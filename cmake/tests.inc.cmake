@@ -11,8 +11,8 @@ macro(add_unit_test tname path lib)
 	add_test(NAME ${tname} COMMAND ${tname}_test)
 endmacro()
 
-set(tests_interface parser )
-foreach(tname ${tests_interface})
-	add_unit_test(${tname} "tests/interface/" "modegen_parsers")
+set(tests_parser basic )
+foreach(tname ${tests_parser})
+	add_unit_test(${tname} "tests/parser/" "parser")
 endforeach()
 
