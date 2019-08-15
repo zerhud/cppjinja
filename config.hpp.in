@@ -1,0 +1,45 @@
+/*************************************************************************
+ * Copyright © 2019 Hudyaev Alexy <hudyaev.alexy@gmail.com>
+ * This file is part of modegen.
+ * Distributed under the GNU Affero General Public License.
+ * See accompanying file copying (at the root of this repository)
+ * or <http://www.gnu.org/licenses/> for details
+ *************************************************************************/
+
+#pragma once
+
+#include <string_view>
+
+#cmakedefine ENABLE_TODO
+#cmakedefine HAVE_FILESYSTEM
+
+#define DO_PRAGMA(x) _Pragma (#x)
+#if !defined(NDEBUG) && defined(ENABLE_TODO)
+#define TODO(x) DO_PRAGMA(message ("TODO - " #x))
+#else 
+#define TODO(x)
+#endif
+
+#if defined(HAVE_FILESYSTEM)
+# define FILESYSTEM <filesystem>
+# define FS std::filesystem
+#else
+# define FILESYSTEM <experimental/filesystem>
+# define FS std::experimental::filesystem
+#endif
+
+namespace cppjinja {
+// templates for work with enums as flags
+template<class T> inline std::enable_if_t<std::is_enum_v<T>,T> operator~ (T a)      { return (T)(~(int)a); }
+template<class T> inline std::enable_if_t<std::is_enum_v<T>,T> operator| (T a, T b) { return (T)((int)a | (int)b); }
+template<class T> inline std::enable_if_t<std::is_enum_v<T>,T> operator& (T a, T b) { return (T)((int)a & (int)b); }
+template<class T> inline std::enable_if_t<std::is_enum_v<T>,T> operator^ (T a, T b) { return (T)((int)a ^ (int)b); }
+template<class T> inline std::enable_if_t<std::is_enum_v<T>,T&> operator|= (T& a, T b) { return (T&)((int&)a |= (int)b); }
+template<class T> inline std::enable_if_t<std::is_enum_v<T>,T&> operator&= (T& a, T b) { return (T&)((int&)a &= (int)b); }
+template<class T> inline std::enable_if_t<std::is_enum_v<T>,T&> operator^= (T& a, T b) { return (T&)((int&)a ^= (int)b); }
+
+namespace settings {
+constexpr std::string_view settings_dir = "@settings_dir@";
+} // namespace settings
+} // namespace cppjinja
+
