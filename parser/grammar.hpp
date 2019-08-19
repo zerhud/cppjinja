@@ -13,5 +13,6 @@
 namespace cppjinja {
 
 b_block parse(std::string_view data);
+b_block parse(std::wstring_view data);
 
 } // namespace cppjinja
