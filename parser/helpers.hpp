@@ -8,11 +8,12 @@
 
 #pragma once
 
+#include <ostream>
 #include "ast.hpp"
 
 namespace cppjinja {
 
-b_block<std::string> parse(std::string_view data);
-b_block<std::wstring> parse(std::wstring_view data);
+//std::ostream& operator << (std::ostream& out, b_block& obj);
 
 } // namespace cppjinja
+

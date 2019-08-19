@@ -45,12 +45,17 @@ struct st_call {
 
 };
 
-using block_content = std::variant<std::string, st_out, st_for, st_if, st_set, st_call>;
+template<typename String>
+using block_content = std::variant<String, st_out, st_for, st_if, st_set, st_call>;
 
+template<typename String>
 struct b_block {
 	std::string name;
-	std::vector<block_content> cnt;
+	std::vector<block_content<String>> cnt;
 };
+
+using s_block = b_block<std::string>;
+using w_block = b_block<std::wstring>;
 
 struct b_macro {
 
@@ -69,4 +74,5 @@ public:
 
 BOOST_FUSION_ADAPT_STRUCT( cppjinja::fnc_call, fnc, params )
 BOOST_FUSION_ADAPT_STRUCT( cppjinja::st_out, ref, filters )
-BOOST_FUSION_ADAPT_STRUCT( cppjinja::b_block, name, cnt )
+BOOST_FUSION_ADAPT_STRUCT( cppjinja::s_block, name, cnt )
+BOOST_FUSION_ADAPT_STRUCT( cppjinja::w_block, name, cnt )

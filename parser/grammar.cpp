@@ -8,42 +8,33 @@
 
 #include "grammar.hpp"
 
-#define BOOST_SPIRIT_UNICODE
-
-#include <boost/phoenix.hpp>
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/support_standard_wide.hpp>
-#include <boost/spirit/home/support/char_encoding/unicode.hpp>
-
-namespace qi = boost::spirit::qi;
-namespace pl = std::placeholders;
-namespace encoding = boost::spirit::unicode;
+#include "grammar.ipp"
 
 namespace cppjinja {
 
-template<typename Iterator, typename Space>
-struct grammar : qi::grammar<Iterator, b_block(), Space> {
-	grammar() : grammar::base_type(rule_block, "block")
-	{
-		using qi::_val;
-		using qi::_1;
+struct string_view_traits {
+	using iterator_t = std::string_view::iterator;
+	using string_t = std::string;
+	using space_t = boost::spirit::ascii::space_type;
+	using char_t = boost::spirit::ascii::char_;
+	using lit_t = boost::spirit::ascii::lit_t;
 
-		using boost::phoenix::at_c;
-		using boost::phoenix::push_back;
-
-		rule_block.name("block");
-		rule_block = rule_content [push_back(at_c<1>(_val), _1)];
-
-		rule_content.name("content");
-		rule_content = qi::lexeme[ *(~encoding::char_('<')) [_val+=_1] ];
-	}
-
-	qi::rule<Iterator, b_block(), Space> rule_block;
-	qi::rule<Iterator, std::string(), Space> rule_content;
+	using boost::spirit::ascii::space;
 };
 
-template<typename String>
-auto inner_parse(String data)
+struct wstring_view_traits {
+	using iterator_t = std::wstring_view::iterator;
+	using string_t = std::string;
+	using space_t = boost::spirit::unicode::space_type;
+	using char_t = boost::spirit::unicode::char_t;
+	using lit_t = boost::spirit::unicode::lit_t;
+
+	using boost::spirit::unicode::space;
+	using boost::spirit::unicode::char_;
+};
+
+template<typename StringTraits>
+auto inner_parse(const typename StringTraits::String& data)
 {
 	auto begin = data.begin();
 	auto end = data.end();
@@ -52,8 +43,8 @@ auto inner_parse(String data)
 	b_block result;
 
 	try {
-		grammar<decltype(begin), encoding::space_type> parser;
-		ok = boost::spirit::qi::phrase_parse(begin,end, parser, encoding::space, result);
+		grammar<StringTraits> parser;
+		ok = boost::spirit::qi::phrase_parse(begin,end, parser, StringTraits::space, result);
 	}
 	catch(qi::expectation_failure<const char*>& ex) {
 		(void) ex;
@@ -66,12 +57,13 @@ auto inner_parse(String data)
 
 } // namespace cppjinja
 
-cppjinja::b_block cppjinja::parse(std::string_view data)
+cppjinja::b_block<std::string> cppjinja::parse(std::string_view data)
 {
-	return cppjinja::inner_parse(data);
+	return cppjinja::inner_parse<string_view_traits>(data);
 }
 
-cppjinja::b_block cppjinja::parse(std::wstring_view data)
+cppjinja::b_block<std::wstring> cppjinja::parse(std::wstring_view data)
 {
-	return cppjinja::inner_parse(data);
+	return cppjinja::inner_parse<wstring_view_traits>(data);
 }
+

@@ -18,14 +18,23 @@
 using namespace std::literals;
 using cppjinja::parse;
 
+template<typename Obj, typename Val>
+void check_block(const Obj& obj, std::size_t ind, const Val& val)
+{
+	//BOOST_REQUIRE_LQ(obj.cnt.size(), ind);
+	BOOST_REQUIRE(std::holds_alternative<Val>(obj.cnt[ind]));
+	BOOST_CHECK_EQUAL(std::get<Val>(obj.cnt[ind]), val);
+}
+
+template<typename Val, typename... Vals>
+void check_block(const Obj& obj, std::size_t ind, const Val& val, const Vals&... vals)
+{
+	check_block(obj, ind, val);
+	check_block(obj, ind+1, vals...);
+}
+
 BOOST_AUTO_TEST_CASE(just_str)
 {
-	auto block = cppjinja::parse("test string"sv);
-	std::cout << block.name << std::endl;
-	BOOST_REQUIRE_EQUAL(block.cnt.size(), 1);
-	BOOST_REQUIRE(std::holds_alternative<std::string>(block.cnt[0]));
-	BOOST_CHECK_EQUAL(std::get<std::string>(block.cnt[0]), "test string"s);
-
-	auto wblock = cppjinja::parse(L"привет"sv);
-	BOOST_CHECK_EQUAL(std::get<std::string>(wblock.cnt[0]), "привет"s);
+	check_block(cppjinja::parse("test string"sv), 0, "test_string"s);
+	check_block(cppjinja::parse(L"привет"sv), 0, L"привет"s);
 }

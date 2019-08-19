@@ -6,13 +6,12 @@
  * or <http://www.gnu.org/licenses/> for details
  *************************************************************************/
 
-#pragma once
+#include "helpers.hpp"
 
-#include "ast.hpp"
+//std::ostream& cppjinja::operator << (std::ostream& out, cppjinja::b_block& obj)
+//{
+	//out << "block " << obj.name << std::endl;
+	//for(auto& cnt:obj.cnt) out << "\t[string]" << std::get<std::string>(cnt);
+	//return out;
+//}
 
-namespace cppjinja {
-
-b_block<std::string> parse(std::string_view data);
-b_block<std::wstring> parse(std::wstring_view data);
-
-} // namespace cppjinja

@@ -38,13 +38,15 @@ add_custom_command(OUTPUT "${lohman_json_file}"
 )
 
 # parser
-add_library(parser STATIC "${main_config_file}")
+add_library(parser SHARED "${main_config_file}")
+target_include_directories(parser PRIVATE "${Boost_INCLUDE_DIRS}" )
 target_sources_local(parser "grammar.hpp" "grammar.cpp" "parser/")
+target_sources_local(parser "helpers.hpp" "helpers.cpp" "parser/")
 target_sources_local(parser "ast.hpp" "ast.cpp" "parser/")
 
 # some files may slow down system when compiling..
 if(LOW_MEMORY AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	set_source_files_properties("parser/interface/grammar.cpp" PROPERTIES COMPILE_FLAGS "--param ggc-min-expand=1024 --param ggc-min-heapsize=4096")
+	set_source_files_properties("parser/grammar.cpp" PROPERTIES COMPILE_FLAGS "--param ggc-min-expand=1024 --param ggc-min-heapsize=4096")
 endif()
 
 if(ENABLE_TESTS)
