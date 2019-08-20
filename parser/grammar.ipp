@@ -8,20 +8,45 @@
 
 #pragma once
 
-#define BOOST_SPIRIT_UNICODE
+#define BOOST_SPIRIT_X3_UNICODE
 
 #include <boost/phoenix.hpp>
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/support_standard_wide.hpp>
-#include <boost/spirit/home/support/char_encoding/unicode.hpp>
+#include <boost/spirit/home/x3.hpp>
+#include <boost/spirit/home/support/utf8.hpp>
 
 #include "ast.hpp"
 
-namespace qi = boost::spirit::qi;
+namespace x3 = boost::spirit::x3;
 namespace pl = std::placeholders;
 
 namespace cppjinja {
 
+namespace traits {
+struct ascii {
+	using out_string_t = std::string;
+	static decltype(x3::ascii::space)& space;
+	static decltype(x3::ascii::char_)& char_;
+};
+struct unicode {
+	using out_string_t = std::string;
+	static decltype(x3::unicode::space)& space;
+	static decltype(x3::unicode::char_)& char_;
+};
+decltype(ascii::space)& ascii::space = x3::ascii::space;
+decltype(ascii::char_)& ascii::char_ = x3::ascii::char_;
+decltype(unicode::space)& unicode::space = x3::unicode::space;
+decltype(unicode::char_)& unicode::char_ = x3::unicode::char_;
+} // namespace traits
+
+namespace parser_tmpl {
+	template<typename Traits>
+	using out_string_t = Traits::string_t;
+
+	template<typename OutString>
+	const x3::rule<struct out_string, OutString> string = "string";
+	template<typename Traits>
+	const auto string_def = x3::lexeme[ *
+} // namespace parser_tmpl
 
 template<typename StringTraits>
 struct grammar : qi::grammar<typename StringTraits::iterator_t, b_block<typename StringTraits::string_t>(), typename StringTraits::space_t> {
