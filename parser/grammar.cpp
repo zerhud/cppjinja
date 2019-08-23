@@ -7,31 +7,18 @@
  *************************************************************************/
 
 #include "grammar.hpp"
-
-#include "grammar.ipp"
+#include "traits.hpp"
+#include "ast.hpp"
 
 namespace cppjinja {
 
-struct string_view_traits {
-	using iterator_t = std::string_view::iterator;
-	using string_t = std::string;
-	using space_t = boost::spirit::ascii::space_type;
-	using char_t = boost::spirit::ascii::char_;
-	using lit_t = boost::spirit::ascii::lit_t;
 
-	using boost::spirit::ascii::space;
-};
+namespace grammar::utf8 {
+using gram_traits = traits::unicode;
 
-struct wstring_view_traits {
-	using iterator_t = std::wstring_view::iterator;
-	using string_t = std::string;
-	using space_t = boost::spirit::unicode::space_type;
-	using char_t = boost::spirit::unicode::char_t;
-	using lit_t = boost::spirit::unicode::lit_t;
+#include "grammar.ipp"
 
-	using boost::spirit::unicode::space;
-	using boost::spirit::unicode::char_;
-};
+} // namespace grammar::utf8
 
 template<typename StringTraits>
 auto inner_parse(const typename StringTraits::String& data)
