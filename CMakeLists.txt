@@ -38,7 +38,7 @@ add_custom_command(OUTPUT "${lohman_json_file}"
 )
 
 # parser
-add_library(parser SHARED "${main_config_file}" parser/grammar.ipp)
+add_library(parser SHARED "${main_config_file}" parser/grammar.ipp parser/traits.hpp)
 target_include_directories(parser PRIVATE "${Boost_INCLUDE_DIRS}" )
 target_sources_local(parser "grammar.hpp" "grammar.cpp" "parser/")
 target_sources_local(parser "helpers.hpp" "helpers.cpp" "parser/")
