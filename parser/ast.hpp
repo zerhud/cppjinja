@@ -24,9 +24,10 @@ struct fnc_call {
 	std::vector<std::variant<std::string,var_name,boost::recursive_wrapper<fnc_call>>> params;
 };
 
+template<typename String>
 struct st_out {
-	std::variant<std::string,var_name,fnc_call> ref;
-	std::variant<std::string,fnc_call> filters;
+	std::variant<String,var_name,fnc_call> ref;
+	std::variant<String,fnc_call> filters;
 };
 
 struct st_for {
@@ -46,7 +47,7 @@ struct st_call {
 };
 
 template<typename String>
-using block_content = std::variant<String, st_out, st_for, st_if, st_set, st_call>;
+using block_content = std::variant<String, st_out<String>, st_for, st_if, st_set, st_call>;
 
 template<typename String>
 struct b_block {
@@ -72,7 +73,7 @@ public:
 
 } // namespace cppjinja
 
-BOOST_FUSION_ADAPT_STRUCT( cppjinja::fnc_call, fnc, params )
-BOOST_FUSION_ADAPT_STRUCT( cppjinja::st_out, ref, filters )
-BOOST_FUSION_ADAPT_STRUCT( cppjinja::s_block, name, cnt )
-BOOST_FUSION_ADAPT_STRUCT( cppjinja::w_block, name, cnt )
+//BOOST_FUSION_ADAPT_STRUCT( cppjinja::fnc_call, fnc, params )
+//BOOST_FUSION_ADAPT_STRUCT( cppjinja::st_out, ref, filters )
+//BOOST_FUSION_ADAPT_STRUCT( cppjinja::s_block, name, cnt )
+//BOOST_FUSION_ADAPT_STRUCT( cppjinja::w_block, name, cnt )

@@ -21,7 +21,7 @@ using gram_traits = traits::unicode_utf8;
 
 } // namespace cppjinja
 
-cppjinja::b_block<std::string> cppjinja::parse(std::string_view data)
+cppjinja::b_block<std::string> cppjinja::parse(std::string_view data, parser_data env)
 {
 	grammar::utf8::gram_traits::types::block_t result;
 	bool ok = x3::parse(
@@ -34,12 +34,12 @@ cppjinja::b_block<std::string> cppjinja::parse(std::string_view data)
 	return result;
 }
 
-cppjinja::b_block<std::string> cppjinja::parse(std::wstring_view data)
+cppjinja::b_block<std::string> cppjinja::parse(std::wstring_view data, parser_data env)
 {
 	grammar::utf8::gram_traits::types::block_t result;
 	bool ok = x3::parse(
 	              data.begin(), data.end(),
-	              grammar::utf8::block,
+	              x3::with<parser_data,parser_data>(std::move(env))[grammar::utf8::block],
 	              result
 	              );
 	if(!ok) throw std::runtime_error("cannot parse");

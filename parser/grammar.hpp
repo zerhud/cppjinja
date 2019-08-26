@@ -12,7 +12,14 @@
 
 namespace cppjinja {
 
-b_block<std::string> parse(std::string_view data);
-b_block<std::string> parse(std::wstring_view data);
+struct parser_data {
+	struct {
+		std::string b= "<=";
+		std::string e= "=>";
+	} output;
+};
+
+b_block<std::string> parse(std::string_view data, parser_data env={});
+b_block<std::string> parse(std::wstring_view data, parser_data env={});
 
 } // namespace cppjinja
