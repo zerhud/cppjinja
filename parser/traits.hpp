@@ -39,6 +39,12 @@ struct ascii {
 	{
 		result += boost::spirit::to_utf8(in);
 	}
+
+	template<typename InStr>
+	static bool compare(const InStr& left, const std::string& right)
+	{
+		return left == right;
+	}
 };
 struct unicode_utf8 {
 	struct types {
@@ -50,6 +56,7 @@ struct unicode_utf8 {
 		//using lit_t = x3::unicode::lit_t;
 
 		using block_t = b_block<out_string_t>;
+		using op_out_t = st_out<out_string_t>;
 	};
 
 	//static decltype(x3::ascii::lit)& lit;
@@ -60,6 +67,12 @@ struct unicode_utf8 {
 	static void concat(types::out_string_t& result, InStr in)
 	{
 		result += boost::spirit::to_utf8(in);
+	}
+
+	template<typename InStr>
+	static bool compare(const InStr& left, const std::string& right)
+	{
+		return left == right;
 	}
 };
 decltype(ascii::space)& ascii::space = x3::ascii::space;

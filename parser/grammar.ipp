@@ -11,6 +11,7 @@
 // also all boost's includes and ast.hpp must to be included.
 
 using block_t = gram_traits::types::block_t;
+using block_ptr  = std::shared_ptr<gram_traits::types::block_t>;
 
 template<typename T>
 bool need_to_add(const block_t& block)
@@ -27,27 +28,35 @@ T& add_and_get(Block& b)
 }
 
 auto add_block_content = [](auto& ctx) {
-	block_t& b = _val(ctx);
-	gram_traits::concat(add_and_get<block_t, gram_traits::types::out_string_t>(b), _attr(ctx));
+	block_ptr b = x3::get<block_ptr>(ctx);
+	gram_traits::concat(add_and_get<block_t, gram_traits::types::out_string_t>(*b), _attr(ctx));
 };
 
-auto is_op_out_start = [](auto& ctx) {
-	parser_data penv = x3::get<parser_data>(ctx);
-	//const bool is_start = gram_traits::compare(_attr(ctx), penv.output.b);
-	const bool is_start = false;//_attr(ctx) == penv.output.b;
-
-	//if(is_start) {
-		//block_t& b = _val(ctx);
-		//b.cnt.emplace_back(st_out<gram_traits::types::out_string_t>{});
-	//}
-
-	return is_start;
+auto op_out_is_start = [](auto& ctx) {
+	parser_data& penv = x3::get<parser_data>(ctx);
+	_pass(ctx) = gram_traits::compare(_attr(ctx), penv.output.b);
 };
 
-const x3::rule<struct op_out, st_out<gram_traits::types::out_string_t>> op_out = "out operator";
+auto op_out_is_end = [](auto& ctx) {
+	parser_data& penv = x3::get<parser_data>(ctx);
+	_pass(ctx) = gram_traits::compare(_attr(ctx), penv.output.e);
+};
+
+auto op_out_define = [](auto& ctx) {
+	block_ptr& out = x3::get<block_ptr>(ctx);
+	st_out<gram_traits::types::out_string_t> val{};
+	val.ref = _attr(ctx);
+	out->cnt.emplace_back(std::move(val));
+};
+
+const x3::rule<struct op_out> op_out = "out_operator";
 const auto op_out_def =
-	+x3::punct[is_op_out_start] >> +x3::alnum >> +x3::punct[is_op_out_start]
-        ;
+	(+x3::punct)[op_out_is_start] >> x3::skip(gram_traits::space)[
+	   (+x3::alnum)[op_out_define]
+	] >> (+x3::punct)[op_out_is_end]
+	;
+
+BOOST_SPIRIT_DEFINE(op_out)
 
 const x3::rule<struct block, gram_traits::types::block_t> block = "block";
 const auto block_def =
@@ -57,7 +66,6 @@ const auto block_def =
 	);
 
 BOOST_SPIRIT_DEFINE(block)
-BOOST_SPIRIT_DEFINE(op_out)
 
 
 //const x3::rule<struct out_string, gram_traits::types::out_string_t()> string = "string";
