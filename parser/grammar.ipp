@@ -27,45 +27,48 @@ T& add_and_get(Block& b)
 	return std::get<T>(b.cnt.back());
 }
 
-auto add_block_content = [](auto& ctx) {
-	block_ptr b = x3::get<block_ptr>(ctx);
-	gram_traits::concat(add_and_get<block_t, gram_traits::types::out_string_t>(*b), _attr(ctx));
+auto nop = [](auto& ctx){}; //< debug lambda
+
+auto block_add_content = [](auto& ctx) {
+	block_t& b = _val(ctx);
+	gram_traits::concat(add_and_get<block_t, gram_traits::types::out_string_t>(b), _attr(ctx));
 };
 
-auto op_out_is_start = [](auto& ctx) {
-	parser_data& penv = x3::get<parser_data>(ctx);
-	_pass(ctx) = gram_traits::compare(_attr(ctx), penv.output.b);
-};
+auto block_add_op = [](auto& ctx) {_val(ctx).get().cnt.emplace_back(_attr(ctx));};
 
-auto op_out_is_end = [](auto& ctx) {
-	parser_data& penv = x3::get<parser_data>(ctx);
-	_pass(ctx) = gram_traits::compare(_attr(ctx), penv.output.e);
-};
+auto exd = [](auto& ctx){ return x3::get<parser_data>(ctx); };
+auto cmp = [](const auto& arg, auto& ctx){ _pass(ctx) = gram_traits::compare(_attr(ctx), arg); };
+
+auto op_out_is_start = [](auto& ctx) { cmp(exd(ctx).output.b, ctx); };
+auto op_out_is_end = [](auto& ctx) { cmp(exd(ctx).output.e, ctx); };
 
 auto op_out_define = [](auto& ctx) {
-	block_ptr& out = x3::get<block_ptr>(ctx);
-	st_out<gram_traits::types::out_string_t> val{};
-	val.ref = _attr(ctx);
-	out->cnt.emplace_back(std::move(val));
+	st_out<gram_traits::types::out_string_t>& tval = _val(ctx);
+	tval.ref = _attr(ctx);
 };
 
-const x3::rule<struct op_out> op_out = "out_operator";
+const x3::rule<struct qstr, gram_traits::types::out_string_t> quoted_string = "string";
+const auto quoted_string_def = 
+	(+x3::alnum)
+;
+
+const x3::rule<struct op_out, st_out<gram_traits::types::out_string_t>> op_out = "out_operator";
 const auto op_out_def =
 	(+x3::punct)[op_out_is_start] >> x3::skip(gram_traits::space)[
-	   (+x3::alnum)[op_out_define]
+	   quoted_string[op_out_define]
 	] >> (+x3::punct)[op_out_is_end]
 	;
 
-BOOST_SPIRIT_DEFINE(op_out)
-
-const x3::rule<struct block, gram_traits::types::block_t> block = "block";
+const x3::rule<struct block, std::reference_wrapper<gram_traits::types::block_t>> block = "block";
 const auto block_def =
 	*(
-		  op_out
-		| gram_traits::char_ [ add_block_content ]
+		  op_out[ block_add_op ]
+		| gram_traits::char_ [ block_add_content ]
 	);
 
 BOOST_SPIRIT_DEFINE(block)
+BOOST_SPIRIT_DEFINE(op_out)
+BOOST_SPIRIT_DEFINE(quoted_string)
 
 
 //const x3::rule<struct out_string, gram_traits::types::out_string_t()> string = "string";

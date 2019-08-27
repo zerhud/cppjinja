@@ -23,12 +23,10 @@ using gram_traits = traits::unicode_utf8;
 #include "grammar.ipp"
 } // namespace grammar::utf8
 
-template<typename Parser, typename Env, typename Result>
-auto make_grammar(const Parser& parser, Env&& env, Result result)
+template<typename Parser, typename Env>
+auto make_grammar(const Parser& parser, Env&& env)
 {
-	auto pd = x3::with<Env,Env>(std::move(env))[parser];
-	auto pr = x3::with<Result,Result>(std::move(result))[pd];
-	return pr;
+	return x3::with<Env,Env>(std::move(env))[parser];
 }
 
 } // namespace cppjinja
@@ -36,25 +34,29 @@ auto make_grammar(const Parser& parser, Env&& env, Result result)
 cppjinja::b_block<std::string> cppjinja::parse(std::string_view data, parser_data env)
 {
 	using block_t = grammar::utf8::gram_traits::types::block_t;
-	std::shared_ptr<block_t> result=std::make_shared<block_t>();
+	block_t result;
+	auto result_ref = std::ref(result);
 	bool ok = x3::parse(
 	              boost::u8_to_u32_iterator(data.begin()),
 	              boost::u8_to_u32_iterator(data.end()),
-	              make_grammar(grammar::utf8::block, std::move(env), result)
+	              make_grammar(grammar::utf8::block, std::move(env)),
+		      result_ref
 	              );
 	if(!ok) throw std::runtime_error("cannot parse");
-	return *result;
+	return result;
 }
 
 cppjinja::b_block<std::string> cppjinja::parse(std::wstring_view data, parser_data env)
 {
 	using block_t = grammar::utf8::gram_traits::types::block_t;
-	std::shared_ptr<block_t> result=std::make_shared<block_t>();
+	block_t result;
+	auto result_ref = std::ref(result);
 	bool ok = x3::parse(
 	              data.begin(), data.end(),
-	              make_grammar(grammar::utf8::block, std::move(env), result)
+	              make_grammar(grammar::utf8::block, std::move(env)),
+		      result_ref
 	              );
 	if(!ok) throw std::runtime_error("cannot parse");
-	return *result;
+	return result;
 }
 
