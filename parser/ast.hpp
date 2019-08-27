@@ -27,7 +27,7 @@ struct fnc_call {
 template<typename String>
 struct st_out {
 	std::variant<String,var_name,fnc_call> ref;
-	std::variant<String,fnc_call> filters;
+	std::vector<std::variant<String,fnc_call>> filters;
 };
 
 struct st_for {

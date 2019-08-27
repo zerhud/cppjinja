@@ -27,7 +27,7 @@ T& add_and_get(Block& b)
 	return std::get<T>(b.cnt.back());
 }
 
-auto nop = [](auto& ctx){}; //< debug lambda
+auto nop = [](auto& ctx){_pass(ctx)=true;}; //< debug lambda
 
 auto block_add_content = [](auto& ctx) {
 	block_t& b = _val(ctx);
@@ -47,17 +47,17 @@ auto op_out_define = [](auto& ctx) {
 	tval.ref = _attr(ctx);
 };
 
+const x3::rule<struct spec_symbols, gram_traits::types::out_string_t> spec_symbols = "spec_symbols";
+const auto spec_symbols_def = +gram_traits::char_("!#$%&()*+,-./:;<=>?@[\\]^_`{|}~");
+
 const x3::rule<struct qstr, gram_traits::types::out_string_t> quoted_string = "string";
-const auto quoted_string_def = 
-	(+x3::alnum)
+const auto quoted_string_def =
+	 (x3::lit("'") >> *(('\\' > x3::char_("'")) | ~x3::char_("\\'")) >> x3::lit("'"))
+	|(x3::lit('"') >> *(('\\' > x3::char_('"')) | ~x3::char_("\\\"")) >> x3::lit('"'))
 ;
 
 const x3::rule<struct op_out, st_out<gram_traits::types::out_string_t>> op_out = "out_operator";
-const auto op_out_def =
-	(+x3::punct)[op_out_is_start] >> x3::skip(gram_traits::space)[
-	   quoted_string[op_out_define]
-	] >> (+x3::punct)[op_out_is_end]
-	;
+const auto op_out_def = spec_symbols[op_out_is_start] >> x3::skip(gram_traits::space)[ quoted_string[op_out_define] >> spec_symbols[op_out_is_end] ] ;
 
 const x3::rule<struct block, std::reference_wrapper<gram_traits::types::block_t>> block = "block";
 const auto block_def =
@@ -69,10 +69,4 @@ const auto block_def =
 BOOST_SPIRIT_DEFINE(block)
 BOOST_SPIRIT_DEFINE(op_out)
 BOOST_SPIRIT_DEFINE(quoted_string)
-
-
-//const x3::rule<struct out_string, gram_traits::types::out_string_t()> string = "string";
-//const auto string_def = x3::lexeme[ *
-
-
-
+BOOST_SPIRIT_DEFINE(spec_symbols)

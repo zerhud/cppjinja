@@ -44,12 +44,13 @@ BOOST_AUTO_TEST_CASE(just_str)
 BOOST_AUTO_TEST_SUITE(output)
 BOOST_AUTO_TEST_CASE(string)
 {
-	cppjinja::s_block block = cppjinja::parse("test <= kuku =>"sv);
+	cppjinja::s_block block = cppjinja::parse("test <= 'kuku' =>"sv);
 	check_block(block, 0, "test "s);
 	BOOST_REQUIRE_EQUAL(block.cnt.size(), 2);
 	BOOST_CHECK(std::holds_alternative<cppjinja::st_out<std::string>>(block.cnt[1]));
 	auto& op_out = std::get<cppjinja::st_out<std::string>>(block.cnt[1]);
 	BOOST_REQUIRE(std::holds_alternative<std::string>(op_out.ref));
 	BOOST_CHECK_EQUAL(std::get<std::string>(op_out.ref), "kuku"s);
+	BOOST_CHECK_EQUAL(op_out.filters.size(), 0);
 }
 BOOST_AUTO_TEST_SUITE_END() // output
