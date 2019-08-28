@@ -44,13 +44,33 @@ BOOST_AUTO_TEST_CASE(just_str)
 BOOST_AUTO_TEST_SUITE(output)
 BOOST_AUTO_TEST_CASE(string)
 {
-	cppjinja::s_block block = cppjinja::parse("test <= 'kuku' =>"sv);
-	check_block(block, 0, "test "s);
-	BOOST_REQUIRE_EQUAL(block.cnt.size(), 2);
-	BOOST_CHECK(std::holds_alternative<cppjinja::st_out<std::string>>(block.cnt[1]));
-	auto& op_out = std::get<cppjinja::st_out<std::string>>(block.cnt[1]);
-	BOOST_REQUIRE(std::holds_alternative<std::string>(op_out.ref));
-	BOOST_CHECK_EQUAL(std::get<std::string>(op_out.ref), "kuku"s);
-	BOOST_CHECK_EQUAL(op_out.filters.size(), 0);
+	using cppjinja::parse;
+	check_block(parse("test <= 'kuku' =>"), 0, "test "s, cppjinja::st_out<std::string>{ "kuku"s, {} });
+	check_block(parse("test <= \"kuku\" =>"), 0, "test "s, cppjinja::st_out<std::string>{ "kuku"s, {} });
+	check_block(parse("<= 'kuk\\'u' =>"), 0, cppjinja::st_out<std::string>{ "kuk'u"s, {} });
+}
+BOOST_AUTO_TEST_CASE(variable)
+{
+	using cppjinja::parse;
+	using sto_t = cppjinja::st_out<std::string>;
+
+	cppjinja::s_block block_glob = parse("<= var =>"sv);
+	cppjinja::s_block block_addr = parse("<= foo.bar =>"sv);
+
+	check_block(block_glob, 0, sto_t{ cppjinja::var_name{"var"}, {} } );
+	check_block(block_addr, 0, sto_t{ cppjinja::var_name{"foo", "bar"}, {} } );
+}
+BOOST_AUTO_TEST_CASE(function)
+{
+	using cppjinja::parse;
+	using cppjinja::var_name;
+	using cppjinja::fnc_call;
+	using sto_t = cppjinja::st_out<std::string>;
+
+	check_block(parse("<= foo() =>"sv), 0, sto_t{ fnc_call{"foo"s, {}}, {} });
+	check_block(parse("<= foo(qq) =>"sv), 0, sto_t{ fnc_call{"foo"s, {var_name{"qq"s}}}, {} });
+	check_block(parse("<= foo(q.q) =>"sv), 0, sto_t{ fnc_call{"foo"s, {var_name{"q"s, "q"s}}}, {} });
+	check_block(parse("<= foo(qq, q.q) =>"sv), 0, sto_t{ fnc_call{"foo"s, {var_name{"qq"s}, var_name{"q"s, "q"s}}}, {} });
+	check_block(parse("<= foo('qq') =>"sv), 0, sto_t{ fnc_call{"foo"s, {"qq"s}}, {} });
 }
 BOOST_AUTO_TEST_SUITE_END() // output

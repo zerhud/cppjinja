@@ -14,21 +14,88 @@
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/variant/recursive_wrapper.hpp>
 
+#define DEFINE_OPERATORS_STRING(sname, ...) \
+    template<typename String> \
+    bool operator < (const sname<String>& left, const sname<String>& right) \
+    { \
+	    return lex_cmp(__VA_ARGS__) < 0; \
+    } \
+    template<typename String> \
+    bool operator == (const sname<String>& left, const sname<String>& right) \
+    { \
+	    return lex_cmp(__VA_ARGS__) == 0; \
+    } \
+    template<typename String> \
+    bool operator != (const sname<String>& left, const sname<String>& right) \
+    { \
+	    return !(left==right); \
+    } \
+
+
+#define DEFINE_OPERATORS(sname, ...) \
+    inline bool operator < (const sname& left, const sname& right) { return lex_cmp(__VA_ARGS__) < 0; } \
+    inline bool operator == (const sname& left, const sname& right) { return lex_cmp(__VA_ARGS__) == 0; } \
+    inline bool operator != (const sname& left, const sname& right) { return !(left==right); } \
+    std::ostream& operator << (std::ostream& out, const sname& obj); \
+
 
 namespace cppjinja {
 
+template<typename T>
+bool operator < (const boost::recursive_wrapper<T>& left, const boost::recursive_wrapper<T>& right)
+{
+	return left.get() < right.get();
+}
+
+constexpr int lex_cmp() { return 0; }
+template<typename T>
+int lex_cmp(const std::vector<T>& left, const std::vector<T>& right)
+{
+	if(left.size() < right.size()) return -1;
+	if(right.size() < left.size()) return  1;
+	for(std::size_t i=0;i<left.size();++i) {
+		if(left[i] < right[i]) return -1;
+		if(right[i] < left[i]) return  1;
+	}
+	return 0;
+}
+
+template<typename Left, typename Right, typename... Args>
+int lex_cmp(const Left& left, const Right& right, const Args&... args)
+{
+	static_assert((sizeof...(args)%2)==0, "cannot compare the odd number of arguments");
+	if(left < right) return -1;
+	if(right < left) return  1;
+	return lex_cmp(args...);
+}
+
 using var_name = std::vector<std::string>;
+DEFINE_OPERATORS(var_name, left, right)
+
 
 struct fnc_call {
-	std::string fnc;
+	std::string ref;
 	std::vector<std::variant<std::string,var_name,boost::recursive_wrapper<fnc_call>>> params;
 };
+DEFINE_OPERATORS(fnc_call, left.ref, right.ref, left.params, right.params)
 
 template<typename String>
 struct st_out {
 	std::variant<String,var_name,fnc_call> ref;
 	std::vector<std::variant<String,fnc_call>> filters;
 };
+DEFINE_OPERATORS_STRING(st_out, left.ref, right.ref, left.filters, right.filters)
+template<typename String>
+std::ostream& operator << (std::ostream& out, const st_out<String>& obj)
+{
+	auto printer = [&out](auto& i){out << i;};
+	std::visit(printer, obj.ref);
+	for(auto& i:obj.filters) {
+		out << '|';
+		std::visit(printer, i);
+	}
+	return out;
+}
 
 struct st_for {
 
