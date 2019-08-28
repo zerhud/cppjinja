@@ -21,5 +21,6 @@ struct parser_data {
 
 b_block<std::string> parse(std::string_view data, parser_data env={});
 b_block<std::string> parse(std::wstring_view data, parser_data env={});
+b_block<std::wstring> wparse(std::wstring_view data, parser_data env={});
 
 } // namespace cppjinja
