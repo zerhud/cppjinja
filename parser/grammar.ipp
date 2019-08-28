@@ -71,7 +71,8 @@ const x3::rule<struct op_out, st_out<gram_traits::types::out_string_t>> op_out =
 const auto op_out_def =
 	  spec_symbols[op_out_is_start]
 	>> x3::skip(gram_traits::space)[
-	  ( fnc_call_rule[op_ref_define] | quoted_string[op_ref_define] | var_name_rule[op_ref_define] )
+	     ( fnc_call_rule[op_ref_define] | quoted_string[op_ref_define] | var_name_rule[op_ref_define] )
+	  >> -( '|' >> (fnc_call_rule[op_params_define] | var_name_rule[op_params_define]) % '|')
 	>> spec_symbols[op_out_is_end] ] ;
 
 const x3::rule<struct block, std::reference_wrapper<gram_traits::types::block_t>> block = "block";

@@ -8,11 +8,6 @@
 
 #include "ast.hpp"
 
-namespace cppjinja {
-template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
-} // namespace cppjinja
-
 std::ostream& cppjinja::operator << (std::ostream& out, const cppjinja::var_name& obj)
 {
 	for(auto& i:obj) out << i << '.';

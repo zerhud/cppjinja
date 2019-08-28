@@ -18,17 +18,17 @@
     template<typename String> \
     bool operator < (const sname<String>& left, const sname<String>& right) \
     { \
-	    return lex_cmp(__VA_ARGS__) < 0; \
+    	return lex_cmp(__VA_ARGS__) < 0; \
     } \
     template<typename String> \
     bool operator == (const sname<String>& left, const sname<String>& right) \
     { \
-	    return lex_cmp(__VA_ARGS__) == 0; \
+    	return lex_cmp(__VA_ARGS__) == 0; \
     } \
     template<typename String> \
     bool operator != (const sname<String>& left, const sname<String>& right) \
     { \
-	    return !(left==right); \
+    	return !(left==right); \
     } \
 
 
@@ -40,6 +40,9 @@
 
 
 namespace cppjinja {
+
+template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
 template<typename T>
 bool operator < (const boost::recursive_wrapper<T>& left, const boost::recursive_wrapper<T>& right)
@@ -82,15 +85,15 @@ DEFINE_OPERATORS(fnc_call, left.ref, right.ref, left.params, right.params)
 template<typename String>
 struct st_out {
 	std::variant<String,var_name,fnc_call> ref;
-	std::vector<std::variant<String,fnc_call>> filters;
+	std::vector<std::variant<var_name,fnc_call>> params;
 };
-DEFINE_OPERATORS_STRING(st_out, left.ref, right.ref, left.filters, right.filters)
+DEFINE_OPERATORS_STRING(st_out, left.ref, right.ref, left.params, right.params)
 template<typename String>
 std::ostream& operator << (std::ostream& out, const st_out<String>& obj)
 {
 	auto printer = [&out](auto& i){out << i;};
 	std::visit(printer, obj.ref);
-	for(auto& i:obj.filters) {
+	for(auto& i:obj.params) {
 		out << '|';
 		std::visit(printer, i);
 	}
@@ -114,13 +117,30 @@ struct st_call {
 };
 
 template<typename String>
-using block_content = std::variant<String, st_out<String>, st_for, st_if, st_set, st_call>;
+using block_content = std::variant<String, st_out<String>>;//, st_for, st_if, st_set, st_call>;
 
 template<typename String>
 struct b_block {
 	std::string name;
 	std::vector<block_content<String>> cnt;
 };
+DEFINE_OPERATORS_STRING(b_block, left.name, right.name, left.cnt, right.cnt)
+template<typename String>
+std::ostream& operator << (std::ostream& out, const b_block<String>& obj)
+{
+    auto printer = overloaded{
+        [&out](const String&){out << "[string content]";},
+        [&out](const st_out<String>&){out << "[out operator]";}
+    };
+
+    out << "block: " << obj.name;
+    for(auto& i:obj.cnt) {
+        out << std::endl << "\t" ;
+        std::visit(printer, i);
+    }
+
+    return out;
+}
 
 using s_block = b_block<std::string>;
 using w_block = b_block<std::wstring>;

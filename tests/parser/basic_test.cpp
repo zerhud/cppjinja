@@ -22,7 +22,8 @@ template<typename Obj, typename Val>
 void check_block(const Obj& obj, std::size_t ind, const Val& val)
 {
 	BOOST_REQUIRE_LE(ind+1, obj.cnt.size());
-	BOOST_REQUIRE(std::holds_alternative<Val>(obj.cnt[ind]));
+	BOOST_TEST_CONTEXT("Object [" << ind << "] from " << obj)
+	    BOOST_REQUIRE(std::holds_alternative<Val>(obj.cnt[ind]));
 	BOOST_CHECK_EQUAL(std::get<Val>(obj.cnt[ind]), val);
 }
 
@@ -31,6 +32,13 @@ void check_block(const Obj& obj, std::size_t ind, const Val& val, const Vals&...
 {
 	check_block(obj, ind, val);
 	check_block(obj, ind+1, vals...);
+}
+
+template<typename... Vals>
+void parse_check_block(std::string_view data, std::size_t ind, const Vals&... vals)
+{
+	BOOST_TEST_CONTEXT("Data was " << data)
+	    check_block(cppjinja::parse(data), ind, vals...);
 }
 
 BOOST_AUTO_TEST_CASE(just_str)
@@ -67,10 +75,24 @@ BOOST_AUTO_TEST_CASE(function)
 	using cppjinja::fnc_call;
 	using sto_t = cppjinja::st_out<std::string>;
 
-	check_block(parse("<= foo() =>"sv), 0, sto_t{ fnc_call{"foo"s, {}}, {} });
-	check_block(parse("<= foo(qq) =>"sv), 0, sto_t{ fnc_call{"foo"s, {var_name{"qq"s}}}, {} });
-	check_block(parse("<= foo(q.q) =>"sv), 0, sto_t{ fnc_call{"foo"s, {var_name{"q"s, "q"s}}}, {} });
-	check_block(parse("<= foo(qq, q.q) =>"sv), 0, sto_t{ fnc_call{"foo"s, {var_name{"qq"s}, var_name{"q"s, "q"s}}}, {} });
-	check_block(parse("<= foo('qq') =>"sv), 0, sto_t{ fnc_call{"foo"s, {"qq"s}}, {} });
+	parse_check_block("q<= foo() =>"sv, 0, "q"s, sto_t{ fnc_call{"foo"s, {}}, {} });
+	parse_check_block("<= foo(qq) =>"sv, 0, sto_t{ fnc_call{"foo"s, {var_name{"qq"s}}}, {} });
+	parse_check_block("<= foo(q.q) =>"sv, 0, sto_t{ fnc_call{"foo"s, {var_name{"q"s, "q"s}}}, {} });
+	parse_check_block("<= foo(qq, q.q) =>"sv, 0, sto_t{ fnc_call{"foo"s, {var_name{"qq"s}, var_name{"q"s, "q"s}}}, {} });
+	parse_check_block("<= foo('qq') =>"sv, 0, sto_t{ fnc_call{"foo"s, {"qq"s}}, {} });
+}
+BOOST_AUTO_TEST_CASE(filters)
+{
+	using cppjinja::parse;
+	using cppjinja::var_name;
+	using cppjinja::fnc_call;
+	using sto_t = cppjinja::st_out<std::string>;
+
+	parse_check_block("<= foo() | filter =>"sv, 0, sto_t{ fnc_call{"foo"s, {}}, {var_name{"filter"s}} });
+	parse_check_block("<= foo(qq)|f1|f2=>"sv, 0, sto_t{ fnc_call{"foo"s, {var_name{"qq"s}}}, {var_name{"f1"s},var_name{"f2"s}} });
+	parse_check_block("text<= 'q'|f =>"sv, 0, "text"s, sto_t{ "q"s, {var_name{"f"s}} });
+	parse_check_block("<= 'q'|f() =>"sv, 0, sto_t{ "q"s, {fnc_call{"f",{}}} });
+	parse_check_block("<= 'q'|f('q') =>"sv, 0, sto_t{ "q"s, {fnc_call{"f",{"q"s}}} });
+	parse_check_block("<= 'q'|f('q',q) =>"sv, 0, sto_t{ "q"s, {fnc_call{"f",{"q"s,var_name{"q"s}}}} });
 }
 BOOST_AUTO_TEST_SUITE_END() // output
