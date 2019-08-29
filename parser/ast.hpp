@@ -119,8 +119,10 @@ struct st_call {
 
 };
 
+template<typename String> struct b_block;
+
 template<typename String>
-using block_content = std::variant<String, st_out<String>>;//, st_for, st_if, st_set, st_call>;
+using block_content = std::variant<String, st_out<String>, boost::recursive_wrapper<b_block<String>>>;//, st_for, st_if, st_set, st_call>;
 
 template<typename String>
 struct b_block {
@@ -132,8 +134,9 @@ template<typename String>
 std::ostream& operator << (std::ostream& out, const b_block<String>& obj)
 {
     auto printer = overloaded{
-        [&out](const String&){out << "[string content]";},
-        [&out](const st_out<String>&){out << "[out operator]";}
+          [&out](const String&){out << "[string content]";}
+	, [&out](const st_out<String>&){out << "[out operator]";}
+	, [&out](const boost::recursive_wrapper<auto>& o){ out << o.get();}
     };
 
     out << "block: " << obj.name;

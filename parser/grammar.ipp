@@ -34,7 +34,11 @@ auto block_add_content = [](auto& ctx) {
 	gram_traits::concat(add_and_get<block_t, gram_traits::types::out_string_t>(b), _attr(ctx));
 };
 
-auto block_add_op = [](auto& ctx) {_val(ctx).get().cnt.emplace_back(_attr(ctx));};
+auto block_add_op_rw = overloaded{
+	  [](std::reference_wrapper<auto>& b, auto&& v){ b.get().cnt.emplace_back(v); }
+	, [](auto& b, auto&& v){ b.cnt.emplace_back(v); }
+};
+auto block_add_op = [](auto& ctx) {block_add_op_rw(_val(ctx),_attr(ctx));};
 
 auto exd = [](auto& ctx){ return x3::get<parser_data>(ctx); };
 auto cmp = [](const auto& arg, auto& ctx){ _pass(ctx) = gram_traits::compare(_attr(ctx), arg); };
@@ -75,10 +79,25 @@ const auto op_out_def =
 	  >> -( '|' >> (fnc_call_rule[op_params_define] | var_name_rule[op_params_define]) % '|')
 	>> spec_symbols[op_out_is_end] ] ;
 
+const x3::rule<struct block_r1, block_t> block_r1 = "block_r1";
+const x3::rule<struct block_r2, block_t> block_r2 = "block_r2";
 const x3::rule<struct block, std::reference_wrapper<gram_traits::types::block_t>> block = "block";
+const auto block_r1_def = x3::lit("(((((") >>
+	*(
+		  op_out[ block_add_op ]
+		| block_r2[ block_add_op ]  
+		| gram_traits::char_ [ block_add_content ]
+	) >> x3::lit(")))))");
+const auto block_r2_def = x3::lit("(((((") >>
+	*(
+		  op_out[ block_add_op ]
+		| block_r1[ block_add_op ]  
+		| gram_traits::char_ [ block_add_content ]
+	) >> x3::lit(")))))");
 const auto block_def =
 	*(
 		  op_out[ block_add_op ]
+		| block_r1[ block_add_op ]  
 		| gram_traits::char_ [ block_add_content ]
 	);
 
@@ -89,3 +108,5 @@ BOOST_SPIRIT_DEFINE(spec_symbols)
 BOOST_SPIRIT_DEFINE(single_var_name)
 BOOST_SPIRIT_DEFINE(var_name_rule)
 BOOST_SPIRIT_DEFINE(fnc_call_rule)
+BOOST_SPIRIT_DEFINE(block_r1)
+BOOST_SPIRIT_DEFINE(block_r2)
