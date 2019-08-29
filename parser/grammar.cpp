@@ -69,5 +69,12 @@ cppjinja::b_block<std::wstring> cppjinja::wparse(std::wstring_view data, parser_
 
 	using block_t = grammar::wide::gram_traits::types::block_t;
 	block_t result;
+	auto result_ref = std::ref(result);
+	bool ok = x3::parse(
+	              data.begin(), data.end(),
+	              make_grammar(grammar::wide::block, std::move(env)),
+		      result_ref
+	              );
+	if(!ok) throw std::runtime_error("cannot parse");
 	return result;
 }

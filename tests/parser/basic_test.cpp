@@ -15,6 +15,15 @@
 
 #include "parser/grammar.hpp"
 
+namespace std { 
+	inline std::ostream& operator<<(std::ostream& out, const std::wstring& value) 
+	{ 
+		out << "[wstring value, see " << __FILE__ << ':' << __LINE__ << ']';
+		return out; 
+	} 
+
+} // namespace std 
+
 using namespace std::literals;
 using cppjinja::parse;
 
@@ -47,7 +56,9 @@ BOOST_AUTO_TEST_CASE(just_str)
 	check_block(cppjinja::parse("привет 你好，世界！"sv), 0, "привет 你好，世界！"s);
 	check_block(cppjinja::parse(L"test string"sv), 0, "test string"s);
 	check_block(cppjinja::parse(L"привет"sv), 0, "привет"s);
-	check_block(cppjinja::wparse(L"привет"sv), 0, L"привет"s);
+	BOOST_TEST_CONTEXT("wide string, line " << __LINE__) {
+		check_block(cppjinja::wparse(L"привет"sv), 0, L"привет"s);
+	}
 }
 
 BOOST_AUTO_TEST_SUITE(output)
@@ -59,8 +70,10 @@ BOOST_AUTO_TEST_CASE(string)
 	parse_check_block("test <= \"kuku\" =>"sv, 0, "test "s, cppjinja::st_out<std::string>{ "kuku"s, {} });
 	parse_check_block("<= 'kuk\\'u' =>"sv, 0, cppjinja::st_out<std::string>{ "kuk'u"s, {} });
 
-	BOOST_TEST_CONTEXT("Russian data, line " << __LINE__ )
-	check_block(wparse(L"<= 'привет' =>"), 0, cppjinja::st_out<std::wstring>{ L"привет"s, {} });
+	BOOST_TEST_CONTEXT("Russian data, line " << __LINE__ ) {
+		check_block(wparse(L"<= 'привет' =>"), 0, cppjinja::st_out<std::wstring>{ L"привет"s, {} });
+		check_block(wparse(L"п<= 'привет' =>"), 0, L"п"s, cppjinja::st_out<std::wstring>{ L"привет"s, {} });
+	}
 }
 BOOST_AUTO_TEST_CASE(variable)
 {

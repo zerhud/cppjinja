@@ -44,9 +44,6 @@ namespace cppjinja {
 template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-template<typename String>
-using ostream = std::basic_ostream<typename String::value_type>;
-
 template<typename T>
 bool operator < (const boost::recursive_wrapper<T>& left, const boost::recursive_wrapper<T>& right)
 {
@@ -92,9 +89,12 @@ struct st_out {
 };
 DEFINE_OPERATORS_STRING(st_out, left.ref, right.ref, left.params, right.params)
 template<typename String>
-ostream<String>& operator << (ostream<String>& out, const st_out<String>& obj)
+std::ostream& operator << (std::ostream& out, const st_out<String>& obj)
 {
-	auto printer = [&out](auto& i){out << i;};
+	auto printer = overloaded{
+		[&out](const std::wstring&){out << "[wstring content]";},
+		[&out](const auto& i){out << i;}
+	};
 	std::visit(printer, obj.ref);
 	for(auto& i:obj.params) {
 		out << '|';
@@ -129,7 +129,7 @@ struct b_block {
 };
 DEFINE_OPERATORS_STRING(b_block, left.name, right.name, left.cnt, right.cnt)
 template<typename String>
-ostream<String>& operator << (ostream<String>& out, const b_block<String>& obj)
+std::ostream& operator << (std::ostream& out, const b_block<String>& obj)
 {
     auto printer = overloaded{
         [&out](const String&){out << "[string content]";},

@@ -18,7 +18,47 @@ namespace pl = std::placeholders;
 
 namespace cppjinja::traits {
 
-struct ascii {
+namespace helpers {
+template<class T>struct tag_t{};
+template<class T>constexpr tag_t<T> tag{};
+namespace detect_string {
+	template<class T, class...Ts>
+	constexpr bool is_stringlike(tag_t<T>, Ts&&...){ return false; }
+	template<class T, class A>
+	constexpr bool is_stringlike( tag_t<std::basic_string<T,A>> ){ return true; }
+	template<class T>
+	constexpr bool detect=is_stringlike(tag<T>); // enable ADL extension
+}
+namespace detect_character {
+	template<class T, class...Ts>
+	constexpr bool is_charlike(tag_t<T>, Ts&&...){ return false; }
+	constexpr bool is_charlike( tag_t<char> ){ return true; }
+	constexpr bool is_charlike( tag_t<wchar_t> ){ return true; }
+	// ETC
+	template<class T>
+	constexpr bool detect=is_charlike(tag<T>); // enable ADL extension
+}
+} // namespace helpers
+
+struct common {
+	template<typename T, typename String>
+	static
+	std::enable_if_t<helpers::detect_string::detect<std::decay_t<String>>>
+	emplace_back_utf8(std::vector<T>& vec, String&& v)
+	{
+		vec.emplace_back(boost::spirit::to_utf8(v));
+	}
+
+	template<typename T, typename In>
+	static
+	std::enable_if_t<!(helpers::detect_string::detect<std::decay_t<In>>)>
+	emplace_back_utf8(std::vector<T>& vec, In&& v)
+	{
+		vec.emplace_back(std::forward<In>(v));
+	}
+};
+
+struct ascii : common {
 	struct types {
 		using out_string_t = std::string;
 		using input_iterator_t = std::string_view::iterator;
@@ -46,7 +86,7 @@ struct ascii {
 		return left == right;
 	}
 };
-struct unicode_utf8 {
+struct unicode_utf8 : common {
 	struct types {
 		using out_string_t = std::string;
 		using input_iterator_t = std::string_view::iterator;
@@ -75,7 +115,7 @@ struct unicode_utf8 {
 		return left == right;
 	}
 };
-struct unicode_wide {
+struct unicode_wide : common {
 	struct types {
 		using out_string_t = std::wstring;
 		using input_iterator_t = std::string_view::iterator;

@@ -43,7 +43,7 @@ auto op_out_is_start = [](auto& ctx) { cmp(exd(ctx).output.b, ctx); };
 auto op_out_is_end = [](auto& ctx) { cmp(exd(ctx).output.e, ctx); };
 
 auto op_ref_define = [](auto& ctx) { _val(ctx).ref = _attr(ctx); };
-auto op_params_define = [](auto& ctx) { _val(ctx).params.emplace_back(_attr(ctx)); };
+auto op_params_define = [](auto& ctx) { gram_traits::emplace_back_utf8(_val(ctx).params,_attr(ctx)); };
 
 const x3::rule<struct spec_symbols, gram_traits::types::out_string_t> spec_symbols = "spec_symbols";
 const auto spec_symbols_def = +gram_traits::char_("!#$%&()*+,-./:;<=>?@[\\]^_`{|}~");
