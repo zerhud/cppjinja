@@ -114,3 +114,13 @@ BOOST_AUTO_TEST_CASE(filters)
 	parse_check_block("<= 'q'|f('q',q) =>"sv, 0, sto_t{ "q"s, {fnc_call{"f",{"q"s,var_name{"q"s}}}} });
 }
 BOOST_AUTO_TEST_SUITE_END() // output
+BOOST_AUTO_TEST_SUITE(blocks)
+BOOST_AUTO_TEST_CASE(recursion)
+{
+	using cppjinja::s_block;
+	parse_check_block("test (((((inner)))))"sv, 0
+	                  , "test "s
+	                  , boost::recursive_wrapper(s_block{""s, {"inner"s}})
+	                  );
+}
+BOOST_AUTO_TEST_SUITE_END() // blocks

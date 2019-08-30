@@ -27,7 +27,19 @@ T& add_and_get(Block& b)
 	return std::get<T>(b.cnt.back());
 }
 
-auto nop = [](auto& ctx){_pass(ctx)=true;}; //< debug lambda
+//-------------- debug block
+auto printer = overloaded{
+	  [](const std::string& s){std::cout << '|' << s << '|' << std::endl;}
+	, [](const std::wstring& s){std::wcout << L'|' << s << L'|' << std::endl;}
+	, [](const wchar_t s){std::wcout << L'|' << s << L'|' << std::endl;}
+};
+auto nop = [](auto& ctx){}; //< debug lambda
+auto pass = [](auto& ctx){_pass(ctx)=true;}; //< debug lambda
+auto fail = [](auto& ctx){_pass(ctx)=false;}; //< debug lambda
+auto print_and_fail = [](auto& ctx){ printer(_attr(ctx)); _pass(ctx)=false;};
+//-------------- debug block
+
+auto peq = [](auto& ctx){ _val(ctx) += _attr(ctx); };
 
 auto block_add_content = [](auto& ctx) {
 	block_t& b = _val(ctx);
@@ -45,6 +57,8 @@ auto cmp = [](const auto& arg, auto& ctx){ _pass(ctx) = gram_traits::compare(_at
 
 auto op_out_is_start = [](auto& ctx) { cmp(exd(ctx).output.b, ctx); };
 auto op_out_is_end = [](auto& ctx) { cmp(exd(ctx).output.e, ctx); };
+auto op_term_is_start = [](auto& ctx) { cmp(exd(ctx).term.b, ctx); };
+auto op_term_is_end = [](auto& ctx) { cmp(exd(ctx).term.e, ctx); };
 
 auto op_ref_define = [](auto& ctx) { _val(ctx).ref = _attr(ctx); };
 auto op_params_define = [](auto& ctx) { gram_traits::emplace_back_utf8(_val(ctx).params,_attr(ctx)); };
@@ -79,21 +93,22 @@ const auto op_out_def =
 	  >> -( '|' >> (fnc_call_rule[op_params_define] | var_name_rule[op_params_define]) % '|')
 	>> spec_symbols[op_out_is_end] ] ;
 
+const x3::rule<struct free_text, gram_traits::types::out_string_t> free_text = "free_text";
+const auto free_text_def = +(gram_traits::char_[peq] >> (!(
+	  spec_symbols[op_out_is_start]
+	| spec_symbols[op_term_is_start]
+	| x3::lit(")))))")
+	))) >> gram_traits::char_
+;
+
 const x3::rule<struct block_r1, block_t> block_r1 = "block_r1";
-const x3::rule<struct block_r2, block_t> block_r2 = "block_r2";
 const x3::rule<struct block, std::reference_wrapper<gram_traits::types::block_t>> block = "block";
 const auto block_r1_def = x3::lit("(((((") >>
 	*(
 		  op_out[ block_add_op ]
-		| block_r2[ block_add_op ]  
-		| gram_traits::char_ [ block_add_content ]
-	) >> x3::lit(")))))");
-const auto block_r2_def = x3::lit("(((((") >>
-	*(
-		  op_out[ block_add_op ]
-		| block_r1[ block_add_op ]  
-		| gram_traits::char_ [ block_add_content ]
-	) >> x3::lit(")))))");
+		| block_r1[ block_add_op ]
+		| free_text[ block_add_content ]
+	) >> x3::lit(")))))") ;
 const auto block_def =
 	*(
 		  op_out[ block_add_op ]
@@ -109,4 +124,4 @@ BOOST_SPIRIT_DEFINE(single_var_name)
 BOOST_SPIRIT_DEFINE(var_name_rule)
 BOOST_SPIRIT_DEFINE(fnc_call_rule)
 BOOST_SPIRIT_DEFINE(block_r1)
-BOOST_SPIRIT_DEFINE(block_r2)
+BOOST_SPIRIT_DEFINE(free_text)

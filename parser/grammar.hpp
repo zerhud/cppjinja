@@ -13,10 +13,15 @@
 namespace cppjinja {
 
 struct parser_data {
+	using namespace std::literals;
 	struct {
 		std::string b= "<=";
 		std::string e= "=>";
 	} output;
+	struct {
+		std::string b= "<%";
+		std::string e= "%>";
+	} term;
 };
 
 b_block<std::string> parse(std::string_view data, parser_data env={});

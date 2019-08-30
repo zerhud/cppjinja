@@ -131,21 +131,28 @@ struct b_block {
 };
 DEFINE_OPERATORS_STRING(b_block, left.name, right.name, left.cnt, right.cnt)
 template<typename String>
+bool operator == (const boost::recursive_wrapper<b_block<String>>& left, const boost::recursive_wrapper<b_block<String>>& right)
+{ return left.get() == right.get();}
+template<typename String>
+std::ostream& operator << (std::ostream& out, const boost::recursive_wrapper<b_block<String>>& obj)
+{out << obj.get(); return out;}
+template<typename String>
 std::ostream& operator << (std::ostream& out, const b_block<String>& obj)
 {
-    auto printer = overloaded{
-          [&out](const String&){out << "[string content]";}
+	auto printer = overloaded{
+	  [&out](const std::string& c){out << c << ", ";}
+	, [&out](const std::wstring&){out << "[string content]";}
 	, [&out](const st_out<String>&){out << "[out operator]";}
-	, [&out](const boost::recursive_wrapper<auto>& o){ out << o.get();}
-    };
+	, [&out](const boost::recursive_wrapper<b_block<String>>& o){ out << o.get();}
+	};
 
-    out << "block: " << obj.name;
-    for(auto& i:obj.cnt) {
-        out << std::endl << "\t" ;
-        std::visit(printer, i);
-    }
+	out << "block: " << obj.name;
+	for(auto& i:obj.cnt) {
+		out << std::endl << "\t" ;
+		std::visit(printer, i);
+	}
 
-    return out;
+	return out;
 }
 
 using s_block = b_block<std::string>;
