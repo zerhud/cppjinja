@@ -45,9 +45,17 @@ auto block_add_content = [](auto& ctx) {
 	block_t& b = _val(ctx);
 	gram_traits::concat(add_and_get<block_t, gram_traits::types::out_string_t>(b), _attr(ctx));
 };
+auto block_add_content_vec = [](auto& ctx){
+	if(_val(ctx).empty()) {_val(ctx).emplace_back(_attr(ctx));return;}
+	auto& back = _val(ctx).back();
+	if(std::holds_alternative<gram_traits::types::out_string_t>(back))
+	        std::get<gram_traits::types::out_string_t>(back) += _attr(ctx);
+	else _val(ctx).emplace_back(_attr(ctx));
+};
 
 auto block_add_op_rw = overloaded{
 	  [](std::reference_wrapper<auto>& b, auto&& v){ b.get().cnt.emplace_back(v); }
+	, [](std::vector<auto>& b, auto&& v){ b.emplace_back(v); }
 	, [](auto& b, auto&& v){ b.cnt.emplace_back(v); }
 };
 auto block_add_op = [](auto& ctx) {block_add_op_rw(_val(ctx),_attr(ctx));};
@@ -101,20 +109,22 @@ const auto free_text_def = +(gram_traits::char_[peq] >> (!(
 	))) >> gram_traits::char_
 ;
 
+const x3::rule<struct block_content_tag, block_content<gram_traits::types::out_string_t>> block_content_r = "block_content";
 const x3::rule<struct block_r1, block_t> block_r1 = "block_r1";
 const x3::rule<struct block, std::reference_wrapper<gram_traits::types::block_t>> block = "block";
 const auto block_r1_def = x3::lit("(((((") >>
-	*(
-		  op_out[ block_add_op ]
-		| block_r1[ block_add_op ]
-		| free_text[ block_add_content ]
-	) >> x3::lit(")))))") ;
+        block_content_r[([](auto&c){_val(c).cnt=_attr(c);})] >> x3::lit(")))))") ;
 const auto block_def =
 	*(
 		  op_out[ block_add_op ]
-		| block_r1[ block_add_op ]  
+		| block_r1[ block_add_op ]
 		| gram_traits::char_ [ block_add_content ]
 	);
+const auto block_content_r_def =
+	*(
+	op_out[ block_add_op ] | block_r1[ block_add_op ] | free_text [ block_add_content_vec ]
+	)
+;
 
 BOOST_SPIRIT_DEFINE(block)
 BOOST_SPIRIT_DEFINE(op_out)
@@ -125,3 +135,4 @@ BOOST_SPIRIT_DEFINE(var_name_rule)
 BOOST_SPIRIT_DEFINE(fnc_call_rule)
 BOOST_SPIRIT_DEFINE(block_r1)
 BOOST_SPIRIT_DEFINE(free_text)
+BOOST_SPIRIT_DEFINE(block_content_r)

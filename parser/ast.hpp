@@ -122,12 +122,16 @@ struct st_call {
 template<typename String> struct b_block;
 
 template<typename String>
-using block_content = std::variant<String, st_out<String>, boost::recursive_wrapper<b_block<String>>>;//, st_for, st_if, st_set, st_call>;
+using block_content = std::vector< std::variant<
+      String
+    , st_out<String>
+    , boost::recursive_wrapper<b_block<String>>
+>>;//, st_for, st_if, st_set, st_call>;
 
 template<typename String>
 struct b_block {
 	std::string name;
-	std::vector<block_content<String>> cnt;
+	block_content<String> cnt;
 };
 DEFINE_OPERATORS_STRING(b_block, left.name, right.name, left.cnt, right.cnt)
 template<typename String>

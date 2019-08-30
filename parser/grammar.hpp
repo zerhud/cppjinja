@@ -13,7 +13,6 @@
 namespace cppjinja {
 
 struct parser_data {
-	using namespace std::literals;
 	struct {
 		std::string b= "<=";
 		std::string e= "=>";
