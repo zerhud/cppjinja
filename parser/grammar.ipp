@@ -36,6 +36,7 @@ auto printer = overloaded{
 auto nop = [](auto& ctx){}; //< debug lambda
 auto pass = [](auto& ctx){_pass(ctx)=true;}; //< debug lambda
 auto fail = [](auto& ctx){_pass(ctx)=false;}; //< debug lambda
+auto print = [](auto& ctx){ printer(_attr(ctx)); };
 auto print_and_fail = [](auto& ctx){ printer(_attr(ctx)); _pass(ctx)=false;};
 //-------------- debug block
 
@@ -109,20 +110,32 @@ const auto free_text_def = +(gram_traits::char_[peq] >> (!(
 	))) >> gram_traits::char_
 ;
 
+const x3::rule<struct value_term_tag, value_term> value_term_r = "value_term";
+const auto value_term_r_def =
+        var_name_rule | quoted_string
+;
+
 const x3::rule<struct block_content_tag, block_content<gram_traits::types::out_string_t>> block_content_r = "block_content";
 const x3::rule<struct block_r1, block_t> block_r1 = "block_r1";
+const x3::rule<struct op_if, block_t> op_if = "op_if";
 const x3::rule<struct block, std::reference_wrapper<gram_traits::types::block_t>> block = "block";
 const auto block_r1_def = x3::lit("(((((") >>
         block_content_r[([](auto&c){_val(c).cnt=_attr(c);})] >> x3::lit(")))))") ;
+const auto op_if_def =
+        x3::skip(gram_traits::space)[spec_symbols[op_term_is_start] >> x3::lit("if") >> spec_symbols[op_term_is_end]]
+	>> block_content_r[([](auto&c){_val(c).cnt=_attr(c);})] >>
+	x3::skip(gram_traits::space)[spec_symbols[op_term_is_start] >> x3::lit("endif") >> spec_symbols[op_term_is_end]]
+	;
 const auto block_def =
 	*(
 		  op_out[ block_add_op ]
+		| op_if[ block_add_op ]
 		| block_r1[ block_add_op ]
 		| gram_traits::char_ [ block_add_content ]
 	);
 const auto block_content_r_def =
 	*(
-	op_out[ block_add_op ] | block_r1[ block_add_op ] | free_text [ block_add_content_vec ]
+	op_out[ block_add_op ] | op_if[block_add_op] | block_r1[ block_add_op ] | free_text [ block_add_content_vec ]
 	)
 ;
 
@@ -136,3 +149,4 @@ BOOST_SPIRIT_DEFINE(fnc_call_rule)
 BOOST_SPIRIT_DEFINE(block_r1)
 BOOST_SPIRIT_DEFINE(free_text)
 BOOST_SPIRIT_DEFINE(block_content_r)
+BOOST_SPIRIT_DEFINE(op_if)

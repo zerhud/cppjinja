@@ -118,9 +118,19 @@ BOOST_AUTO_TEST_SUITE(blocks)
 BOOST_AUTO_TEST_CASE(recursion)
 {
 	using cppjinja::s_block;
-	parse_check_block("test (((((inner)))))"sv, 0
+	parse_check_block( "test (((((inner)))))"sv, 0
 	                  , "test "s
 	                  , boost::recursive_wrapper(s_block{""s, {"inner"s}})
 	                  );
 }
+BOOST_AUTO_TEST_SUITE(op_if)
+BOOST_AUTO_TEST_CASE(simple)
+{
+	using cppjinja::s_block;
+	parse_check_block(
+	            "<%if%>kuku<%endif%>"sv, 0,
+	            boost::recursive_wrapper(s_block{""s, {"kuku"s}})
+	            );
+}
+BOOST_AUTO_TEST_SUITE_END() // op_if
 BOOST_AUTO_TEST_SUITE_END() // blocks

@@ -75,10 +75,12 @@ int lex_cmp(const Left& left, const Right& right, const Args&... args)
 using var_name = std::vector<std::string>;
 DEFINE_OPERATORS(var_name, left, right)
 
+struct fnc_call;
+using value_term = std::variant<std::string, var_name, boost::recursive_wrapper<fnc_call>>;
 
 struct fnc_call {
 	std::string ref;
-	std::vector<std::variant<std::string,var_name,boost::recursive_wrapper<fnc_call>>> params;
+	std::vector<value_term> params;
 };
 DEFINE_OPERATORS(fnc_call, left.ref, right.ref, left.params, right.params)
 
@@ -108,8 +110,12 @@ struct st_for {
 };
 
 struct st_if {
+	enum class op_t{ eq, less, more, less_eq, more_eq };
 
+	op_t op;
+	value_term left, right;
 };
+DEFINE_OPERATORS(st_if, left.left, right.left, left.right, right.right)
 
 struct st_set {
 
