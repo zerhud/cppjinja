@@ -18,6 +18,7 @@
 namespace std { 
 	inline std::ostream& operator<<(std::ostream& out, const std::wstring& value) 
 	{ 
+		(void)value;
 		out << "[wstring value, see " << __FILE__ << ':' << __LINE__ << ']';
 		return out; 
 	} 

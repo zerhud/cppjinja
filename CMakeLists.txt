@@ -14,6 +14,7 @@ find_package(Boost COMPONENTS unit_test_framework system REQUIRED)
 find_package(Threads REQUIRED)
 include(CheckCXXSourceCompiles)
 include(cmake/target_sources_local.cmake)
+include(cmake/flags.cmake)
 
 CHECK_CXX_SOURCE_COMPILES("#include <filesystem>\nint main(int,char**){return 0;}" HAVE_FILESYSTEM)
 if(NOT HAVE_FILESYSTEM)
