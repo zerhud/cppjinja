@@ -69,15 +69,22 @@ auto block_add_content_vec = [](auto& ctx){
 	else _val(ctx).emplace_back(_attr(ctx));
 };
 
-auto block_add_op_rw = overloaded{
-	  [](std::reference_wrapper<auto>& b, auto&& v){ b.get().cnt.emplace_back(v); }
-	, [](std::vector<auto>& b, auto&& v){ b.emplace_back(v); }
-	, [](auto& b, auto&& v){ b.cnt.emplace_back(v); }
-};
-auto block_set_ref_rw = overloaded{
-	  [](std::reference_wrapper<auto>& b, auto&& v){ b.get().ref = std::move(v); }
-	, [](auto& b, auto&& v){ b.ref = std::move(v); }
-};
+static struct  block_add_op_rw_t {
+	template<typename Type, typename Value>
+	void operator() (std::reference_wrapper<Type>& b, Value&& v){ b.get().cnt.emplace_back(std::forward<Value>(v)); }
+	template<typename Type, typename Value>
+	void operator() (std::vector<Type>& b, Value&& v){ b.emplace_back(std::forward<Value>(v)); }
+	template<typename Type, typename Value>
+	void operator() (Type& b, Value&& v){ b.cnt.emplace_back(std::forward<Value>(v)); }
+} block_add_op_rw;
+
+static struct block_set_ref_rw_t {
+	template<typename Type, typename Value>
+	void operator() (std::reference_wrapper<Type>& b, Value&& v){ b.get().ref = std::move(v); }
+	template<typename Type, typename Value>
+	void operator() (Type& b, Value&& v){ b.ref = std::move(v); }
+} block_set_ref_rw ;
+
 auto block_add_op = [](auto& ctx) {block_add_op_rw(_val(ctx),std::move(_attr(ctx)));};
 auto block_set_ref = [](auto& ctx) {block_set_ref_rw(_val(ctx),std::move(_attr(ctx)));};
 
