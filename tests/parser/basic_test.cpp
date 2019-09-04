@@ -91,8 +91,8 @@ BOOST_AUTO_TEST_CASE(function)
 {
 	using cppjinja::parse;
 	using cppjinja::var_name;
-	using cppjinja::fnc_call;
 	using sto_t = cppjinja::st_out<std::string>;
+	using fnc_call = cppjinja::fnc_call<std::string>;
 
 	parse_check_block("q<= foo() =>"sv, 0, "q"s, sto_t{ fnc_call{"foo"s, {}}, {} });
 	parse_check_block("<= foo(qq) =>"sv, 0, sto_t{ fnc_call{"foo"s, {var_name{"qq"s}}}, {} });
@@ -104,8 +104,8 @@ BOOST_AUTO_TEST_CASE(filters)
 {
 	using cppjinja::parse;
 	using cppjinja::var_name;
-	using cppjinja::fnc_call;
 	using sto_t = cppjinja::st_out<std::string>;
+	using fnc_call = cppjinja::fnc_call<std::string>;
 
 	parse_check_block("<= foo() | filter =>"sv, 0, sto_t{ fnc_call{"foo"s, {}}, {var_name{"filter"s}} });
 	parse_check_block("<= foo(qq)|f1|f2=>"sv, 0, sto_t{ fnc_call{"foo"s, {var_name{"qq"s}}}, {var_name{"f1"s},var_name{"f2"s}} });
@@ -116,22 +116,16 @@ BOOST_AUTO_TEST_CASE(filters)
 }
 BOOST_AUTO_TEST_SUITE_END() // output
 BOOST_AUTO_TEST_SUITE(blocks)
-BOOST_AUTO_TEST_CASE(recursion)
-{
-	using cppjinja::s_block;
-	parse_check_block( "test (((((inner)))))"sv, 0
-	                  , "test "s
-	                  , boost::recursive_wrapper(s_block{""s, {"inner"s}})
-	                  );
-}
 BOOST_AUTO_TEST_SUITE(op_if)
 BOOST_AUTO_TEST_CASE(simple)
 {
 	using cppjinja::s_block;
-	parse_check_block(
-	            "<%if%>kuku<%endif%>"sv, 0,
-	            boost::recursive_wrapper(s_block{""s, {"kuku"s}})
-	            );
+	using st_if = cppjinja::st_if<std::string>;
+
+	auto result = boost::recursive_wrapper(s_block{st_if{}, {"kuku"s}});
+	parse_check_block( "<%if a is b%>kuku<%endif%>"sv, 0, result);
+	parse_check_block( "<% if a is b%>kuku<%endif%>"sv, 0, result);
+	parse_check_block( "<% if a is b %>kuku<% endif %>"sv, 0, result);
 }
 BOOST_AUTO_TEST_SUITE_END() // op_if
 BOOST_AUTO_TEST_SUITE_END() // blocks

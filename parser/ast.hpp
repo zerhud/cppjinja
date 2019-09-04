@@ -75,19 +75,37 @@ int lex_cmp(const Left& left, const Right& right, const Args&... args)
 using var_name = std::vector<std::string>;
 DEFINE_OPERATORS(var_name, left, right)
 
-struct fnc_call;
-using value_term = std::variant<std::string, var_name, boost::recursive_wrapper<fnc_call>>;
+template<typename String> struct fnc_call;
+template<typename String>
+using value_term = std::variant<String, var_name, boost::recursive_wrapper<fnc_call<String>>>;
 
+template<typename String>
 struct fnc_call {
 	std::string ref;
-	std::vector<value_term> params;
+	std::vector<value_term<String>> params;
 };
-DEFINE_OPERATORS(fnc_call, left.ref, right.ref, left.params, right.params)
+DEFINE_OPERATORS_STRING(fnc_call, left.ref, right.ref, left.params, right.params)
+template<typename String>
+std::ostream& operator << (std::ostream& out, const fnc_call<String>& obj)
+{
+	out << obj.ref << '(';
+	auto printer = overloaded{
+		[&out](const auto& i){out << i;},
+		[&out](const std::wstring& i){ out << "[wstring content]";},
+		[&out](const boost::recursive_wrapper<fnc_call<String>>& i){out << i.get();}
+	};
+	for(auto& i:obj.params) {
+		std::visit(printer,i);
+		out << ',';
+	}
+	out << ')';
+	return out;
+}
 
 template<typename String>
 struct st_out {
-	std::variant<String,var_name,fnc_call> ref;
-	std::vector<std::variant<var_name,fnc_call>> params;
+	std::variant<String,var_name,fnc_call<String>> ref;
+	std::vector<std::variant<var_name,fnc_call<String>>> params;
 };
 DEFINE_OPERATORS_STRING(st_out, left.ref, right.ref, left.params, right.params)
 template<typename String>
@@ -109,13 +127,20 @@ struct st_for {
 
 };
 
-struct st_if {
-	enum class op_t{ eq, less, more, less_eq, more_eq };
+enum class comparator{ eq, less, more, less_eq, more_eq };
 
-	op_t op;
-	value_term left, right;
+template<typename String>
+struct st_if {
+	comparator op;
+	value_term<String> left, right;
 };
-DEFINE_OPERATORS(st_if, left.left, right.left, left.right, right.right)
+DEFINE_OPERATORS_STRING(st_if, left.op, right.op, left.left, right.left, left.right, right.right)
+template<typename String>
+std::ostream& operator << (std::ostream& out, const st_if<String>& obj)
+{
+	//TODO("write code here");
+	return out;
+}
 
 struct st_set {
 
@@ -134,12 +159,13 @@ using block_content = std::vector< std::variant<
     , boost::recursive_wrapper<b_block<String>>
 >>;//, st_for, st_if, st_set, st_call>;
 
+enum class block_ref { no, name, op_if };
 template<typename String>
 struct b_block {
-	std::string name;
+	std::optional<std::variant<String,st_if<String>>> ref;
 	block_content<String> cnt;
 };
-DEFINE_OPERATORS_STRING(b_block, left.name, right.name, left.cnt, right.cnt)
+DEFINE_OPERATORS_STRING(b_block, left.ref, right.ref, left.cnt, right.cnt)
 template<typename String>
 bool operator == (const boost::recursive_wrapper<b_block<String>>& left, const boost::recursive_wrapper<b_block<String>>& right)
 { return left.get() == right.get();}
@@ -154,9 +180,10 @@ std::ostream& operator << (std::ostream& out, const b_block<String>& obj)
 	, [&out](const std::wstring&){out << "[string content]";}
 	, [&out](const st_out<String>&){out << "[out operator]";}
 	, [&out](const boost::recursive_wrapper<b_block<String>>& o){ out << o.get();}
+	, [&out](const auto& c){out << c;}
 	};
 
-	out << "block: " << obj.name;
+	out << "block: " ;
 	for(auto& i:obj.cnt) {
 		out << std::endl << "\t" ;
 		std::visit(printer, i);

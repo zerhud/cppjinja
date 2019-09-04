@@ -14,18 +14,4 @@ std::ostream& cppjinja::operator << (std::ostream& out, const cppjinja::var_name
 	return out;
 }
 
-std::ostream& cppjinja::operator << (std::ostream& out, const cppjinja::fnc_call& obj)
-{
-	out << obj.ref << '(';
-	auto printer = overloaded{
-		[&out](const auto& i){out << i;},
-		[&out](const boost::recursive_wrapper<fnc_call>& i){out << i.get();}
-	};
-	for(auto& i:obj.params) {
-		std::visit(printer,i);
-		out << ',';
-	}
-	out << ')';
-	return out;
-}
 
