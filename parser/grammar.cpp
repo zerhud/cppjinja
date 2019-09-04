@@ -44,7 +44,7 @@ cppjinja::b_block<std::string> cppjinja::parse(std::string_view data, parser_dat
 	              boost::u8_to_u32_iterator(data.begin()),
 	              boost::u8_to_u32_iterator(data.end()),
 	              make_grammar(grammar::utf8::block, std::move(env)),
-		      result_ref
+	              result_ref
 	              );
 	if(!ok) throw std::runtime_error("cannot parse");
 	return result;
@@ -58,7 +58,7 @@ cppjinja::b_block<std::string> cppjinja::parse(std::wstring_view data, parser_da
 	bool ok = x3::parse(
 	              data.begin(), data.end(),
 	              make_grammar(grammar::utf8::block, std::move(env)),
-		      result_ref
+	              result_ref
 	              );
 	if(!ok) throw std::runtime_error("cannot parse");
 	return result;
@@ -73,7 +73,7 @@ cppjinja::b_block<std::wstring> cppjinja::wparse(std::wstring_view data, parser_
 	bool ok = x3::parse(
 	              data.begin(), data.end(),
 	              make_grammar(grammar::wide::block, std::move(env)),
-		      result_ref
+	              result_ref
 	              );
 	if(!ok) throw std::runtime_error("cannot parse");
 	return result;

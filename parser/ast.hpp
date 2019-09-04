@@ -9,10 +9,12 @@
 #pragma once
 
 #include <string>
-#include <variant>
 #include <vector>
+#include <variant>
+#include <optional>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/variant/recursive_wrapper.hpp>
+#include "config.hpp"
 
 #define DEFINE_OPERATORS_STRING(sname, ...) \
     template<typename String> \
@@ -78,6 +80,17 @@ DEFINE_OPERATORS(var_name, left, right)
 template<typename String> struct fnc_call;
 template<typename String>
 using value_term = std::variant<String, var_name, boost::recursive_wrapper<fnc_call<String>>>;
+template<typename String>
+std::ostream& operator << (std::ostream& out, const value_term<String>& obj)
+{
+	auto printer = overloaded{
+		  [&out](const auto& i){out << i;}
+		, [&out](const std::wstring&){ out << "[wstring content]";}
+		, [&out](const boost::recursive_wrapper<fnc_call<String>>& i){out << i.get();}
+	};
+	std::visit(printer, obj);
+	return out;
+}
 
 template<typename String>
 struct fnc_call {
@@ -89,17 +102,8 @@ template<typename String>
 std::ostream& operator << (std::ostream& out, const fnc_call<String>& obj)
 {
 	out << obj.ref << '(';
-	auto printer = overloaded{
-		[&out](const auto& i){out << i;},
-		[&out](const std::wstring& i){ out << "[wstring content]";},
-		[&out](const boost::recursive_wrapper<fnc_call<String>>& i){out << i.get();}
-	};
-	for(auto& i:obj.params) {
-		std::visit(printer,i);
-		out << ',';
-	}
-	out << ')';
-	return out;
+	for(auto& i:obj.params)  out << i << ',';
+	return out << ')';
 }
 
 template<typename String>
@@ -128,6 +132,7 @@ struct st_for {
 };
 
 enum class comparator{ eq, less, more, less_eq, more_eq };
+std::ostream& operator << (std::ostream& out, comparator obj);
 
 template<typename String>
 struct st_if {
@@ -138,7 +143,7 @@ DEFINE_OPERATORS_STRING(st_if, left.op, right.op, left.left, right.left, left.ri
 template<typename String>
 std::ostream& operator << (std::ostream& out, const st_if<String>& obj)
 {
-	//TODO("write code here");
+	out << "if " << obj.left << " " << obj.op << " " << obj.right;
 	return out;
 }
 
@@ -184,6 +189,8 @@ std::ostream& operator << (std::ostream& out, const b_block<String>& obj)
 	};
 
 	out << "block: " ;
+	if(obj.ref) std::visit(printer, *obj.ref);
+	else out << "[no ref]";
 	for(auto& i:obj.cnt) {
 		out << std::endl << "\t" ;
 		std::visit(printer, i);

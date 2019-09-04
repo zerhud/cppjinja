@@ -120,12 +120,16 @@ BOOST_AUTO_TEST_SUITE(op_if)
 BOOST_AUTO_TEST_CASE(simple)
 {
 	using cppjinja::s_block;
+	using cppjinja::comparator;
+	using cppjinja::var_name;
 	using st_if = cppjinja::st_if<std::string>;
 
-	auto result = boost::recursive_wrapper(s_block{st_if{}, {"kuku"s}});
+	auto result = boost::recursive_wrapper(s_block{st_if{comparator::eq, var_name{"a"s}, var_name{"b"s}}, {"kuku"s}});
 	parse_check_block( "<%if a is b%>kuku<%endif%>"sv, 0, result);
 	parse_check_block( "<% if a is b%>kuku<%endif%>"sv, 0, result);
 	parse_check_block( "<% if a is b %>kuku<% endif %>"sv, 0, result);
+	BOOST_CHECK_THROW(cppjinja::parse("<% if a is b %>kuku<% %>"sv), std::exception);
+	BOOST_CHECK_THROW(cppjinja::parse("<% if a is b %>kuku<% kuku %>"sv), std::exception);
 }
 BOOST_AUTO_TEST_SUITE_END() // op_if
 BOOST_AUTO_TEST_SUITE_END() // blocks

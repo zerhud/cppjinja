@@ -32,8 +32,10 @@ auto printer = overloaded{
 	  [](const std::string& s){std::cout << '|' << s << '|' << std::endl;}
 	, [](const std::wstring& s){std::wcout << L'|' << s << L'|' << std::endl;}
 	, [](const wchar_t s){std::wcout << L'|' << s << L'|' << std::endl;}
+	, [](const st_if<std::string>&){}
+	, [](const st_if<std::wstring>&){}
 };
-auto nop = [](auto& ctx){}; //< debug lambda
+auto nop = [](auto&){}; //< debug lambda
 auto pass = [](auto& ctx){_pass(ctx)=true;}; //< debug lambda
 auto fail = [](auto& ctx){_pass(ctx)=false;}; //< debug lambda
 auto print = [](auto& ctx){ printer(_attr(ctx)); };
@@ -79,9 +81,24 @@ auto op_out_is_start = [](auto& ctx) { cmp(exd(ctx).output.b, ctx); };
 auto op_out_is_end = [](auto& ctx) { cmp(exd(ctx).output.e, ctx); };
 auto op_term_is_start = [](auto& ctx) { cmp(exd(ctx).term.b, ctx); };
 auto op_term_is_end = [](auto& ctx) { cmp(exd(ctx).term.e, ctx); };
+auto op_term_check_end = [](auto& ctx) {
+	using str_t = gram_traits::types::out_string_t;
+
+	std::string& val = _attr(ctx);
+	auto& block = _val(ctx);
+
+	if(!block.ref) {
+		_pass(ctx)=false;
+		return;
+	}
+
+	bool ok = false;
+	if(std::holds_alternative<st_if<str_t>>(*block.ref))
+		ok = val == "endif";
+	_pass(ctx) = ok;
+};
 
 auto op_ref_define = [](auto& ctx) { _val(ctx).ref = _attr(ctx); };
-//auto op_params_define = [](auto& ctx) { gram_traits::emplace_back_utf8(_val(ctx).params,_attr(ctx)); };
 auto op_params_define = [](auto& ctx) { _val(ctx).params.emplace_back(_attr(ctx)); };
 
 const x3::rule<struct spec_symbols, gram_traits::types::out_string_t> spec_symbols = "spec_symbols";
@@ -123,9 +140,7 @@ const auto free_text_def = +(gram_traits::char_[peq] >> (!(
 ;
 
 const x3::rule<struct value_term_tag, value_term<gram_traits::types::out_string_t>> value_term_r = "value_term";
-const auto value_term_r_def =
-        var_name_rule | quoted_string
-;
+const auto value_term_r_def = var_name_rule | quoted_string ;
 
 const x3::rule<struct comparation_tag, comparator> comparator_r = "comparator";
 const auto comparator_r_def = 
@@ -136,23 +151,28 @@ const auto comparator_r_def =
 
 const x3::rule<struct op_if, st_if<gram_traits::types::out_string_t>> op_if = "op_if";
 const auto op_if_def =
-	   x3::lit("if") >> +gram_traits::space
+	   *gram_traits::space
+	>> x3::lit("if") >> +gram_traits::space
 	>> value_term_r[([](auto&c){_val(c).left=_attr(c);})] >> +gram_traits::space
 	>> comparator_r[([](auto&c){_val(c).op=_attr(c);})] >> +gram_traits::space
-	>> value_term_r[([](auto&c){_val(c).right=_attr(c);})] >> +gram_traits::space
-	>> spec_symbols[op_term_is_end]
+	>> value_term_r[([](auto&c){_val(c).right=_attr(c);})]
+	>> *gram_traits::space
 	;
 
 const x3::rule<struct block_content_tag, block_content<gram_traits::types::out_string_t>> block_content_r = "block_content";
 const x3::rule<struct block_r1, block_t> block_r1 = "block_r1";
 const x3::rule<struct block_tag, std::reference_wrapper<gram_traits::types::block_t>> block = "block";
-const auto block_r1_def = //x3::with<block_ref>(block_ref::no)[
-	x3::skip(gram_traits::space)[spec_symbols[op_term_is_start]
-	   >> (op_if[block_set_ref])
-	   >> spec_symbols[op_term_is_end] ]
+const auto block_r1_def =
+	   spec_symbols[op_term_is_start]
+	>> (op_if[block_set_ref])
+	>  spec_symbols[op_term_is_end]
 	>> block_content_r[([](auto&c){_val(c).cnt=_attr(c);})]
-	>> x3::skip(gram_traits::space)[ spec_symbols[op_term_is_start] >> +x3::alnum >> spec_symbols[op_term_is_end] ]
-	;//];
+	>> x3::skip(gram_traits::space)[
+		   spec_symbols[op_term_is_start]
+		>> (+x3::alnum)[op_term_check_end]
+		>> spec_symbols[op_term_is_end]
+	]
+	;
 const auto block_def =
 	*(
 		  op_out[ block_add_op ]
