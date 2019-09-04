@@ -12,11 +12,11 @@
 #include "traits.hpp"
 #include "ast.hpp"
 
+#define FILE_INLINING
+
 namespace x3 = boost::spirit::x3;
 
 namespace cppjinja {
-
-struct grammar_result_tag {};
 
 namespace grammar::utf8 {
 using gram_traits = traits::unicode_utf8;

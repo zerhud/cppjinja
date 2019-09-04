@@ -10,6 +10,13 @@
 // before include command a gram_traits must to be defined.
 // also all boost's includes and ast.hpp must to be included.
 
+#ifndef FILE_INLINING
+#include "traits.hpp"
+#include "grammar.hpp"
+namespace cppjinja::deubg {
+using gram_traits = traits::unicode_utf8;
+#endif
+
 using block_t = gram_traits::types::block_t;
 using block_ptr  = std::shared_ptr<gram_traits::types::block_t>;
 
@@ -163,8 +170,8 @@ const x3::rule<struct block_content_tag, block_content<gram_traits::types::out_s
 const x3::rule<struct block_r1, block_t> block_r1 = "block_r1";
 const x3::rule<struct block_tag, std::reference_wrapper<gram_traits::types::block_t>> block = "block";
 const auto block_r1_def =
-	   spec_symbols[op_term_is_start]
-	>> (op_if[block_set_ref])
+	   (spec_symbols[op_term_is_start]
+	>> (op_if[block_set_ref]))
 	>  spec_symbols[op_term_is_end]
 	>> block_content_r[([](auto&c){_val(c).cnt=_attr(c);})]
 	>> x3::skip(gram_traits::space)[
@@ -198,3 +205,7 @@ BOOST_SPIRIT_DEFINE(block_content_r)
 BOOST_SPIRIT_DEFINE(op_if)
 BOOST_SPIRIT_DEFINE(comparator_r)
 BOOST_SPIRIT_DEFINE(value_term_r)
+
+#ifndef FILE_INLINING
+} // namespace cppjinja::deubg
+#endif
