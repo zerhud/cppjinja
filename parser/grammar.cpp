@@ -20,11 +20,11 @@ struct grammar_result_tag {};
 
 namespace grammar::utf8 {
 using gram_traits = traits::unicode_utf8;
-#include "grammar.ipp"
+#include "grammar.inl"
 } // namespace grammar::utf8
 namespace grammar::wide {
 using gram_traits = traits::unicode_wide;
-#include "grammar.ipp"
+#include "grammar.inl"
 } // namespace grammar::wide
 
 template<typename Parser, typename Env>
