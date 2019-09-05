@@ -95,11 +95,11 @@ BOOST_AUTO_TEST_CASE(function)
 	using sto_t = cppjinja::st_out<std::string>;
 	using fnc_call = cppjinja::fnc_call<std::string>;
 
-	parse_check_block("q<= foo() =>"sv, 0, "q"s, sto_t{ fnc_call{"foo"s, {}}, {} });
-	parse_check_block("<= foo(qq) =>"sv, 0, sto_t{ fnc_call{"foo"s, {var_name{"qq"s}}}, {} });
-	parse_check_block("<= foo(q.q) =>"sv, 0, sto_t{ fnc_call{"foo"s, {var_name{"q"s, "q"s}}}, {} });
-	parse_check_block("<= foo(qq, q.q) =>"sv, 0, sto_t{ fnc_call{"foo"s, {var_name{"qq"s}, var_name{"q"s, "q"s}}}, {} });
-	parse_check_block("<= foo('qq') =>"sv, 0, sto_t{ fnc_call{"foo"s, {"qq"s}}, {} });
+	parse_check_block("q<= foo() =>"sv, 0, "q"s, sto_t{ fnc_call{{"foo"s}, {}}, {} });
+	parse_check_block("<= foo(qq) =>"sv, 0, sto_t{ fnc_call{{"foo"s}, {var_name{"qq"s}}}, {} });
+	parse_check_block("<= foo(q.q) =>"sv, 0, sto_t{ fnc_call{{"foo"s}, {var_name{"q"s, "q"s}}}, {} });
+	parse_check_block("<= foo(qq, q.q) =>"sv, 0, sto_t{ fnc_call{{"foo"s}, {var_name{"qq"s}, var_name{"q"s, "q"s}}}, {} });
+	parse_check_block("<= foo('qq') =>"sv, 0, sto_t{ fnc_call{{"foo"s}, {"qq"s}}, {} });
 }
 BOOST_AUTO_TEST_CASE(filters)
 {
@@ -108,12 +108,12 @@ BOOST_AUTO_TEST_CASE(filters)
 	using sto_t = cppjinja::st_out<std::string>;
 	using fnc_call = cppjinja::fnc_call<std::string>;
 
-	parse_check_block("<= foo() | filter =>"sv, 0, sto_t{ fnc_call{"foo"s, {}}, {var_name{"filter"s}} });
-	parse_check_block("<= foo(qq)|f1|f2=>"sv, 0, sto_t{ fnc_call{"foo"s, {var_name{"qq"s}}}, {var_name{"f1"s},var_name{"f2"s}} });
+	parse_check_block("<= foo() | filter =>"sv, 0, sto_t{ fnc_call{{"foo"s}, {}}, {var_name{"filter"s}} });
+	parse_check_block("<= foo(qq)|f1|f2=>"sv, 0, sto_t{ fnc_call{{"foo"s}, {var_name{"qq"s}}}, {var_name{"f1"s},var_name{"f2"s}} });
 	parse_check_block("text<= 'q'|f =>"sv, 0, "text"s, sto_t{ "q"s, {var_name{"f"s}} });
-	parse_check_block("<= 'q'|f() =>"sv, 0, sto_t{ "q"s, {fnc_call{"f",{}}} });
-	parse_check_block("<= 'q'|f('q') =>"sv, 0, sto_t{ "q"s, {fnc_call{"f",{"q"s}}} });
-	parse_check_block("<= 'q'|f('q',q) =>"sv, 0, sto_t{ "q"s, {fnc_call{"f",{"q"s,var_name{"q"s}}}} });
+	parse_check_block("<= 'q'|f() =>"sv, 0, sto_t{ "q"s, {fnc_call{{"f"s},{}}} });
+	parse_check_block("<= 'q'|f('q') =>"sv, 0, sto_t{ "q"s, {fnc_call{{"f"s},{"q"s}}} });
+	parse_check_block("<= 'q'|a.f('q',q) =>"sv, 0, sto_t{ "q"s, {fnc_call{{"a"s,"f"s},{"q"s,var_name{"q"s}}}} });
 }
 BOOST_AUTO_TEST_SUITE_END() // output
 BOOST_AUTO_TEST_SUITE(blocks)

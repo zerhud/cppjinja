@@ -159,7 +159,7 @@ const auto quoted_string_def =
 
 const x3::rule<struct fnc_call_tag, fnc_call<gram_traits::types::out_string_t>> fnc_call_rule = "fnc_call";
 const auto fnc_call_rule_def = x3::skip(gram_traits::space)[
-	   single_var_name[op_ref_define]
+	   var_name_rule[op_ref_define]
 	>> x3::char_('(')
 	>> -((quoted_string[op_params_define] | var_name_rule[op_params_define] /*| fnc_call_rule[op_params_define]*/) % ',')
 	>> ')' ]
@@ -167,7 +167,7 @@ const auto fnc_call_rule_def = x3::skip(gram_traits::space)[
 
 const x3::rule<struct op_out, st_out<gram_traits::types::out_string_t>> op_out = "out_operator";
 const auto op_out_def =
-	  spec_symbols[op_out_is_start]
+	   spec_symbols[op_out_is_start]
 	>> x3::skip(gram_traits::space)[
 	     ( fnc_call_rule[op_ref_define] | quoted_string[op_ref_define] | var_name_rule[op_ref_define] )
 	  >> -( '|' >> (fnc_call_rule[op_params_define] | var_name_rule[op_params_define]) % '|')

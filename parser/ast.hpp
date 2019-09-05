@@ -24,7 +24,6 @@ using var_name = std::vector<std::string>;
 enum class comparator{ eq, less, more, less_eq, more_eq };
 enum class block_ref { no, name, op_if };
 
-
 template<typename String> struct fnc_call;
 template<typename String> struct b_block;
 
@@ -33,7 +32,7 @@ using value_term = std::variant<String, var_name, boost::recursive_wrapper<fnc_c
 
 template<typename String>
 struct fnc_call {
-	std::string ref;
+	var_name ref;
 	std::vector<value_term<String>> params;
 };
 
