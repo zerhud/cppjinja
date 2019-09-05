@@ -45,6 +45,7 @@ target_include_directories(parser PRIVATE "${Boost_INCLUDE_DIRS}" PUBLIC "${conf
 target_sources_local(parser "grammar.hpp" "grammar.cpp" "parser/")
 target_sources_local(parser "helpers.hpp" "helpers.cpp" "parser/")
 target_sources_local(parser "ast.hpp" "ast.cpp" "parser/")
+target_sources_local(parser "debug_operators.hpp" "debug_operators.cpp" "parser/")
 
 # some files may slow down system when compiling..
 if(LOW_MEMORY AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")

@@ -57,6 +57,13 @@ struct setter{
 	template<typename Ctx> void operator()(Ctx& c){_val(c) = value;}
 };
 
+template<typename T>
+struct setter_field {
+	T& field;
+	explicit setter_field(T& f) : field(f) {}
+	template<typename Ctx> void operator()(Ctx& c){field = _attr(c);}
+};
+
 auto block_add_content = [](auto& ctx) {
 	block_t& b = _val(ctx);
 	gram_traits::concat(add_and_get<block_t, gram_traits::types::out_string_t>(b), _attr(ctx));

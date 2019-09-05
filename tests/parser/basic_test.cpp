@@ -14,6 +14,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "parser/grammar.hpp"
+#include "parser/debug_operators.hpp"
 
 namespace std { 
 	inline std::ostream& operator<<(std::ostream& out, const std::wstring& value) 
