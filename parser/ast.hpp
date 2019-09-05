@@ -21,7 +21,7 @@ namespace cppjinja {
 
 using var_name = std::vector<std::string>;
 
-enum class comparator{ eq, less, more, less_eq, more_eq };
+enum class comparator{ no, eq, less, more, less_eq, more_eq };
 enum class block_ref { no, name, op_if };
 
 template<typename String> struct fnc_call;
@@ -50,7 +50,7 @@ struct st_for {
 
 template<typename String>
 struct st_if {
-	comparator op;
+	comparator op=comparator::no;
 	value_term<String> left, right;
 };
 

@@ -15,6 +15,7 @@ std::ostream& cppjinja::operator << (std::ostream& out, comparator obj)
 	else if(obj==comparator::more) out << ">";
 	else if(obj==comparator::less_eq) out << "=<";
 	else if(obj==comparator::more_eq) out << ">=";
+	else if(obj==comparator::no) ;
 	else assert(false);
 	return out;
 }

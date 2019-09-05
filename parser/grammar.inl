@@ -190,13 +190,22 @@ const auto comparator_r_def =
 	| (x3::lit("=<") | x3::lit("leq"))[setter(comparator::less_eq)]
 ;
 
+const x3::rule<struct op_for, st_for<gram_traits::types::out_string_t>> op_for = "op_for";
+const auto op_for_def =
+	   *gram_traits::space
+	>> x3::lit("for") >> +gram_traits::space
+	>> (single_var_name[op_params_define] % ',') >> +gram_traits::space
+	>> x3::lit("in") >> +gram_traits::space
+	>> value_term_r[op_ref_define] >> *gram_traits::space
+	;
+
 const x3::rule<struct op_if, st_if<gram_traits::types::out_string_t>> op_if = "op_if";
 const auto op_if_def =
 	   *gram_traits::space
 	>> x3::lit("if") >> +gram_traits::space
-	>> value_term_r[([](auto&c){_val(c).left=_attr(c);})] >> +gram_traits::space
+	>> value_term_r[([](auto&c){_val(c).left=_attr(c);})] >> -(+gram_traits::space
 	>> comparator_r[([](auto&c){_val(c).op=_attr(c);})] >> +gram_traits::space
-	>> value_term_r[([](auto&c){_val(c).right=_attr(c);})]
+	>> value_term_r[([](auto&c){_val(c).right=_attr(c);})])
 	>> *gram_traits::space
 	;
 
