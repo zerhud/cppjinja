@@ -57,11 +57,32 @@ struct setter{
 	template<typename Ctx> void operator()(Ctx& c){_val(c) = value;}
 };
 
+template<typename>
+struct is_ref_wrapper : std::false_type {};
+template<typename T>
+struct is_ref_wrapper<std::reference_wrapper<T>> : std::true_type {};
+
+template<typename>
+struct is_req_wrapper : std::false_type {};
+template<typename T>
+struct is_req_wrapper<boost::recursive_wrapper<T>> : std::true_type {};
+
 template<typename T>
 struct setter_field {
 	T& field;
 	explicit setter_field(T& f) : field(f) {}
-	template<typename Ctx> void operator()(Ctx& c){field = _attr(c);}
+
+	template<typename Ctx>
+	std::enable_if_t<is_ref_wrapper<T>::value>
+	operator()(Ctx& c){field.get() = _attr(c);}
+
+	template<typename Ctx>
+	std::enable_if_t<is_req_wrapper<T>::value>
+	operator()(Ctx& c){field.get() = _attr(c);}
+
+	template<typename Ctx>
+	std::enable_if_t<!is_ref_wrapper<T>::value>
+	operator()(Ctx& c){field = _attr(c);}
 };
 
 auto block_add_content = [](auto& ctx) {
@@ -156,7 +177,6 @@ const x3::rule<struct free_text, gram_traits::types::out_string_t> free_text = "
 const auto free_text_def = +(gram_traits::char_[peq] >> (!(
 	  spec_symbols[op_out_is_start]
 	| spec_symbols[op_term_is_start]
-	| x3::lit(")))))")
 	))) >> gram_traits::char_
 ;
 

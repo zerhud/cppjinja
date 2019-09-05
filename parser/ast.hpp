@@ -43,8 +43,10 @@ struct st_out {
 	std::vector<std::variant<var_name,fnc_call<String>>> params;
 };
 
+template<typename String>
 struct st_for {
-
+	std::vector<var_name> params;
+	std::variant<var_name, fnc_call<String>> ref;
 };
 
 template<typename String>
