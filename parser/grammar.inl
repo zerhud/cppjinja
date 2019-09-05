@@ -137,6 +137,8 @@ auto op_term_check_end = [](auto& ctx) {
 	bool ok = false;
 	if(std::holds_alternative<st_if<str_t>>(*block.ref))
 		ok = val == "endif";
+	if(std::holds_alternative<st_for<str_t>>(*block.ref))
+		ok = val == "endfor";
 	_pass(ctx) = ok;
 };
 
@@ -214,7 +216,7 @@ const x3::rule<struct block_r1, block_t> block_r1 = "block_r1";
 const x3::rule<struct block_tag, std::reference_wrapper<gram_traits::types::block_t>> block = "block";
 const auto block_r1_def =
 	   (spec_symbols[op_term_is_start]
-	>> (op_if[block_set_ref]))
+	>> (op_if[block_set_ref] | op_for[block_set_ref]))
 	>  spec_symbols[op_term_is_end]
 	>> block_content_r[([](auto&c){_val(c).cnt=_attr(c);})]
 	>> x3::skip(gram_traits::space)[
@@ -248,6 +250,7 @@ BOOST_SPIRIT_DEFINE(block_content_r)
 BOOST_SPIRIT_DEFINE(op_if)
 BOOST_SPIRIT_DEFINE(comparator_r)
 BOOST_SPIRIT_DEFINE(value_term_r)
+BOOST_SPIRIT_DEFINE(op_for)
 
 #ifndef FILE_INLINING
 } // namespace cppjinja::deubg

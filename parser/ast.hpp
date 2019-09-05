@@ -44,8 +44,8 @@ struct st_out {
 
 template<typename String>
 struct st_for {
-	std::vector<var_name> params;
-	std::variant<var_name, fnc_call<String>> ref;
+	std::vector<std::string> params;
+	value_term<String> ref;
 };
 
 template<typename String>
@@ -72,7 +72,7 @@ using block_content = std::vector< std::variant<
 
 template<typename String>
 struct b_block {
-	std::optional<std::variant<String,st_if<String>>> ref;
+	std::optional<std::variant<String,st_if<String>,st_for<String>>> ref;
 	block_content<String> cnt;
 };
 

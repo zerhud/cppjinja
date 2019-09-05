@@ -96,8 +96,8 @@ template<typename String>
 std::ostream& operator << (std::ostream& out, const st_out<String>& obj)
 {
 	auto printer = overloaded{
-		[&out](const std::wstring&){out << "[wstring content]";},
-		[&out](const auto& i){out << i;}
+		  [&out](const std::wstring&){out << "[wstring content]";}
+		, [&out](const auto& i){out << i;}
 	};
 	std::visit(printer, obj.ref);
 	for(auto& i:obj.params) {
@@ -108,6 +108,23 @@ std::ostream& operator << (std::ostream& out, const st_out<String>& obj)
 }
 
 
+
+DEFINE_OPERATORS_STRING(st_for, left.params, right.params, left.ref, right.ref)
+template<typename String>
+std::ostream& operator << (std::ostream& out, const st_for<String>& obj)
+{
+	auto printer = overloaded{
+		  [&out](const std::wstring&){out << "[wstring content]";}
+		, [&out](const boost::recursive_wrapper<fnc_call<String>>& i){out << i.get();}
+		, [&out](const auto& i){out << i;}
+	};
+
+	out << "for ";
+	for(auto& f:obj.params) out << f << ", ";
+	out << ": ";
+	std::visit(printer, obj.ref);
+	return out;
+}
 
 DEFINE_OPERATORS_STRING(st_if, left.op, right.op, left.left, right.left, left.right, right.right)
 template<typename String>

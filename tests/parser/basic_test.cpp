@@ -147,4 +147,18 @@ BOOST_AUTO_TEST_CASE(no_comparator)
 	parse_check_block( "<%if a.is.b %>kuku<%endif%>"sv, 0, result);
 }
 BOOST_AUTO_TEST_SUITE_END() // op_if
+BOOST_AUTO_TEST_SUITE(op_for)
+BOOST_AUTO_TEST_CASE(simple)
+{
+	using cppjinja::s_block;
+	using cppjinja::comparator;
+	using cppjinja::var_name;
+	using st_for = cppjinja::st_for<std::string>;
+
+	auto result = boost::recursive_wrapper(s_block{st_for{{var_name{"a"s}}, var_name{"q"s}}, {"kuku"s}});
+	parse_check_block( "<%for a in q%>kuku<%endfor%>"sv, 0, result);
+	parse_check_block( "<%for a in q %>kuku<%endfor%>"sv, 0, result);
+	parse_check_block( "<% for a in q %>kuku<%endfor%>"sv, 0, result);
+}
+BOOST_AUTO_TEST_SUITE_END() // op_for
 BOOST_AUTO_TEST_SUITE_END() // blocks
