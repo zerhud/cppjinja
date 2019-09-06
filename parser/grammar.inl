@@ -185,7 +185,8 @@ const auto raw_text_def = +(gram_traits::char_[peq] >> (!(
 ;
 
 const x3::rule<struct free_text, gram_traits::types::out_string_t> free_text = "free_text";
-const auto free_text_def = +(gram_traits::char_[peq] >> (!(
+const auto free_text_def = 
+	+(gram_traits::char_[peq] >> (!(
 	  spec_symbols[op_out_is_start]
 	| spec_symbols[op_term_is_start]
 	))) >> gram_traits::char_
@@ -239,7 +240,7 @@ const auto block_r1_def =
 	   (spec_symbols[op_term_is_start]
 	>> (op_if[block_set_ref] | op_for[block_set_ref] | op_raw[block_set_ref]))
 	>  spec_symbols[op_term_is_end]
-	>> (raw_text[cnt_if_raw] | block_content_r[([](auto&c){_val(c).cnt=_attr(c);})])
+	>> -(raw_text[cnt_if_raw] | block_content_r[([](auto&c){_val(c).cnt=_attr(c);})])
 	>> x3::skip(gram_traits::space)[
 		   spec_symbols[op_term_is_start]
 		>> (+x3::alnum)[op_term_check_end]
