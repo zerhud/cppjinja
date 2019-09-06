@@ -91,6 +91,8 @@ std::ostream& operator << (std::ostream& out, const fnc_call<String>& obj)
 }
 
 
+DEFINE_OPERATORS(st_raw, &left, &right)
+
 DEFINE_OPERATORS_STRING(st_out, left.ref, right.ref, left.params, right.params)
 template<typename String>
 std::ostream& operator << (std::ostream& out, const st_out<String>& obj)

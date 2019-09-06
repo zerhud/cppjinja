@@ -36,6 +36,8 @@ struct fnc_call {
 	std::vector<value_term<String>> params;
 };
 
+struct st_raw {};
+
 template<typename String>
 struct st_out {
 	std::variant<String,var_name,fnc_call<String>> ref;
@@ -72,7 +74,7 @@ using block_content = std::vector< std::variant<
 
 template<typename String>
 struct b_block {
-	std::optional<std::variant<String,st_if<String>,st_for<String>>> ref;
+	std::optional<std::variant<String,st_raw,st_if<String>,st_for<String>>> ref;
 	block_content<String> cnt;
 };
 

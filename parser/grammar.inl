@@ -139,6 +139,8 @@ auto op_term_check_end = [](auto& ctx) {
 		ok = val == "endif";
 	if(std::holds_alternative<st_for<str_t>>(*block.ref))
 		ok = val == "endfor";
+	if(std::holds_alternative<st_raw>(*block.ref))
+		ok = val == "endraw";
 	_pass(ctx) = ok;
 };
 
@@ -174,6 +176,13 @@ const auto op_out_def =
 	     ( fnc_call_rule[op_ref_define] | quoted_string[op_ref_define] | var_name_rule[op_ref_define] )
 	  >> -( '|' >> (fnc_call_rule[op_params_define] | var_name_rule[op_params_define]) % '|')
 	>> spec_symbols[op_out_is_end] ] ;
+
+
+const x3::rule<struct raw_text, gram_traits::types::out_string_t> raw_text = "raw_text";
+const auto raw_text_def = +(gram_traits::char_[peq] >> (!(
+	spec_symbols[op_term_is_start] >> *gram_traits::space >> x3::lit("endraw") >> *gram_traits::space >> spec_symbols[op_term_is_end]
+	))) >> gram_traits::char_
+;
 
 const x3::rule<struct free_text, gram_traits::types::out_string_t> free_text = "free_text";
 const auto free_text_def = +(gram_traits::char_[peq] >> (!(
@@ -211,14 +220,26 @@ const auto op_if_def =
 	>> *gram_traits::space
 	;
 
+auto cnt_if_raw = [](auto& ctx){
+	auto& ref = _val(ctx).ref;
+	if(!ref || !std::holds_alternative<st_raw>(*ref)) {
+		_pass(ctx)=false;
+		return;
+	}
+
+	_val(ctx).cnt.emplace_back(_attr(ctx));
+};
+const x3::rule<struct op_raw, st_raw> op_raw = "op_raw";
+const auto op_raw_def = *gram_traits::space[nop] >> x3::lit("raw") >> *gram_traits::space[nop];
+
 const x3::rule<struct block_content_tag, block_content<gram_traits::types::out_string_t>> block_content_r = "block_content";
 const x3::rule<struct block_r1, block_t> block_r1 = "block_r1";
 const x3::rule<struct block_tag, std::reference_wrapper<gram_traits::types::block_t>> block = "block";
 const auto block_r1_def =
 	   (spec_symbols[op_term_is_start]
-	>> (op_if[block_set_ref] | op_for[block_set_ref]))
+	>> (op_if[block_set_ref] | op_for[block_set_ref] | op_raw[block_set_ref]))
 	>  spec_symbols[op_term_is_end]
-	>> block_content_r[([](auto&c){_val(c).cnt=_attr(c);})]
+	>> (raw_text[cnt_if_raw] | block_content_r[([](auto&c){_val(c).cnt=_attr(c);})])
 	>> x3::skip(gram_traits::space)[
 		   spec_symbols[op_term_is_start]
 		>> (+x3::alnum)[op_term_check_end]
@@ -251,6 +272,8 @@ BOOST_SPIRIT_DEFINE(op_if)
 BOOST_SPIRIT_DEFINE(comparator_r)
 BOOST_SPIRIT_DEFINE(value_term_r)
 BOOST_SPIRIT_DEFINE(op_for)
+BOOST_SPIRIT_DEFINE(op_raw)
+BOOST_SPIRIT_DEFINE(raw_text)
 
 #ifndef FILE_INLINING
 } // namespace cppjinja::deubg

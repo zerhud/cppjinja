@@ -25,3 +25,10 @@ std::ostream& cppjinja::operator << (std::ostream& out, const cppjinja::var_name
 	for(auto& i:obj) out << i << '.';
 	return out;
 }
+
+std::ostream& cppjinja::operator << (std::ostream& out, const st_raw& obj)
+{
+	out << "[raw " << &obj << ']';
+	return out;
+}
+

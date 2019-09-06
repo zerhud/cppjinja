@@ -12,6 +12,8 @@
 #include <iostream>
 #include <sstream>
 #include <boost/test/unit_test.hpp>
+#include <boost/test/data/test_case.hpp>
+#include <boost/test/data/monomorphic.hpp>
 
 #include "parser/grammar.hpp"
 #include "parser/debug_operators.hpp"
@@ -48,8 +50,11 @@ void check_block(const Obj& obj, std::size_t ind, const Val& val, const Vals&...
 template<typename... Vals>
 void parse_check_block(std::string_view data, std::size_t ind, const Vals&... vals)
 {
-	BOOST_TEST_CONTEXT("Data was " << data)
-	    check_block(cppjinja::parse(data), ind, vals...);
+	BOOST_TEST_CONTEXT("Data was " << data) {
+		cppjinja::s_block bl;
+		BOOST_CHECK_NO_THROW(bl=cppjinja::parse(data));
+		check_block(bl, ind, vals...);
+	}
 }
 
 BOOST_AUTO_TEST_CASE(just_str)
@@ -148,17 +153,40 @@ BOOST_AUTO_TEST_CASE(no_comparator)
 }
 BOOST_AUTO_TEST_SUITE_END() // op_if
 BOOST_AUTO_TEST_SUITE(op_for)
-BOOST_AUTO_TEST_CASE(simple)
+BOOST_DATA_TEST_CASE(
+	  simple
+	,   boost::unit_test::data::make("kuku"s, ""s, "a"s, "aa"s)
+	  * boost::unit_test::data::make("for a in q"s, "for a in q "s, " for a in q "s)
+	  * boost::unit_test::data::make("endfor"s, "endfor "s, " endfor "s)
+	, text, start, finish )
 {
 	using cppjinja::s_block;
-	using cppjinja::comparator;
 	using cppjinja::var_name;
 	using st_for = cppjinja::st_for<std::string>;
 
-	auto result = boost::recursive_wrapper(s_block{st_for{{var_name{"a"s}}, var_name{"q"s}}, {"kuku"s}});
-	parse_check_block( "<%for a in q%>kuku<%endfor%>"sv, 0, result);
-	parse_check_block( "<%for a in q %>kuku<%endfor%>"sv, 0, result);
-	parse_check_block( "<% for a in q %>kuku<%endfor%>"sv, 0, result);
+	std::string data = "<%"s + start + "%>"s + text + "<%"s + finish + "%>"s;
+	auto result = boost::recursive_wrapper(s_block{st_for{{var_name{"a"s}}, var_name{"q"s}}, {text}});
+	parse_check_block( data, 0, result);
 }
 BOOST_AUTO_TEST_SUITE_END() // op_for
+BOOST_DATA_TEST_CASE(
+	  raw
+	,   boost::unit_test::data::make("kuku"s, "kuku<<"s, "kuku<%if a%>"s, ""s, "a", "aa"s)
+	  * boost::unit_test::data::make("<% raw %>"s, "<% raw%>"s, "<%raw %>"s, "<%raw%>"s)
+	  * boost::unit_test::data::make("<% endraw %>"s, "<% endraw%>"s, "<%endraw %>"s, "<%endraw%>"s)
+	, text, start, finish )
+{
+	using cppjinja::st_raw;
+	using cppjinja::s_block;
+	using cppjinja::parse;
+
+	std::string data = start + text + finish;
+	BOOST_TEST_CONTEXT("Data was" << data) {
+		s_block bl;
+		BOOST_REQUIRE_NO_THROW(bl = parse(data));
+		auto& rb = std::get<boost::recursive_wrapper<s_block>>(bl.cnt[0]);
+		BOOST_REQUIRE(std::holds_alternative<std::string>(rb.get().cnt[0]));
+		BOOST_CHECK_EQUAL(std::get<std::string>(rb.get().cnt[0]), text);
+	}
+}
 BOOST_AUTO_TEST_SUITE_END() // blocks
