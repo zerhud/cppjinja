@@ -123,19 +123,33 @@ BOOST_AUTO_TEST_CASE(filters)
 BOOST_AUTO_TEST_SUITE_END() // output
 BOOST_AUTO_TEST_SUITE(blocks)
 BOOST_AUTO_TEST_SUITE(op_if)
-BOOST_AUTO_TEST_CASE(simple)
+BOOST_DATA_TEST_CASE(
+	  simple
+	,   boost::unit_test::data::make("kuku"s, ""s, "a"s, "aa"s, "abc"s)
+	  * boost::unit_test::data::make("if a is b"s, " if a is b"s, " if a is b "s)
+	  * boost::unit_test::data::make("endif"s, "endif "s, " endif "s)
+	, text, start, finish )
 {
 	using cppjinja::s_block;
 	using cppjinja::comparator;
 	using cppjinja::var_name;
 	using st_if = cppjinja::st_if<std::string>;
 
-	auto result = boost::recursive_wrapper(s_block{st_if{comparator::eq, var_name{"a"s}, var_name{"b"s}}, {"kuku"s}});
-	parse_check_block( "<%if a is b%>kuku<%endif%>"sv, 0, result);
-	parse_check_block( "<% if a is b%>kuku<%endif%>"sv, 0, result);
-	parse_check_block( "<% if a is b %>kuku<% endif %>"sv, 0, result);
-	BOOST_CHECK_THROW(cppjinja::parse("<% if a is b %>kuku<% %>"sv), std::exception);
-	BOOST_CHECK_THROW(cppjinja::parse("<% if a is b %>kuku<% kuku %>"sv), std::exception);
+	std::string data = "<%"s + start + "%>"s + text + "<%"s + finish + "%>"s;
+	auto result = boost::recursive_wrapper(s_block{st_if{comparator::eq, var_name{"a"s}, var_name{"b"s}}, {text}});
+	if(text.empty()) result.get().cnt.clear();
+
+	parse_check_block(data, 0, result);
+}
+BOOST_DATA_TEST_CASE(
+	  errors
+	,   boost::unit_test::data::make("kuku"s, ""s, "a"s, "aa"s, "abc"s)
+	  * boost::unit_test::data::make("if a is b"s, " if a is"s)
+	  * boost::unit_test::data::make(""s, "kuku"s, " endfor "s)
+	, text, start, finish )
+{
+	std::string data = "<%"s + start + "%>"s + text + "<%"s + finish + "%>"s;
+	BOOST_CHECK_THROW(cppjinja::parse(data), std::exception);
 }
 BOOST_AUTO_TEST_CASE(no_comparator)
 {
@@ -153,19 +167,9 @@ BOOST_AUTO_TEST_CASE(no_comparator)
 }
 BOOST_AUTO_TEST_SUITE_END() // op_if
 BOOST_AUTO_TEST_SUITE(op_for)
-BOOST_AUTO_TEST_CASE(empty_body)
-{
-	using cppjinja::s_block;
-	using cppjinja::var_name;
-	using st_for = cppjinja::st_for<std::string>;
-
-	std::string data = "<% for a in q%>kuku<% endif %>"s;
-	auto result = boost::recursive_wrapper(s_block{st_for{{var_name{"a"s}}, var_name{"q"s}}, {"kuku"s}});
-	parse_check_block( data, 0, result);
-}
 BOOST_DATA_TEST_CASE(
 	  simple
-	,   boost::unit_test::data::make("kuku"s, ""s)//""s, "a"s, "aa"s)
+	,   boost::unit_test::data::make("kuku"s, ""s, "a"s, "aa"s, "abc"s)
 	  * boost::unit_test::data::make("for a in q"s, "for a in q "s, " for a in q "s)
 	  * boost::unit_test::data::make("endfor"s, "endfor "s, " endfor "s)
 	, text, start, finish )
@@ -176,7 +180,8 @@ BOOST_DATA_TEST_CASE(
 
 	std::string data = "<%"s + start + "%>"s + text + "<%"s + finish + "%>"s;
 	auto result = boost::recursive_wrapper(s_block{st_for{{var_name{"a"s}}, var_name{"q"s}}, {text}});
-	//parse_check_block( data, 0, result);
+	if(text.empty()) result.get().cnt.clear();
+	parse_check_block( data, 0, result);
 }
 BOOST_AUTO_TEST_SUITE_END() // op_for
 BOOST_DATA_TEST_CASE(
@@ -193,10 +198,13 @@ BOOST_DATA_TEST_CASE(
 	std::string data = start + text + finish;
 	BOOST_TEST_CONTEXT("Data was" << data) {
 		s_block bl;
-		//BOOST_REQUIRE_NO_THROW(bl = parse(data));
-		//auto& rb = std::get<boost::recursive_wrapper<s_block>>(bl.cnt[0]);
-		//BOOST_REQUIRE(std::holds_alternative<std::string>(rb.get().cnt[0]));
-		//BOOST_CHECK_EQUAL(std::get<std::string>(rb.get().cnt[0]), text);
+		BOOST_REQUIRE_NO_THROW(bl = parse(data));
+		auto& rb = std::get<boost::recursive_wrapper<s_block>>(bl.cnt[0]);
+		if(text.empty())  BOOST_CHECK(rb.get().cnt.empty());
+		else {
+			BOOST_REQUIRE(std::holds_alternative<std::string>(rb.get().cnt[0]));
+			BOOST_CHECK_EQUAL(std::get<std::string>(rb.get().cnt[0]), text);
+		}
 	}
 }
 BOOST_AUTO_TEST_SUITE_END() // blocks

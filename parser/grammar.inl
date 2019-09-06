@@ -148,7 +148,7 @@ auto op_ref_define = [](auto& ctx) { _val(ctx).ref = _attr(ctx); };
 auto op_params_define = [](auto& ctx) { _val(ctx).params.emplace_back(_attr(ctx)); };
 
 const x3::rule<struct spec_symbols, gram_traits::types::out_string_t> spec_symbols = "spec_symbols";
-const auto spec_symbols_def = +gram_traits::char_("!#$%&()*+,-./:;<=>?@[\\]^_`{|}~");
+const auto spec_symbols_def = x3::repeat(2)[gram_traits::char_("!#$%&()*+,-./:;<=>?@[\\]^_`{|}~")];
 
 const x3::rule<struct single_var_name, std::string> single_var_name = "single_var_name";
 const auto single_var_name_def = gram_traits::char_("A-Za-z_") >> *gram_traits::char_("0-9A-Za-z_");
@@ -186,7 +186,7 @@ const auto raw_text_def = +(gram_traits::char_[peq] >> (!(
 
 const x3::rule<struct free_text, gram_traits::types::out_string_t> free_text = "free_text";
 const auto free_text_def = 
-	+(gram_traits::char_[peq] >> (!(
+	*(gram_traits::char_[peq] >> (!(
 	  spec_symbols[op_out_is_start]
 	| spec_symbols[op_term_is_start]
 	))) >> gram_traits::char_
