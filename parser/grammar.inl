@@ -117,6 +117,7 @@ auto block_add_op = [](auto& ctx) {block_add_op_rw(_val(ctx),std::move(_attr(ctx
 auto block_set_ref = [](auto& ctx) {block_set_ref_rw(_val(ctx),std::move(_attr(ctx)));};
 auto def_cnt = [](auto&c){_val(c).cnt=_attr(c);};
 auto add_cnt = [](auto&c){_val(c).cnt+=_attr(c);};
+auto clear_cnt = [](auto&c){_val(c).cnt.clear();};
 
 auto exd = [](auto& ctx){ return x3::get<parser_data>(ctx); };
 auto cmp = [](const auto& arg, auto& ctx){ _pass(ctx) = gram_traits::compare(_attr(ctx), arg); };
@@ -175,10 +176,12 @@ const auto fnc_call_rule_def = x3::skip(gram_traits::space)[
 
 const x3::rule<struct op_comment, st_comment<gram_traits::types::out_string_t>> op_comment = "comment";
 const auto op_comment_def =
-	   spec_symbols[op_comment_is_start]
-	>> *(gram_traits::char_[add_cnt] >> !spec_symbols[op_comment_is_end])
+	  (spec_symbols[op_comment_is_start] >> spec_symbols[op_comment_is_end])
+	| (spec_symbols[op_comment_is_start]
+	>> +(gram_traits::char_[add_cnt] >> !spec_symbols[op_comment_is_end])
 	>> gram_traits::char_
-	>> spec_symbols[op_comment_is_end]
+	>> spec_symbols[op_comment_is_end])
+	| (spec_symbols[op_comment_is_start] >> gram_traits::char_[clear_cnt][add_cnt] >> spec_symbols[op_comment_is_end])
 ;
 
 const x3::rule<struct op_out, st_out<gram_traits::types::out_string_t>> op_out = "out_operator";

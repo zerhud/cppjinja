@@ -32,13 +32,13 @@ namespace tests {
 
 std::string random_string()
 {
-	static std::string alphabet = "abcdefgh";
+	static std::string alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()-=+/\\?}{[]";
 	std::random_device rdev;
 	std::mt19937 gen(rdev());
 	std::uniform_int_distribution dis(0, static_cast<int>(alphabet.size()-1));
 
 	std::string ret;
-	std::int64_t size = dis(gen)*10;
+	std::int64_t size = dis(gen);
 	while(size--) ret += alphabet.at(static_cast<std::size_t>(dis(gen)));
 
 	return ret;
@@ -234,8 +234,16 @@ BOOST_AUTO_TEST_CASE(comment)
 	using st_if = cppjinja::st_if<std::string>;
 	using st_comment = cppjinja::st_comment<std::string>;
 
-	auto rndstr = tests::random_string();
+	std::string rndstr = ""s;
 	auto result = boost::recursive_wrapper(s_block{st_if{comparator::no, var_name{"a"s}, ""s}, {st_comment{rndstr}}});
+	parse_check_block("<% if a%><#" + rndstr + "#><%endif%>", 0, result);
+
+	rndstr = "a"s;
+	result = boost::recursive_wrapper(s_block{st_if{comparator::no, var_name{"a"s}, ""s}, {st_comment{rndstr}}});
+	parse_check_block("<% if a%><#" + rndstr + "#><%endif%>", 0, result);
+
+	rndstr = tests::random_string();
+	result = boost::recursive_wrapper(s_block{st_if{comparator::no, var_name{"a"s}, ""s}, {st_comment{rndstr}}});
 	parse_check_block("<% if a%><#" + rndstr + "#><%endif%>", 0, result);
 }
 BOOST_AUTO_TEST_SUITE_END() // blocks
