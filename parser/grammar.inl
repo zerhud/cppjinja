@@ -115,6 +115,8 @@ static struct block_set_ref_rw_t {
 
 auto block_add_op = [](auto& ctx) {block_add_op_rw(_val(ctx),std::move(_attr(ctx)));};
 auto block_set_ref = [](auto& ctx) {block_set_ref_rw(_val(ctx),std::move(_attr(ctx)));};
+auto def_cnt = [](auto&c){_val(c).cnt=_attr(c);};
+auto add_cnt = [](auto&c){_val(c).cnt+=_attr(c);};
 
 auto exd = [](auto& ctx){ return x3::get<parser_data>(ctx); };
 auto cmp = [](const auto& arg, auto& ctx){ _pass(ctx) = gram_traits::compare(_attr(ctx), arg); };
@@ -123,6 +125,8 @@ auto op_out_is_start = [](auto& ctx) { cmp(exd(ctx).output.b, ctx); };
 auto op_out_is_end = [](auto& ctx) { cmp(exd(ctx).output.e, ctx); };
 auto op_term_is_start = [](auto& ctx) { cmp(exd(ctx).term.b, ctx); };
 auto op_term_is_end = [](auto& ctx) { cmp(exd(ctx).term.e, ctx); };
+auto op_comment_is_start = [](auto& ctx) { cmp(exd(ctx).cmt.b, ctx); };
+auto op_comment_is_end = [](auto& ctx) { cmp(exd(ctx).cmt.e, ctx); };
 auto op_term_check_end = [](auto& ctx) {
 	using str_t = gram_traits::types::out_string_t;
 
@@ -167,6 +171,14 @@ const auto fnc_call_rule_def = x3::skip(gram_traits::space)[
 	>> x3::char_('(')
 	>> -((quoted_string[op_params_define] | var_name_rule[op_params_define] /*| fnc_call_rule[op_params_define]*/) % ',')
 	>> ')' ]
+;
+
+const x3::rule<struct op_comment, st_comment<gram_traits::types::out_string_t>> op_comment = "comment";
+const auto op_comment_def =
+	   spec_symbols[op_comment_is_start]
+	>> *(gram_traits::char_[add_cnt] >> !spec_symbols[op_comment_is_end])
+	>> gram_traits::char_
+	>> spec_symbols[op_comment_is_end]
 ;
 
 const x3::rule<struct op_out, st_out<gram_traits::types::out_string_t>> op_out = "out_operator";
@@ -240,7 +252,7 @@ const auto block_r1_def =
 	   (spec_symbols[op_term_is_start]
 	>> (op_if[block_set_ref] | op_for[block_set_ref] | op_raw[block_set_ref]))
 	>  spec_symbols[op_term_is_end]
-	>> -(raw_text[cnt_if_raw] | block_content_r[([](auto&c){_val(c).cnt=_attr(c);})])
+	>> -(raw_text[cnt_if_raw] | block_content_r[def_cnt])
 	>> x3::skip(gram_traits::space)[
 		   spec_symbols[op_term_is_start]
 		>> (+x3::alnum)[op_term_check_end]
@@ -255,7 +267,7 @@ const auto block_def =
 	);
 const auto block_content_r_def =
 	*(
-	op_out[ block_add_op ] | block_r1[ block_add_op ] | free_text [ block_add_content_vec ]
+	op_out[ block_add_op ] | op_comment[block_add_op] | block_r1[ block_add_op ] | free_text [ block_add_content_vec ]
 	)
 ;
 
@@ -275,6 +287,7 @@ BOOST_SPIRIT_DEFINE(value_term_r)
 BOOST_SPIRIT_DEFINE(op_for)
 BOOST_SPIRIT_DEFINE(op_raw)
 BOOST_SPIRIT_DEFINE(raw_text)
+BOOST_SPIRIT_DEFINE(op_comment)
 
 #ifndef FILE_INLINING
 } // namespace cppjinja::deubg

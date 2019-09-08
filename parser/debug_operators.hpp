@@ -136,6 +136,14 @@ std::ostream& operator << (std::ostream& out, const st_if<String>& obj)
 	return out;
 }
 
+DEFINE_OPERATORS_STRING(st_comment, left.cnt, right.cnt)
+template<typename String>
+std::ostream& operator << (std::ostream& out, const st_comment<String>& obj)
+{
+	out << "comment: " << obj.cnt;
+	return out;
+}
+
 
 DEFINE_OPERATORS_STRING(b_block, left.ref, right.ref, left.cnt, right.cnt)
 template<typename String>

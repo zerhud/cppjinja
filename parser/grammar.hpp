@@ -21,6 +21,10 @@ struct parser_data {
 		std::string b= "<%";
 		std::string e= "%>";
 	} term;
+	struct {
+		std::string b="<#";
+		std::string e="#>";
+	} cmt;
 };
 
 b_block<std::string> parse(std::string_view data, parser_data env={});

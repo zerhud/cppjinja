@@ -64,11 +64,17 @@ struct st_call {
 
 };
 
+template<typename String>
+struct st_comment {
+	String cnt;
+};
+
 
 template<typename String>
 using block_content = std::vector< std::variant<
       String
     , st_out<String>
+    , st_comment<String>
     , boost::recursive_wrapper<b_block<String>>
 >>;//, st_for, st_if, st_set, st_call>;
 
