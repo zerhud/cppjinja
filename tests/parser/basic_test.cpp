@@ -29,10 +29,20 @@ namespace std {
 } // namespace std 
 
 namespace tests {
-
-std::string random_string()
+const std::string& rnd_data_string()
 {
 	static std::string alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()-=+/\\?}{[]";
+	return alphabet;
+}
+
+const std::string& rnd_data_alnum()
+{
+	static std::string alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	return alphabet;
+}
+
+std::string gen_random_string(const std::string& alphabet)
+{
 	std::random_device rdev;
 	std::mt19937 gen(rdev());
 	std::uniform_int_distribution dis(0, static_cast<int>(alphabet.size()-1));
@@ -44,10 +54,22 @@ std::string random_string()
 	return ret;
 }
 
+std::string random_string() { return gen_random_string(rnd_data_string()); }
+std::string random_alnum() { return gen_random_string(rnd_data_alnum()); }
+
+template<typename Ref, typename... Cnt>
+auto make_rblock(Ref&& ref, Cnt&&... cnt)
+{
+	using cppjinja::s_block;
+	using cnt_t = cppjinja::block_content<std::string>;
+	return boost::recursive_wrapper( s_block{std::move(ref), cnt_t{std::move(cnt)...}} );
+}
+
 } // namespace tests {
 
 using namespace std::literals;
 using cppjinja::parse;
+namespace ut = boost::unit_test;
 
 template<typename Obj, typename Val>
 void check_block(const Obj& obj, std::size_t ind, const Val& val)
@@ -143,9 +165,9 @@ BOOST_AUTO_TEST_SUITE(blocks)
 BOOST_AUTO_TEST_SUITE(op_if)
 BOOST_DATA_TEST_CASE(
 	  simple
-	,   boost::unit_test::data::make("kuku"s, ""s, "a"s, "aa"s, "abc"s)
-	  * boost::unit_test::data::make("if a is b"s, " if a is b"s, " if a is b "s)
-	  * boost::unit_test::data::make("endif"s, "endif "s, " endif "s)
+	,   ut::data::make("kuku"s, ""s, "a"s, "aa"s, "abc"s)
+	  * ut::data::make("if a is b"s, " if a is b"s, " if a is b "s)
+	  * ut::data::make("endif"s, "endif "s, " endif "s)
 	, text, start, finish )
 {
 	using cppjinja::s_block;
@@ -154,16 +176,16 @@ BOOST_DATA_TEST_CASE(
 	using st_if = cppjinja::st_if<std::string>;
 
 	std::string data = "<%"s + start + "%>"s + text + "<%"s + finish + "%>"s;
-	auto result = boost::recursive_wrapper(s_block{st_if{comparator::eq, var_name{"a"s}, var_name{"b"s}}, {text}});
+	auto result = tests::make_rblock(st_if{comparator::eq, var_name{"a"s}, var_name{"b"s}}, text);
 	if(text.empty()) result.get().cnt.clear();
 
 	parse_check_block(data, 0, result);
 }
 BOOST_DATA_TEST_CASE(
 	  errors
-	,   boost::unit_test::data::make("kuku"s, ""s, "a"s, "aa"s, "abc"s)
-	  * boost::unit_test::data::make("if a is b"s, " if a is"s)
-	  * boost::unit_test::data::make(""s, "kuku"s, " endfor "s)
+	,   ut::data::make("kuku"s, ""s, "a"s, "aa"s, "abc"s)
+	  * ut::data::make("if a is b"s, " if a is"s)
+	  * ut::data::make(""s, "kuku"s, " endfor "s)
 	, text, start, finish )
 {
 	std::string data = "<%"s + start + "%>"s + text + "<%"s + finish + "%>"s;
@@ -176,10 +198,10 @@ BOOST_AUTO_TEST_CASE(no_comparator)
 	using cppjinja::var_name;
 	using st_if = cppjinja::st_if<std::string>;
 
-	auto result = boost::recursive_wrapper(s_block{st_if{comparator::no, var_name{"a"s}, ""s}, {"kuku"s}});
+	auto result = tests::make_rblock(st_if{comparator::no, var_name{"a"s}, ""s}, "kuku"s);
 	parse_check_block( "<%if a%>kuku<%endif%>"sv, 0, result);
 	parse_check_block( "<%if a %>kuku<%endif%>"sv, 0, result);
-	result = boost::recursive_wrapper(s_block{st_if{comparator::no, var_name{"a"s,"is"s,"b"s}, ""s}, {"kuku"s}});
+	result = tests::make_rblock(st_if{comparator::no, var_name{"a"s,"is"s,"b"s}, ""s}, "kuku"s);
 	parse_check_block( "<%if a.is.b%>kuku<%endif%>"sv, 0, result);
 	parse_check_block( "<%if a.is.b %>kuku<%endif%>"sv, 0, result);
 }
@@ -187,9 +209,9 @@ BOOST_AUTO_TEST_SUITE_END() // op_if
 BOOST_AUTO_TEST_SUITE(op_for)
 BOOST_DATA_TEST_CASE(
 	  simple
-	,   boost::unit_test::data::make("kuku"s, ""s, "a"s, "aa"s, "abc"s)
-	  * boost::unit_test::data::make("for a in q"s, "for a in q "s, " for a in q "s)
-	  * boost::unit_test::data::make("endfor"s, "endfor "s, " endfor "s)
+	,   ut::data::make("kuku"s, ""s, "a"s, "aa"s, "abc"s)
+	  * ut::data::make("for a in q"s, "for a in q "s, " for a in q "s)
+	  * ut::data::make("endfor"s, "endfor "s, " endfor "s)
 	, text, start, finish )
 {
 	using cppjinja::s_block;
@@ -197,16 +219,16 @@ BOOST_DATA_TEST_CASE(
 	using st_for = cppjinja::st_for<std::string>;
 
 	std::string data = "<%"s + start + "%>"s + text + "<%"s + finish + "%>"s;
-	auto result = boost::recursive_wrapper(s_block{st_for{{var_name{"a"s}}, var_name{"q"s}}, {text}});
+	auto result = tests::make_rblock(st_for{{var_name{"a"s}}, var_name{"q"s}}, text);
 	if(text.empty()) result.get().cnt.clear();
 	parse_check_block( data, 0, result);
 }
 BOOST_AUTO_TEST_SUITE_END() // op_for
 BOOST_DATA_TEST_CASE(
 	  raw
-	,   boost::unit_test::data::make("kuku"s, "kuku<<"s, "kuku<%if a%>"s, ""s, "a", "aa"s)
-	  * boost::unit_test::data::make("<% raw %>"s, "<% raw%>"s, "<%raw %>"s, "<%raw%>"s)
-	  * boost::unit_test::data::make("<% endraw %>"s, "<% endraw%>"s, "<%endraw %>"s, "<%endraw%>"s)
+	,   ut::data::make("kuku"s, "kuku<<"s, "kuku<%if a%>"s, ""s, "a", "aa"s)
+	  * ut::data::make("<% raw %>"s, "<% raw%>"s, "<%raw %>"s, "<%raw%>"s)
+	  * ut::data::make("<% endraw %>"s, "<% endraw%>"s, "<%endraw %>"s, "<%endraw%>"s)
 	, text, start, finish )
 {
 	using cppjinja::st_raw;
@@ -225,7 +247,7 @@ BOOST_DATA_TEST_CASE(
 		}
 	}
 }
-BOOST_DATA_TEST_CASE( comment, boost::unit_test::data::make(""s, "s"s, "aa"s, tests::random_string()), text)
+BOOST_DATA_TEST_CASE( comment, ut::data::make(""s, "s"s, "aa"s, tests::random_string()), text)
 {
 	using cppjinja::s_block;
 	using cppjinja::comparator;
@@ -234,7 +256,17 @@ BOOST_DATA_TEST_CASE( comment, boost::unit_test::data::make(""s, "s"s, "aa"s, te
 	using st_if = cppjinja::st_if<std::string>;
 	using st_comment = cppjinja::st_comment<std::string>;
 
-	auto result = boost::recursive_wrapper(s_block{st_if{comparator::no, var_name{"a"s}, ""s}, {st_comment{text}}});
+	auto result = tests::make_rblock(st_if{comparator::no, var_name{"a"s}, ""s}, st_comment{text});
 	parse_check_block("<% if a%><#" + text + "#><%endif%>", 0, result);
+}
+BOOST_DATA_TEST_CASE(
+	  named_block
+	,   ut::data::make("a"s, "aa"s, tests::random_alnum())
+	  * ut::data::make(""s, "a", "ss"s, ",!#", tests::random_string())
+	, name, content )
+{
+	auto result = tests::make_rblock(name, content);
+	std::string data = "<%block "s + name + "%>"s + content + "<%endblock%>"s;
+	parse_check_block(data, 0, result);
 }
 BOOST_AUTO_TEST_SUITE_END() // blocks

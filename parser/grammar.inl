@@ -146,6 +146,8 @@ auto op_term_check_end = [](auto& ctx) {
 		ok = val == "endfor";
 	if(std::holds_alternative<st_raw>(*block.ref))
 		ok = val == "endraw";
+	if(std::holds_alternative<std::string>(*block.ref))
+		ok = val == "endblock";
 	_pass(ctx) = ok;
 };
 
@@ -253,7 +255,7 @@ const x3::rule<struct block_r1, block_t> block_r1 = "block_r1";
 const x3::rule<struct block_tag, std::reference_wrapper<gram_traits::types::block_t>> block = "block";
 const auto block_r1_def =
 	   (spec_symbols[op_term_is_start]
-	>> (op_if[block_set_ref] | op_for[block_set_ref] | op_raw[block_set_ref]))
+	>> (op_if[block_set_ref] | op_for[block_set_ref] | op_raw[block_set_ref] | (x3::lit("block") >> +gram_traits::space >> single_var_name[block_set_ref]) ))
 	>  spec_symbols[op_term_is_end]
 	>> -(raw_text[cnt_if_raw] | block_content_r[def_cnt])
 	>> x3::skip(gram_traits::space)[

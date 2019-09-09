@@ -76,11 +76,11 @@ using block_content = std::vector< std::variant<
     , st_out<String>
     , st_comment<String>
     , boost::recursive_wrapper<b_block<String>>
->>;//, st_for, st_if, st_set, st_call>;
+>>;
 
 template<typename String>
 struct b_block {
-	std::optional<std::variant<String,st_raw,st_if<String>,st_for<String>>> ref;
+	std::optional<std::variant<std::string,st_raw,st_if<String>,st_for<String>>> ref;
 	block_content<String> cnt;
 };
 
