@@ -225,7 +225,7 @@ BOOST_DATA_TEST_CASE(
 		}
 	}
 }
-BOOST_AUTO_TEST_CASE(comment)
+BOOST_DATA_TEST_CASE( comment, boost::unit_test::data::make(""s, "s"s, "aa"s, tests::random_string()), text)
 {
 	using cppjinja::s_block;
 	using cppjinja::comparator;
@@ -234,16 +234,7 @@ BOOST_AUTO_TEST_CASE(comment)
 	using st_if = cppjinja::st_if<std::string>;
 	using st_comment = cppjinja::st_comment<std::string>;
 
-	std::string rndstr = ""s;
-	auto result = boost::recursive_wrapper(s_block{st_if{comparator::no, var_name{"a"s}, ""s}, {st_comment{rndstr}}});
-	parse_check_block("<% if a%><#" + rndstr + "#><%endif%>", 0, result);
-
-	rndstr = "a"s;
-	result = boost::recursive_wrapper(s_block{st_if{comparator::no, var_name{"a"s}, ""s}, {st_comment{rndstr}}});
-	parse_check_block("<% if a%><#" + rndstr + "#><%endif%>", 0, result);
-
-	rndstr = tests::random_string();
-	result = boost::recursive_wrapper(s_block{st_if{comparator::no, var_name{"a"s}, ""s}, {st_comment{rndstr}}});
-	parse_check_block("<% if a%><#" + rndstr + "#><%endif%>", 0, result);
+	auto result = boost::recursive_wrapper(s_block{st_if{comparator::no, var_name{"a"s}, ""s}, {st_comment{text}}});
+	parse_check_block("<% if a%><#" + text + "#><%endif%>", 0, result);
 }
 BOOST_AUTO_TEST_SUITE_END() // blocks
