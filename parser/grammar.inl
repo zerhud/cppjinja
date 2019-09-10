@@ -113,6 +113,7 @@ static struct block_set_ref_rw_t {
 	void operator() (Type& b, Value&& v){ b.ref = std::move(v); }
 } block_set_ref_rw ;
 
+auto set = [](auto& ctx){ _val(ctx) = _attr(ctx); };
 auto block_add_op = [](auto& ctx) {block_add_op_rw(_val(ctx),std::move(_attr(ctx)));};
 auto block_set_ref = [](auto& ctx) {block_set_ref_rw(_val(ctx),std::move(_attr(ctx)));};
 auto def_cnt = [](auto&c){_val(c).cnt=_attr(c);};
@@ -250,12 +251,20 @@ auto cnt_if_raw = [](auto& ctx){
 const x3::rule<struct op_raw, st_raw> op_raw = "op_raw";
 const auto op_raw_def = *gram_traits::space[nop] >> x3::lit("raw") >> *gram_traits::space[nop];
 
+const x3::rule<struct named_block, std::string> named_block = "named_block";
+const auto named_block_def = *gram_traits::space >> x3::lit("block")
+	>> +gram_traits::space >> single_var_name[set] >> *gram_traits::space ;
+
 const x3::rule<struct block_content_tag, block_content<gram_traits::types::out_string_t>> block_content_r = "block_content";
 const x3::rule<struct block_r1, block_t> block_r1 = "block_r1";
 const x3::rule<struct block_tag, std::reference_wrapper<gram_traits::types::block_t>> block = "block";
 const auto block_r1_def =
 	   (spec_symbols[op_term_is_start]
-	>> (op_if[block_set_ref] | op_for[block_set_ref] | op_raw[block_set_ref] | (x3::lit("block") >> +gram_traits::space >> single_var_name[block_set_ref]) ))
+	>> ( op_if[block_set_ref]
+	   | op_for[block_set_ref]
+	   | op_raw[block_set_ref]
+	   | named_block[block_set_ref]
+	   ))
 	>  spec_symbols[op_term_is_end]
 	>> -(raw_text[cnt_if_raw] | block_content_r[def_cnt])
 	>> x3::skip(gram_traits::space)[
@@ -293,6 +302,7 @@ BOOST_SPIRIT_DEFINE(op_for)
 BOOST_SPIRIT_DEFINE(op_raw)
 BOOST_SPIRIT_DEFINE(raw_text)
 BOOST_SPIRIT_DEFINE(op_comment)
+BOOST_SPIRIT_DEFINE(named_block)
 
 #ifndef FILE_INLINING
 } // namespace cppjinja::deubg

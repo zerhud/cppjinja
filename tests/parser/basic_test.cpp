@@ -211,7 +211,7 @@ BOOST_DATA_TEST_CASE(
 	  simple
 	,   ut::data::make("kuku"s, ""s, "a"s, "aa"s, "abc"s)
 	  * ut::data::make("for a in q"s, "for a in q "s, " for a in q "s)
-	  * ut::data::make("endfor"s, "endfor "s, " endfor "s)
+	  * ut::data::make("endfor"s, "endfor "s, " endfor "s, "\tendfor\t"s)
 	, text, start, finish )
 {
 	using cppjinja::s_block;
@@ -263,10 +263,13 @@ BOOST_DATA_TEST_CASE(
 	  named_block
 	,   ut::data::make("a"s, "aa"s, tests::random_alnum())
 	  * ut::data::make(""s, "a", "ss"s, ",!#", tests::random_string())
-	, name, content )
+	  * ut::data::make(" "s, "\t"s, "   \t "s)
+	  * ut::data::make("block "s, "\tblock\t"s, "block    "s )
+	, name, content, finish, start )
 {
 	auto result = tests::make_rblock(name, content);
-	std::string data = "<%block "s + name + "%>"s + content + "<%endblock%>"s;
+	if(content.empty()) result.get().cnt.clear();
+	std::string data = "<%"s + start + name + finish+ "%>"s + content + "<%endblock%>"s;
 	parse_check_block(data, 0, result);
 }
 BOOST_AUTO_TEST_SUITE_END() // blocks
