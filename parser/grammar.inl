@@ -49,7 +49,6 @@ auto print = [](auto& ctx){ printer(_attr(ctx)); };
 auto print_and_fail = [](auto& ctx){ printer(_attr(ctx)); _pass(ctx)=false;};
 //-------------- debug block
 
-auto peq = [](auto& ctx){ _val(ctx) += _attr(ctx); };
 template<typename T>
 struct setter{
 	T value;
@@ -113,14 +112,19 @@ static struct block_set_ref_rw_t {
 	void operator() (Type& b, Value&& v){ b.ref = std::move(v); }
 } block_set_ref_rw ;
 
-auto set = [](auto& ctx){ _val(ctx) = _attr(ctx); };
-auto set_name = [](auto& ctx){_val(ctx).name = _attr(ctx); };
-auto set_value = [](auto& ctx){_val(ctx).value = _attr(ctx); };
+auto set = [](auto& ctx)       { _val(ctx) = _attr(ctx); };
+auto set_name = [](auto& ctx)  {_val(ctx).name = _attr(ctx); };
+auto set_value = [](auto& ctx) {_val(ctx).value = _attr(ctx); };
+auto set_ref = [](auto& ctx)   {block_set_ref_rw(_val(ctx),std::move(_attr(ctx)));};
+auto set_cnt = [](auto& ctx)   {_val(ctx).cnt = _attr(ctx);};
 
-auto block_add_op = [](auto& ctx) {block_add_op_rw(_val(ctx),std::move(_attr(ctx)));};
-auto block_set_ref = [](auto& ctx) {block_set_ref_rw(_val(ctx),std::move(_attr(ctx)));};
-auto def_cnt = [](auto&c){_val(c).cnt=_attr(c);};
-auto add_cnt = [](auto&c){_val(c).cnt+=_attr(c);};
+auto empback = [](auto& ctx){_val(ctx).emplace_back(_attr(ctx));};
+auto empback_cnt = [](auto& ctx){block_add_op_rw(_val(ctx),std::move(_attr(ctx)));};
+auto empback_params = [](auto& ctx) { _val(ctx).params.emplace_back(_attr(ctx)); };
+
+auto peq = [](auto& ctx){ _val(ctx) += _attr(ctx); };
+auto peq_cnt = [](auto&c){_val(c).cnt+=_attr(c);};
+
 auto clear_cnt = [](auto&c){_val(c).cnt.clear();};
 
 auto exd = [](auto& ctx){ return x3::get<parser_data>(ctx); };
@@ -157,9 +161,6 @@ auto op_term_check_end = [](auto& ctx) {
 	_pass(ctx) = ok;
 };
 
-auto op_ref_define = [](auto& ctx) { _val(ctx).ref = _attr(ctx); };
-auto op_params_define = [](auto& ctx) { _val(ctx).params.emplace_back(_attr(ctx)); };
-
 const x3::rule<struct spec_symbols, gram_traits::types::out_string_t> spec_symbols = "spec_symbols";
 const auto spec_symbols_def = x3::repeat(2)[gram_traits::char_("!#$%&()*+,-./:;<=>?@[\\]^_`{|}~")];
 
@@ -176,9 +177,9 @@ const auto quoted_string_def =
 
 const x3::rule<struct fnc_call_tag, fnc_call<gram_traits::types::out_string_t>> fnc_call_rule = "fnc_call";
 const auto fnc_call_rule_def = x3::skip(gram_traits::space)[
-	   var_name_rule[op_ref_define]
+	   var_name_rule[set_ref]
 	>> x3::char_('(')
-	>> -((quoted_string[op_params_define] | var_name_rule[op_params_define] /*| fnc_call_rule[op_params_define]*/) % ',')
+	>> -((quoted_string[empback_params] | var_name_rule[empback_params] /*| fnc_call_rule[empback_params]*/) % ',')
 	>> ')' ]
 ;
 
@@ -186,18 +187,22 @@ const x3::rule<struct op_comment, st_comment<gram_traits::types::out_string_t>> 
 const auto op_comment_def =
 	  (spec_symbols[op_comment_is_start] >> spec_symbols[op_comment_is_end])
 	| (spec_symbols[op_comment_is_start]
-	>> +(gram_traits::char_[add_cnt] >> !spec_symbols[op_comment_is_end])
+	>> +(gram_traits::char_[peq_cnt] >> !spec_symbols[op_comment_is_end])
 	>> gram_traits::char_
 	>> spec_symbols[op_comment_is_end])
-	| (spec_symbols[op_comment_is_start] >> gram_traits::char_[clear_cnt][add_cnt] >> spec_symbols[op_comment_is_end])
+	   | (
+	       spec_symbols[op_comment_is_start]
+	    >> gram_traits::char_[clear_cnt][peq_cnt]
+	    >> spec_symbols[op_comment_is_end]
+	    )
 ;
 
 const x3::rule<struct op_out, st_out<gram_traits::types::out_string_t>> op_out = "out_operator";
 const auto op_out_def =
 	   spec_symbols[op_out_is_start]
 	>> x3::skip(gram_traits::space)[
-	     ( fnc_call_rule[op_ref_define] | quoted_string[op_ref_define] | var_name_rule[op_ref_define] )
-	  >> -( '|' >> (fnc_call_rule[op_params_define] | var_name_rule[op_params_define]) % '|')
+	     ( fnc_call_rule[set_ref] | quoted_string[set_ref] | var_name_rule[set_ref] )
+	  >> -( '|' >> (fnc_call_rule[empback_params] | var_name_rule[empback_params]) % '|')
 	>> spec_symbols[op_out_is_end] ] ;
 
 
@@ -220,18 +225,18 @@ const auto value_term_r_def = var_name_rule | quoted_string ;
 
 const x3::rule<struct comparation_tag, comparator> comparator_r = "comparator";
 const auto comparator_r_def = 
-	  (x3::lit("==") | x3::lit("is"))[setter(comparator::eq)]
-	| (x3::lit("<") | x3::lit("less"))[setter(comparator::less)]
-	| (x3::lit("=<") | x3::lit("leq"))[setter(comparator::less_eq)]
+	  (x3::lit("==") | x3::lit("is"))   [setter(comparator::eq)]
+	| (x3::lit("<" ) | x3::lit("less")) [setter(comparator::less)]
+	| (x3::lit("=<") | x3::lit("leq"))  [setter(comparator::less_eq)]
 ;
 
 const x3::rule<struct op_for, st_for<gram_traits::types::out_string_t>> op_for = "op_for";
 const auto op_for_def =
 	   *gram_traits::space
 	>> x3::lit("for") >> +gram_traits::space
-	>> (single_var_name[op_params_define] % ',') >> +gram_traits::space
+	>> (single_var_name[empback_params] % ',') >> +gram_traits::space
 	>> x3::lit("in") >> +gram_traits::space
-	>> value_term_r[op_ref_define] >> *gram_traits::space
+	>> value_term_r[set_ref] >> *gram_traits::space
 	;
 
 const x3::rule<struct op_macro_param, macro_parameter<gram_traits::types::out_string_t>> op_macro_param = "op_macro_param";
@@ -241,7 +246,7 @@ const auto op_macro_def = x3::skip(gram_traits::space)[
 	   x3::lit("macro")
 	>> single_var_name[set_name]
 	>> x3::lit("(")
-	>> -(op_macro_param[op_params_define] % ',')
+	>> -(op_macro_param[empback_params] % ',')
 	>> x3::lit(")")] >> *gram_traits::space ;
 
 const x3::rule<struct op_if, st_if<gram_traits::types::out_string_t>> op_if = "op_if";
@@ -274,15 +279,15 @@ const x3::rule<struct block_content_tag, block_content<gram_traits::types::out_s
 const x3::rule<struct block_r1, block_t> block_r1 = "block_r1";
 const x3::rule<struct block_tag, std::reference_wrapper<gram_traits::types::block_t>> block = "block";
 const auto block_r1_def =
-	   (spec_symbols[op_term_is_start]
-	>> ( op_if[block_set_ref]
-	   | op_macro[block_set_ref]
-	   | op_for[block_set_ref]
-	   | op_raw[block_set_ref]
-	   | named_block[block_set_ref]
+	   (spec_symbols  [op_term_is_start]
+	>> ( op_if        [set_ref]
+	   | op_macro     [set_ref]
+	   | op_for       [set_ref]
+	   | op_raw       [set_ref]
+	   | named_block  [set_ref]
 	   )  )
-	>  spec_symbols[op_term_is_end]
-	>> -(raw_text[cnt_if_raw] | block_content_r[def_cnt])
+	>  spec_symbols   [op_term_is_end]
+	>> -(raw_text[cnt_if_raw] | block_content_r[set_cnt])
 	>> x3::skip(gram_traits::space)[
 		   spec_symbols[op_term_is_start]
 		>> (+x3::alnum)[op_term_check_end]
@@ -291,14 +296,14 @@ const auto block_r1_def =
 	;
 const auto block_def =
 	*(
-		  op_out[ block_add_op ]
-		| block_r1[ block_add_op ]
+		  op_out             [ empback_cnt ]
+		| block_r1           [ empback_cnt ]
 		| gram_traits::char_ [ block_add_content ]
 	);
 const auto block_content_r_def = *(
-	  op_out    [ block_add_op ]
-	| op_comment[ block_add_op]
-	| block_r1  [ block_add_op ]
+	  op_out    [ empback_cnt ]
+	| op_comment[ empback_cnt]
+	| block_r1  [ empback_cnt ]
 	| free_text [ block_add_content_vec ]
 	) ;
 
