@@ -28,7 +28,7 @@ template<typename String> struct fnc_call;
 template<typename String> struct b_block;
 
 template<typename String>
-using value_term = std::variant<String, var_name, boost::recursive_wrapper<fnc_call<String>>>;
+using value_term = std::variant<String, var_name, boost::recursive_wrapper<fnc_call<String>>> ;
 
 template<typename String>
 struct fnc_call {
@@ -56,21 +56,21 @@ struct st_if {
 	value_term<String> left, right;
 };
 
+template<typename String>
 struct macro_parameter {
-	enum class type {no, str, integer, fpoint};
-
 	macro_parameter()=default;
-	macro_parameter(std::string n);
-	macro_parameter(std::string n, std::string v);
+	macro_parameter(std::string n) : name(std::move(n)) {}
+	macro_parameter(std::string n, value_term<String> v)
+		: name(std::move(n)), value(std::move(v)) {}
 
 	std::string name;
-	std::string value;
-	type value_t=type::no;
+	std::optional<value_term<String>> value;
 };
 
+template<typename String>
 struct st_macro {
 	std::string name;
-	std::vector<macro_parameter> params;
+	std::vector<macro_parameter<String>> params;
 };
 
 struct st_set {
@@ -97,7 +97,7 @@ using block_content = std::vector< std::variant<
 
 template<typename String>
 struct b_block {
-	std::optional<std::variant<std::string,st_raw,st_if<String>,st_for<String>,st_macro>> ref;
+	std::optional<std::variant<std::string,st_raw,st_if<String>,st_for<String>,st_macro<String>>> ref;
 	block_content<String> cnt;
 };
 

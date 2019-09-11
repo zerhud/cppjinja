@@ -145,8 +145,23 @@ std::ostream& operator << (std::ostream& out, const st_comment<String>& obj)
 }
 
 
-DEFINE_OPERATORS(st_macro, left.name, right.name, left.params, right.params)
-DEFINE_OPERATORS(macro_parameter, left.name, right.name, left.value, right.value, left.value_t, right.value_t)
+DEFINE_OPERATORS_STRING(st_macro, left.name, right.name, left.params, right.params)
+DEFINE_OPERATORS_STRING(macro_parameter, left.name, right.name, left.value, right.value)
+template<typename String>
+std::ostream& operator << (std::ostream& out, const macro_parameter<String>& obj)
+{
+	out << obj.name;
+	if(obj.value) out << "=" << *obj.value;
+	return out;
+}
+template<typename String>
+std::ostream& operator << (std::ostream& out, const st_macro<String>& obj)
+{
+	out << "macro: " << obj.name << '(';
+	for(auto& p:obj.params) out << p << ',';
+	out << ')';
+	return out;
+}
 
 DEFINE_OPERATORS_STRING(b_block, left.ref, right.ref, left.cnt, right.cnt)
 template<typename String>

@@ -10,16 +10,3 @@
 
 using namespace std::literals;
 
-cppjinja::macro_parameter::macro_parameter(std::string n)
-	: name(std::move(n))
-	, value_t(type::no)
-{
-}
-
-cppjinja::macro_parameter::macro_parameter(std::string n, std::string v)
-	: name(std::move(n))
-	, value(std::move(v))
-	, value_t(type::str)
-{
-}
-

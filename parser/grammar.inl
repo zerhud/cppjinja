@@ -115,6 +115,7 @@ static struct block_set_ref_rw_t {
 
 auto set = [](auto& ctx){ _val(ctx) = _attr(ctx); };
 auto set_name = [](auto& ctx){_val(ctx).name = _attr(ctx); };
+auto set_value = [](auto& ctx){_val(ctx).value = _attr(ctx); };
 
 auto block_add_op = [](auto& ctx) {block_add_op_rw(_val(ctx),std::move(_attr(ctx)));};
 auto block_set_ref = [](auto& ctx) {block_set_ref_rw(_val(ctx),std::move(_attr(ctx)));};
@@ -151,7 +152,7 @@ auto op_term_check_end = [](auto& ctx) {
 		ok = val == "endraw";
 	if(std::holds_alternative<std::string>(*block.ref))
 		ok = val == "endblock";
-	if(std::holds_alternative<st_macro>(*block.ref))
+	if(std::holds_alternative<st_macro<str_t>>(*block.ref))
 		ok = val == "endmacro";
 	_pass(ctx) = ok;
 };
@@ -233,16 +234,15 @@ const auto op_for_def =
 	>> value_term_r[op_ref_define] >> *gram_traits::space
 	;
 
-const x3::rule<struct op_macro_param, macro_parameter> op_macro_param = "op_macro_param";
-const x3::rule<struct op_macro, st_macro> op_macro = "op_macro";
+const x3::rule<struct op_macro_param, macro_parameter<gram_traits::types::out_string_t>> op_macro_param = "op_macro_param";
+const x3::rule<struct op_macro, st_macro<gram_traits::types::out_string_t>> op_macro = "op_macro";
+const auto op_macro_param_def = single_var_name[set_name] >> -(x3::lit("=") >>  value_term_r[set_value]) ;
 const auto op_macro_def = x3::skip(gram_traits::space)[
 	   x3::lit("macro")
 	>> single_var_name[set_name]
 	>> x3::lit("(")
 	>> -(op_macro_param[op_params_define] % ',')
 	>> x3::lit(")")] >> *gram_traits::space ;
-const auto op_macro_param_def = single_var_name[set_name]
-;
 
 const x3::rule<struct op_if, st_if<gram_traits::types::out_string_t>> op_if = "op_if";
 const auto op_if_def =

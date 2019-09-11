@@ -285,18 +285,21 @@ BOOST_DATA_TEST_CASE(
 	std::string data = "<%"s + start + name + finish+ "%>"s + content + "<%endblock%>"s;
 	parse_check_block(data, 0, result);
 }
+using macparam = cppjinja::macro_parameter<std::string>;
 BOOST_DATA_TEST_CASE(
 	  macro
 	,   ut::data::make(std::make_pair("macro m"s,"m"s), std::make_pair(" macro mm"s,"mm"s), std::make_pair("macro\tasdf"s,"asdf"s))
 	  * ut::data::make(""s, "cnt"s)
 	  * ut::data::make(
-		    std::make_pair(")"s, std::vector<cppjinja::macro_parameter>{})
-		  , std::make_pair("a  ) "s, std::vector<cppjinja::macro_parameter>{cppjinja::macro_parameter("a"s)})
-		  , std::make_pair("a,b)\t"s, std::vector<cppjinja::macro_parameter>{cppjinja::macro_parameter("a"s),cppjinja::macro_parameter("b"s)})
+		    std::make_pair(")"s, std::vector<macparam>{})
+		  , std::make_pair("a  ) "s, std::vector<macparam>{macparam("a"s)})
+		  , std::make_pair("a,b)\t"s, std::vector<macparam>{macparam("a"s),macparam("b"s)})
+		  , std::make_pair("a,b='c')\t"s, std::vector<macparam>{macparam("a"s),macparam("b"s, "c"s)})
+		  , std::make_pair( "a,b=c.d)\t"s, std::vector<macparam>{macparam("a"s),macparam("b"s, cppjinja::var_name{"c"s,"d"s})} )
 		  )
 	, name, content, params)
 {
-	using cppjinja::st_macro;
+	using st_macro = cppjinja::st_macro<std::string>;
 
 	auto result = tests::make_rblock(st_macro{name.second, params.second}, content);
 	if(content.empty()) result.get().cnt.clear();
