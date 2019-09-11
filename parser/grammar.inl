@@ -114,6 +114,8 @@ static struct block_set_ref_rw_t {
 } block_set_ref_rw ;
 
 auto set = [](auto& ctx){ _val(ctx) = _attr(ctx); };
+auto set_name = [](auto& ctx){_val(ctx).name = _attr(ctx); };
+
 auto block_add_op = [](auto& ctx) {block_add_op_rw(_val(ctx),std::move(_attr(ctx)));};
 auto block_set_ref = [](auto& ctx) {block_set_ref_rw(_val(ctx),std::move(_attr(ctx)));};
 auto def_cnt = [](auto&c){_val(c).cnt=_attr(c);};
@@ -149,6 +151,8 @@ auto op_term_check_end = [](auto& ctx) {
 		ok = val == "endraw";
 	if(std::holds_alternative<std::string>(*block.ref))
 		ok = val == "endblock";
+	if(std::holds_alternative<st_macro>(*block.ref))
+		ok = val == "endmacro";
 	_pass(ctx) = ok;
 };
 
@@ -229,6 +233,17 @@ const auto op_for_def =
 	>> value_term_r[op_ref_define] >> *gram_traits::space
 	;
 
+const x3::rule<struct op_macro_param, macro_parameter> op_macro_param = "op_macro_param";
+const x3::rule<struct op_macro, st_macro> op_macro = "op_macro";
+const auto op_macro_def = x3::skip(gram_traits::space)[
+	   x3::lit("macro")
+	>> single_var_name[set_name]
+	>> x3::lit("(")
+	>> -(op_macro_param[op_params_define] % ',')
+	>> x3::lit(")")] >> *gram_traits::space ;
+const auto op_macro_param_def = single_var_name[set_name]
+;
+
 const x3::rule<struct op_if, st_if<gram_traits::types::out_string_t>> op_if = "op_if";
 const auto op_if_def =
 	   *gram_traits::space
@@ -261,10 +276,11 @@ const x3::rule<struct block_tag, std::reference_wrapper<gram_traits::types::bloc
 const auto block_r1_def =
 	   (spec_symbols[op_term_is_start]
 	>> ( op_if[block_set_ref]
+	   | op_macro[block_set_ref]
 	   | op_for[block_set_ref]
 	   | op_raw[block_set_ref]
 	   | named_block[block_set_ref]
-	   ))
+	   )  )
 	>  spec_symbols[op_term_is_end]
 	>> -(raw_text[cnt_if_raw] | block_content_r[def_cnt])
 	>> x3::skip(gram_traits::space)[
@@ -279,11 +295,12 @@ const auto block_def =
 		| block_r1[ block_add_op ]
 		| gram_traits::char_ [ block_add_content ]
 	);
-const auto block_content_r_def =
-	*(
-	op_out[ block_add_op ] | op_comment[block_add_op] | block_r1[ block_add_op ] | free_text [ block_add_content_vec ]
-	)
-;
+const auto block_content_r_def = *(
+	  op_out    [ block_add_op ]
+	| op_comment[ block_add_op]
+	| block_r1  [ block_add_op ]
+	| free_text [ block_add_content_vec ]
+	) ;
 
 BOOST_SPIRIT_DEFINE(block)
 BOOST_SPIRIT_DEFINE(op_out)
@@ -303,6 +320,8 @@ BOOST_SPIRIT_DEFINE(op_raw)
 BOOST_SPIRIT_DEFINE(raw_text)
 BOOST_SPIRIT_DEFINE(op_comment)
 BOOST_SPIRIT_DEFINE(named_block)
+BOOST_SPIRIT_DEFINE(op_macro)
+BOOST_SPIRIT_DEFINE(op_macro_param)
 
 #ifndef FILE_INLINING
 } // namespace cppjinja::deubg

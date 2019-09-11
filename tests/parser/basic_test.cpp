@@ -25,6 +25,19 @@ namespace std {
 		out << "[wstring value, see " << __FILE__ << ':' << __LINE__ << ']';
 		return out; 
 	} 
+	template<typename A, typename B>
+	std::ostream& operator<<(std::ostream& out, const std::pair<A,B>& p)
+	{
+		out << p.first << ", " << p.second;
+		return out;
+	}
+	template<typename A, typename B>
+	std::ostream& operator<<(std::ostream& out, const std::pair<A,std::vector<B>>& p)
+	{
+		out << p.first << ": ";
+		for(auto& i:p.second) out << i << ',';
+		return out;
+	}
 
 } // namespace std 
 
@@ -270,6 +283,24 @@ BOOST_DATA_TEST_CASE(
 	auto result = tests::make_rblock(name, content);
 	if(content.empty()) result.get().cnt.clear();
 	std::string data = "<%"s + start + name + finish+ "%>"s + content + "<%endblock%>"s;
+	parse_check_block(data, 0, result);
+}
+BOOST_DATA_TEST_CASE(
+	  macro
+	,   ut::data::make(std::make_pair("macro m"s,"m"s), std::make_pair(" macro mm"s,"mm"s), std::make_pair("macro\tasdf"s,"asdf"s))
+	  * ut::data::make(""s, "cnt"s)
+	  * ut::data::make(
+		    std::make_pair(")"s, std::vector<cppjinja::macro_parameter>{})
+		  , std::make_pair("a  ) "s, std::vector<cppjinja::macro_parameter>{cppjinja::macro_parameter("a"s)})
+		  , std::make_pair("a,b)\t"s, std::vector<cppjinja::macro_parameter>{cppjinja::macro_parameter("a"s),cppjinja::macro_parameter("b"s)})
+		  )
+	, name, content, params)
+{
+	using cppjinja::st_macro;
+
+	auto result = tests::make_rblock(st_macro{name.second, params.second}, content);
+	if(content.empty()) result.get().cnt.clear();
+	std::string data = "<%"s + name.first + "("s + params.first + "%>"s + content + "<%endmacro%>"s;
 	parse_check_block(data, 0, result);
 }
 BOOST_AUTO_TEST_SUITE_END() // blocks

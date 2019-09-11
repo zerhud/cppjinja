@@ -56,6 +56,23 @@ struct st_if {
 	value_term<String> left, right;
 };
 
+struct macro_parameter {
+	enum class type {no, str, integer, fpoint};
+
+	macro_parameter()=default;
+	macro_parameter(std::string n);
+	macro_parameter(std::string n, std::string v);
+
+	std::string name;
+	std::string value;
+	type value_t=type::no;
+};
+
+struct st_macro {
+	std::string name;
+	std::vector<macro_parameter> params;
+};
+
 struct st_set {
 
 };
@@ -80,16 +97,12 @@ using block_content = std::vector< std::variant<
 
 template<typename String>
 struct b_block {
-	std::optional<std::variant<std::string,st_raw,st_if<String>,st_for<String>>> ref;
+	std::optional<std::variant<std::string,st_raw,st_if<String>,st_for<String>,st_macro>> ref;
 	block_content<String> cnt;
 };
 
 using s_block = b_block<std::string>;
 using w_block = b_block<std::wstring>;
-
-struct b_macro {
-
-};
 
 class jtmpl final {
 public:

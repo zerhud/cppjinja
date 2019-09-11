@@ -145,6 +145,9 @@ std::ostream& operator << (std::ostream& out, const st_comment<String>& obj)
 }
 
 
+DEFINE_OPERATORS(st_macro, left.name, right.name, left.params, right.params)
+DEFINE_OPERATORS(macro_parameter, left.name, right.name, left.value, right.value, left.value_t, right.value_t)
+
 DEFINE_OPERATORS_STRING(b_block, left.ref, right.ref, left.cnt, right.cnt)
 template<typename String>
 bool operator == (const boost::recursive_wrapper<b_block<String>>& left, const boost::recursive_wrapper<b_block<String>>& right)
