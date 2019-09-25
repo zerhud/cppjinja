@@ -38,6 +38,14 @@ namespace std {
 		for(auto& i:p.second) out << i << ',';
 		return out;
 	}
+	template<typename T>
+	std::ostream& operator << (std::ostream& out, const std::vector<T>& p)
+	{
+		out << '[';
+		for(auto& i:p) out << i << ',';
+		out << ']';
+		return out;
+	}
 
 } // namespace std 
 
@@ -104,47 +112,59 @@ template<typename... Vals>
 void parse_check_block(std::string_view data, std::size_t ind, const Vals&... vals)
 {
 	BOOST_TEST_CONTEXT("Data was " << data) {
-		cppjinja::s_block bl;
+		std::vector<cppjinja::s_jtmpl> bl;
 		BOOST_CHECK_NO_THROW(bl=cppjinja::parse(data));
-		check_block(bl, ind, vals...);
+		BOOST_REQUIRE_EQUAL(bl.size(), 1);
+		BOOST_REQUIRE_EQUAL(bl[0].cnt.size(), 1);
+		check_block(bl[0].cnt[0], ind, vals...);
 	}
 }
 
-BOOST_AUTO_TEST_CASE(just_str)
+template<typename... Vals>
+void wparse_check_block(std::wstring_view data, std::size_t ind, const Vals&... vals)
 {
-	check_block(cppjinja::parse("test string"sv), 0, "test string"s);
-	check_block(cppjinja::parse("привет 你好，世界！"sv), 0, "привет 你好，世界！"s);
-	check_block(cppjinja::parse(L"test string"sv), 0, "test string"s);
-	check_block(cppjinja::parse(L"привет"sv), 0, "привет"s);
-	BOOST_TEST_CONTEXT("wide string, line " << __LINE__) {
-		check_block(cppjinja::wparse(L"привет"sv), 0, L"привет"s);
+	BOOST_TEST_CONTEXT("Data was wchar_t* string...") {
+		std::vector<cppjinja::w_jtmpl> bl;
+		BOOST_CHECK_NO_THROW(bl=cppjinja::wparse(data));
+		BOOST_REQUIRE_EQUAL(bl.size(), 1);
+		BOOST_REQUIRE_EQUAL(bl[0].cnt.size(), 1);
+		check_block(bl[0].cnt[0], ind, vals...);
+	}
+}
+
+BOOST_DATA_TEST_CASE(just_str
+		,   ut::data::make("test string"s, "привет 你好，世界！"s)
+		  ^ ut::data::make(L"test string"s, L"привет"s)
+		, data, wdata)
+{
+	BOOST_TEST_CONTEXT("test with wide string, line " << __LINE__) {
+		parse_check_block(data, 0, data);
+		wparse_check_block(wdata, 0, wdata);
 	}
 }
 
 BOOST_AUTO_TEST_SUITE(output)
 BOOST_AUTO_TEST_CASE(string)
 {
-	using cppjinja::parse;
-	using cppjinja::wparse;
 	parse_check_block("test <= 'kuku' =>"sv, 0, "test "s, cppjinja::st_out<std::string>{ "kuku"s, {} });
 	parse_check_block("test <= \"kuku\" =>"sv, 0, "test "s, cppjinja::st_out<std::string>{ "kuku"s, {} });
 	parse_check_block("<= 'kuk\\'u' =>"sv, 0, cppjinja::st_out<std::string>{ "kuk'u"s, {} });
 
 	BOOST_TEST_CONTEXT("Russian data, line " << __LINE__ ) {
-		check_block(wparse(L"<= 'привет' =>"), 0, cppjinja::st_out<std::wstring>{ L"привет"s, {} });
-		check_block(wparse(L"п<= 'привет' =>"), 0, L"п"s, cppjinja::st_out<std::wstring>{ L"привет"s, {} });
+		wparse_check_block(L"<= 'привет' =>", 0, cppjinja::st_out<std::wstring>{ L"привет"s, {} });
+		wparse_check_block(L"п<= 'привет' =>", 0, L"п"s, cppjinja::st_out<std::wstring>{ L"привет"s, {} });
 	}
 }
-BOOST_AUTO_TEST_CASE(variable)
+BOOST_DATA_TEST_CASE(variable
+		,   ut::data::make("<= var =>"sv, "<= foo.bar =>"sv)
+		  ^ ut::data::make(cppjinja::var_name{"var"}, cppjinja::var_name{"foo", "bar"})
+		, data, result)
 {
 	using cppjinja::parse;
 	using sto_t = cppjinja::st_out<std::string>;
 
-	cppjinja::s_block block_glob = parse("<= var =>"sv);
-	cppjinja::s_block block_addr = parse("<= foo.bar =>"sv);
-
-	check_block(block_glob, 0, sto_t{ cppjinja::var_name{"var"}, {} } );
-	check_block(block_addr, 0, sto_t{ cppjinja::var_name{"foo", "bar"}, {} } );
+	parse_check_block(data, 0, sto_t{ result, {} } );
+	parse_check_block(data, 0, sto_t{ result, {} } );
 }
 BOOST_AUTO_TEST_CASE(function)
 {
@@ -250,8 +270,11 @@ BOOST_DATA_TEST_CASE(
 
 	std::string data = start + text + finish;
 	BOOST_TEST_CONTEXT("Data was" << data) {
-		s_block bl;
-		BOOST_REQUIRE_NO_THROW(bl = parse(data));
+		std::vector<cppjinja::s_jtmpl> tmpl;
+		BOOST_REQUIRE_NO_THROW(tmpl = parse(data));
+		BOOST_TEST( tmpl.size() == 1 );
+		BOOST_TEST( tmpl[0].cnt.size() == 1 );
+		s_block& bl = tmpl[0].cnt[0];
 		auto& rb = std::get<boost::recursive_wrapper<s_block>>(bl.cnt[0]);
 		if(text.empty())  BOOST_CHECK(rb.get().cnt.empty());
 		else {

@@ -112,13 +112,18 @@ static struct block_set_ref_rw_t {
 	void operator() (Type& b, Value&& v){ b.ref = std::move(v); }
 } block_set_ref_rw ;
 
+template<typename Obj, typename Value>
+void empback_helper(Obj& obj, Value&& val) { obj.emplace_back(std::forward<Value>(val)); }
+template<typename Obj, typename Value>
+void empback_helper(std::reference_wrapper<Obj>& obj, Value&& val) { obj.get().emplace_back(std::forward<Value>(val)); }
+
 auto set = [](auto& ctx)       { _val(ctx) = _attr(ctx); };
 auto set_name = [](auto& ctx)  {_val(ctx).name = _attr(ctx); };
 auto set_value = [](auto& ctx) {_val(ctx).value = _attr(ctx); };
 auto set_ref = [](auto& ctx)   {block_set_ref_rw(_val(ctx),std::move(_attr(ctx)));};
 auto set_cnt = [](auto& ctx)   {_val(ctx).cnt = _attr(ctx);};
 
-auto empback = [](auto& ctx){_val(ctx).emplace_back(_attr(ctx));};
+auto empback = [](auto& ctx){ empback_helper(_val(ctx),_attr(ctx)); };
 auto empback_cnt = [](auto& ctx){block_add_op_rw(_val(ctx),std::move(_attr(ctx)));};
 auto empback_params = [](auto& ctx) { _val(ctx).params.emplace_back(_attr(ctx)); };
 
@@ -307,6 +312,16 @@ const auto block_content_r_def = *(
 	| free_text [ block_add_content_vec ]
 	) ;
 
+const x3::rule<struct jtmpl_tag, jtmpl<gram_traits::types::out_string_t>> jtmpl_rule = "jtmpl_rule";
+const auto jtmpl_rule_def = 
+	+block_r1 [empback_cnt]
+;
+
+const x3::rule<struct jtmpl_tag, std::reference_wrapper<std::vector<jtmpl<gram_traits::types::out_string_t>>>> jtmpls_rule = "jtmpls_rule";
+const auto jtmpls_rule_def =
+	+jtmpl_rule[empback]
+;
+
 BOOST_SPIRIT_DEFINE(block)
 BOOST_SPIRIT_DEFINE(op_out)
 BOOST_SPIRIT_DEFINE(quoted_string)
@@ -327,6 +342,8 @@ BOOST_SPIRIT_DEFINE(op_comment)
 BOOST_SPIRIT_DEFINE(named_block)
 BOOST_SPIRIT_DEFINE(op_macro)
 BOOST_SPIRIT_DEFINE(op_macro_param)
+BOOST_SPIRIT_DEFINE(jtmpl_rule)
+BOOST_SPIRIT_DEFINE(jtmpls_rule)
 
 #ifndef FILE_INLINING
 } // namespace cppjinja::deubg

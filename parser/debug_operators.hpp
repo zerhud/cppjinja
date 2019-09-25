@@ -191,4 +191,13 @@ std::ostream& operator << (std::ostream& out, const b_block<String>& obj)
 
 	return out;
 }
+
+template<typename String>
+std::ostream& operator << (std::ostream& out, const jtmpl<String>& obj)
+{
+	out << "template: " << obj.name << std::endl;
+	for(auto& b:obj.cnt) out << b << std::endl;
+	return out;
+}
+
 } // namespace cppjinja

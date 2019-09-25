@@ -35,44 +35,41 @@ auto make_grammar(const Parser& parser, Env&& env)
 
 } // namespace cppjinja
 
-cppjinja::b_block<std::string> cppjinja::parse(std::string_view data, parser_data env)
+std::vector<cppjinja::s_jtmpl> cppjinja::parse(std::string_view data, parser_data env)
 {
-	using block_t = grammar::utf8::gram_traits::types::block_t;
-	block_t result;
+	std::vector<s_jtmpl> result;
 	auto result_ref = std::ref(result);
 	bool ok = x3::parse(
 	              boost::u8_to_u32_iterator(data.begin()),
 	              boost::u8_to_u32_iterator(data.end()),
-	              make_grammar(grammar::utf8::block, std::move(env)),
+	              make_grammar(grammar::utf8::jtmpls_rule, std::move(env)),
 	              result_ref
 	              );
 	if(!ok) throw std::runtime_error("cannot parse");
 	return result;
 }
 
-cppjinja::b_block<std::string> cppjinja::parse(std::wstring_view data, parser_data env)
+std::vector<cppjinja::s_jtmpl> cppjinja::parse(std::wstring_view data, parser_data env)
 {
-	using block_t = grammar::utf8::gram_traits::types::block_t;
-	block_t result;
+	std::vector<s_jtmpl> result;
 	auto result_ref = std::ref(result);
 	bool ok = x3::parse(
 	              data.begin(), data.end(),
-	              make_grammar(grammar::utf8::block, std::move(env)),
+	              make_grammar(grammar::utf8::jtmpls_rule, std::move(env)),
 	              result_ref
 	              );
 	if(!ok) throw std::runtime_error("cannot parse");
 	return result;
 }
 
-cppjinja::b_block<std::wstring> cppjinja::wparse(std::wstring_view data, parser_data env)
+std::vector<cppjinja::w_jtmpl> cppjinja::wparse(std::wstring_view data, parser_data env)
 {
 
-	using block_t = grammar::wide::gram_traits::types::block_t;
-	block_t result;
+	std::vector<w_jtmpl> result;
 	auto result_ref = std::ref(result);
 	bool ok = x3::parse(
 	              data.begin(), data.end(),
-	              make_grammar(grammar::wide::block, std::move(env)),
+	              make_grammar(grammar::wide::jtmpls_rule, std::move(env)),
 	              result_ref
 	              );
 	if(!ok) throw std::runtime_error("cannot parse");

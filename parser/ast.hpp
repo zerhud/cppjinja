@@ -104,10 +104,15 @@ struct b_block {
 using s_block = b_block<std::string>;
 using w_block = b_block<std::wstring>;
 
-class jtmpl final {
-public:
-	jtmpl();
+template<typename String>
+struct jtmpl {
+	String name;
+	std::optional<String> extends;
+	std::vector<b_block<String>> cnt;
 };
+
+using s_jtmpl = jtmpl<std::string>;
+using w_jtmpl = jtmpl<std::wstring>;
 
 } // namespace cppjinja
 
