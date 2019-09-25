@@ -282,7 +282,7 @@ const auto named_block_def = *gram_traits::space >> x3::lit("block")
 
 const x3::rule<struct block_content_tag, block_content<gram_traits::types::out_string_t>> block_content_r = "block_content";
 const x3::rule<struct block_r1, block_t> block_r1 = "block_r1";
-const x3::rule<struct block_tag, std::reference_wrapper<gram_traits::types::block_t>> block = "block";
+const x3::rule<struct block_tag, gram_traits::types::block_t> block = "block";
 const auto block_r1_def =
 	   (spec_symbols  [op_term_is_start]
 	>> ( op_if        [set_ref]
@@ -300,9 +300,8 @@ const auto block_r1_def =
 	]
 	;
 const auto block_def =
-	*(
+	+(
 		  op_out             [ empback_cnt ]
-		| block_r1           [ empback_cnt ]
 		| gram_traits::char_ [ block_add_content ]
 	);
 const auto block_content_r_def = *(
@@ -313,13 +312,15 @@ const auto block_content_r_def = *(
 	) ;
 
 const x3::rule<struct jtmpl_tag, jtmpl<gram_traits::types::out_string_t>> jtmpl_rule = "jtmpl_rule";
-const auto jtmpl_rule_def = 
-	+block_r1 [empback_cnt]
+const auto jtmpl_rule_def =  +(
+	  block_r1 [empback_cnt]
+	| block[([](auto&c){_val(c).cnt.emplace_back(_attr(c));})]
+	)
 ;
 
 const x3::rule<struct jtmpl_tag, std::reference_wrapper<std::vector<jtmpl<gram_traits::types::out_string_t>>>> jtmpls_rule = "jtmpls_rule";
 const auto jtmpls_rule_def =
-	+jtmpl_rule[empback]
+	jtmpl_rule[empback]
 ;
 
 BOOST_SPIRIT_DEFINE(block)
