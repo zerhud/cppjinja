@@ -126,6 +126,10 @@ auto set_cnt = [](auto& ctx)   {_val(ctx).cnt = _attr(ctx);};
 auto empback = [](auto& ctx){ empback_helper(_val(ctx),_attr(ctx)); };
 auto empback_cnt = [](auto& ctx){block_add_op_rw(_val(ctx),std::move(_attr(ctx)));};
 auto empback_params = [](auto& ctx) { _val(ctx).params.emplace_back(_attr(ctx)); };
+auto empback_to_unnamed = [](auto& c) { _val(c).unnamed_block().cnt.emplace_back(_attr(c)); };
+auto empback_cnt_to_unnamed = [](auto& ctx) {
+	auto& b = _val(ctx).unnamed_block();
+	gram_traits::concat(add_and_get<block_t, gram_traits::types::out_string_t>(b), _attr(ctx)); };
 
 auto peq = [](auto& ctx){ _val(ctx) += _attr(ctx); };
 auto peq_cnt = [](auto&c){_val(c).cnt+=_attr(c);};
@@ -282,7 +286,6 @@ const auto named_block_def = *gram_traits::space >> x3::lit("block")
 
 const x3::rule<struct block_content_tag, block_content<gram_traits::types::out_string_t>> block_content_r = "block_content";
 const x3::rule<struct block_r1, block_t> block_r1 = "block_r1";
-const x3::rule<struct block_tag, gram_traits::types::block_t> block = "block";
 const auto block_r1_def =
 	   (spec_symbols  [op_term_is_start]
 	>> ( op_if        [set_ref]
@@ -299,11 +302,6 @@ const auto block_r1_def =
 		>> spec_symbols[op_term_is_end]
 	]
 	;
-const auto block_def =
-	+(
-		  op_out             [ empback_cnt ]
-		| gram_traits::char_ [ block_add_content ]
-	);
 const auto block_content_r_def = *(
 	  op_out    [ empback_cnt ]
 	| op_comment[ empback_cnt]
@@ -311,10 +309,12 @@ const auto block_content_r_def = *(
 	| free_text [ block_add_content_vec ]
 	) ;
 
+
 const x3::rule<struct jtmpl_tag, jtmpl<gram_traits::types::out_string_t>> jtmpl_rule = "jtmpl_rule";
 const auto jtmpl_rule_def =  +(
-	  block_r1 [empback_cnt]
-	| block[([](auto&c){_val(c).cnt.emplace_back(_attr(c));})]
+	  block_r1             [empback_cnt]
+	| op_out               [empback_to_unnamed]
+	| gram_traits::char_   [empback_cnt_to_unnamed]
 	)
 ;
 
@@ -323,7 +323,6 @@ const auto jtmpls_rule_def =
 	jtmpl_rule[empback]
 ;
 
-BOOST_SPIRIT_DEFINE(block)
 BOOST_SPIRIT_DEFINE(op_out)
 BOOST_SPIRIT_DEFINE(quoted_string)
 BOOST_SPIRIT_DEFINE(spec_symbols)
@@ -349,3 +348,4 @@ BOOST_SPIRIT_DEFINE(jtmpls_rule)
 #ifndef FILE_INLINING
 } // namespace cppjinja::deubg
 #endif
+

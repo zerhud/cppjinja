@@ -109,6 +109,11 @@ struct jtmpl {
 	String name;
 	std::optional<String> extends;
 	std::vector<b_block<String>> cnt;
+
+	b_block<String>& unnamed_block() {
+		for(auto& c:cnt) if(!c.ref) return c;
+		return cnt.emplace_back();
+	}
 };
 
 using s_jtmpl = jtmpl<std::string>;

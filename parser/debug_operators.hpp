@@ -91,7 +91,10 @@ std::ostream& operator << (std::ostream& out, const fnc_call<String>& obj)
 }
 
 
-DEFINE_OPERATORS(st_raw, &left, &right)
+inline bool operator < (const st_raw&, const st_raw&) { return false; }
+inline bool operator == (const st_raw&, const st_raw&) { return true; }
+inline bool operator != (const st_raw& left, const st_raw& right) { return !(left==right); }
+std::ostream& operator << (std::ostream& out, const st_raw& obj);
 
 DEFINE_OPERATORS_STRING(st_out, left.ref, right.ref, left.params, right.params)
 template<typename String>
