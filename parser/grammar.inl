@@ -119,6 +119,8 @@ void empback_helper(std::reference_wrapper<Obj>& obj, Value&& val) { obj.get().e
 
 auto set = [](auto& ctx)       { _val(ctx) = _attr(ctx); };
 auto set_name = [](auto& ctx)  {_val(ctx).name = _attr(ctx); };
+auto setrw_name = [](auto& ctx)  {_val(ctx).get().name = _attr(ctx); };
+auto setrweb_name = [](auto& ctx)  {_val(ctx).get().emplace_back().name = _attr(ctx); };
 auto set_value = [](auto& ctx) {_val(ctx).value = _attr(ctx); };
 auto set_ref = [](auto& ctx)   {block_set_ref_rw(_val(ctx),std::move(_attr(ctx)));};
 auto set_cnt = [](auto& ctx)   {_val(ctx).cnt = _attr(ctx);};
@@ -318,9 +320,17 @@ const auto jtmpl_rule_def =  +(
 	)
 ;
 
+const x3::rule<struct named_jtmpl_tag, jtmpl<gram_traits::types::out_string_t>> named_jtmpl_rule = "named_jtmpl_rule";
+const auto named_jtmpl_rule_def =
+	   spec_symbols[op_term_is_start] >> x3::lit("template")[([](auto&){std::cout<<__LINE__<<std::endl;})] >> +x3::space >> single_var_name[set_name] >> spec_symbols[op_term_is_end]
+	>> -jtmpl_rule[([](auto&c){_val(c).cnt=std::move(_attr(c).cnt);})]
+	>> spec_symbols[op_term_is_start] >> x3::lit("endtemplate") >> spec_symbols[op_term_is_end]
+;
+
 const x3::rule<struct jtmpl_tag, std::reference_wrapper<std::vector<jtmpl<gram_traits::types::out_string_t>>>> jtmpls_rule = "jtmpls_rule";
 const auto jtmpls_rule_def =
-	jtmpl_rule[empback]
+	  +(named_jtmpl_rule[empback])
+	| jtmpl_rule[empback]
 ;
 
 BOOST_SPIRIT_DEFINE(op_out)
@@ -344,6 +354,7 @@ BOOST_SPIRIT_DEFINE(op_macro)
 BOOST_SPIRIT_DEFINE(op_macro_param)
 BOOST_SPIRIT_DEFINE(jtmpl_rule)
 BOOST_SPIRIT_DEFINE(jtmpls_rule)
+BOOST_SPIRIT_DEFINE(named_jtmpl_rule)
 
 #ifndef FILE_INLINING
 } // namespace cppjinja::deubg

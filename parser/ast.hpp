@@ -106,7 +106,7 @@ using w_block = b_block<std::wstring>;
 
 template<typename String>
 struct jtmpl {
-	String name;
+	std::string name;
 	std::optional<String> extends;
 	std::vector<b_block<String>> cnt;
 
