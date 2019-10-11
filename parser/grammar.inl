@@ -313,7 +313,7 @@ const auto block_content_r_def = *(
 
 
 const x3::rule<struct jtmpl_tag, jtmpl<gram_traits::types::out_string_t>> jtmpl_rule = "jtmpl_rule";
-const auto jtmpl_rule_def =  +(
+const auto jtmpl_rule_def =  *(
 	  block_r1             [empback_cnt]
 	| op_out               [empback_to_unnamed]
 	| gram_traits::char_   [empback_cnt_to_unnamed]
@@ -322,15 +322,15 @@ const auto jtmpl_rule_def =  +(
 
 const x3::rule<struct named_jtmpl_tag, jtmpl<gram_traits::types::out_string_t>> named_jtmpl_rule = "named_jtmpl_rule";
 const auto named_jtmpl_rule_def =
-	   spec_symbols[op_term_is_start] >> x3::lit("template")[([](auto&){std::cout<<__LINE__<<std::endl;})] >> +x3::space >> single_var_name[set_name] >> spec_symbols[op_term_is_end]
-	>> -jtmpl_rule[([](auto&c){_val(c).cnt=std::move(_attr(c).cnt);})]
-	>> spec_symbols[op_term_is_start] >> x3::lit("endtemplate") >> spec_symbols[op_term_is_end]
+	   -(spec_symbols[op_term_is_start] >> x3::lit("template") >> +x3::space >> single_var_name[set_name] >> spec_symbols[op_term_is_end])
+	>> jtmpl_rule[([](auto&c){_val(c).cnt=std::move(_attr(c).cnt);})]
+	>> -(spec_symbols[op_term_is_start] >> x3::lit("endtemplate") >> spec_symbols[op_term_is_end])
 ;
 
 const x3::rule<struct jtmpl_tag, std::reference_wrapper<std::vector<jtmpl<gram_traits::types::out_string_t>>>> jtmpls_rule = "jtmpls_rule";
 const auto jtmpls_rule_def =
 	  +(named_jtmpl_rule[empback])
-	| jtmpl_rule[empback]
+	//| jtmpl_rule[empback]
 ;
 
 BOOST_SPIRIT_DEFINE(op_out)
