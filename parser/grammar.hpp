@@ -27,8 +27,8 @@ struct parser_data {
 	} cmt;
 };
 
-std::vector<s_jtmpl> parse(std::string_view data, parser_data env={});
-std::vector<s_jtmpl> parse(std::wstring_view data, parser_data env={});
-std::vector<w_jtmpl> wparse(std::wstring_view data, parser_data env={});
+s_jtmpl parse(std::string_view data, parser_data env={});
+s_jtmpl parse(std::wstring_view data, parser_data env={});
+w_jtmpl wparse(std::wstring_view data, parser_data env={});
 
 } // namespace cppjinja

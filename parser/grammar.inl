@@ -169,6 +169,8 @@ auto op_term_check_end = [](auto& ctx) {
 		ok = val == "endblock";
 	if(std::holds_alternative<st_macro<str_t>>(*block.ref))
 		ok = val == "endmacro";
+	if(std::holds_alternative<jtmpl>(*block.ref))
+		ok = val == "endtemplate";
 	_pass(ctx) = ok;
 };
 
@@ -286,8 +288,17 @@ const x3::rule<struct named_block, std::string> named_block = "named_block";
 const auto named_block_def = *gram_traits::space >> x3::lit("block")
 	>> +gram_traits::space >> single_var_name[set] >> *gram_traits::space ;
 
+const x3::rule<struct jtmpl_tag, jtmpl> jtmpl_rule = "jtmpl_rule";
+const auto jtmpl_rule_def =
+	   x3::lit("template")
+	>> -(+gram_traits::space >> single_var_name[set_name])
+	>> *gram_traits::space
+;
+
 const x3::rule<struct block_content_tag, block_content<gram_traits::types::out_string_t>> block_content_r = "block_content";
 const x3::rule<struct block_r1, block_t> block_r1 = "block_r1";
+const x3::rule<struct block_tag, std::reference_wrapper<gram_traits::types::block_t>> block = "block";
+ 
 const auto block_r1_def =
 	   (spec_symbols  [op_term_is_start]
 	>> ( op_if        [set_ref]
@@ -304,6 +315,12 @@ const auto block_r1_def =
 		>> spec_symbols[op_term_is_end]
 	]
 	;
+const auto block_def =
+       *(
+                 op_out             [ empback_cnt ]
+               | block_r1           [ empback_cnt ]
+               | gram_traits::char_ [ block_add_content ]
+       );
 const auto block_content_r_def = *(
 	  op_out    [ empback_cnt ]
 	| op_comment[ empback_cnt]
@@ -312,27 +329,8 @@ const auto block_content_r_def = *(
 	) ;
 
 
-const x3::rule<struct jtmpl_tag, jtmpl<gram_traits::types::out_string_t>> jtmpl_rule = "jtmpl_rule";
-const auto jtmpl_rule_def =  *(
-	  block_r1             [empback_cnt]
-	| op_out               [empback_to_unnamed]
-	| gram_traits::char_   [empback_cnt_to_unnamed]
-	)
-;
 
-const x3::rule<struct named_jtmpl_tag, jtmpl<gram_traits::types::out_string_t>> named_jtmpl_rule = "named_jtmpl_rule";
-const auto named_jtmpl_rule_def =
-	   -(spec_symbols[op_term_is_start] >> x3::lit("template") >> +x3::space >> single_var_name[set_name] >> spec_symbols[op_term_is_end])
-	>> jtmpl_rule[([](auto&c){_val(c).cnt=std::move(_attr(c).cnt);})]
-	>> -(spec_symbols[op_term_is_start] >> x3::lit("endtemplate") >> spec_symbols[op_term_is_end])
-;
-
-const x3::rule<struct jtmpl_tag, std::reference_wrapper<std::vector<jtmpl<gram_traits::types::out_string_t>>>> jtmpls_rule = "jtmpls_rule";
-const auto jtmpls_rule_def =
-	  +(named_jtmpl_rule[empback])
-	//| jtmpl_rule[empback]
-;
-
+BOOST_SPIRIT_DEFINE(block)
 BOOST_SPIRIT_DEFINE(op_out)
 BOOST_SPIRIT_DEFINE(quoted_string)
 BOOST_SPIRIT_DEFINE(spec_symbols)
@@ -353,8 +351,6 @@ BOOST_SPIRIT_DEFINE(named_block)
 BOOST_SPIRIT_DEFINE(op_macro)
 BOOST_SPIRIT_DEFINE(op_macro_param)
 BOOST_SPIRIT_DEFINE(jtmpl_rule)
-BOOST_SPIRIT_DEFINE(jtmpls_rule)
-BOOST_SPIRIT_DEFINE(named_jtmpl_rule)
 
 #ifndef FILE_INLINING
 } // namespace cppjinja::deubg

@@ -67,6 +67,7 @@ int lex_cmp(const Left& left, const Right& right, const Args&... args)
 
 
 DEFINE_OPERATORS(var_name, left, right)
+DEFINE_OPERATORS(jtmpl, left.name, right.name, left.extends, right.extends)
 std::ostream& operator << (std::ostream& out, comparator obj);
 
 template<typename String>
@@ -192,14 +193,6 @@ std::ostream& operator << (std::ostream& out, const b_block<String>& obj)
 		std::visit(printer, i);
 	}
 
-	return out;
-}
-
-template<typename String>
-std::ostream& operator << (std::ostream& out, const jtmpl<String>& obj)
-{
-	out << "template: " << obj.name << std::endl;
-	for(auto& b:obj.cnt) out << b << std::endl;
 	return out;
 }
 

@@ -9,8 +9,9 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE cppjinja parser
 
-#include <iostream>
+#include <bitset>
 #include <sstream>
+#include <iostream>
 #include <boost/test/unit_test.hpp>
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/data/monomorphic.hpp>
@@ -78,24 +79,38 @@ std::string gen_random_string(const std::string& alphabet)
 std::string random_string() { return gen_random_string(rnd_data_string()); }
 std::string random_alnum() { return gen_random_string(rnd_data_alnum()); }
 
+typedef std::bitset<2> mbflags;
+mbflags make_mbflags(bool no_cnt=false, bool emb=false)
+{
+	mbflags ret;
+	if(no_cnt) ret.set(0);
+	if(emb) ret.set(1);
+	return ret;
+}
+
 template<typename String, typename Ref, typename... Cnt>
-auto make_block(Ref&& ref, Cnt&&... cnt)
+auto make_block(mbflags flags, Ref&& ref, Cnt&&... cnt)
 {
 	using block_t = cppjinja::b_block<String>;
 	using cnt_t = cppjinja::block_content<String>;
-	return block_t{std::move(ref), cnt_t{std::move(cnt)...}};
+	auto ret = block_t{std::forward<Ref>(ref), cnt_t{std::forward<Cnt>(cnt)...}};
+	if(flags.test(0)) ret.cnt.clear();
+	if(flags.test(1)) ret = block_t{std::nullopt, cnt_t{std::move(ret)}};
+	return ret;
 }
 
 template<typename Ref, typename... Cnt>
-auto make_sblock(Ref&& ref, Cnt&&... cnt)
+auto make_sblock(mbflags flags, Ref&& ref, Cnt&&... cnt)
 {
-	return make_block<std::string>(std::forward<Ref>(ref), std::forward<Cnt>(cnt)...);
+	//return make_block<std::string>(false, std::nullopt, make_block<std::string>(no_cnt, std::forward<Ref>(ref), std::forward<Cnt>(cnt)...));
+	return make_block<std::string>(flags, std::forward<Ref>(ref), std::forward<Cnt>(cnt)...);
 }
 
 template<typename Ref, typename... Cnt>
-auto make_wblock(Ref&& ref, Cnt&&... cnt)
+auto make_wblock(mbflags flags, Ref&& ref, Cnt&&... cnt)
 {
-	return make_block<std::wstring>(std::forward<Ref>(ref), std::forward<Cnt>(cnt)...);
+	//return make_block<std::wstring>(false, make_block<std::wstring>(no_cnt, std::forward<Ref>(ref), std::forward<Cnt>(cnt)...));
+	return make_block<std::wstring>(flags, std::forward<Ref>(ref), std::forward<Cnt>(cnt)...);
 }
 
 } // namespace tests
@@ -121,41 +136,40 @@ void check_block(const Obj& obj, std::size_t ind, const Val& val, const Vals&...
 }
 
 template<typename Block, typename Val, typename... Vals>
-void compare_block(const std::vector<Block>& left, std::size_t ind, const Val& val, const Vals&... vals)
+void compare_block(const Block& left, std::size_t ind, const Val& val, const Vals&... vals)
 {
-	BOOST_REQUIRE_LE(ind+1, left.size());
-	BOOST_CHECK_EQUAL(left[ind], val);
+	//BOOST_REQUIRE_LE(ind+1, left.cnt.size());
+	//BOOST_TEST(left.cnt[ind] == val);
+	BOOST_TEST(left == val);
 
-	if constexpr ( 0 < sizeof...(vals) ) compare_block(left, ind, vals...);
+	if constexpr ( 0 < sizeof...(vals) ) compare_block(left, ind+1, vals...);
 }
 
-template<typename... Vals>
-void parse_check_blocks(std::string_view data, std::size_t ind, const Vals&... vals)
+template<typename Vals>
+void parse_check_blocks(std::string_view data, std::size_t ind, const Vals& vals)
 {
 	BOOST_TEST_CONTEXT("Data was " << data) {
-		std::vector<cppjinja::s_jtmpl> tmpl;
+		cppjinja::s_jtmpl tmpl;
 		BOOST_CHECK_NO_THROW(tmpl=cppjinja::parse(data));
-		BOOST_REQUIRE_EQUAL(tmpl.size(), 1);
-		BOOST_REQUIRE_EQUAL(tmpl[0].cnt.size(), 1);
-		compare_block(tmpl[0].cnt, ind, vals...);
+		BOOST_TEST( tmpl == vals );
+		//compare_block(tmpl, ind, vals...);
 	}
 }
 
 template<typename... Vals>
 void parse_check_content(std::string_view data, std::size_t ind, Vals&&... vals)
 {
-	parse_check_blocks(data, ind, tests::make_sblock(std::nullopt, std::forward<Vals>(vals)...));
+	parse_check_blocks(data, ind, tests::make_sblock(tests::make_mbflags(), std::nullopt, std::forward<Vals>(vals)...));
 }
 
-template<typename... Vals>
-void wparse_check_blocks(std::wstring_view data, std::size_t ind, const Vals&... vals)
+template<typename Vals>
+void wparse_check_blocks(std::wstring_view data, std::size_t ind, const Vals& vals)
 {
 	BOOST_TEST_CONTEXT("Data was wchar_t* string...") {
-		std::vector<cppjinja::w_jtmpl> bl;
-		BOOST_CHECK_NO_THROW(bl=cppjinja::wparse(data));
-		BOOST_REQUIRE_EQUAL(bl.size(), 1);
-		BOOST_REQUIRE_EQUAL(bl[0].cnt.size(), 1);
-		compare_block(bl[0].cnt, ind, vals...);
+		cppjinja::w_jtmpl tmpl;
+		BOOST_CHECK_NO_THROW(tmpl=cppjinja::wparse(data));
+		//compare_block(tmpl, ind, vals...);
+		BOOST_TEST( tmpl==vals );
 	}
 }
 
@@ -243,8 +257,8 @@ BOOST_DATA_TEST_CASE(
 	using st_if = cppjinja::st_if<std::string>;
 
 	std::string data = "<%"s + start + "%>"s + text + "<%"s + finish + "%>"s;
-	auto result = tests::make_sblock(st_if{comparator::eq, var_name{"a"s}, var_name{"b"s}}, text);
-	if(text.empty()) result.cnt.clear();
+	auto flags = tests::make_mbflags(text.empty(), true);
+	auto result = tests::make_sblock(flags, st_if{comparator::eq, var_name{"a"s}, var_name{"b"s}}, text);
 
 	parse_check_blocks(data, 0, result);
 }
@@ -265,10 +279,11 @@ BOOST_AUTO_TEST_CASE(no_comparator)
 	using cppjinja::var_name;
 	using st_if = cppjinja::st_if<std::string>;
 
-	auto result = tests::make_sblock(st_if{comparator::no, var_name{"a"s}, ""s}, "kuku"s);
+	auto flags = tests::make_mbflags(false, true);
+	auto result = tests::make_sblock(flags, st_if{comparator::no, var_name{"a"s}, ""s}, "kuku"s);
 	parse_check_blocks( "<%if a%>kuku<%endif%>"sv, 0, result);
 	parse_check_blocks( "<%if a %>kuku<%endif%>"sv, 0, result);
-	result = tests::make_sblock(st_if{comparator::no, var_name{"a"s,"is"s,"b"s}, ""s}, "kuku"s);
+	result = tests::make_sblock(flags, st_if{comparator::no, var_name{"a"s,"is"s,"b"s}, ""s}, "kuku"s);
 	parse_check_blocks( "<%if a.is.b%>kuku<%endif%>"sv, 0, result);
 	parse_check_blocks( "<%if a.is.b %>kuku<%endif%>"sv, 0, result);
 }
@@ -286,8 +301,8 @@ BOOST_DATA_TEST_CASE(
 	using st_for = cppjinja::st_for<std::string>;
 
 	std::string data = "<%"s + start + "%>"s + text + "<%"s + finish + "%>"s;
-	auto result = tests::make_sblock(st_for{{var_name{"a"s}}, var_name{"q"s}}, text);
-	if(text.empty()) result.cnt.clear();
+	auto flags = tests::make_mbflags(text.empty(), true);
+	auto result = tests::make_sblock(flags, st_for{{var_name{"a"s}}, var_name{"q"s}}, text);
 	parse_check_blocks( data, 0, result);
 }
 BOOST_AUTO_TEST_SUITE_END() // op_for
@@ -303,8 +318,8 @@ BOOST_DATA_TEST_CASE(
 	using cppjinja::parse;
 
 	std::string data = start + text + finish;
-	auto result = tests::make_sblock(st_raw{}, text);
-	if(text.empty()) result.cnt.clear();
+	auto flags = tests::make_mbflags(text.empty(), true);
+	auto result = tests::make_sblock(flags, st_raw{}, text);
 	parse_check_blocks( data, 0, result );
 }
 BOOST_DATA_TEST_CASE( comment, ut::data::make(""s, "s"s, "aa"s, tests::random_string()), text)
@@ -316,7 +331,8 @@ BOOST_DATA_TEST_CASE( comment, ut::data::make(""s, "s"s, "aa"s, tests::random_st
 	using st_if = cppjinja::st_if<std::string>;
 	using st_comment = cppjinja::st_comment<std::string>;
 
-	auto result = tests::make_sblock(st_if{comparator::no, var_name{"a"s}, ""s}, st_comment{text});
+	auto flags = tests::make_mbflags(false,true);
+	auto result = tests::make_sblock(flags, st_if{comparator::no, var_name{"a"s}, ""s}, st_comment{text});
 	parse_check_blocks("<% if a%><#" + text + "#><%endif%>", 0, result);
 }
 BOOST_DATA_TEST_CASE(
@@ -327,8 +343,8 @@ BOOST_DATA_TEST_CASE(
 	  * ut::data::make("block "s, "\tblock\t"s, "block    "s )
 	, name, content, finish, start )
 {
-	auto result = tests::make_sblock(name, content);
-	if(content.empty()) result.cnt.clear();
+	auto flags = tests::make_mbflags(content.empty(), true);
+	auto result = tests::make_sblock(flags, name, content);
 	std::string data = "<%"s + start + name + finish+ "%>"s + content + "<%endblock%>"s;
 	parse_check_blocks(data, 0, result);
 }
@@ -348,8 +364,8 @@ BOOST_DATA_TEST_CASE(
 {
 	using st_macro = cppjinja::st_macro<std::string>;
 
-	auto result = tests::make_sblock(st_macro{name.second, params.second}, content);
-	if(content.empty()) result.cnt.clear();
+	auto flags = tests::make_mbflags(content.empty(), true);
+	auto result = tests::make_sblock(flags, st_macro{name.second, params.second}, content);
 	std::string data = "<%"s + name.first + "("s + params.first + "%>"s + content + "<%endmacro%>"s;
 	parse_check_blocks(data, 0, result);
 }

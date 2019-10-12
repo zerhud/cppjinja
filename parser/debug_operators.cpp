@@ -10,6 +10,13 @@
 
 #include <iomanip>
 
+std::ostream& cppjinja::operator << (std::ostream& out, const jtmpl& obj)
+{
+	out << "jtmpl " << obj.name;
+	if(obj.extends) out << " :" << *obj.extends << ' ';
+	return out;
+}
+
 std::ostream& cppjinja::operator << (std::ostream& out, comparator obj)
 {
 	if(obj==comparator::eq) out << "==";

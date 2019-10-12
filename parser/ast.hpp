@@ -86,6 +86,10 @@ struct st_comment {
 	String cnt;
 };
 
+struct jtmpl {
+	std::string name;
+	std::optional<std::string> extends;
+};
 
 template<typename String>
 using block_content = std::vector< std::variant<
@@ -97,27 +101,15 @@ using block_content = std::vector< std::variant<
 
 template<typename String>
 struct b_block {
-	std::optional<std::variant<std::string,st_raw,st_if<String>,st_for<String>,st_macro<String>>> ref;
+	std::optional<std::variant<std::string,st_raw,st_if<String>,st_for<String>,st_macro<String>,jtmpl>> ref;
 	block_content<String> cnt;
 };
 
 using s_block = b_block<std::string>;
 using w_block = b_block<std::wstring>;
 
-template<typename String>
-struct jtmpl {
-	std::string name;
-	std::optional<String> extends;
-	std::vector<b_block<String>> cnt;
-
-	b_block<String>& unnamed_block() {
-		for(auto& c:cnt) if(!c.ref) return c;
-		return cnt.emplace_back();
-	}
-};
-
-using s_jtmpl = jtmpl<std::string>;
-using w_jtmpl = jtmpl<std::wstring>;
+using s_jtmpl = b_block<std::string>;
+using w_jtmpl = b_block<std::wstring>;
 
 } // namespace cppjinja
 
