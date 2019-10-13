@@ -63,21 +63,21 @@ const std::string& rnd_data_alnum()
 	return alphabet;
 }
 
-std::string gen_random_string(const std::string& alphabet)
+std::string gen_random_string(const std::string& alphabet, std::int32_t min=0)
 {
 	std::random_device rdev;
 	std::mt19937 gen(rdev());
 	std::uniform_int_distribution dis(0, static_cast<int>(alphabet.size()-1));
 
 	std::string ret;
-	std::int64_t size = dis(gen);
+	std::int64_t size = dis(gen)+min;
 	while(size--) ret += alphabet.at(static_cast<std::size_t>(dis(gen)));
 
 	return ret;
 }
 
 std::string random_string() { return gen_random_string(rnd_data_string()); }
-std::string random_alnum() { return gen_random_string(rnd_data_alnum()); }
+std::string random_alnum(std::int32_t min=0) { return gen_random_string(rnd_data_alnum(),min); }
 
 typedef std::bitset<2> mbflags;
 mbflags make_mbflags(bool no_cnt=false, bool emb=false)
@@ -278,7 +278,7 @@ BOOST_DATA_TEST_CASE(
 BOOST_AUTO_TEST_SUITE_END() // op_for
 BOOST_DATA_TEST_CASE(
 	  raw
-	,   ut::data::make("kuku"s, "kuku<<"s, "kuku<%if a%>"s, ""s, "a", "aa"s)
+	,   ut::data::make("kuku"s, "kuku<<"s, "kuku<%if a%>"s, ""s, "a", "aa"s,"<%if a is b%><%endif%>"s)
 	  * ut::data::make("<% raw %>"s, "<% raw%>"s, "<%raw %>"s, "<%raw%>"s)
 	  * ut::data::make("<% endraw %>"s, "<% endraw%>"s, "<%endraw %>"s, "<%endraw%>"s)
 	, text, start, finish )
@@ -307,7 +307,7 @@ BOOST_DATA_TEST_CASE( comment, ut::data::make(""s, "s"s, "aa"s, tests::random_st
 }
 BOOST_DATA_TEST_CASE(
 	  named_block
-	,   ut::data::make("a"s, "aa"s, tests::random_alnum())
+	,   ut::data::make("a"s, "aa"s, tests::random_alnum(1))
 	  * ut::data::make(""s, "a", "ss"s, ",!#", tests::random_string())
 	  * ut::data::make(" "s, "\t"s, "   \t "s)
 	  * ut::data::make("block "s, "\tblock\t"s, "block    "s )
@@ -339,13 +339,44 @@ BOOST_DATA_TEST_CASE(
 	std::string data = "<%"s + name.first + "("s + params.first + "%>"s + content + "<%endmacro%>"s;
 	parse_check_blocks(data, result);
 }
+BOOST_AUTO_TEST_CASE(few)
+{
+	using cppjinja::st_raw;
+	using st_if = cppjinja::st_if<std::string>;
+	using cppjinja::comparator;
+	using cppjinja::var_name;
+
+	auto result = tests::make_sblock(tests::make_mbflags(false,true),st_raw{},"kuku"s);
+	result.cnt.emplace_back(tests::make_sblock(tests::make_mbflags(false,false),st_if{comparator::eq, var_name{"a"}, var_name{"b"}},"other"s));
+	parse_check_blocks("<%raw%>kuku<%endraw%><%if a is b%>other<%endif%>"sv, result);
+}
+BOOST_AUTO_TEST_CASE(emb)
+{
+	using st_if = cppjinja::st_if<std::string>;
+	using cppjinja::st_raw;
+	using cppjinja::comparator;
+	using cppjinja::var_name;
+
+	using tests::make_sblock;
+
+	auto flags_out = tests::make_mbflags(false,true);
+	auto flags_inner = tests::make_mbflags(false,false);
+	auto result = make_sblock(flags_out, st_if{comparator::eq, var_name{"a"s}, var_name{"b"s}},
+	                          make_sblock(flags_inner, st_raw{}, "kuku"s)
+	                          );
+	parse_check_blocks("<%if a is b%><%raw%>kuku<%endraw%><%endif%>"sv, result);
+}
 BOOST_AUTO_TEST_SUITE_END() // blocks
 BOOST_AUTO_TEST_SUITE(tmpls)
 BOOST_AUTO_TEST_CASE(simple)
 {
 	using cppjinja::jtmpl;
-	auto result = tests::make_sblock(tests::make_mbflags(), jtmpl{"tmpl"s, std::nullopt}, "kuku"s);
-	parse_check_blocks("<%template tmpl%>kuku<%endtemplate%>"sv, 0, result);
+	auto flags = tests::make_mbflags(false,true);
+	auto result = tests::make_sblock(flags, jtmpl{"tmpl"s, std::nullopt}, "kuku"s);
+	parse_check_blocks("<%template tmpl%>kuku<%endtemplate%>"sv, result);
+	result.cnt.emplace_back(tests::make_sblock(flags.reset(1), jtmpl{"t2"s, std::nullopt}, "other"s));
+	//parse_check_blocks("<%template tmpl%>kuku<%endtemplate%><%template tt%>other<%endtemplate%>"sv, result);
+	parse_check_blocks("<%template tmpl%>kuku<%endtemplate%><%template tmpl%>kuku<%endtemplate%>"sv, result);
 }
 BOOST_AUTO_TEST_SUITE_END() // tmpls
 
