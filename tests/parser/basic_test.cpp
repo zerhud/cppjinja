@@ -102,14 +102,12 @@ auto make_block(mbflags flags, Ref&& ref, Cnt&&... cnt)
 template<typename Ref, typename... Cnt>
 auto make_sblock(mbflags flags, Ref&& ref, Cnt&&... cnt)
 {
-	//return make_block<std::string>(false, std::nullopt, make_block<std::string>(no_cnt, std::forward<Ref>(ref), std::forward<Cnt>(cnt)...));
 	return make_block<std::string>(flags, std::forward<Ref>(ref), std::forward<Cnt>(cnt)...);
 }
 
 template<typename Ref, typename... Cnt>
 auto make_wblock(mbflags flags, Ref&& ref, Cnt&&... cnt)
 {
-	//return make_block<std::wstring>(false, make_block<std::wstring>(no_cnt, std::forward<Ref>(ref), std::forward<Cnt>(cnt)...));
 	return make_block<std::wstring>(flags, std::forward<Ref>(ref), std::forward<Cnt>(cnt)...);
 }
 
@@ -119,65 +117,37 @@ using namespace std::literals;
 using cppjinja::parse;
 namespace ut = boost::unit_test;
 
-template<typename Obj, typename Val>
-void check_block(const Obj& obj, std::size_t ind, const Val& val)
-{
-	BOOST_REQUIRE_LE(ind+1, obj.cnt.size());
-	BOOST_TEST_CONTEXT("Object [" << ind << "] from " << obj)
-	    BOOST_REQUIRE(std::holds_alternative<Val>(obj.cnt[ind]));
-	BOOST_CHECK_EQUAL(std::get<Val>(obj.cnt[ind]), val);
-}
-
-template<typename Obj, typename Val, typename... Vals>
-void check_block(const Obj& obj, std::size_t ind, const Val& val, const Vals&... vals)
-{
-	check_block(obj, ind, val);
-	check_block(obj, ind+1, vals...);
-}
-
-template<typename Block, typename Val, typename... Vals>
-void compare_block(const Block& left, std::size_t ind, const Val& val, const Vals&... vals)
-{
-	//BOOST_REQUIRE_LE(ind+1, left.cnt.size());
-	//BOOST_TEST(left.cnt[ind] == val);
-	BOOST_TEST(left == val);
-
-	if constexpr ( 0 < sizeof...(vals) ) compare_block(left, ind+1, vals...);
-}
-
 template<typename Vals>
-void parse_check_blocks(std::string_view data, std::size_t ind, const Vals& vals)
+void parse_check_blocks(std::string_view data, const Vals& vals)
 {
 	BOOST_TEST_CONTEXT("Data was " << data) {
 		cppjinja::s_jtmpl tmpl;
 		BOOST_CHECK_NO_THROW(tmpl=cppjinja::parse(data));
 		BOOST_TEST( tmpl == vals );
-		//compare_block(tmpl, ind, vals...);
 	}
 }
 
 template<typename... Vals>
-void parse_check_content(std::string_view data, std::size_t ind, Vals&&... vals)
+void parse_check_content(std::string_view data, Vals&&... vals)
 {
-	parse_check_blocks(data, ind, tests::make_sblock(tests::make_mbflags(), std::nullopt, std::forward<Vals>(vals)...));
+	parse_check_blocks(data, tests::make_sblock(tests::make_mbflags(), std::nullopt, std::forward<Vals>(vals)...));
 }
 
 template<typename Vals>
-void wparse_check_blocks(std::wstring_view data, std::size_t ind, const Vals& vals)
+void wparse_check_blocks(std::wstring_view data, const Vals& vals)
 {
 	BOOST_TEST_CONTEXT("Data was wchar_t* string...") {
 		cppjinja::w_jtmpl tmpl;
 		BOOST_CHECK_NO_THROW(tmpl=cppjinja::wparse(data));
-		//compare_block(tmpl, ind, vals...);
 		BOOST_TEST( tmpl==vals );
 	}
 }
 
 template<typename... Vals>
-void wparse_check_content(std::wstring_view data, std::size_t ind, Vals&&... vals)
+void wparse_check_content(std::wstring_view data, Vals&&... vals)
 {
 	using cnt_t = cppjinja::block_content<std::wstring>;
-	wparse_check_blocks(data, ind, cppjinja::w_block{std::nullopt, cnt_t{std::forward<Vals>(vals)...}});
+	wparse_check_blocks(data, cppjinja::w_block{std::nullopt, cnt_t{std::forward<Vals>(vals)...}});
 }
 
 BOOST_DATA_TEST_CASE(just_str
@@ -186,21 +156,21 @@ BOOST_DATA_TEST_CASE(just_str
 		, data, wdata)
 {
 	BOOST_TEST_CONTEXT("test with wide string, line " << __LINE__) {
-		parse_check_content(data, 0, data);
-		wparse_check_content(wdata, 0, wdata);
+		parse_check_content(data, data);
+		wparse_check_content(wdata, wdata);
 	}
 }
 
 BOOST_AUTO_TEST_SUITE(output)
 BOOST_AUTO_TEST_CASE(string)
 {
-	parse_check_content("test <= 'kuku' =>"sv, 0, "test "s, cppjinja::st_out<std::string>{ "kuku"s, {} });
-	parse_check_content("test <= \"kuku\" =>"sv, 0, "test "s, cppjinja::st_out<std::string>{ "kuku"s, {} });
-	parse_check_content("<= 'kuk\\'u' =>"sv, 0, cppjinja::st_out<std::string>{ "kuk'u"s, {} });
+	parse_check_content("test <= 'kuku' =>"sv, "test "s, cppjinja::st_out<std::string>{ "kuku"s, {} });
+	parse_check_content("test <= \"kuku\" =>"sv, "test "s, cppjinja::st_out<std::string>{ "kuku"s, {} });
+	parse_check_content("<= 'kuk\\'u' =>"sv, cppjinja::st_out<std::string>{ "kuk'u"s, {} });
 
 	BOOST_TEST_CONTEXT("Russian data, line " << __LINE__ ) {
-		wparse_check_content(L"<= 'привет' =>", 0, cppjinja::st_out<std::wstring>{ L"привет"s, {} });
-		wparse_check_content(L"п<= 'привет' =>", 0, L"п"s, cppjinja::st_out<std::wstring>{ L"привет"s, {} });
+		wparse_check_content(L"<= 'привет' =>", cppjinja::st_out<std::wstring>{ L"привет"s, {} });
+		wparse_check_content(L"п<= 'привет' =>", L"п"s, cppjinja::st_out<std::wstring>{ L"привет"s, {} });
 	}
 }
 BOOST_DATA_TEST_CASE(variable
@@ -211,8 +181,8 @@ BOOST_DATA_TEST_CASE(variable
 	using cppjinja::parse;
 	using sto_t = cppjinja::st_out<std::string>;
 
-	parse_check_content(data, 0, sto_t{ result, {} } );
-	parse_check_content(data, 0, sto_t{ result, {} } );
+	parse_check_content(data, sto_t{ result, {} } );
+	parse_check_content(data, sto_t{ result, {} } );
 }
 BOOST_AUTO_TEST_CASE(function)
 {
@@ -221,11 +191,11 @@ BOOST_AUTO_TEST_CASE(function)
 	using sto_t = cppjinja::st_out<std::string>;
 	using fnc_call = cppjinja::fnc_call<std::string>;
 
-	parse_check_content("q<= foo() =>"sv, 0, "q"s, sto_t{ fnc_call{{"foo"s}, {}}, {} });
-	parse_check_content("<= foo(qq) =>"sv, 0, sto_t{ fnc_call{{"foo"s}, {var_name{"qq"s}}}, {} });
-	parse_check_content("<= foo(q.q) =>"sv, 0, sto_t{ fnc_call{{"foo"s}, {var_name{"q"s, "q"s}}}, {} });
-	parse_check_content("<= foo(qq, q.q) =>"sv, 0, sto_t{ fnc_call{{"foo"s}, {var_name{"qq"s}, var_name{"q"s, "q"s}}}, {} });
-	parse_check_content("<= foo('qq') =>"sv, 0, sto_t{ fnc_call{{"foo"s}, {"qq"s}}, {} });
+	parse_check_content("q<= foo() =>"sv, "q"s, sto_t{ fnc_call{{"foo"s}, {}}, {} });
+	parse_check_content("<= foo(qq) =>"sv, sto_t{ fnc_call{{"foo"s}, {var_name{"qq"s}}}, {} });
+	parse_check_content("<= foo(q.q) =>"sv, sto_t{ fnc_call{{"foo"s}, {var_name{"q"s, "q"s}}}, {} });
+	parse_check_content("<= foo(qq, q.q) =>"sv, sto_t{ fnc_call{{"foo"s}, {var_name{"qq"s}, var_name{"q"s, "q"s}}}, {} });
+	parse_check_content("<= foo('qq') =>"sv, sto_t{ fnc_call{{"foo"s}, {"qq"s}}, {} });
 }
 BOOST_AUTO_TEST_CASE(filters)
 {
@@ -234,12 +204,12 @@ BOOST_AUTO_TEST_CASE(filters)
 	using sto_t = cppjinja::st_out<std::string>;
 	using fnc_call = cppjinja::fnc_call<std::string>;
 
-	parse_check_content("<= foo() | filter =>"sv, 0, sto_t{ fnc_call{{"foo"s}, {}}, {var_name{"filter"s}} });
-	parse_check_content("<= foo(qq)|f1|f2=>"sv, 0, sto_t{ fnc_call{{"foo"s}, {var_name{"qq"s}}}, {var_name{"f1"s},var_name{"f2"s}} });
-	parse_check_content("text<= 'q'|f =>"sv, 0, "text"s, sto_t{ "q"s, {var_name{"f"s}} });
-	parse_check_content("<= 'q'|f() =>"sv, 0, sto_t{ "q"s, {fnc_call{{"f"s},{}}} });
-	parse_check_content("<= 'q'|f('q') =>"sv, 0, sto_t{ "q"s, {fnc_call{{"f"s},{"q"s}}} });
-	parse_check_content("<= 'q'|a.f('q',q) =>"sv, 0, sto_t{ "q"s, {fnc_call{{"a"s,"f"s},{"q"s,var_name{"q"s}}}} });
+	parse_check_content("<= foo() | filter =>"sv, sto_t{ fnc_call{{"foo"s}, {}}, {var_name{"filter"s}} });
+	parse_check_content("<= foo(qq)|f1|f2=>"sv, sto_t{ fnc_call{{"foo"s}, {var_name{"qq"s}}}, {var_name{"f1"s},var_name{"f2"s}} });
+	parse_check_content("text<= 'q'|f =>"sv, "text"s, sto_t{ "q"s, {var_name{"f"s}} });
+	parse_check_content("<= 'q'|f() =>"sv, sto_t{ "q"s, {fnc_call{{"f"s},{}}} });
+	parse_check_content("<= 'q'|f('q') =>"sv, sto_t{ "q"s, {fnc_call{{"f"s},{"q"s}}} });
+	parse_check_content("<= 'q'|a.f('q',q) =>"sv, sto_t{ "q"s, {fnc_call{{"a"s,"f"s},{"q"s,var_name{"q"s}}}} });
 }
 BOOST_AUTO_TEST_SUITE_END() // output
 BOOST_AUTO_TEST_SUITE(blocks)
@@ -260,7 +230,7 @@ BOOST_DATA_TEST_CASE(
 	auto flags = tests::make_mbflags(text.empty(), true);
 	auto result = tests::make_sblock(flags, st_if{comparator::eq, var_name{"a"s}, var_name{"b"s}}, text);
 
-	parse_check_blocks(data, 0, result);
+	parse_check_blocks(data, result);
 }
 BOOST_DATA_TEST_CASE(
 	  errors
@@ -281,11 +251,11 @@ BOOST_AUTO_TEST_CASE(no_comparator)
 
 	auto flags = tests::make_mbflags(false, true);
 	auto result = tests::make_sblock(flags, st_if{comparator::no, var_name{"a"s}, ""s}, "kuku"s);
-	parse_check_blocks( "<%if a%>kuku<%endif%>"sv, 0, result);
-	parse_check_blocks( "<%if a %>kuku<%endif%>"sv, 0, result);
+	parse_check_blocks( "<%if a%>kuku<%endif%>"sv, result);
+	parse_check_blocks( "<%if a %>kuku<%endif%>"sv, result);
 	result = tests::make_sblock(flags, st_if{comparator::no, var_name{"a"s,"is"s,"b"s}, ""s}, "kuku"s);
-	parse_check_blocks( "<%if a.is.b%>kuku<%endif%>"sv, 0, result);
-	parse_check_blocks( "<%if a.is.b %>kuku<%endif%>"sv, 0, result);
+	parse_check_blocks( "<%if a.is.b%>kuku<%endif%>"sv, result);
+	parse_check_blocks( "<%if a.is.b %>kuku<%endif%>"sv, result);
 }
 BOOST_AUTO_TEST_SUITE_END() // op_if
 BOOST_AUTO_TEST_SUITE(op_for)
@@ -303,7 +273,7 @@ BOOST_DATA_TEST_CASE(
 	std::string data = "<%"s + start + "%>"s + text + "<%"s + finish + "%>"s;
 	auto flags = tests::make_mbflags(text.empty(), true);
 	auto result = tests::make_sblock(flags, st_for{{var_name{"a"s}}, var_name{"q"s}}, text);
-	parse_check_blocks( data, 0, result);
+	parse_check_blocks( data, result);
 }
 BOOST_AUTO_TEST_SUITE_END() // op_for
 BOOST_DATA_TEST_CASE(
@@ -320,7 +290,7 @@ BOOST_DATA_TEST_CASE(
 	std::string data = start + text + finish;
 	auto flags = tests::make_mbflags(text.empty(), true);
 	auto result = tests::make_sblock(flags, st_raw{}, text);
-	parse_check_blocks( data, 0, result );
+	parse_check_blocks( data, result );
 }
 BOOST_DATA_TEST_CASE( comment, ut::data::make(""s, "s"s, "aa"s, tests::random_string()), text)
 {
@@ -333,7 +303,7 @@ BOOST_DATA_TEST_CASE( comment, ut::data::make(""s, "s"s, "aa"s, tests::random_st
 
 	auto flags = tests::make_mbflags(false,true);
 	auto result = tests::make_sblock(flags, st_if{comparator::no, var_name{"a"s}, ""s}, st_comment{text});
-	parse_check_blocks("<% if a%><#" + text + "#><%endif%>", 0, result);
+	parse_check_blocks("<% if a%><#" + text + "#><%endif%>", result);
 }
 BOOST_DATA_TEST_CASE(
 	  named_block
@@ -346,7 +316,7 @@ BOOST_DATA_TEST_CASE(
 	auto flags = tests::make_mbflags(content.empty(), true);
 	auto result = tests::make_sblock(flags, name, content);
 	std::string data = "<%"s + start + name + finish+ "%>"s + content + "<%endblock%>"s;
-	parse_check_blocks(data, 0, result);
+	parse_check_blocks(data, result);
 }
 using macparam = cppjinja::macro_parameter<std::string>;
 BOOST_DATA_TEST_CASE(
@@ -367,6 +337,6 @@ BOOST_DATA_TEST_CASE(
 	auto flags = tests::make_mbflags(content.empty(), true);
 	auto result = tests::make_sblock(flags, st_macro{name.second, params.second}, content);
 	std::string data = "<%"s + name.first + "("s + params.first + "%>"s + content + "<%endmacro%>"s;
-	parse_check_blocks(data, 0, result);
+	parse_check_blocks(data, result);
 }
 BOOST_AUTO_TEST_SUITE_END() // blocks
