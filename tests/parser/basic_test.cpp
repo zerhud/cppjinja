@@ -340,3 +340,12 @@ BOOST_DATA_TEST_CASE(
 	parse_check_blocks(data, result);
 }
 BOOST_AUTO_TEST_SUITE_END() // blocks
+BOOST_AUTO_TEST_SUITE(tmpls)
+BOOST_AUTO_TEST_CASE(simple)
+{
+	using cppjinja::jtmpl;
+	auto result = tests::make_sblock(tests::make_mbflags(), jtmpl{"tmpl"s, std::nullopt}, "kuku"s);
+	parse_check_blocks("<%template tmpl%>kuku<%endtemplate%>"sv, 0, result);
+}
+BOOST_AUTO_TEST_SUITE_END() // tmpls
+

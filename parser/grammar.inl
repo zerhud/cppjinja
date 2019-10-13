@@ -306,6 +306,7 @@ const auto block_r1_def =
 	   | op_for       [set_ref]
 	   | op_raw       [set_ref]
 	   | named_block  [set_ref]
+	   | jtmpl_rule   [set_ref]
 	   )  )
 	>  spec_symbols   [op_term_is_end]
 	>> -(raw_text[cnt_if_raw] | block_content_r[set_cnt])
