@@ -67,7 +67,7 @@ int lex_cmp(const Left& left, const Right& right, const Args&... args)
 
 
 DEFINE_OPERATORS(var_name, left, right)
-DEFINE_OPERATORS(jtmpl, left.name, right.name, left.extends, right.extends)
+DEFINE_OPERATORS(st_jtmpl, left.name, right.name, left.extends, right.extends)
 std::ostream& operator << (std::ostream& out, comparator obj);
 
 template<typename String>

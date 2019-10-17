@@ -169,8 +169,11 @@ auto op_term_check_end = [](auto& ctx) {
 		ok = val == "endblock";
 	if(std::holds_alternative<st_macro<str_t>>(*block.ref))
 		ok = val == "endmacro";
-	if(std::holds_alternative<jtmpl>(*block.ref))
+	std::cout << "in var " << block.ref->index() << std::endl;
+	if(std::holds_alternative<st_jtmpl>(*block.ref)) {
+		std::cout << "here endtempalte" << std::endl;
 		ok = val == "endtemplate";
+	}
 	_pass(ctx) = ok;
 };
 
@@ -288,11 +291,12 @@ const x3::rule<struct named_block, std::string> named_block = "named_block";
 const auto named_block_def = *gram_traits::space >> x3::lit("block")
 	>> +gram_traits::space >> single_var_name[set] >> *gram_traits::space ;
 
-const x3::rule<struct jtmpl_tag, jtmpl> jtmpl_rule = "jtmpl_rule";
-const auto jtmpl_rule_def =
-	   x3::lit("template")
-	>> -(+gram_traits::space >> single_var_name[set_name])
-	>> *gram_traits::space
+const x3::rule<struct jtmpl_tag, st_jtmpl> jtmpl_rule = "jtmpl_rule";
+const auto jtmpl_rule_def = *gram_traits::space[nop]
+	>> x3::lit("template")
+	//>> -(+gram_traits::space >> single_var_name[set_name])
+	>> +gram_traits::space[nop] >> single_var_name[set_name][print]
+	>> *gram_traits::space[nop]
 ;
 
 const x3::rule<struct block_content_tag, block_content<gram_traits::types::out_string_t>> block_content_r = "block_content";
@@ -312,7 +316,7 @@ const auto block_r1_def =
 	>> -(raw_text[cnt_if_raw] | block_content_r[set_cnt])
 	>> x3::skip(gram_traits::space)[
 		   spec_symbols[op_term_is_start]
-		>> (+x3::alnum)[op_term_check_end]
+		>> (+x3::alnum)[op_term_check_end][print]
 		>> spec_symbols[op_term_is_end]
 	]
 	;

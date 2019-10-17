@@ -121,7 +121,7 @@ template<typename Vals>
 void parse_check_blocks(std::string_view data, const Vals& vals)
 {
 	BOOST_TEST_CONTEXT("Data was " << data) {
-		cppjinja::s_jtmpl tmpl;
+		cppjinja::s_block tmpl;
 		BOOST_CHECK_NO_THROW(tmpl=cppjinja::parse(data));
 		BOOST_TEST( tmpl == vals );
 	}
@@ -137,7 +137,7 @@ template<typename Vals>
 void wparse_check_blocks(std::wstring_view data, const Vals& vals)
 {
 	BOOST_TEST_CONTEXT("Data was wchar_t* string...") {
-		cppjinja::w_jtmpl tmpl;
+		cppjinja::w_block tmpl;
 		BOOST_CHECK_NO_THROW(tmpl=cppjinja::wparse(data));
 		BOOST_TEST( tmpl==vals );
 	}
@@ -370,13 +370,20 @@ BOOST_AUTO_TEST_SUITE_END() // blocks
 BOOST_AUTO_TEST_SUITE(tmpls)
 BOOST_AUTO_TEST_CASE(simple)
 {
-	using cppjinja::jtmpl;
+	using cppjinja::st_jtmpl;
 	auto flags = tests::make_mbflags(false,true);
-	auto result = tests::make_sblock(flags, jtmpl{"tmpl"s, std::nullopt}, "kuku"s);
+	auto result = tests::make_sblock(flags, st_jtmpl{"tmpl"s, std::nullopt}, "kuku"s);
 	parse_check_blocks("<%template tmpl%>kuku<%endtemplate%>"sv, result);
-	result.cnt.emplace_back(tests::make_sblock(flags.reset(1), jtmpl{"t2"s, std::nullopt}, "other"s));
+}
+BOOST_AUTO_TEST_CASE(two)
+{
+	using cppjinja::st_jtmpl;
+	auto flags = tests::make_mbflags(false,true);
+	auto result = tests::make_sblock(flags, st_jtmpl{"tmpl"s, std::nullopt}, "kuku"s);
+	result.cnt.emplace_back(tests::make_sblock(flags.reset(1), st_jtmpl{"t2"s, std::nullopt}, "other"s));
 	//parse_check_blocks("<%template tmpl%>kuku<%endtemplate%><%template tt%>other<%endtemplate%>"sv, result);
-	parse_check_blocks("<%template tmpl%>kuku<%endtemplate%><%template tmpl%>kuku<%endtemplate%>"sv, result);
+	parse_check_blocks("<% template tmpl%><% endtemplate%><% template tmpl%><% endtemplate%>"sv, result);
+	//parse_check_blocks("<% template tmpl%>kuku<%endtemplate%>kuku<% raw%>kuku<% endraw %>"sv, result);
 }
 BOOST_AUTO_TEST_SUITE_END() // tmpls
 

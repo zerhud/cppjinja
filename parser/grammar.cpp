@@ -35,9 +35,9 @@ auto make_grammar(const Parser& parser, Env&& env)
 
 } // namespace cppjinja
 
-cppjinja::s_jtmpl cppjinja::parse(std::string_view data, parser_data env)
+cppjinja::s_block cppjinja::parse(std::string_view data, parser_data env)
 {
-	s_jtmpl result;
+	s_block result;
 	auto result_ref = std::ref(result);
 	bool ok = x3::parse(
 	              boost::u8_to_u32_iterator(data.begin()),
@@ -49,9 +49,9 @@ cppjinja::s_jtmpl cppjinja::parse(std::string_view data, parser_data env)
 	return result;
 }
 
-cppjinja::s_jtmpl cppjinja::parse(std::wstring_view data, parser_data env)
+cppjinja::s_block cppjinja::parse(std::wstring_view data, parser_data env)
 {
-	s_jtmpl result;
+	s_block result;
 	auto result_ref = std::ref(result);
 	bool ok = x3::parse(
 	              data.begin(), data.end(),
@@ -62,10 +62,10 @@ cppjinja::s_jtmpl cppjinja::parse(std::wstring_view data, parser_data env)
 	return result;
 }
 
-cppjinja::w_jtmpl cppjinja::wparse(std::wstring_view data, parser_data env)
+cppjinja::w_block cppjinja::wparse(std::wstring_view data, parser_data env)
 {
 
-	w_jtmpl result;
+	w_block result;
 	auto result_ref = std::ref(result);
 	bool ok = x3::parse(
 	              data.begin(), data.end(),
