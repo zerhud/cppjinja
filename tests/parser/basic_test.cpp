@@ -92,7 +92,7 @@ template<typename String, typename Ref, typename... Cnt>
 auto make_block(mbflags flags, Ref&& ref, Cnt&&... cnt)
 {
 	using block_t = cppjinja::b_block<String>;
-	using cnt_t = cppjinja::block_content<String>;
+	using cnt_t = std::vector<cppjinja::block_content<String>>;
 	auto ret = block_t{std::forward<Ref>(ref), cnt_t{std::forward<Cnt>(cnt)...}};
 	if(flags.test(0)) ret.cnt.clear();
 	if(flags.test(1)) ret = block_t{std::nullopt, cnt_t{std::move(ret)}};
@@ -146,7 +146,7 @@ void wparse_check_blocks(std::wstring_view data, const Vals& vals)
 template<typename... Vals>
 void wparse_check_content(std::wstring_view data, Vals&&... vals)
 {
-	using cnt_t = cppjinja::block_content<std::wstring>;
+	using cnt_t = std::vector<cppjinja::block_content<std::wstring>>;
 	wparse_check_blocks(data, cppjinja::w_block{std::nullopt, cnt_t{std::forward<Vals>(vals)...}});
 }
 
@@ -370,20 +370,26 @@ BOOST_AUTO_TEST_SUITE_END() // blocks
 BOOST_AUTO_TEST_SUITE(tmpls)
 BOOST_AUTO_TEST_CASE(simple)
 {
-	using cppjinja::st_jtmpl;
+	using cppjinja::jtmpl;
 	auto flags = tests::make_mbflags(false,true);
-	auto result = tests::make_sblock(flags, st_jtmpl{"tmpl"s, std::nullopt}, "kuku"s);
+	auto result = tests::make_sblock(flags, jtmpl{"tmpl"s, std::nullopt}, "kuku"s);
 	parse_check_blocks("<%template tmpl%>kuku<%endtemplate%>"sv, result);
 }
-BOOST_AUTO_TEST_CASE(two)
+BOOST_AUTO_TEST_CASE(few)
 {
-	using cppjinja::st_jtmpl;
+	using cppjinja::jtmpl;
+	using cppjinja::st_raw;
+
 	auto flags = tests::make_mbflags(false,true);
-	auto result = tests::make_sblock(flags, st_jtmpl{"tmpl"s, std::nullopt}, "kuku"s);
-	result.cnt.emplace_back(tests::make_sblock(flags.reset(1), st_jtmpl{"t2"s, std::nullopt}, "other"s));
-	//parse_check_blocks("<%template tmpl%>kuku<%endtemplate%><%template tt%>other<%endtemplate%>"sv, result);
-	parse_check_blocks("<% template tmpl%><% endtemplate%><% template tmpl%><% endtemplate%>"sv, result);
-	//parse_check_blocks("<% template tmpl%>kuku<%endtemplate%>kuku<% raw%>kuku<% endraw %>"sv, result);
+	auto result = tests::make_sblock(flags, jtmpl{"tmpl"s, std::nullopt}, "kuku"s);
+	result.cnt.emplace_back(tests::make_sblock(flags.reset(1), jtmpl{"t2"s, std::nullopt}, "other"s));
+	std::string data = "<%template tmpl%>kuku<%endtemplate%><%template t2%>other<%endtemplate%>"s;
+	parse_check_blocks(data, result);
+	data += "<%template t3%>t3<%if a is b%>raw<%endif%><%endtemplate%>";
+	result.cnt.emplace_back(tests::make_sblock(flags, jtmpl{"t3"s,std::nullopt}, "t3"s,
+				tests::make_sblock(flags, st_raw{}, "raw"s)
+				));
+	parse_check_blocks(data, result);
 }
 BOOST_AUTO_TEST_SUITE_END() // tmpls
 

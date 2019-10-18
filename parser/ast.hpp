@@ -86,23 +86,23 @@ struct st_comment {
 	String cnt;
 };
 
-struct st_jtmpl {
+struct jtmpl {
 	std::string name;
 	std::optional<std::string> extends;
 };
 
 template<typename String>
-using block_content = std::vector< std::variant<
+using block_content = std::variant<
       String
     , st_out<String>
     , st_comment<String>
     , boost::recursive_wrapper<b_block<String>>
->>;
+>;
 
 template<typename String>
 struct b_block {
-	std::optional<std::variant<std::string,st_raw,st_jtmpl,st_if<String>,st_for<String>,st_macro<String>>> ref;
-	block_content<String> cnt;
+	std::optional<std::variant<std::string,st_raw,jtmpl,st_if<String>,st_for<String>,st_macro<String>>> ref;
+	std::vector<block_content<String>> cnt;
 };
 
 using s_block = b_block<std::string>;

@@ -10,7 +10,7 @@
 
 #include <iomanip>
 
-std::ostream& cppjinja::operator << (std::ostream& out, const st_jtmpl& obj)
+std::ostream& cppjinja::operator << (std::ostream& out, const jtmpl& obj)
 {
 	out << "jtmpl " << obj.name;
 	if(obj.extends) out << " :" << *obj.extends << ' ';
