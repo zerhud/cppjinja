@@ -388,12 +388,12 @@ BOOST_AUTO_TEST_CASE(few)
 	result.cnt.emplace_back(tests::make_sblock(flags.reset(1), jtmpl{"t2"s, std::nullopt}, "other"s));
 	std::string data = "<%template tmpl%>kuku<%endtemplate%><%template t2%>other<%endtemplate%>"s;
 	parse_check_blocks(data, result);
-	data += "<%template t3%><%raw%>raw<%endraw%>t3<%if a is b%><%endif%><%endtemplate%>";
-	result.cnt.emplace_back(tests::make_sblock(flags, jtmpl{"t3"s,std::nullopt}, "t3"s,
-				tests::make_sblock(flags, st_raw{}, "raw"s),
-				tests::make_sblock(flags, st_if{comparator::no, var_name{"a"s}, "b"s}, "if"s)
+	data += "<%template t3%><%raw%>rawinner<%endraw%>t3inner<%if a is b%>ifinner<%endif%><%endtemplate%>";
+	result.cnt.emplace_back(tests::make_sblock(flags, jtmpl{"t3"s,std::nullopt},
+	            tests::make_sblock(flags, st_raw{}, "rawinner"s),
+	            "t3inner"s,
+	            tests::make_sblock(flags, st_if{comparator::eq, var_name{"a"s}, var_name{"b"s}}, "ifinner"s)
 				));
 	parse_check_blocks(data, result);
 }
 BOOST_AUTO_TEST_SUITE_END() // tmpls
-
