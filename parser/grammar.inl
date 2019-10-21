@@ -159,6 +159,7 @@ auto op_term_check_end = [](auto& ctx) {
 	}
 
 	bool ok = false;
+	std::cout << "we have " << block.ref->index() << " and " << val << std::endl;
 	if(std::holds_alternative<st_if<str_t>>(*block.ref))
 		ok = val == "endif";
 	if(std::holds_alternative<st_for<str_t>>(*block.ref))
@@ -233,6 +234,15 @@ const auto free_text_def =
 
 const x3::rule<struct value_term_tag, value_term<gram_traits::types::out_string_t>> value_term_r = "value_term";
 const auto value_term_r_def = var_name_rule | quoted_string ;
+struct value_term_tag {
+	template<typename T, typename Iter, typename Context>
+	inline void on_success(const Iter& first, const Iter& last, T& ast, Context& ctx)
+	{
+		auto beg = first;
+		while(beg!=last) std::cout << *beg;
+		std::cout << std::endl;
+	}
+};
 
 const x3::rule<struct comparation_tag, comparator> comparator_r = "comparator";
 const auto comparator_r_def = 
@@ -266,7 +276,7 @@ const auto op_if_def =
 	>> x3::lit("if") >> +gram_traits::space
 	>> value_term_r[([](auto&c){_val(c).left=_attr(c);})] >> -(+gram_traits::space
 	>> comparator_r[([](auto&c){_val(c).op=_attr(c);})] >> +gram_traits::space
-	>> value_term_r[([](auto&c){_val(c).right=_attr(c);})])
+	>> value_term_r[([](auto&c){_val(c).right=_attr(c);})][([](auto&c){std::cout<<_attr(c)<<std::endl;})])
 	>> *gram_traits::space
 	;
 
@@ -287,7 +297,7 @@ const auto named_block_def = *gram_traits::space >> x3::lit("block")
 	>> +gram_traits::space >> single_var_name[set] >> *gram_traits::space ;
 
 const x3::rule<struct jtmpl_tag, jtmpl> jtmpl_rule = "jtmpl_rule";
-const auto jtmpl_rule_def = *gram_traits::space[nop] >> x3::lit("template") >> -(+gram_traits::space >> single_var_name[set_name]) ;
+const auto jtmpl_rule_def = *gram_traits::space[nop] >> x3::lit("template") >> -(+gram_traits::space >> single_var_name[set_name][print]) ;
 
 const x3::rule<struct jtmpl_end_tag> jtmpl_end_rule = "jtmpl_end_rule";
 const auto jtmpl_end_rule_def = x3::skip(gram_traits::space)[ spec_symbols [op_term_is_start] >> x3::lit("endtemplate") >> spec_symbols [op_term_is_end] ];
@@ -304,8 +314,9 @@ const auto block_jtmpl_rule_def =
 	>> jtmpl_rule   [set_ref]
 	>> *gram_traits::space[nop]
 	>> spec_symbols [op_term_is_end]
-	//>> (+(block_content_r[empback_cnt] >> !jtmpl_end_rule) >> block_content_r[empback_cnt])
-	>> *(!jtmpl_end_rule >> block_content_r[empback_cnt])
+	//>> (+((block_r1[empback_cnt] | block_content_r[empback_cnt]) >> !jtmpl_end_rule) >> block_content_r[empback_cnt])
+	//>> +( !jtmpl_end_rule[([](){std::cout<<"k\n";})] >> block_content_r[empback_cnt] )
+	>> +block_content_r[empback_cnt]
 	>> jtmpl_end_rule
 ;
  
@@ -317,12 +328,12 @@ const auto block_r1_def =
 	   | op_raw       [set_ref]
 	   | named_block  [set_ref]
 	   )  )
-	> spec_symbols  [op_term_is_end]
+	>> spec_symbols  [op_term_is_end][print]
 	>> -(raw_text[cnt_if_raw] | block_content_vec_r[empback_cnt])
 	>> x3::skip(gram_traits::space)[
-		   spec_symbols[op_term_is_start]
-		>> (+x3::alnum)[op_term_check_end]
-		>> spec_symbols[op_term_is_end]
+		   spec_symbols[op_term_is_start][print]
+		>> (+x3::alnum)[op_term_check_end][print]
+		>> spec_symbols[op_term_is_end][print]
 	]
 	;
 const auto block_def =

@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_SUITE(blocks)
 BOOST_AUTO_TEST_SUITE(op_if)
 BOOST_DATA_TEST_CASE(
 	  simple
-	,   ut::data::make("kuku"s, ""s, "a"s, "aa"s, "abc"s)
+	,   ut::data::make("kuku"s, "if"s, ""s, "a"s, "aa"s, "abc"s)
 	  * ut::data::make("if a is b"s, " if a is b"s, " if a is b "s)
 	  * ut::data::make("endif"s, "endif "s, " endif "s)
 	, text, start, finish )
@@ -379,15 +379,19 @@ BOOST_AUTO_TEST_CASE(few)
 {
 	using cppjinja::jtmpl;
 	using cppjinja::st_raw;
+	using st_if = cppjinja::st_if<std::string>;
+	using cppjinja::comparator;
+	using cppjinja::var_name;
 
 	auto flags = tests::make_mbflags(false,true);
 	auto result = tests::make_sblock(flags, jtmpl{"tmpl"s, std::nullopt}, "kuku"s);
 	result.cnt.emplace_back(tests::make_sblock(flags.reset(1), jtmpl{"t2"s, std::nullopt}, "other"s));
 	std::string data = "<%template tmpl%>kuku<%endtemplate%><%template t2%>other<%endtemplate%>"s;
 	parse_check_blocks(data, result);
-	data += "<%template t3%>t3<%if a is b%>raw<%endif%><%endtemplate%>";
+	data += "<%template t3%><%raw%>raw<%endraw%>t3<%if a is b%><%endif%><%endtemplate%>";
 	result.cnt.emplace_back(tests::make_sblock(flags, jtmpl{"t3"s,std::nullopt}, "t3"s,
-				tests::make_sblock(flags, st_raw{}, "raw"s)
+				tests::make_sblock(flags, st_raw{}, "raw"s),
+				tests::make_sblock(flags, st_if{comparator::no, var_name{"a"s}, "b"s}, "if"s)
 				));
 	parse_check_blocks(data, result);
 }
