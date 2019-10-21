@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_SUITE(op_if)
 BOOST_DATA_TEST_CASE(
 	  simple
 	,   ut::data::make("kuku"s, "if"s, ""s, "a"s, "aa"s, "abc"s)
-	  * ut::data::make("if a is b"s, " if a is b"s, " if a is b "s)
+	  * ut::data::make("if a is b"s, " if a is b"s, " if a is b "s, "if a==b"s, "if a == b"s, "if a ==b"s, "if a== b"s)
 	  * ut::data::make("endif"s, "endif "s, " endif "s)
 	, text, start, finish )
 {
@@ -388,12 +388,14 @@ BOOST_AUTO_TEST_CASE(few)
 	result.cnt.emplace_back(tests::make_sblock(flags.reset(1), jtmpl{"t2"s, std::nullopt}, "other"s));
 	std::string data = "<%template tmpl%>kuku<%endtemplate%><%template t2%>other<%endtemplate%>"s;
 	parse_check_blocks(data, result);
+
 	data += "<%template t3%><%raw%>rawinner<%endraw%>t3inner<%if a is b%>ifinner<%endif%><%endtemplate%>";
-	result.cnt.emplace_back(tests::make_sblock(flags, jtmpl{"t3"s,std::nullopt},
+	result.cnt.emplace_back(
+	            tests::make_sblock(flags, jtmpl{"t3"s,std::nullopt},
 	            tests::make_sblock(flags, st_raw{}, "rawinner"s),
 	            "t3inner"s,
 	            tests::make_sblock(flags, st_if{comparator::eq, var_name{"a"s}, var_name{"b"s}}, "ifinner"s)
-				));
+	));
 	parse_check_blocks(data, result);
 }
 BOOST_AUTO_TEST_SUITE_END() // tmpls
