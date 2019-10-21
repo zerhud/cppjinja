@@ -124,13 +124,15 @@ void empback_helper(Obj& obj, Value&& val) { obj.emplace_back(std::forward<Value
 template<typename Obj, typename Value>
 void empback_helper(std::reference_wrapper<Obj>& obj, Value&& val) { obj.get().emplace_back(std::forward<Value>(val)); }
 
-auto set = [](auto& ctx)       { _val(ctx) = _attr(ctx); };
-auto set_name = [](auto& ctx)  {_val(ctx).name = _attr(ctx); };
-auto setrw_name = [](auto& ctx)  {_val(ctx).get().name = _attr(ctx); };
-auto setrweb_name = [](auto& ctx)  {_val(ctx).get().emplace_back().name = _attr(ctx); };
+auto set =       [](auto& ctx)  { _val(ctx) = _attr(ctx); };
+auto set_name =  [](auto& ctx)  {_val(ctx).name = _attr(ctx); };
+auto setrw_name =[](auto& ctx)  {_val(ctx).get().name = _attr(ctx); };
 auto set_value = [](auto& ctx) {_val(ctx).value = _attr(ctx); };
-auto set_ref = [](auto& ctx)   {block_set_ref_rw(_val(ctx),std::move(_attr(ctx)));};
-auto set_cnt = [](auto& ctx)   {_val(ctx).cnt = _attr(ctx);};
+auto set_ref =   [](auto& ctx) {block_set_ref_rw(_val(ctx),std::move(_attr(ctx)));};
+auto set_cnt =   [](auto& ctx) {_val(ctx).cnt = _attr(ctx);};
+auto set_op =    [](auto& ctx) {_val(ctx).op = _attr(ctx);};
+auto set_left =  [](auto& ctx) {_val(ctx).left = _attr(ctx);};
+auto set_right = [](auto& ctx) {_val(ctx).right = _attr(ctx);};
 
 auto empback = [](auto& ctx){ empback_helper(_val(ctx),_attr(ctx)); };
 auto empback_cnt = [](auto& ctx){block_add_op_rw(_val(ctx),std::move(_attr(ctx)));};
@@ -257,12 +259,29 @@ struct value_term_tag {
 	}
 };
 
-const x3::rule<struct comparation_tag, comparator> comparator_r = "comparator";
-const auto comparator_r_def = 
-	  (x3::lit("==") | x3::lit("is"))   [setter(comparator::eq)]
-	| (x3::lit("<" ) | x3::lit("less")) [setter(comparator::less)]
-	| (x3::lit("=<") | x3::lit("leq"))  [setter(comparator::less_eq)]
+const x3::rule<struct comparation_sym_tag, comparator> comparation_sym_op = "comparation_sym_op";
+const auto comparation_sym_op_def = 
+	  x3::lit("==") [setter(comparator::eq)]
+	| x3::lit("<" ) [setter(comparator::less)]
+	| x3::lit("=<") [setter(comparator::less_eq)]
+	| x3::lit(">" ) [setter(comparator::more)]
+	| x3::lit(">=") [setter(comparator::more_eq)]
 ;
+
+const x3::rule<struct comparation_char_tag, comparator> comparation_char_op = "comparation_char_op";
+const auto comparation_char_op_def = 
+	  x3::lit("is")   [setter(comparator::eq)]
+	| x3::lit("less") [setter(comparator::less)]
+	| x3::lit("leq")  [setter(comparator::less_eq)]
+	| x3::lit("more") [setter(comparator::more)]
+	| x3::lit("meq")  [setter(comparator::more_eq)]
+;
+
+const x3::rule<struct comparator_tag, comparator> comparator_r = "comparator";
+const auto comparator_r_def = 
+	  ( *gram_traits::space >> comparation_sym_op [set] >> *gram_traits::space)
+	| ( +gram_traits::space >> comparation_char_op[set] >> +gram_traits::space)
+	;
 
 const x3::rule<struct op_for, st_for<gram_traits::types::out_string_t>> op_for = "op_for";
 const auto op_for_def =
@@ -287,9 +306,8 @@ const x3::rule<struct op_if, st_if<gram_traits::types::out_string_t>> op_if = "o
 const auto op_if_def =
 	   *gram_traits::space
 	>> x3::lit("if") >> +gram_traits::space
-	>> value_term_r[([](auto&c){_val(c).left=_attr(c);})] >> -(+gram_traits::space
-	>> comparator_r[([](auto&c){_val(c).op=_attr(c);})] >> +gram_traits::space
-	>> value_term_r[([](auto&c){_val(c).right=_attr(c);})])
+	>> value_term_r[set_left]
+	>> -(comparator_r[set_op] >> value_term_r[set_right])
 	>> *gram_traits::space
 	;
 
@@ -388,6 +406,8 @@ BOOST_SPIRIT_DEFINE(jtmpl_rule)
 BOOST_SPIRIT_DEFINE(block_jtmpl_rule)
 BOOST_SPIRIT_DEFINE(block_content_vec_r)
 BOOST_SPIRIT_DEFINE(jtmpl_end_rule)
+BOOST_SPIRIT_DEFINE(comparation_sym_op)
+BOOST_SPIRIT_DEFINE(comparation_char_op)
 
 #ifndef FILE_INLINING
 } // namespace cppjinja::deubg
