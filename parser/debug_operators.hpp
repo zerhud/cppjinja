@@ -132,6 +132,14 @@ std::ostream& operator << (std::ostream& out, const st_for<String>& obj)
 	return out;
 }
 
+DEFINE_OPERATORS_STRING(extends_op, left.name, right.name)
+template<typename String>
+std::ostream& cppjinja::operator << (std::ostream& out, const extends_op<String>& obj)
+{
+	out << "extends " << obj.name;
+	return out;
+}
+
 DEFINE_OPERATORS_STRING(set_op, left.names, right.names, left.value, right.value)
 template<typename String>
 std::ostream& operator << (std::ostream& out, const set_op<String>& obj)

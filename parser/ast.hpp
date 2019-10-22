@@ -79,6 +79,11 @@ struct set_op {
 	value_term<String> value;
 };
 
+template<typename String>
+struct extends_op {
+	String name;
+};
+
 struct st_call {
 
 };
@@ -99,6 +104,7 @@ using block_content = std::variant<
     , st_out<String>
     , st_comment<String>
     , set_op<String>
+    , extends_op<String>
     , boost::recursive_wrapper<b_block<String>>
 >;
 

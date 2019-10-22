@@ -333,6 +333,13 @@ const auto op_set_r_def = x3::skip(gram_traits::space)[
 	>> value_term_r[set_value]
 	>> spec_symbols[op_term_is_end]];
 
+const x3::rule<struct op_extends_tag, extends_op<gram_traits::types::out_string_t>> op_extends_r = "extends_op";
+const auto op_extends_r_def = x3::skip(gram_traits::space)[
+	   spec_symbols[op_term_is_start]
+	>> x3::lit("extends")
+	>> quoted_string [set_name]
+	>> spec_symbols[op_term_is_end]];
+
 const x3::rule<struct op_raw, st_raw> op_raw = "op_raw";
 const auto op_raw_def = *gram_traits::space[nop] >> x3::lit("raw") >> *gram_traits::space[nop];
 
@@ -383,6 +390,7 @@ const auto block_def =
 	)| (*(
 		  op_out             [ empback_cnt ]
 		| op_set_r           [ empback_cnt ]
+		| op_extends_r       [ empback_cnt ]
 		| block_r1           [ empback_cnt ]
 		| gram_traits::char_ [ block_add_content ]
 	));
@@ -391,6 +399,7 @@ const auto block_content_r_def = (
 	  op_out    [ set ]
 	| op_comment[ set ]
 	| op_set_r  [ set ]
+	| op_extends_r [ set ]
 	| block_r1  [ set ]
 	| free_text [ set ]
 	) ;
@@ -424,6 +433,7 @@ BOOST_SPIRIT_DEFINE(jtmpl_end_rule)
 BOOST_SPIRIT_DEFINE(comparation_sym_op)
 BOOST_SPIRIT_DEFINE(comparation_char_op)
 BOOST_SPIRIT_DEFINE(op_set_r)
+BOOST_SPIRIT_DEFINE(op_extends_r)
 
 #ifndef FILE_INLINING
 } // namespace cppjinja::deubg
