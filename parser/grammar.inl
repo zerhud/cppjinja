@@ -39,6 +39,8 @@ auto printer = overloaded{
 	  [](const std::string& s){std::cout << '|' << s << '|' << std::endl;}
 	, [](const std::wstring& s){std::wcout << L'|' << s << L'|' << std::endl;}
 	, [](const wchar_t s){std::wcout << L'|' << s << L'|' << std::endl;}
+	, [](const std::vector<std::string>& v){ std::cout << "vec: "; for(auto&s:v)std::cout << s << ", "; std::cout<<std::endl; }
+	, [](const boost::spirit::x3::unused_type&){std::cout<<std::endl;}
 	, [](const st_if<std::string>&){}
 	, [](const st_if<std::wstring>&){}
 };
@@ -136,6 +138,7 @@ auto set_right = [](auto& ctx) {_val(ctx).right = _attr(ctx);};
 
 auto empback = [](auto& ctx){ empback_helper(_val(ctx),_attr(ctx)); };
 auto empback_cnt = [](auto& ctx){block_add_op_rw(_val(ctx),std::move(_attr(ctx)));};
+auto empback_names = [](auto& ctx) { _val(ctx).names.emplace_back(_attr(ctx)); };
 auto empback_params = [](auto& ctx) { _val(ctx).params.emplace_back(_attr(ctx)); };
 auto empback_to_unnamed = [](auto& c) { _val(c).unnamed_block().cnt.emplace_back(_attr(c)); };
 auto empback_cnt_to_unnamed = [](auto& ctx) {
@@ -248,7 +251,7 @@ const auto free_text_def =
 ;
 
 const x3::rule<struct value_term_tag, value_term<gram_traits::types::out_string_t>> value_term_r = "value_term";
-const auto value_term_r_def = var_name_rule | quoted_string ;
+const auto value_term_r_def = fnc_call_rule | quoted_string | var_name_rule;
 struct value_term_tag {
 	template<typename T, typename Iter, typename Context>
 	inline void on_success(const Iter& first, const Iter& last, T& ast, Context& ctx)
@@ -320,6 +323,16 @@ auto cnt_if_raw = [](auto& ctx){
 
 	_val(ctx).cnt.emplace_back(_attr(ctx));
 };
+
+const x3::rule<struct op_set_tag, cppjinja::set_op<gram_traits::types::out_string_t>> op_set_r = "op_set";
+const auto op_set_r_def = x3::skip(gram_traits::space)[
+	   spec_symbols[op_term_is_start]
+	>> x3::lit("set")
+	>> (single_var_name[empback_names] % ',')
+	>> x3::lit("=")
+	>> value_term_r[set_value]
+	>> spec_symbols[op_term_is_end]];
+
 const x3::rule<struct op_raw, st_raw> op_raw = "op_raw";
 const auto op_raw_def = *gram_traits::space[nop] >> x3::lit("raw") >> *gram_traits::space[nop];
 
@@ -369,6 +382,7 @@ const auto block_def =
 	(+block_jtmpl_rule           [ empback_cnt ]
 	)| (*(
 		  op_out             [ empback_cnt ]
+		| op_set_r           [ empback_cnt ]
 		| block_r1           [ empback_cnt ]
 		| gram_traits::char_ [ block_add_content ]
 	));
@@ -376,6 +390,7 @@ const auto block_content_vec_r_def = +block_content_r;
 const auto block_content_r_def = (
 	  op_out    [ set ]
 	| op_comment[ set ]
+	| op_set_r  [ set ]
 	| block_r1  [ set ]
 	| free_text [ set ]
 	) ;
@@ -408,6 +423,7 @@ BOOST_SPIRIT_DEFINE(block_content_vec_r)
 BOOST_SPIRIT_DEFINE(jtmpl_end_rule)
 BOOST_SPIRIT_DEFINE(comparation_sym_op)
 BOOST_SPIRIT_DEFINE(comparation_char_op)
+BOOST_SPIRIT_DEFINE(op_set_r)
 
 #ifndef FILE_INLINING
 } // namespace cppjinja::deubg

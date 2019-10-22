@@ -132,6 +132,16 @@ std::ostream& operator << (std::ostream& out, const st_for<String>& obj)
 	return out;
 }
 
+DEFINE_OPERATORS_STRING(set_op, left.names, right.names, left.value, right.value)
+template<typename String>
+std::ostream& operator << (std::ostream& out, const set_op<String>& obj)
+{
+	out << "set ";
+	for(auto& n:obj.names) out << n << ", ";
+	out << " = " << obj.value;
+	return out;
+}
+
 DEFINE_OPERATORS_STRING(st_if, left.op, right.op, left.left, right.left, left.right, right.right)
 template<typename String>
 std::ostream& operator << (std::ostream& out, const st_if<String>& obj)

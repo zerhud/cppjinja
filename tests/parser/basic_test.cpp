@@ -212,6 +212,30 @@ BOOST_AUTO_TEST_CASE(filters)
 	parse_check_content("<= 'q'|a.f('q',q) =>"sv, sto_t{ "q"s, {fnc_call{{"a"s,"f"s},{"q"s,var_name{"q"s}}}} });
 }
 BOOST_AUTO_TEST_SUITE_END() // output
+
+BOOST_AUTO_TEST_SUITE(set_op)
+BOOST_DATA_TEST_CASE(
+	  one_var
+	,   ut::data::make("a"s, "var"s, "v123"s)
+	  * ut::data::make("="s, " = "s, "= "s, " ="s)
+	  * ut::data::make(
+		  std::make_pair("'str'"s, cppjinja::value_term<std::string>("str"s))
+		, std::make_pair("a"s, cppjinja::value_term<std::string>{cppjinja::var_name{"a"s}})
+		, std::make_pair("foo()"s, cppjinja::value_term<std::string>{cppjinja::fnc_call<std::string>{cppjinja::var_name{"foo"s}, {}}})
+	    )
+	, var, eq_sign, val
+	)
+{
+	std::string data = "<% set " + var + eq_sign + val.first + "%>"s;
+	auto result = cppjinja::set_op<std::string>{{var}, val.second};
+	parse_check_content(data, result);
+
+	data = "<%block kuku%>"+data+"<%endblock%>";
+	auto flags = tests::make_mbflags(false, false);
+	parse_check_content(data, tests::make_sblock(flags, "kuku"s, result));
+}
+BOOST_AUTO_TEST_SUITE_END() // set_op
+
 BOOST_AUTO_TEST_SUITE(blocks)
 BOOST_AUTO_TEST_SUITE(op_if)
 BOOST_DATA_TEST_CASE(

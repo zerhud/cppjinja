@@ -73,8 +73,10 @@ struct st_macro {
 	std::vector<macro_parameter<String>> params;
 };
 
-struct st_set {
-
+template<typename String>
+struct set_op {
+	std::vector<std::string> names;
+	value_term<String> value;
 };
 
 struct st_call {
@@ -96,6 +98,7 @@ using block_content = std::variant<
       String
     , st_out<String>
     , st_comment<String>
+    , set_op<String>
     , boost::recursive_wrapper<b_block<String>>
 >;
 
