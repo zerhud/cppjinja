@@ -27,8 +27,12 @@ namespace cppjinja::text {
 	auto const quoted_string_2_def = *(char_ >> !lit('"') | lit("\\\"") >> x3::attr('"')) >> char_;
 	auto const quoted_string_def = lit("'") >> -quoted_string_1_def >> lit("'");
 
+	auto const single_var_name_def = char_("A-Za-z_") >> *char_("0-9A-Za-z_");
+
 	BOOST_SPIRIT_DEFINE( quoted_string )
+	BOOST_SPIRIT_DEFINE( single_var_name )
 
 	class quoted_string_class : x3::annotate_on_success {};
+	class single_var_name_class : x3::annotate_on_success {};
 
 } // namespace cppjinja::text

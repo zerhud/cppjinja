@@ -25,13 +25,30 @@ namespace ut = boost::unit_test;
 namespace utd = boost::unit_test::data;
 
 BOOST_DATA_TEST_CASE(
-        simple
-      ,   utd::make(u8"'kuku'"s, u8"''"s, u8"'привет'"s)
-        ^ utd::make(u8"kuku"s, u8""s, u8"привет"s)
+        quoted1_string
+      ,   utd::make(u8"'kuku'"s, u8"''"s, u8"'привет'"s, u8"'k\\k'"s, u8"'ok\\'ok'"s)
+        ^ utd::make(u8"kuku"s,   u8""s,   u8"привет"s  , u8"k\\k"s,   u8"ok'ok"s)
       , data, good_result
       )
 {
 	std::string result;
 	BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(cppjinja::text::quoted_string, data) );
+	BOOST_TEST( result == good_result );
+}
+
+BOOST_DATA_TEST_CASE(
+        single_var_name
+      ,   utd::make(u8"kuku"s, u8""s, u8"a8_"s, u8"8a"s)
+        ^ utd::make(u8"kuku"s, u8""s, u8"a8_"s, u8""s)
+      , data, good_result
+      )
+{
+	std::string result;
+
+	if(good_result.empty())
+		BOOST_CHECK_THROW( result = cppjinja::text::parse(cppjinja::text::single_var_name, data), std::exception );
+	else
+		BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(cppjinja::text::single_var_name, data) );
+
 	BOOST_TEST( result == good_result );
 }
