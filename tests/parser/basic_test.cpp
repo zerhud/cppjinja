@@ -124,6 +124,8 @@ void parse_check_blocks(std::string_view data, const Vals& vals)
 		cppjinja::s_block tmpl;
 		BOOST_CHECK_NO_THROW(tmpl=cppjinja::parse(data));
 		BOOST_TEST( tmpl == vals );
+		BOOST_CHECK_NO_THROW(tmpl=cppjinja::parsers(data.begin(), data.end()));
+		BOOST_TEST( tmpl == vals );
 	}
 }
 

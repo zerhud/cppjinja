@@ -34,7 +34,66 @@ auto make_grammar(const Parser& parser, Env&& env)
 	return x3::with<Env,Env>(std::move(env))[parser];
 }
 
+template<typename Iter>
+struct iter_timpl { 
+	using iterator_category	= std::bidirectional_iterator_tag;
+	using value_type = typename Iter::value_type;
+	using difference_type = std::ptrdiff_t;
+	using pointer = typename Iter::value_type*;
+	using reference = typename Iter::value_type&;
+
+	Iter iter;
+
+	void applay() const {}
+
+	typename Iter::value_type operator * () noexcept { return *iter; }
+	typename Iter::value_type operator * () const noexcept { return *iter; }
+
+	iter_timpl& operator ++ () noexcept { ++iter; return *this; }
+	iter_timpl& operator -- () noexcept { ++iter; return *this; }
+	iter_timpl& operator ++ (int) noexcept { iter++; return *this; }
+	iter_timpl& operator -- (int) noexcept { iter++; return *this; }
+};
+
+template<typename Iter>
+bool operator == (const iter_timpl<Iter>& left, const iter_timpl<Iter>& right) { return left.iter == right.iter; }
+template<typename Iter>
+bool operator != (const iter_timpl<Iter>& left, const iter_timpl<Iter>& right) { return left.iter != right.iter; }
+
+/// cannot instaitiate x3::parse with template
+/// calss as Iterator tempalte's parameter.
+struct iter_simpl : iter_timpl<iter_stype> {};
+struct iter_wimpl : iter_timpl<iter_wtype> {};
+
 } // namespace cppjinja
+
+cppjinja::s_block cppjinja::parsers(iter_stype begin, iter_stype end, parser_data env)
+{
+	s_block result;
+	auto result_ref = std::ref(result);
+	bool ok = x3::parse(
+	              boost::u8_to_u32_iterator(iter_simpl{std::move(begin)}),
+		      boost::u8_to_u32_iterator(iter_simpl{std::move(end)}),
+
+	              make_grammar(grammar::utf8::block, std::move(env)),
+	              result_ref
+	              );
+	if(!ok) throw std::runtime_error("cannot parse");
+	return result;
+}
+
+cppjinja::s_block cppjinja::parserw(iter_wtype begin, iter_wtype end, parser_data env)
+{
+	s_block result;
+	auto result_ref = std::ref(result);
+	bool ok = x3::parse(
+	              iter_wimpl{std::move(begin)}, iter_wimpl{std::move(end)},
+	              make_grammar(grammar::utf8::block, std::move(env)),
+	              result_ref
+	              );
+	if(!ok) throw std::runtime_error("cannot parse");
+	return result;
+}
 
 cppjinja::s_block cppjinja::parse(std::string_view data, parser_data env)
 {
