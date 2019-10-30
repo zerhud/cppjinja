@@ -11,19 +11,16 @@
 #include "ast/common.hpp"
 #include <boost/fusion/include/adapt_struct.hpp>
 
-BOOST_FUSION_ADAPT_TPL_STRUCT(
-		(String),
-		(cppjinja::binary_op)(String),
+BOOST_FUSION_ADAPT_STRUCT(
+		cppjinja::ast::binary_op,
 		left, right)
-  
 
-BOOST_FUSION_ADAPT_TPL_STRUCT(
-		(String),
-		(cppjinja::fnc_call_parameter)(String),
+
+BOOST_FUSION_ADAPT_STRUCT(
+		cppjinja::ast::function_call_parameter,
 		name, value)
 
-BOOST_FUSION_ADAPT_TPL_STRUCT(
-		(String),
-		(cppjinja::fnc_call)(String),
+BOOST_FUSION_ADAPT_STRUCT(
+		cppjinja::ast::function_call,
 		ref, params)
 

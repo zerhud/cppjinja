@@ -13,51 +13,53 @@
 #include <optional>
 
 #include <boost/spirit/home/x3/support/ast/variant.hpp>
+#include <boost/spirit/home/x3/support/ast/position_tagged.hpp>
 
-namespace cppjinja {
+namespace cppjinja::ast {
+
+namespace x3 = boost::spirit::x3;
+using string_t = std::string;
 
 template<typename T>
 using forward_ast = boost::spirit::x3::forward_ast<T>;
 
 enum class comparator{ no, eq, less, more, less_eq, more_eq };
 
-using var_name = std::vector<std::string>;
+using var_name = std::vector<string_t>;
 
-template<typename String> struct fnc_call;
+struct function_call;
+struct binary_op;
+struct value_term;
+struct function_call_parameter;
 
-template<typename String>
-struct value_term : x3::variant<
-		  String
-		, var_name
-		, fnc_call<String>
-		, binary_op<String>
->
-{
-	using base_type::base_type;
-	using base_type::operator=;
-
-};
-
-template<typename String>
-struct binary_op
+struct binary_op : x3::position_tagged
 {
 	forward_ast<value_term> left;
 	forward_ast<value_term> right;
 };
 
-template<typename String>
-struct fnc_call_parameter
+struct function_call_parameter : x3::position_tagged
 {
-	std::optional<std::string> name;
-	forward_ast<value_term<String>> value;
+	std::optional<string_t> name;
+	forward_ast<value_term> value;
 };
 
-template<typename String>
-struct fnc_call
+struct function_call : x3::position_tagged
 {
 	var_name ref;
-	std::vector<fnc_call_param<String>> params;
+	std::vector<function_call_parameter> params;
 };
 
-} // namespace cppjinja
+struct value_term : x3::variant<
+	  string_t
+	, var_name
+	, function_call
+	, binary_op
+>
+{
+	using base_type::base_type;
+	using base_type::operator=;
+};
+
+} // namespace cppjinja::ast
 

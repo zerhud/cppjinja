@@ -6,5 +6,3 @@
  * or <http://www.gnu.org/licenses/> for details
  *************************************************************************/
 
-#include "helpers.hpp"
-

@@ -16,14 +16,25 @@
 #include "config.hpp"
 #include "helpers.hpp"
 
-#include "ast/common.hpp"
-
-
 namespace cppjinja {
+
+using var_name = std::vector<std::string>;
+
+enum class comparator{ no, eq, less, more, less_eq, more_eq };
 
 enum class block_ref { no, name, op_if };
 
+template<typename String> struct fnc_call;
 template<typename String> struct b_block;
+
+template<typename String>
+using value_term = std::variant<String, var_name, boost::recursive_wrapper<fnc_call<String>>> ;
+
+template<typename String>
+struct fnc_call {
+	var_name ref;
+	std::vector<value_term<String>> params;
+};
 
 struct st_raw {};
 
