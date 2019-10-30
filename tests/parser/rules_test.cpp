@@ -23,6 +23,7 @@ using namespace std::literals;
 
 namespace ut = boost::unit_test;
 namespace utd = boost::unit_test::data;
+namespace ast = cppjinja::ast;
 
 BOOST_DATA_TEST_CASE(
         quoted1_string
@@ -38,8 +39,8 @@ BOOST_DATA_TEST_CASE(
 
 BOOST_DATA_TEST_CASE(
         single_var_name
-      ,   utd::make(u8"kuku"s, u8""s, u8"a8_"s, u8"8a"s)
-        ^ utd::make(u8"kuku"s, u8""s, u8"a8_"s, u8""s)
+      ,   utd::make("kuku"s, ""s, "a8_"s, "8a"s)
+        ^ utd::make("kuku"s, ""s, "a8_"s, ""s)
       , data, good_result
       )
 {
@@ -50,5 +51,16 @@ BOOST_DATA_TEST_CASE(
 	else
 		BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(cppjinja::text::single_var_name, data) );
 
+	BOOST_TEST( result == good_result );
+}
+
+BOOST_DATA_TEST_CASE(
+          var_name
+        ,   utd::make("a"s, "a.b"s)
+          ^ utd::make(ast::var_name{"a"s}, ast::var_name{"a"s, "b"s})
+        , data, good_result)
+{
+	ast::var_name result;
+	BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(cppjinja::text::var_name, data) );
 	BOOST_TEST( result == good_result );
 }
