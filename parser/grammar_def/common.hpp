@@ -15,8 +15,8 @@
 #include "grammar/common.hpp"
 
 namespace cppjinja::text {
-	//decltype (x3::unicode::char_)& char_ = x3::unicode::char_;
-	//decltype (x3::unicode::space)& space = x3::unicode::space;
+	//auto& char_ = x3::unicode::char_;
+	//auto& space = x3::unicode::space;
 	//using boost::spirit::x3::standard_wide::lit;
 
 	auto& char_ = x3::char_;
