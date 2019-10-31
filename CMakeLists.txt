@@ -54,7 +54,7 @@ endif()
 
 if(ENABLE_TESTS)
 	include(cmake/tests.inc.cmake)
-	add_executable(rules_tmp tests/parser/rules_test.cpp)
+	add_executable(rules_tmp tests/parser/rules_test.cpp parser/operators/common.cpp)
 	target_link_libraries(rules_tmp PRIVATE parser ${Boost_LIBRARIES})
 	target_include_directories(rules_tmp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/parser/")
 endif()

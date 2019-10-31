@@ -7,7 +7,7 @@
  *************************************************************************/
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE cppjinja parser
+#define BOOST_TEST_MODULE grammar
 
 #include <bitset>
 #include <sstream>
@@ -16,8 +16,9 @@
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/data/monomorphic.hpp>
 
-#include "parser/grammar_def/common.hpp"
 #include "parser/parse.hpp"
+#include "parser/operators/common.hpp"
+#include "parser/grammar_def/common.hpp"
 
 using namespace std::literals;
 
