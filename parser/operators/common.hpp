@@ -11,12 +11,20 @@
 #include <ostream>
 #include "ast/common.hpp"
 
+#define VARIANT_OPERATORS(sname, ...) \
+    namespace std { std::ostream& operator << (std::ostream& out, const sname& obj); } \
+
 #define DEFINE_OPERATORS(sname, ...) \
     inline bool operator < (const sname& left, const sname& right) { return cppjinja::lex_cmp(__VA_ARGS__) < 0; } \
     inline bool operator == (const sname& left, const sname& right) { return cppjinja::lex_cmp(__VA_ARGS__) == 0; } \
     inline bool operator != (const sname& left, const sname& right) { return !(left==right); } \
     namespace std { std::ostream& operator << (std::ostream& out, const sname& obj); } \
 
+
+namespace cppjinja::ast {
+	template<typename T>
+	bool operator < (const boost::spirit::x3::forward_ast<T>& left, const boost::spirit::x3::forward_ast<T>& right){ return left.get() < right.get(); }
+} // namespace boost::spirit::x3
 
 namespace cppjinja {
 
@@ -42,8 +50,10 @@ constexpr int lex_cmp(const Left& left, const Right& right, const Args&... args)
 	return lex_cmp(args...);
 }
 
-
 } // namespace cppjinja
 
 DEFINE_OPERATORS(cppjinja::ast::var_name, left, right)
+DEFINE_OPERATORS(cppjinja::ast::function_call_parameter, left.name, right.name, left.value, right.value)
+DEFINE_OPERATORS(cppjinja::ast::function_call, left.ref, right.ref, left.params, right.params)
+DEFINE_OPERATORS(cppjinja::ast::binary_op, left.left, right.left, left.right, right.right)
 

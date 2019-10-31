@@ -65,3 +65,18 @@ BOOST_DATA_TEST_CASE(
 	BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(cppjinja::text::var_name, data) );
 	BOOST_TEST( result == good_result );
 }
+
+BOOST_DATA_TEST_CASE(
+          value_term
+        , utd::make("'a'"s, "a"s, "a.a"s)
+        ^ utd::make(
+              ast::value_term{"a"s}
+            , ast::var_name{"a"s}
+            , ast::var_name{"a"s, "a"s}
+            )
+        , data, good_result)
+{
+	ast::value_term result;
+	BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(cppjinja::text::value_term, data) );
+	BOOST_TEST( result == good_result );
+}

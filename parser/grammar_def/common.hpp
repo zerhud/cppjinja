@@ -31,12 +31,28 @@ namespace cppjinja::text {
 
 	auto const var_name_def = single_var_name % '.';
 
+	auto const binary_op_sign = 
+		  lit("==") >> x3::attr(ast::comparator::eq)
+		| lit("is") >> x3::attr(ast::comparator::eq)
+		| lit("<=") >> x3::attr(ast::comparator::less_eq)
+		| lit(">=") >> x3::attr(ast::comparator::more_eq)
+		| lit( "<") >> x3::attr(ast::comparator::less)
+		| lit( ">") >> x3::attr(ast::comparator::more)
+	;
+	auto const binary_op_def = value_term >> binary_op_sign >> value_term;
+
+	auto const value_term_def = quoted_string | var_name;
+
 	BOOST_SPIRIT_DEFINE( quoted_string )
 	BOOST_SPIRIT_DEFINE( single_var_name )
 	BOOST_SPIRIT_DEFINE( var_name )
+	BOOST_SPIRIT_DEFINE( binary_op )
+	BOOST_SPIRIT_DEFINE( value_term )
 
 	class quoted_string_class : x3::annotate_on_success {};
 	class single_var_name_class : x3::annotate_on_success {};
 	class var_name_class : x3::annotate_on_success {};
+	class binary_op_class : x3::annotate_on_success {};
+	class value_term_class : x3::annotate_on_success {};
 
 } // namespace cppjinja::text
