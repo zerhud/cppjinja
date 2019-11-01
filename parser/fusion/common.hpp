@@ -13,7 +13,7 @@
 
 BOOST_FUSION_ADAPT_STRUCT(
 		cppjinja::ast::binary_op,
-		left, right)
+		left, op, right)
 
 
 BOOST_FUSION_ADAPT_STRUCT(

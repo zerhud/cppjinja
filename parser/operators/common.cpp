@@ -41,7 +41,8 @@ std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::value_te
 
 std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::comparator& obj)
 {
-	out << static_cast<int>(obj);
+	if(obj == cppjinja::ast::comparator::eq) out << "==";
+	else out << static_cast<int>(obj);
 	return out;
 }
 
