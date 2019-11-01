@@ -15,3 +15,33 @@ std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::var_name
 	return out << format( *char_ % '.', obj);
 }
 
+std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::function_call_parameter& obj)
+{
+	if(obj.name) out << *obj.name << '=';
+	return out << obj.value;
+}
+
+std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::function_call& obj)
+{
+	out << obj.ref << '(';
+	//TODO: print params
+	return out << ')';
+}
+
+std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::binary_op& obj)
+{
+	return out << obj.left << obj.op << obj.right;
+}
+
+std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::value_term& obj)
+{
+	out << obj.var;
+	return out;
+}
+
+std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::comparator& obj)
+{
+	out << static_cast<int>(obj);
+	return out;
+}
+

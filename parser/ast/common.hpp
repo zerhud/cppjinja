@@ -35,6 +35,7 @@ struct function_call_parameter;
 struct binary_op : x3::position_tagged
 {
 	forward_ast<value_term> left;
+	comparator op;
 	forward_ast<value_term> right;
 };
 
