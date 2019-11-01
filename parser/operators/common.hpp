@@ -63,6 +63,5 @@ DEFINE_OPERATORS(cppjinja::ast::var_name, left, right)
 DEFINE_OPERATORS(cppjinja::ast::function_call_parameter, left.name, right.name, left.value, right.value)
 DEFINE_OPERATORS(cppjinja::ast::function_call, left.ref, right.ref, left.params, right.params)
 DEFINE_OPERATORS(cppjinja::ast::binary_op, left.left, right.left, left.right, right.right)
-DEFINE_OPERATORS(cppjinja::ast::value_term, left, right)
+DEFINE_OPERATORS(cppjinja::ast::value_term, left.var, right.var)
 namespace std { std::ostream& operator << (std::ostream& out, const cppjinja::ast::comparator& obj); }
-
