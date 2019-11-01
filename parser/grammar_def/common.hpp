@@ -43,16 +43,23 @@ namespace cppjinja::text {
 
 	auto const value_term_def = quoted_string | var_name;
 
+	auto const function_call_parameter_def = -(single_var_name >> '=') >> value_term;
+	auto const function_call_def = var_name >> x3::omit['('] >> -(function_call_parameter % ',') >> x3::omit[')'];
+
 	BOOST_SPIRIT_DEFINE( quoted_string )
 	BOOST_SPIRIT_DEFINE( single_var_name )
 	BOOST_SPIRIT_DEFINE( var_name )
 	BOOST_SPIRIT_DEFINE( binary_op )
 	BOOST_SPIRIT_DEFINE( value_term )
+	BOOST_SPIRIT_DEFINE( function_call )
+	BOOST_SPIRIT_DEFINE( function_call_parameter )
 
 	class quoted_string_class : x3::annotate_on_success {};
 	class single_var_name_class : x3::annotate_on_success {};
 	class var_name_class : x3::annotate_on_success {};
 	class binary_op_class : x3::annotate_on_success {};
 	class value_term_class : x3::annotate_on_success {};
+	class function_call_class : x3::annotate_on_success {};
+	class function_call_parameter_class : x3::annotate_on_success {};
 
 } // namespace cppjinja::text

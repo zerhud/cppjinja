@@ -67,6 +67,24 @@ BOOST_DATA_TEST_CASE(
 }
 
 BOOST_DATA_TEST_CASE(
+          function_call
+        , utd::make("foo()"s, "foo.bar()"s, "foo('a')", "foo('a','a')"s, "foo ( 'a' , 'a' )"s, "foo\n( )"s)
+        ^ utd::make(
+              ast::function_call({"foo"s}, {})
+            , ast::function_call{ast::var_name{"foo","bar"}, {}}
+            , ast::function_call({"foo"s}, {ast::function_call_parameter(ast::value_term{"a"s})})
+            , ast::function_call({"foo"s}, {ast::value_term{"a"s}, ast::value_term{"a"s}})
+            , ast::function_call({"foo"s}, {ast::value_term{"a"s}, ast::value_term{"a"s}})
+            , ast::function_call({"foo"s}, {})
+            )
+        , data, good_result)
+{
+	ast::function_call result;
+	BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(cppjinja::text::function_call, data) );
+	BOOST_TEST( result == good_result );
+}
+
+BOOST_DATA_TEST_CASE(
           value_term
         , utd::make("'a'"s, "a"s, "a.a"s)
         ^ utd::make(

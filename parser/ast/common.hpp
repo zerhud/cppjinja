@@ -41,12 +41,17 @@ struct binary_op : x3::position_tagged
 
 struct function_call_parameter : x3::position_tagged
 {
+	function_call_parameter() =default ;
+	function_call_parameter(const value_term& v) : value(v) {}
+	function_call_parameter(string_t n, const value_term& v) : name(std::move(n)), value(v) {}
 	std::optional<string_t> name;
 	forward_ast<value_term> value;
 };
 
 struct function_call : x3::position_tagged
 {
+	function_call()=default ;
+	function_call(var_name f, std::vector<function_call_parameter> p) : ref(std::move(f)), params(std::move(p)) {}
 	var_name ref;
 	std::vector<function_call_parameter> params;
 };
