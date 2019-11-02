@@ -22,6 +22,7 @@ namespace cppjinja::text {
 	auto& char_ = x3::char_;
 	auto& space = x3::space;
 	using boost::spirit::x3::lit;
+	using boost::spirit::x3::skip;
 
 	auto const quoted_string_1_def = *(char_ >> !lit('\'') | lit("\\'") >> x3::attr('\'')) >> char_;
 	auto const quoted_string_2_def = *(char_ >> !lit('"') | lit("\\\"") >> x3::attr('"')) >> char_;
@@ -43,8 +44,11 @@ namespace cppjinja::text {
 
 	auto const value_term_def = quoted_string | var_name;
 
-	auto const function_call_parameter_def = -(single_var_name >> '=') >> value_term;
-	auto const function_call_def = var_name >> x3::omit['('] >> -(function_call_parameter % ',') >> x3::omit[')'];
+	auto const function_call_parameter_def = skip(space)[-(single_var_name >> '=') >> value_term];
+	auto const function_call_def =
+		skip(space)[
+		var_name >> x3::omit['('] >> -(function_call_parameter % ',') >> x3::omit[')']
+		];
 
 	BOOST_SPIRIT_DEFINE( quoted_string )
 	BOOST_SPIRIT_DEFINE( single_var_name )
