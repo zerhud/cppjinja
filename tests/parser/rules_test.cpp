@@ -28,8 +28,8 @@ namespace ast = cppjinja::ast;
 
 BOOST_DATA_TEST_CASE(
         quoted1_string
-      ,   utd::make(u8"'kuku'"s, u8"''"s, u8"'привет'"s, u8"'k\\k'"s, u8"'ok\\'ok'"s)
-        ^ utd::make(u8"kuku"s,   u8""s,   u8"привет"s  , u8"k\\k"s,   u8"ok'ok"s)
+      ,   utd::make(u8"'kuku'"s, u8"'ku ku'"s, u8"''"s, u8"'привет'"s, u8"'k\\k'"s, u8"'ok\\'ok'"s)
+        ^ utd::make(u8"kuku"s,   u8"ku ku"s,   u8""s,   u8"привет"s  , u8"k\\k"s,   u8"ok'ok"s)
       , data, good_result
       )
 {
@@ -68,7 +68,7 @@ BOOST_DATA_TEST_CASE(
 
 BOOST_DATA_TEST_CASE(
           function_call
-        , utd::make("foo()"s, "foo.bar()"s, "foo('a')", "foo('a','a')"s, "foo ( 'a' , 'a' )"s, "foo\n( )"s)
+        , utd::make("foo()"s, "foo.bar()"s, "foo('a')", "foo('a','a')"s, "foo ( 'a' , 'a' )"s, "foo\n(  )"s)
         ^ utd::make(
               ast::function_call({"foo"s}, {})
             , ast::function_call{ast::var_name{"foo","bar"}, {}}
@@ -86,33 +86,33 @@ BOOST_DATA_TEST_CASE(
 
 BOOST_DATA_TEST_CASE(
           value_term
-        , utd::make("'a'"s, "a"s, "a.a"s)
+        , utd::make("'a'"s, "a"s, "a.a"s, "foo()"s)
         ^ utd::make(
               ast::value_term{"a"s}
             , ast::var_name{"a"s}
             , ast::var_name{"a"s, "a"s}
+            , ast::function_call{ast::var_name{"foo"s}, {}}
             )
         , data, good_result)
 {
 	ast::value_term result;
-	BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(cppjinja::text::value_term_r1, data) );
+	BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(cppjinja::text::value_term, data) );
 	BOOST_TEST( result == good_result );
 }
 
 BOOST_DATA_TEST_CASE(
-	  binary_op
-	, utd::make("'a'=='a'"s, "a==a"s, "foo()==foo()"s)
-	^ utd::make(
-		  ast::value_term{"a"s}
-		, ast::var_name{"a"s}
-		, ast::function_call{ast::var_name{"foo"s}, {}}
-		)
-	, data, value)
+    binary_op
+    , utd::make("'a'=='a'"s, "a==a"s, "foo()==foo()"s)
+    ^ utd::make(
+          ast::value_term{"a"s}
+        , ast::var_name{"a"s}
+        , ast::function_call{ast::var_name{"foo"s}, {}}
+    )
+, data, value)
 {
 	ast::binary_op result;
-	BOOST_REQUIRE_NO_THROW( result = cppjinja::text::parse(cppjinja::text::binary_op1, data) );
+	BOOST_REQUIRE_NO_THROW( result = cppjinja::text::parse(cppjinja::text::binary_op, data) );
 	BOOST_TEST( result.left == value );
 	BOOST_TEST( result.right == value );
 	BOOST_TEST( result.op == ast::comparator::eq );
 }
-

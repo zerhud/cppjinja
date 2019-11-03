@@ -24,7 +24,7 @@ namespace cppjinja::text {
 		auto begin = data.begin();
 
 		Attribute result;
-		bool success = boost::spirit::x3::parse(begin, end, rule, result);
+		bool success = boost::spirit::x3::phrase_parse(begin, end, rule, boost::spirit::x3::space, result);
 
 		if(!success) throw std::runtime_error("cannot parse");
 

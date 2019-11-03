@@ -13,5 +13,5 @@
 namespace cppjinja::text {
 	namespace x3 = boost::spirit::x3;
 	using iterator_type = std::string_view::const_iterator;
-	using context_type = x3::phrase_parse_context<x3::ascii::space_type>::type;
+	using context_type = x3::phrase_parse_context<decltype(x3::space)>::type;
 } // namespace cppjinja::text

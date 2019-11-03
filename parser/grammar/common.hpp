@@ -17,32 +17,26 @@ namespace cppjinja::text {
 	struct quoted_string_class;
 	struct single_var_name_class;
 	struct var_name_class;
-	struct binary_op1_class;
-	struct binary_op2_class;
+	struct binary_op_class;
 	struct function_call_parameter_class;
 	struct function_call_class;
-	struct value_term_r1_class;
-	struct value_term_r2_class;
+	struct value_term_class;
 
 	const x3::rule<quoted_string_class, ast::string_t> quoted_string = "quoted_string";
 	const x3::rule<single_var_name_class, ast::string_t> single_var_name = "single_var_name";
 	const x3::rule<var_name_class, ast::var_name> var_name = "var_name";
-	const x3::rule<binary_op1_class, ast::binary_op> binary_op1 = "binary_op1";
-	const x3::rule<binary_op2_class, ast::binary_op> binary_op2 = "binary_op2";
+	const x3::rule<binary_op_class, ast::binary_op> binary_op = "binary_op";
 	const x3::rule<function_call_parameter_class, ast::function_call_parameter> function_call_parameter = "function_call_parameter";
 	const x3::rule<function_call_class, ast::function_call> function_call = "function_call";
-	const x3::rule<value_term_r1_class, ast::value_term> value_term_r1 = "value_term_r1";
-	const x3::rule<value_term_r2_class, ast::value_term> value_term_r2 = "value_term_r2";
+	const x3::rule<value_term_class, ast::value_term> value_term = "value_term";
 
 	BOOST_SPIRIT_DECLARE(decltype(quoted_string))
 	BOOST_SPIRIT_DECLARE(decltype(single_var_name))
 	BOOST_SPIRIT_DECLARE(decltype(var_name))
-	BOOST_SPIRIT_DECLARE(decltype(binary_op1))
-	BOOST_SPIRIT_DECLARE(decltype(binary_op2))
+	BOOST_SPIRIT_DECLARE(decltype(binary_op))
 	BOOST_SPIRIT_DECLARE(decltype(function_call_parameter))
 	BOOST_SPIRIT_DECLARE(decltype(function_call))
-	BOOST_SPIRIT_DECLARE(decltype(value_term_r1))
-	BOOST_SPIRIT_DECLARE(decltype(value_term_r2))
+	BOOST_SPIRIT_DECLARE(decltype(value_term))
 
 } // namespace cppjinja::text
 
