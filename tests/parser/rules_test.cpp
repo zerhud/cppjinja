@@ -18,7 +18,7 @@
 
 #include "parser/parse.hpp"
 #include "parser/operators/common.hpp"
-#include "parser/grammar_def/common.hpp"
+#include "parser/grammar/common.hpp"
 
 using namespace std::literals;
 

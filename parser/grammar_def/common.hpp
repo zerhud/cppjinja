@@ -32,7 +32,7 @@ namespace cppjinja::text {
 
 	auto const var_name_def = single_var_name % '.';
 
-	auto const binary_op_sign = 
+	auto const binary_op_sign =
 		  lit("==") >> x3::attr(ast::comparator::eq)
 		| lit("is") >> x3::attr(ast::comparator::eq)
 		| lit("!=") >> x3::attr(ast::comparator::neq)
@@ -45,13 +45,13 @@ namespace cppjinja::text {
 	auto const binary_op1_def = value_term_r2 >> binary_op_sign >> value_term_r2;
 	auto const binary_op2_def = value_term_r1 >> binary_op_sign >> value_term_r1;
 
-	auto const value_term_r1_def = quoted_string | var_name | binary_op2;
-	auto const value_term_r2_def = quoted_string | var_name | binary_op1;
+	auto const value_term_r1_def = quoted_string | var_name | binary_op2 | function_call;
+	auto const value_term_r2_def = quoted_string | var_name | binary_op1 | function_call;
 
 	auto const function_call_parameter_def = skip(space)[-(single_var_name >> '=') >> value_term_r1];
-	auto const function_call_def = 
+	auto const function_call_def =
 		skip(space)[
-		var_name >> x3::omit['('] >> -(!char_(')') >> function_call_parameter % ',') >> x3::omit[')']
+			var_name >> x3::omit['('] >> -(!char_(')') >> function_call_parameter % ',') >> x3::omit[')']
 		];
 
 	BOOST_SPIRIT_DEFINE( quoted_string )

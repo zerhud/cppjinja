@@ -34,5 +34,15 @@ namespace cppjinja::text {
 	const x3::rule<value_term_r1_class, ast::value_term> value_term_r1 = "value_term_r1";
 	const x3::rule<value_term_r2_class, ast::value_term> value_term_r2 = "value_term_r2";
 
+	BOOST_SPIRIT_DECLARE(decltype(quoted_string))
+	BOOST_SPIRIT_DECLARE(decltype(single_var_name))
+	BOOST_SPIRIT_DECLARE(decltype(var_name))
+	BOOST_SPIRIT_DECLARE(decltype(binary_op1))
+	BOOST_SPIRIT_DECLARE(decltype(binary_op2))
+	BOOST_SPIRIT_DECLARE(decltype(function_call_parameter))
+	BOOST_SPIRIT_DECLARE(decltype(function_call))
+	BOOST_SPIRIT_DECLARE(decltype(value_term_r1))
+	BOOST_SPIRIT_DECLARE(decltype(value_term_r2))
+
 } // namespace cppjinja::text
 
