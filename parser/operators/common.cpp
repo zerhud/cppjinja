@@ -33,6 +33,11 @@ std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::binary_o
 	return out << obj.left << obj.op << obj.right;
 }
 
+std::ostream& std::operator << (std::ostream& out, const boost::spirit::x3::forward_ast<cppjinja::ast::value_term>& obj)
+{
+	return out << (obj.get());
+}
+
 std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::value_term& obj)
 {
 	out << obj.var;

@@ -57,8 +57,8 @@ BOOST_DATA_TEST_CASE(
 
 BOOST_DATA_TEST_CASE(
           var_name
-        ,   utd::make("a"s, "a.b"s)
-          ^ utd::make(ast::var_name{"a"s}, ast::var_name{"a"s, "b"s})
+        , utd::make("a"s, "a.b"s)
+        ^ utd::make(ast::var_name{"a"s}, ast::var_name{"a"s, "b"s})
         , data, good_result)
 {
 	ast::var_name result;
@@ -98,3 +98,21 @@ BOOST_DATA_TEST_CASE(
 	BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(cppjinja::text::value_term, data) );
 	BOOST_TEST( result == good_result );
 }
+
+BOOST_DATA_TEST_CASE(
+	  binary_op
+	, utd::make("'a'=='a'"s, "a==a"s, "foo()==foo()"s)
+	^ utd::make(
+		  ast::value_term{"a"s}
+		, ast::var_name{"a"s}
+		, ast::function_call{ast::var_name{"foo"s}, {}}
+		)
+	, data, value)
+{
+	ast::binary_op result;
+	BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(cppjinja::text::binary_op, data) );
+	BOOST_TEST( result.left == value );
+	BOOST_TEST( result.right == value );
+	BOOST_TEST( result.op == ast::comparator::eq );
+}
+

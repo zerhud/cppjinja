@@ -35,6 +35,7 @@ namespace cppjinja::text {
 	auto const binary_op_sign = 
 		  lit("==") >> x3::attr(ast::comparator::eq)
 		| lit("is") >> x3::attr(ast::comparator::eq)
+		| lit("!=") >> x3::attr(ast::comparator::neq)
 		| lit("<=") >> x3::attr(ast::comparator::less_eq)
 		| lit(">=") >> x3::attr(ast::comparator::more_eq)
 		| lit( "<") >> x3::attr(ast::comparator::less)
@@ -42,7 +43,7 @@ namespace cppjinja::text {
 	;
 	auto const binary_op_def = value_term >> binary_op_sign >> value_term;
 
-	auto const value_term_def = quoted_string | var_name;
+	auto const value_term_def = quoted_string | var_name | binary_op ;//| function_call;
 
 	auto const function_call_parameter_def = skip(space)[-(single_var_name >> '=') >> value_term];
 	auto const function_call_def =
