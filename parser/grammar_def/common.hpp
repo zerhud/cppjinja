@@ -41,29 +41,36 @@ namespace cppjinja::text {
 		| lit( "<") >> x3::attr(ast::comparator::less)
 		| lit( ">") >> x3::attr(ast::comparator::more)
 	;
-	auto const binary_op_def = value_term >> binary_op_sign >> value_term;
 
-	auto const value_term_def = quoted_string | var_name | binary_op ;//| function_call;
+	auto const binary_op1_def = value_term_r2 >> binary_op_sign >> value_term_r2;
+	auto const binary_op2_def = value_term_r1 >> binary_op_sign >> value_term_r1;
 
-	auto const function_call_parameter_def = skip(space)[-(single_var_name >> '=') >> value_term];
-	auto const function_call_def =
+	auto const value_term_r1_def = quoted_string | var_name | binary_op2;
+	auto const value_term_r2_def = quoted_string | var_name | binary_op1;
+
+	auto const function_call_parameter_def = skip(space)[-(single_var_name >> '=') >> value_term_r1];
+	auto const function_call_def = 
 		skip(space)[
-		var_name >> x3::omit['('] >> -(function_call_parameter % ',') >> x3::omit[')']
+		var_name >> x3::omit['('] >> -(!char_(')') >> function_call_parameter % ',') >> x3::omit[')']
 		];
 
 	BOOST_SPIRIT_DEFINE( quoted_string )
 	BOOST_SPIRIT_DEFINE( single_var_name )
 	BOOST_SPIRIT_DEFINE( var_name )
-	BOOST_SPIRIT_DEFINE( binary_op )
-	BOOST_SPIRIT_DEFINE( value_term )
+	BOOST_SPIRIT_DEFINE( binary_op1 )
+	BOOST_SPIRIT_DEFINE( binary_op2 )
+	BOOST_SPIRIT_DEFINE( value_term_r1 )
+	BOOST_SPIRIT_DEFINE( value_term_r2 )
 	BOOST_SPIRIT_DEFINE( function_call )
 	BOOST_SPIRIT_DEFINE( function_call_parameter )
 
 	class quoted_string_class : x3::annotate_on_success {};
 	class single_var_name_class : x3::annotate_on_success {};
 	class var_name_class : x3::annotate_on_success {};
-	class binary_op_class : x3::annotate_on_success {};
-	class value_term_class : x3::annotate_on_success {};
+	class binary_op1_class : x3::annotate_on_success {};
+	class binary_op2_class : x3::annotate_on_success {};
+	class value_term_r1_class : x3::annotate_on_success {};
+	class value_term_r2_class : x3::annotate_on_success {};
 	class function_call_class : x3::annotate_on_success {};
 	class function_call_parameter_class : x3::annotate_on_success {};
 

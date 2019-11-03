@@ -95,7 +95,7 @@ BOOST_DATA_TEST_CASE(
         , data, good_result)
 {
 	ast::value_term result;
-	BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(cppjinja::text::value_term, data) );
+	BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(cppjinja::text::value_term_r1, data) );
 	BOOST_TEST( result == good_result );
 }
 
@@ -110,7 +110,7 @@ BOOST_DATA_TEST_CASE(
 	, data, value)
 {
 	ast::binary_op result;
-	BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(cppjinja::text::binary_op, data) );
+	BOOST_REQUIRE_NO_THROW( result = cppjinja::text::parse(cppjinja::text::binary_op1, data) );
 	BOOST_TEST( result.left == value );
 	BOOST_TEST( result.right == value );
 	BOOST_TEST( result.op == ast::comparator::eq );

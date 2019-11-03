@@ -56,12 +56,14 @@ struct function_call : x3::position_tagged
 	std::vector<function_call_parameter> params;
 };
 
-struct value_term : x3::variant<
+using value_term_var = x3::variant<
 	  string_t
 	, var_name
 	, function_call
 	, binary_op
->
+> ;
+
+struct value_term : value_term_var
 {
 	using base_type::base_type;
 	using base_type::operator=;
