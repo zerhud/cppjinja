@@ -15,10 +15,10 @@ namespace cppjinja::text {
 
 	namespace x3 = boost::spirit::x3;
 
-	struct op_term_start_class;
-	struct op_term_end_class;
-	struct block_term_start_class;
-	struct block_term_end_class;
+	class op_term_start_class;
+	class op_term_end_class;
+	class block_term_start_class;
+	class block_term_end_class;
 
 	const x3::rule<op_term_start_class, ast::op_term_start> op_term_start = "op_term_start";
 	const x3::rule<op_term_end_class, ast::op_term_end> op_term_end = "op_term_start";

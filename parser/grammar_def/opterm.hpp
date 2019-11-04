@@ -13,7 +13,7 @@
 
 namespace cppjinja::text {
 
-    auto get_data = [](auto& ctx){ return x3::get<parser_env>(ctx); };
+	auto get_data = [](auto& ctx){ return x3::get<parser_env>(ctx); };
 
 	const auto op_seq_def = x3::repeat(2)[char_("!#$%&()*,-./:;<=>?@[\\]^_`{|}~")];
 	const auto op_term_start_def = op_seq_def[([](auto&c){_pass(c)=_attr(c)==get_data(c).output.b;})] >> -(omit['+'] >> x3::attr(true));
@@ -22,8 +22,8 @@ namespace cppjinja::text {
 	const auto block_term_start_def = "block_term_start";
 	const auto block_term_end_def = "block_term_start";
 
-	BOOST_SPIRIT_DEFINE( op_term_start )
-
 	class op_term_start_class : x3::annotate_on_success {};
+
+	BOOST_SPIRIT_DEFINE( op_term_start )
 
 } // namespace cppjinja::text

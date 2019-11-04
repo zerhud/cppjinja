@@ -48,7 +48,7 @@ target_sources_local(parser "ast.hpp" "ast.cpp" "parser/")
 target_sources_local(parser "debug_operators.hpp" "debug_operators.cpp" "parser/")
 
 #parser2
-add_library(parser2 SHARED "parser/config.hpp" "parser/common.hpp" "parser/parse.hpp")
+add_library(parser2 SHARED "parser/common.hpp" "parser/parse.hpp")
 target_include_directories(parser2 PRIVATE "${Boost_INCLUDE_DIRS}" PUBLIC "${config_files_dir}" "parser")
 target_sources_local(parser2 "common.hpp" "" "parser/ast/")
 target_sources_local(parser2 "opterm.hpp" "" "parser/ast/")
