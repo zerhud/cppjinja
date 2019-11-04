@@ -47,6 +47,15 @@ target_sources_local(parser "helpers.hpp" "helpers.cpp" "parser/")
 target_sources_local(parser "ast.hpp" "ast.cpp" "parser/")
 target_sources_local(parser "debug_operators.hpp" "debug_operators.cpp" "parser/")
 
+#parser2
+add_library(parser2 SHARED "parser/config.hpp")
+target_include_directories(parser2 PRIVATE "${Boost_INCLUDE_DIRS}" PUBLIC "${config_files_dir}" "parser")
+target_sources_local(parser2 "common.hpp" "" "parser/ast/")
+target_sources_local(parser2 "common.hpp" "" "parser/fusion/")
+target_sources_local(parser2 "common.hpp" "" "parser/grammar/")
+target_sources_local(parser2 "common.hpp" "common.cpp" "parser/operators/")
+target_sources_local(parser2 "common.hpp" "common.cpp" "parser/grammar_def/")
+
 # some files may slow down system when compiling..
 if(LOW_MEMORY AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 	set_source_files_properties("parser/grammar.cpp" PROPERTIES COMPILE_FLAGS "--param ggc-min-expand=1024 --param ggc-min-heapsize=4096")
@@ -54,8 +63,5 @@ endif()
 
 if(ENABLE_TESTS)
 	include(cmake/tests.inc.cmake)
-	add_executable(rules_tmp tests/parser/rules_test.cpp parser/operators/common.cpp parser/grammar_def/common.cpp)
-	target_link_libraries(rules_tmp PRIVATE parser ${Boost_LIBRARIES})
-	target_include_directories(rules_tmp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/parser/")
 endif()
 
