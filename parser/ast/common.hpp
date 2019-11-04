@@ -57,8 +57,7 @@ struct function_call : x3::position_tagged
 };
 
 using value_term_var = x3::variant<
-	  int
-	, double
+	  double
 	, string_t
 	, var_name
 	, function_call

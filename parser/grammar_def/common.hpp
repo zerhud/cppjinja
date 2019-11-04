@@ -46,7 +46,7 @@ namespace cppjinja::text {
 
 	auto const binary_op_def = value_term >> binary_op_sign >> value_term;
 
-	auto const value_term_def = function_call | quoted_string | var_name | binary_op;
+	auto const value_term_def = x3::double_ | function_call | quoted_string | var_name | binary_op;
 
 	auto const function_call_parameter_def = -(single_var_name >> '=') >> value_term;
 	auto const function_call_def =

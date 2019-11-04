@@ -86,12 +86,14 @@ BOOST_DATA_TEST_CASE(
 
 BOOST_DATA_TEST_CASE(
           value_term
-        , utd::make("'a'"s, "a"s, "a.a"s, "foo()"s)
+        , utd::make("'a'"s, "a"s, "a.a"s, "foo()"s, "1"s, "1.0"s)
         ^ utd::make(
               ast::value_term{"a"s}
             , ast::var_name{"a"s}
             , ast::var_name{"a"s, "a"s}
             , ast::function_call{ast::var_name{"foo"s}, {}}
+            , 1.0
+            , 1.0
             )
         , data, good_result)
 {
