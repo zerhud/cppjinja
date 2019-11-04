@@ -16,7 +16,7 @@
 
 namespace cppjinja {
 
-struct parser_data {
+struct parser_env {
 	struct {
 		std::string b= "<=";
 		std::string e= "=>";

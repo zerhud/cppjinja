@@ -19,9 +19,9 @@ namespace cppjinja::ast {
 
 namespace x3 = boost::spirit::x3;
 
-struct op_term_start : public x3::position_tagged { bool trim; };
-struct op_term_end : public x3::position_tagged { bool trim; };
-struct block_term_start : public x3::position_tagged { bool trim; };
-struct block_term_end : public x3::position_tagged { bool trim; };
+struct op_term_start : public x3::position_tagged { bool trim=false; };
+struct op_term_end : public x3::position_tagged { bool trim=false; };
+struct block_term_start : public x3::position_tagged { bool trim=false; };
+struct block_term_end : public x3::position_tagged { bool trim=false; };
 
 } // namespace cppjinja::ast

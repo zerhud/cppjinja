@@ -15,6 +15,4 @@
 namespace cppjinja::text {
 
 
-        namespace x3 = boost::spirit::x3;
-	using iterator_type = std::string_view::const_iterator;
 } // namespace cppjinja::text

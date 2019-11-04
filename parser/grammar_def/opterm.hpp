@@ -13,7 +13,7 @@
 
 namespace cppjinja::text {
 
-    auto get_data = [](auto& ctx){ return x3::get<parser_data>(ctx); };
+    auto get_data = [](auto& ctx){ return x3::get<parser_env>(ctx); };
 
 	const auto op_seq_def = x3::repeat(2)[char_("!#$%&()*,-./:;<=>?@[\\]^_`{|}~")];
 	const auto op_term_start_def = op_seq_def[([](auto&c){_pass(c)=_attr(c)==get_data(c).output.b;})] >> -(omit['+'] >> x3::attr(true));

@@ -7,7 +7,7 @@
  *************************************************************************/
 
 #include "opterm.hpp"
-#include "../config.hpp"
+#include "../parse.hpp"
 
 namespace cppjinja::text {
 
