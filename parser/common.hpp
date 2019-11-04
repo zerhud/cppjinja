@@ -8,13 +8,27 @@
 
 #pragma once
 
+#define BOOST_SPIRIT_X3_UNICODE
+
+#include <string>
 #include <boost/spirit/home/x3.hpp>
+#include <boost/spirit/home/support/utf8.hpp>
 
-#include "common.hpp"
+namespace cppjinja {
 
-namespace cppjinja::text {
+struct parser_data {
+	struct {
+		std::string b= "<=";
+		std::string e= "=>";
+	} output;
+	struct {
+		std::string b= "<%";
+		std::string e= "%>";
+	} term;
+	struct {
+		std::string b="<#";
+		std::string e="#>";
+	} cmt;
+};
 
-
-        namespace x3 = boost::spirit::x3;
-	using iterator_type = std::string_view::const_iterator;
-} // namespace cppjinja::text
+} // namespace cppjinja

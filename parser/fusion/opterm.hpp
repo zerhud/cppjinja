@@ -8,13 +8,23 @@
 
 #pragma once
 
-#include <boost/spirit/home/x3.hpp>
+#include "ast/opterm.hpp"
+#include <boost/fusion/include/adapt_struct.hpp>
 
-#include "common.hpp"
+BOOST_FUSION_ADAPT_STRUCT(
+        cppjinja::ast::op_term_start,
+        trim)
 
-namespace cppjinja::text {
+BOOST_FUSION_ADAPT_STRUCT(
+        cppjinja::ast::op_term_end,
+        trim)
+
+BOOST_FUSION_ADAPT_STRUCT(
+        cppjinja::ast::block_term_start,
+        trim)
+
+BOOST_FUSION_ADAPT_STRUCT(
+        cppjinja::ast::block_term_end,
+        trim)
 
 
-        namespace x3 = boost::spirit::x3;
-	using iterator_type = std::string_view::const_iterator;
-} // namespace cppjinja::text

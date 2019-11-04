@@ -11,6 +11,9 @@
 
 namespace cppjinja::text {
 
+decltype(x3::char_)& char_ = x3::char_;
+decltype(x3::space)& space = x3::space;
+
 BOOST_SPIRIT_INSTANTIATE( decltype(quoted_string), iterator_type, context_type )
 BOOST_SPIRIT_INSTANTIATE( decltype(single_var_name), iterator_type, context_type )
 BOOST_SPIRIT_INSTANTIATE( decltype(var_name), iterator_type, context_type )

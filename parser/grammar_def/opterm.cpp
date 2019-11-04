@@ -6,15 +6,11 @@
  * or <http://www.gnu.org/licenses/> for details
  *************************************************************************/
 
-#pragma once
-
-#include <boost/spirit/home/x3.hpp>
-
-#include "common.hpp"
+#include "opterm.hpp"
+#include "../config.hpp"
 
 namespace cppjinja::text {
 
+BOOST_SPIRIT_INSTANTIATE( decltype(op_term_start), iterator_type, context_type )
 
-        namespace x3 = boost::spirit::x3;
-	using iterator_type = std::string_view::const_iterator;
 } // namespace cppjinja::text

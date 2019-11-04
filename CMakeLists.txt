@@ -48,13 +48,18 @@ target_sources_local(parser "ast.hpp" "ast.cpp" "parser/")
 target_sources_local(parser "debug_operators.hpp" "debug_operators.cpp" "parser/")
 
 #parser2
-add_library(parser2 SHARED "parser/config.hpp")
+add_library(parser2 SHARED "parser/config.hpp" "parser/common.hpp" "parser/parse.hpp")
 target_include_directories(parser2 PRIVATE "${Boost_INCLUDE_DIRS}" PUBLIC "${config_files_dir}" "parser")
 target_sources_local(parser2 "common.hpp" "" "parser/ast/")
+target_sources_local(parser2 "opterm.hpp" "" "parser/ast/")
 target_sources_local(parser2 "common.hpp" "" "parser/fusion/")
+target_sources_local(parser2 "opterm.hpp" "" "parser/fusion/")
 target_sources_local(parser2 "common.hpp" "" "parser/grammar/")
+target_sources_local(parser2 "opterm.hpp" "" "parser/grammar/")
 target_sources_local(parser2 "common.hpp" "common.cpp" "parser/operators/")
+target_sources_local(parser2 "opterm.hpp" "opterm.cpp" "parser/operators/")
 target_sources_local(parser2 "common.hpp" "common.cpp" "parser/grammar_def/")
+target_sources_local(parser2 "opterm.hpp" "opterm.cpp" "parser/grammar_def/")
 
 # some files may slow down system when compiling..
 if(LOW_MEMORY AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")

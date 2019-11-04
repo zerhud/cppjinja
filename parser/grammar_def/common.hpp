@@ -19,8 +19,8 @@ namespace cppjinja::text {
 	//auto& space = x3::unicode::space;
 	//using boost::spirit::x3::standard_wide::lit;
 
-	auto& char_ = x3::char_;
-	auto& space = x3::space;
+    extern decltype(x3::char_)& char_;
+	extern decltype(x3::space)& space;
 	using boost::spirit::x3::lit;
 	using boost::spirit::x3::skip;
 	using boost::spirit::x3::omit;
