@@ -16,12 +16,20 @@
 namespace cppjinja::text {
 
 	auto const op_out_def = op_term_start >> value_term >> op_term_end;
-	auto const op_comment_def = comment_term_start >> -(*(char_ >> !comment_term_end) >> char_) >> comment_term_end;
+
+	auto const op_comment_value_def = (char_ >> !comment_term_end) >> char_;
+	auto const op_comment_def = comment_term_start >> -op_comment_value >> comment_term_end;
+
 	auto const op_set_def = op_term_start >> var_name >> '=' >> value_term >> op_term_end;
+
+	class op_out_class      : x3::annotate_on_success { };
+	class op_set_class      : x3::annotate_on_success { };
+	class op_comment_class  : x3::annotate_on_success { };
 
 	BOOST_SPIRIT_DEFINE( op_out )
 	BOOST_SPIRIT_DEFINE( op_comment )
 	BOOST_SPIRIT_DEFINE( op_set )
+	BOOST_SPIRIT_DEFINE( op_comment_value )
 
 } // namespace cppjinja::text
 

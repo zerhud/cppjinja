@@ -16,13 +16,16 @@ namespace cppjinja::text {
 
 	class op_out_class;
 	class op_comment_class;
+	class op_comment_value_class;
 	class op_set_class;
 
 	const x3::rule<op_out_class, ast::op_out> op_out = "op_out";
+	const x3::rule<op_comment_value_class, std::string> op_comment_value = "op_comment_value";
 	const x3::rule<op_comment_class, ast::op_comment> op_comment = "op_comment";
 	const x3::rule<op_set_class, ast::op_set> op_set = "op_set";
 
 	BOOST_SPIRIT_DECLARE(decltype(op_out))
+	BOOST_SPIRIT_DECLARE(decltype(op_comment_value))
 	BOOST_SPIRIT_DECLARE(decltype(op_comment))
 	BOOST_SPIRIT_DECLARE(decltype(op_set))
 
