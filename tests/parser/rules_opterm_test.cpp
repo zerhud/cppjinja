@@ -23,10 +23,32 @@ using namespace std::literals;
 namespace txt = cppjinja::text;
 namespace ast = cppjinja::ast;
 
-BOOST_AUTO_TEST_CASE(start)
+BOOST_AUTO_TEST_CASE(op_term)
 {
-	std::string data = "<%";
 	ast::op_term_start result;
+
+	std::string data = "<=";
 	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::op_term_start, data) );
-	BOOST_FAIL("empty test");
+	BOOST_TEST( !result.trim );
+
+	data = "<=+";
+	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::op_term_start, data) );
+	BOOST_TEST( result.trim );
+
+	data = "<%";
+	BOOST_REQUIRE_THROW( result = txt::parse(txt::op_term_start, data), std::exception );
+
+	data = "{=+";
+	cppjinja::parser_env env; env.output.b="{=";
+	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::op_term_start, data, std::move(env)) );
+	BOOST_TEST( result.trim );
+}
+
+BOOST_AUTO_TEST_CASE(op_block)
+{
+	ast::block_term_start result;
+
+	std::string data = "<%";
+	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::block_term_start, data) );
+	BOOST_TEST( !result.trim );
 }
