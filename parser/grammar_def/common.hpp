@@ -8,8 +8,6 @@
 
 #pragma once
 
-//#define BOOST_SPIRIT_X3_UNICODE
-
 #include <boost/spirit/home/x3/support/utility/annotate_on_success.hpp>
 #include <boost/spirit/home/support/utf8.hpp>
 #include "grammar/common.hpp"
