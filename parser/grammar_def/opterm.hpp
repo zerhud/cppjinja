@@ -23,11 +23,12 @@ namespace cppjinja::text {
 	auto check_if_block_end     = [](auto& ctx){ _pass(ctx) = _attr(ctx) == get_data(ctx).term.e; };
 	auto check_if_comment_start = [](auto& ctx){ _pass(ctx) = _attr(ctx) == get_data(ctx).cmt.b; };
 	auto check_if_comment_end   = [](auto& ctx){ _pass(ctx) = _attr(ctx) == get_data(ctx).cmt.e; };
+	auto set_trim = [](auto& c){if constexpr (!std::is_same_v<std::decay_t<decltype(_val(c))>,x3::unused_type>) _val(c).trim=true;};
 
 	// ---
 	// helpers expressions
 	// ---
-	const auto check_trim = -char_('+')[ ([](auto&c){_val(c).trim=true;}) ];
+	const auto check_trim = -char_('+')[set_trim];
 	const auto op_seq_def = x3::repeat(2)[char_("!#$%&()*,-./:;<=>?@[\\]^_`{|}~")];
 
 	// ---

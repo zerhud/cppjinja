@@ -23,11 +23,11 @@ namespace cppjinja::text {
 	class comment_term_end_class;
 
 	const x3::rule<op_term_start_class,      ast::op_term_start>      op_term_start      = "op_term_start";
-	const x3::rule<op_term_end_class,        ast::op_term_end>        op_term_end        = "op_term_start";
+	const x3::rule<op_term_end_class,        ast::op_term_end>        op_term_end        = "op_term_end";
 	const x3::rule<block_term_start_class,   ast::block_term_start>   block_term_start   = "block_term_start";
-	const x3::rule<block_term_end_class,     ast::block_term_end>     block_term_end     = "block_term_start";
+	const x3::rule<block_term_end_class,     ast::block_term_end>     block_term_end     = "block_term_end";
 	const x3::rule<comment_term_start_class, ast::comment_term_start> comment_term_start = "comment_term_start";
-	const x3::rule<comment_term_end_class,   ast::comment_term_end>   comment_term_end   = "comment_term_start";
+	const x3::rule<comment_term_end_class,   ast::comment_term_end>   comment_term_end   = "comment_term_end";
 
 	BOOST_SPIRIT_DECLARE(decltype(op_term_start))
 	BOOST_SPIRIT_DECLARE(decltype(op_term_end))
