@@ -7,7 +7,7 @@
  *************************************************************************/
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE grammar
+#define BOOST_TEST_MODULE rules_single
 
 #include <boost/test/unit_test.hpp>
 #include <boost/test/data/test_case.hpp>
