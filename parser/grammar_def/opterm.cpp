@@ -18,9 +18,4 @@ BOOST_SPIRIT_INSTANTIATE( decltype(block_term_end),     iterator_type, context_t
 BOOST_SPIRIT_INSTANTIATE( decltype(comment_term_start), iterator_type, context_type )
 BOOST_SPIRIT_INSTANTIATE( decltype(comment_term_end),   iterator_type, context_type )
 
-template bool parse_rule<iterator_type, context_type, const boost::spirit::x3::unused_type>(
-        decltype(comment_term_end) rule_
-      , iterator_type& first, iterator_type const& last
-      , context_type const& context, const boost::spirit::x3::unused_type& attr);
-
 } // namespace cppjinja::text

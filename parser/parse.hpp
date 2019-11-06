@@ -23,7 +23,6 @@ namespace cppjinja::text {
 	}
 
 	using iterator_type = std::string_view::const_iterator;
-	//using context_type = x3::phrase_parse_context<decltype(x3::space)>::type;
 	using context_type = x3::context<parser_env,parser_env,x3::phrase_parse_context<decltype(x3::space)>::type>;
 
 	template<typename Id, typename Attribute>
