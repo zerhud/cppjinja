@@ -7,7 +7,7 @@
  *************************************************************************/
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE grammar
+#define BOOST_TEST_MODULE rules_opterm
 
 #include <sstream>
 #include <iostream>
