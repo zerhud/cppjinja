@@ -16,7 +16,7 @@ foreach(tname ${tests_parser})
 	add_unit_test(${tname} "tests/parser/" "parser")
 endforeach()
 
-set(tests_parser2 rules_common rules_opterm rules_single)
+set(tests_parser2 rules_common rules_opterm rules_single rules_blocks)
 foreach(tname ${tests_parser2})
 	add_unit_test(${tname} "tests/parser/" "parser2")
 endforeach()

@@ -53,22 +53,27 @@ target_include_directories(parser2 PRIVATE "${Boost_INCLUDE_DIRS}" PUBLIC "${con
 target_sources_local(parser2 "common.hpp" "" "parser/ast/")
 target_sources_local(parser2 "opterm.hpp" "" "parser/ast/")
 target_sources_local(parser2 "single.hpp" "" "parser/ast/")
+target_sources_local(parser2 "blocks.hpp" "" "parser/ast/")
 
 target_sources_local(parser2 "common.hpp" "" "parser/fusion/")
 target_sources_local(parser2 "opterm.hpp" "" "parser/fusion/")
 target_sources_local(parser2 "single.hpp" "" "parser/fusion/")
+target_sources_local(parser2 "blocks.hpp" "" "parser/fusion/")
 
 target_sources_local(parser2 "common.hpp" "" "parser/grammar/")
 target_sources_local(parser2 "opterm.hpp" "" "parser/grammar/")
 target_sources_local(parser2 "single.hpp" "" "parser/grammar/")
+target_sources_local(parser2 "blocks.hpp" "" "parser/grammar/")
 
 target_sources_local(parser2 "common.hpp" "common.cpp" "parser/operators/")
 target_sources_local(parser2 "opterm.hpp" "opterm.cpp" "parser/operators/")
 target_sources_local(parser2 "single.hpp" "single.cpp" "parser/operators/")
+target_sources_local(parser2 "blocks.hpp" "blocks.cpp" "parser/operators/")
 
 target_sources_local(parser2 "common.hpp" "common.cpp" "parser/grammar_def/")
 target_sources_local(parser2 "opterm.hpp" "opterm.cpp" "parser/grammar_def/")
 target_sources_local(parser2 "single.hpp" "single.cpp" "parser/grammar_def/")
+target_sources_local(parser2 "blocks.hpp" "blocks.cpp" "parser/grammar_def/")
 
 # some files may slow down system when compiling..
 if(LOW_MEMORY AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
