@@ -24,7 +24,7 @@ namespace utd = boost::unit_test::data;
 
 BOOST_DATA_TEST_CASE(
 	  block_raw
-	, utd::make("kuku"s, "'a'"s, "foo()"s)
+	, utd::make("kuku"s, "'a'"s, "foo()"s, "<%"s, "<%endraw_%>"s)
 	* utd::make(""s, "+"s)
 	* utd::make(""s, "+"s)
 	* utd::make(""s, " "s, "\n"s)
@@ -34,7 +34,7 @@ BOOST_DATA_TEST_CASE(
 
 	std::string text = "<%"s + left + space + "raw"s + "%>"s + data + "<%"s + space + "endraw" + right + "%>"s;
 	BOOST_TEST_CONTEXT("TEXT=" << text) {
-		BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(txt::block_raw, text) );
+		BOOST_REQUIRE_NO_THROW( result = cppjinja::text::parse(txt::block_raw, text) );
 		BOOST_TEST( result.value == data );
 		BOOST_TEST( !left.empty() == result.left_open.trim );
 		BOOST_TEST( !right.empty() == result.right_close.trim );
