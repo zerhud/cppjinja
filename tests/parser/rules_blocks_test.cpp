@@ -22,9 +22,10 @@ namespace txt = cppjinja::text;
 namespace ast = cppjinja::ast;
 namespace utd = boost::unit_test::data;
 
+BOOST_AUTO_TEST_SUITE(block_raw)
 BOOST_DATA_TEST_CASE(
-	  block_raw
-	, utd::make("kuku"s, "'a'"s, "foo()"s, "<%"s, "<%endraw_%>"s)
+	  good
+	, utd::make("kuku"s, "'a'"s, "foo()"s, "<#"s, "<="s, "<%"s, "<%endraw_%>"s)
 	* utd::make(""s, "+"s)
 	* utd::make(""s, "+"s)
 	* utd::make(""s, " "s, "\n"s)
@@ -40,4 +41,5 @@ BOOST_DATA_TEST_CASE(
 		BOOST_TEST( !right.empty() == result.right_close.trim );
 	}
 }
+BOOST_AUTO_TEST_SUITE_END() // block_raw
 

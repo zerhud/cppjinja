@@ -14,10 +14,16 @@
 namespace cppjinja::text {
 	namespace x3 = boost::spirit::x3;
 
+	class block_free_text_class;
+	class block_raw_text_class;
 	class block_raw_class;
 
+	const x3::rule<block_free_text_class, std::string> block_free_text = "block_free_text";
+	const x3::rule<block_raw_text_class, std::string> block_raw_text = "block_raw_text";
 	const x3::rule<block_raw_class, ast::block_raw> block_raw = "block_raw";
 
+	BOOST_SPIRIT_DECLARE(decltype(block_free_text))
+	BOOST_SPIRIT_DECLARE(decltype(block_raw_text))
 	BOOST_SPIRIT_DECLARE(decltype(block_raw))
 
 } // namespace cppjinja::text
