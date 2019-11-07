@@ -30,7 +30,7 @@ using block_content = x3::variant
 	, forward_ast<block_macro>
 >;
 
-struct block
+struct block : x3::position_tagged
 {
 	block_term_start left_open, right_open;
 	block_term_end left_close, right_close;
@@ -38,7 +38,21 @@ struct block
 
 struct block_raw : block
 {
-	std::string value;
+	string_t value;
+};
+
+struct block_if : block
+{
+	binary_op condition;
+	std::vector<block_content> content;
+};
+
+struct block_for : block
+{
+};
+
+struct block_macro : block
+{
 };
 
 } // namespace cppjinja::ast

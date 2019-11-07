@@ -33,7 +33,8 @@ namespace cppjinja::text {
 	auto const var_name_def = lexeme[single_var_name % '.'];
 
 	auto const binary_op_sign =
-		  lit("==") >> x3::attr(ast::comparator::eq)
+		  lit("in") >> x3::attr(ast::comparator::in)
+		| lit("==") >> x3::attr(ast::comparator::eq)
 		| lit("is") >> x3::attr(ast::comparator::eq)
 		| lit("!=") >> x3::attr(ast::comparator::neq)
 		| lit("<=") >> x3::attr(ast::comparator::less_eq)

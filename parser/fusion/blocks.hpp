@@ -17,4 +17,9 @@ BOOST_FUSION_ADAPT_STRUCT(
 		value,
 		right_open, right_close)
 
+BOOST_FUSION_ADAPT_STRUCT(
+		cppjinja::ast::block_if,
+		left_open, condition, left_close,
+		content,
+		right_open, right_close)
 

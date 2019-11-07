@@ -24,7 +24,7 @@ using string_t = std::string;
 template<typename T>
 using forward_ast = boost::spirit::x3::forward_ast<T>;
 
-enum class comparator{ no, eq, neq, less, more, less_eq, more_eq };
+enum class comparator{ no, in, eq, neq, less, more, less_eq, more_eq };
 
 using var_name = std::vector<string_t>;
 
