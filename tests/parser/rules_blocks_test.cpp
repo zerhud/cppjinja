@@ -25,7 +25,7 @@ namespace utd = boost::unit_test::data;
 BOOST_AUTO_TEST_SUITE(block_raw)
 BOOST_DATA_TEST_CASE(
 	  good
-	, utd::make("kuku"s, "'a'"s, "foo()"s, "<#"s, "<="s, "<%"s, "<%endraw_%>"s)
+	, utd::make("kuku"s, "'a'"s, "foo()"s, "<#"s, "<="s, "<%"s, "<%endraw_%>"s, "a b"s)
 	* utd::make(""s, "+"s)
 	* utd::make(""s, "+"s)
 	* utd::make(""s, " "s, "\n"s)

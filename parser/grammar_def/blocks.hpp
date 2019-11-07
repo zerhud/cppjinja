@@ -16,7 +16,7 @@
 
 namespace cppjinja::text {
 	const auto block_free_text_def = +(char_ >> !block_term_start) >> char_;
-	const auto block_raw_text_def = +(char_ >> !block_term_start) >> char_;
+	const auto block_raw_text_def = lexeme[+(char_ >> !block_term_start) >> char_];
 	const auto block_raw_def =
 		   block_term_start >> omit[lit("raw")] >> block_term_end
 		>> -block_raw_text
