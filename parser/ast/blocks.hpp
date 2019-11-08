@@ -25,7 +25,7 @@ using block_content = x3::variant
 	, op_comment
 	, op_set
 	, forward_ast<block_raw>
-	//, forward_ast<block_if>
+	, forward_ast<block_if>
 	//, forward_ast<block_for>
 	//, forward_ast<block_macro>
 >;

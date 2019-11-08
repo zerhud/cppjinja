@@ -18,6 +18,9 @@ DEFINE_OPERATORS(cppjinja::ast::block_content, left.var, right.var)
 DEFINE_OPERATORS(cppjinja::ast::block_raw,     left.value, right.value,
                  left.left_open, right.left_open, left.left_close, right.left_close,
                  left.right_open, right.right_open, left.right_close, right.right_close)
+DEFINE_OPERATORS(cppjinja::ast::block_if,      left.condition, right.condition, left.content, right.content,
+                 left.left_open, right.left_open, left.left_close, right.left_close,
+                 left.right_open, right.right_open, left.right_close, right.right_close)
 
 
 namespace cppjinja::ast {
