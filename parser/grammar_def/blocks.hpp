@@ -19,7 +19,7 @@ namespace cppjinja::text {
 	const auto block_free_text_term_def = lexeme[block_term_start | op_term_start | comment_term_start | x3::eoi];
 	const auto block_free_text_def = lexeme[!block_free_text_term_def >> *(char_ >> !block_free_text_term_def) >> char_];
 
-	const auto block_content_def = op_comment | block_free_text | op_out;
+	const auto block_content_def = op_comment | block_free_text | op_out | block_if | block_raw;
 	const auto block_content_vec_def = +block_content;
 
 	const auto block_raw_text_def = lexeme[+(char_ >> !block_term_start) >> char_];

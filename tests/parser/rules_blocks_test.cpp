@@ -91,9 +91,10 @@ BOOST_AUTO_TEST_SUITE_END() // block_if
 BOOST_AUTO_TEST_SUITE(inner)
 BOOST_DATA_TEST_CASE(
 	  content
-	, utd::make("t"s, "ttt<#c#>"s, "t<#cmt#><=a=>"s)
+	, utd::make("t"s, "<=a=>"s, "ttt<#c#>"s, "t<#cmt#><=a=>"s)
 	^ utd::make(
 		  ast::make_content( "t"s )
+		, ast::make_content( ast::make_out(ast::var_name{"a"s}))
 		, ast::make_content( "ttt"s, ast::make_comment("c"s))
 		, ast::make_content( "t"s, ast::make_comment("cmt"s), ast::make_out(ast::var_name{"a"s}))
 	  )

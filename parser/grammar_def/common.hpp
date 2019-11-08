@@ -11,6 +11,7 @@
 #include <boost/spirit/home/x3/support/utility/annotate_on_success.hpp>
 #include <boost/spirit/home/support/utf8.hpp>
 #include "grammar/common.hpp"
+#include "grammar/opterm.hpp"
 
 namespace cppjinja::text {
 	//auto& char_ = x3::unicode::char_;
@@ -45,7 +46,7 @@ namespace cppjinja::text {
 
 	auto const binary_op_def = value_term >> binary_op_sign >> value_term;
 
-	auto const value_term_def = x3::double_ | function_call | quoted_string | var_name | binary_op;
+	auto const value_term_def = !block_term_start >> (x3::double_ | function_call | quoted_string | var_name | binary_op);
 
 	auto const function_call_parameter_def = -(single_var_name >> '=') >> value_term;
 	auto const function_call_def =
