@@ -88,3 +88,21 @@ BOOST_DATA_TEST_CASE(
 }
 BOOST_AUTO_TEST_SUITE_END() // block_if
 
+BOOST_AUTO_TEST_SUITE(inner)
+BOOST_DATA_TEST_CASE(
+	  content
+	, utd::make("t"s, "ttt<#c#>"s, "t<#cmt#><=a=>"s)
+	^ utd::make(
+		  ast::make_content( "t"s )
+		, ast::make_content( "ttt"s, ast::make_comment("c"s))
+		, ast::make_content( "t"s, ast::make_comment("cmt"s), ast::make_out(ast::var_name{"a"s}))
+	  )
+	, data, good_result)
+{
+	std::vector<ast::block_content> result;
+	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::block_content_vec, data) );
+	BOOST_TEST( result.size() == good_result.size() );
+	BOOST_TEST( result == good_result );
+}
+BOOST_AUTO_TEST_SUITE_END() // inner
+

@@ -114,7 +114,7 @@ BOOST_DATA_TEST_CASE(
 {
 	ast::binary_op result;
 	BOOST_REQUIRE_NO_THROW( result = cppjinja::text::parse(cppjinja::text::binary_op, data) );
-	BOOST_TEST( result.left == value );
-	BOOST_TEST( result.right == value );
+	BOOST_TEST( result.left.get() == value );
+	BOOST_TEST( result.right.get() == value );
 	BOOST_TEST( result.op == ast::comparator::eq );
 }

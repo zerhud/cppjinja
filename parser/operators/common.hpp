@@ -19,6 +19,8 @@
     inline bool operator < (const sname& left, const sname& right) { return cppjinja::lex_cmp(__VA_ARGS__) < 0; } \
     inline bool operator == (const sname& left, const sname& right) { return cppjinja::lex_cmp(__VA_ARGS__) == 0; } \
     inline bool operator != (const sname& left, const sname& right) { return !(left==right); } \
+    inline bool operator == (const x3::forward_ast<sname>& left, const x3::forward_ast<sname>& right) { return left.get() == right.get(); } \
+    inline bool operator != (const x3::forward_ast<sname>& left, const x3::forward_ast<sname>& right) { return !(left==right); } \
     }\
     namespace std { std::ostream& operator << (std::ostream& out, const sname& obj); }\
 
