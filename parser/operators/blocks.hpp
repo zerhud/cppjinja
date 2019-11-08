@@ -31,8 +31,8 @@ std::vector<block_content> make_content(Args&&... args)
 	return std::vector{ block_content{std::forward<Args>(args)}... };
 }
 
-op_comment make_comment(std::string v) { op_comment ret; ret.value=v; return ret; }
+inline op_comment make_comment(std::string v) { op_comment ret; ret.value=v; return ret; }
 
-op_out make_out(var_name v) { op_out ret; ret.value=v; return ret; }
+inline op_out make_out(var_name v) { op_out ret; ret.value=v; return ret; }
 
 } // namespace cppjinja::ast
