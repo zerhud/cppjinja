@@ -12,6 +12,7 @@
 namespace cppjinja::text {
 
 BOOST_SPIRIT_INSTANTIATE( decltype(block_if),          iterator_type, context_type )
+BOOST_SPIRIT_INSTANTIATE( decltype(block_for),         iterator_type, context_type )
 BOOST_SPIRIT_INSTANTIATE( decltype(block_raw),         iterator_type, context_type )
 BOOST_SPIRIT_INSTANTIATE( decltype(block_content),     iterator_type, context_type )
 BOOST_SPIRIT_INSTANTIATE( decltype(block_content_vec), iterator_type, context_type )

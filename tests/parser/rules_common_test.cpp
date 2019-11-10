@@ -68,10 +68,12 @@ BOOST_DATA_TEST_CASE(
 
 BOOST_DATA_TEST_CASE(
           function_call
-        , utd::make("foo()"s, "foo.bar()"s, "foo('a')", "foo('a','a')"s, "foo ( 'a' , 'a' )"s, "foo\n(  )"s)
+        , utd::make("foo()"s, "f_oo()"s, "foo.bar()"s, "f_oo.bar()"s, "foo('a')", "foo('a','a')"s, "foo ( 'a' , 'a' )"s, "foo\n(  )"s)
         ^ utd::make(
               ast::function_call({"foo"s}, {})
+            , ast::function_call({"f_oo"s}, {})
             , ast::function_call{ast::var_name{"foo","bar"}, {}}
+            , ast::function_call{ast::var_name{"f_oo","bar"}, {}}
             , ast::function_call({"foo"s}, {ast::function_call_parameter(ast::value_term{"a"s})})
             , ast::function_call({"foo"s}, {ast::value_term{"a"s}, ast::value_term{"a"s}})
             , ast::function_call({"foo"s}, {ast::value_term{"a"s}, ast::value_term{"a"s}})

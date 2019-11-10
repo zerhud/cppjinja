@@ -26,7 +26,7 @@ using block_content = x3::variant
 	, op_set
 	, forward_ast<block_raw>
 	, forward_ast<block_if>
-	//, forward_ast<block_for>
+	, forward_ast<block_for>
 	//, forward_ast<block_macro>
 >;
 
@@ -49,6 +49,10 @@ struct block_if : block
 
 struct block_for : block
 {
+	typedef x3::variant<var_name, function_call> value_t;
+	std::vector<string_t> vars;
+	value_t value;
+	std::vector<block_content> content;
 };
 
 struct block_macro : block
@@ -56,4 +60,3 @@ struct block_macro : block
 };
 
 } // namespace cppjinja::ast
-

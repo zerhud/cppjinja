@@ -34,13 +34,21 @@ namespace cppjinja::text {
 		>> block_term_start >> lit("endif") >> block_term_end
 		;
 
+	const auto block_for_def =
+		   block_term_start >> lit("for") >> (single_var_name % ',') >> lit("in") >> ( function_call | var_name ) >> block_term_end
+		>> *block_content
+		>> block_term_start >> lit("endfor") >> block_term_end
+		;
+
 	class block_if_class          : x3::annotate_on_success {};
+	class block_for_class         : x3::annotate_on_success {};
 	class block_raw_class         : x3::annotate_on_success {};
 	class block_raw_text_class    : x3::annotate_on_success {};
 	class block_free_text_class   : x3::annotate_on_success {};
 	class block_content_vec_class : x3::annotate_on_success {};
 
 	BOOST_SPIRIT_DEFINE( block_if )
+	BOOST_SPIRIT_DEFINE( block_for )
 	BOOST_SPIRIT_DEFINE( block_raw )
 	BOOST_SPIRIT_DEFINE( block_content )
 	BOOST_SPIRIT_DEFINE( block_raw_text )
