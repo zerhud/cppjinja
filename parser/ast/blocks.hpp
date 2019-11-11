@@ -54,8 +54,10 @@ struct block_if : block
 struct block_for : block
 {
 	typedef x3::variant<var_name, function_call> value_t;
-	std::vector<string_t> vars;
+
 	value_t value;
+	bool recursive=false;
+	std::vector<string_t> vars;
 	std::vector<block_content> content;
 };
 

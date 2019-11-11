@@ -109,10 +109,11 @@ BOOST_AUTO_TEST_SUITE_END() // inner
 
 BOOST_DATA_TEST_CASE(
 	  block_for
-	, utd::make("key, val in dict.kuku"s, "key in kuku"s, "key, val in my_dict.items()"s)
+	, utd::make("key, val in dict.kuku"s, "key in kuku"s, "key in kuku recursive"s, "key, val in my_dict.items()"s)
 	^ utd::make(
 		  ast::make_for({"key"s, "val"s}, ast::block_for::value_t(ast::var_name{"dict"s, "kuku"s}))
 		, ast::make_for({"key"s}, ast::block_for::value_t(ast::var_name{"kuku"s}))
+		, ast::make_for({"key"s}, ast::block_for::value_t(ast::var_name{"kuku"s}), true)
 		, ast::make_for({"key"s, "val"s}, ast::block_for::value_t(ast::function_call{ast::var_name{"my_dict"s,"items"s}, {}}))
 	)
 	, data, good_result)

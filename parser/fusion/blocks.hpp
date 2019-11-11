@@ -25,7 +25,7 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
 		cppjinja::ast::block_for,
-		left_open, vars, value, left_close,
+		left_open, vars, value, recursive, left_close,
 		content,
 		right_open, right_close)
 

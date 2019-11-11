@@ -21,7 +21,8 @@ DEFINE_OPERATORS(cppjinja::ast::block_raw,     left.value, right.value,
 DEFINE_OPERATORS(cppjinja::ast::block_if,      left.condition, right.condition, left.content, right.content,
                  left.left_open, right.left_open, left.left_close, right.left_close,
                  left.right_open, right.right_open, left.right_close, right.right_close)
-DEFINE_OPERATORS(cppjinja::ast::block_for, left.vars, right.vars, left.value.var, right.value.var, left.content, right.content,
+DEFINE_OPERATORS(cppjinja::ast::block_for,
+                 left.vars, right.vars, left.value.var, right.value.var, left.content, right.content, left.recursive, right.recursive,
                  left.left_open, right.left_open, left.left_close, right.left_close,
                  left.right_open, right.right_open, left.right_close, right.right_close)
 DEFINE_OPERATORS(cppjinja::ast::macro_parameter, left.name, right.name, left.value, right.value)
@@ -48,11 +49,12 @@ inline op_comment make_comment(std::string v) { op_comment ret; ret.value=v; ret
 
 inline op_out make_out(var_name v) { op_out ret; ret.value=v; return ret; }
 
-inline block_for make_for(std::vector<std::string> vars, boost::spirit::x3::variant<cppjinja::ast::var_name, cppjinja::ast::function_call> val)
+inline block_for make_for(std::vector<std::string> vars, boost::spirit::x3::variant<cppjinja::ast::var_name, cppjinja::ast::function_call> val, bool recurs=false)
 {
 	block_for ret;
 	ret.vars = std::move(vars);
 	ret.value = std::move(val);
+	ret.recursive = recurs;
 	return ret;
 }
 
