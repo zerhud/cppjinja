@@ -20,6 +20,7 @@ namespace cppjinja::text {
 	class block_macro_class;
 	class block_named_class;
 	class block_content_class;
+	class block_filtered_class;
 	class block_raw_text_class;
 	class block_free_text_class;
 	class macro_parameter_class;
@@ -38,6 +39,7 @@ namespace cppjinja::text {
 
 	const x3::rule<block_macro_class, ast::block_macro> block_macro = "block_macro";
 	const x3::rule<block_named_class, ast::block_named> block_named = "block_named";
+	const x3::rule<block_filtered_class, ast::block_named> block_filtered = "block_filtered";
 	const x3::rule<macro_parameter_class, ast::macro_parameter> macro_parameter = "macro_parameter";
 
 	BOOST_SPIRIT_DECLARE(decltype(block_if))
@@ -46,6 +48,7 @@ namespace cppjinja::text {
 	BOOST_SPIRIT_DECLARE(decltype(block_named))
 	BOOST_SPIRIT_DECLARE(decltype(block_macro))
 	BOOST_SPIRIT_DECLARE(decltype(block_content))
+	BOOST_SPIRIT_DECLARE(decltype(block_filtered))
 	BOOST_SPIRIT_DECLARE(decltype(block_raw_text))
 	BOOST_SPIRIT_DECLARE(decltype(block_free_text))
 	BOOST_SPIRIT_DECLARE(decltype(macro_parameter))

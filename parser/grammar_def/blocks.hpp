@@ -52,12 +52,18 @@ namespace cppjinja::text {
 		>> *block_content
 		>> block_term_start >> lexeme[lit("endblock") >> -omit[+space >> single_var_name]] >> block_term_end
 		;
+	const auto block_filtered_def =
+		   block_term_start >> lit("filter") >> macro_parameters_def >> block_term_end
+		>> *block_content
+		>> block_term_start >> lexeme[lit("endfilter") >> -omit[+space >> single_var_name]] >> block_term_end
+		;
 
 	class block_if_class          : x3::annotate_on_success {};
 	class block_for_class         : x3::annotate_on_success {};
 	class block_raw_class         : x3::annotate_on_success {};
 	class block_macro_class       : x3::annotate_on_success {};
 	class block_named_class       : x3::annotate_on_success {};
+	class block_filtered_class    : x3::annotate_on_success {};
 	class block_raw_text_class    : x3::annotate_on_success {};
 	class block_free_text_class   : x3::annotate_on_success {};
 	class macro_parameter_calss   : x3::annotate_on_success {};
@@ -69,6 +75,7 @@ namespace cppjinja::text {
 	BOOST_SPIRIT_DEFINE( block_macro )
 	BOOST_SPIRIT_DEFINE( block_named )
 	BOOST_SPIRIT_DEFINE( block_content )
+	BOOST_SPIRIT_DEFINE( block_filtered )
 	BOOST_SPIRIT_DEFINE( block_raw_text )
 	BOOST_SPIRIT_DEFINE( block_free_text )
 	BOOST_SPIRIT_DEFINE( macro_parameter )

@@ -18,6 +18,7 @@ struct block_raw;
 struct block_for;
 struct block_macro;
 struct block_named;
+struct block_filtered;
 
 using block_content = x3::variant
 <
@@ -30,6 +31,7 @@ using block_content = x3::variant
 	, forward_ast<block_for>
 	, forward_ast<block_macro>
 	, forward_ast<block_named>
+	, forward_ast<block_filtered>
 >;
 
 struct block : x3::position_tagged
@@ -63,18 +65,15 @@ struct macro_parameter
 	std::optional<value_term> value;
 };
 
-struct block_macro : block
+struct block_with_name : block
 {
 	string_t name;
 	std::vector<macro_parameter> params;
 	std::vector<block_content> content;
 };
 
-struct block_named : block
-{
-	string_t name;
-	std::vector<macro_parameter> params;
-	std::vector<block_content> content;
-};
+struct block_macro : block_with_name { };
+struct block_named : block_with_name { };
+struct block_filtered : block_with_name { };
 
 } // namespace cppjinja::ast
