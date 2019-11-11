@@ -35,5 +35,11 @@ BOOST_FUSION_ADAPT_STRUCT(
 		content,
 		right_open, right_close)
 
+BOOST_FUSION_ADAPT_STRUCT(
+		cppjinja::ast::block_named,
+		left_open, name, params, left_close,
+		content,
+		right_open, right_close)
+
 BOOST_FUSION_ADAPT_STRUCT(cppjinja::ast::macro_parameter, name, value)
 
