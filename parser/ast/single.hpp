@@ -13,9 +13,16 @@
 
 namespace cppjinja::ast {
 
+struct filter_call : x3::variant<var_name, function_call>
+{
+	using base_type::base_type;
+	using base_type::operator=;
+};
+
 struct op_out : x3::position_tagged
 {
 	value_term value;
+	std::vector<filter_call> filters;
 	op_term_start open;
 	op_term_end close;
 };

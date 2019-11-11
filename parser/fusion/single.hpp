@@ -13,7 +13,7 @@
 
 BOOST_FUSION_ADAPT_STRUCT(
 		cppjinja::ast::op_out,
-		open, value, close)
+		open, value, filters, close)
 
 BOOST_FUSION_ADAPT_STRUCT(
 		cppjinja::ast::op_comment,
