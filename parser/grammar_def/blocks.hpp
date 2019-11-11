@@ -40,19 +40,30 @@ namespace cppjinja::text {
 		>> block_term_start >> lit("endfor") >> block_term_end
 		;
 
+	const auto macro_parameter_def = single_var_name >> -('=' >> value_term);
+	const auto block_macro_def =
+		   block_term_start >> lit("macro") >> single_var_name >> -('(' >> -(macro_parameter % ',') >> ')') >> block_term_end
+		>> *block_content
+		>> block_term_start >> lexeme[lit("endmacro") >> -omit[+space >> single_var_name]] >> block_term_end
+		;
+
 	class block_if_class          : x3::annotate_on_success {};
 	class block_for_class         : x3::annotate_on_success {};
 	class block_raw_class         : x3::annotate_on_success {};
+	class block_macro_class       : x3::annotate_on_success {};
 	class block_raw_text_class    : x3::annotate_on_success {};
 	class block_free_text_class   : x3::annotate_on_success {};
+	class macro_parameter_calss   : x3::annotate_on_success {};
 	class block_content_vec_class : x3::annotate_on_success {};
 
 	BOOST_SPIRIT_DEFINE( block_if )
 	BOOST_SPIRIT_DEFINE( block_for )
 	BOOST_SPIRIT_DEFINE( block_raw )
+	BOOST_SPIRIT_DEFINE( block_macro )
 	BOOST_SPIRIT_DEFINE( block_content )
 	BOOST_SPIRIT_DEFINE( block_raw_text )
 	BOOST_SPIRIT_DEFINE( block_free_text )
+	BOOST_SPIRIT_DEFINE( macro_parameter )
 	BOOST_SPIRIT_DEFINE( block_content_vec )
 } // namespace cppjinja::text
 

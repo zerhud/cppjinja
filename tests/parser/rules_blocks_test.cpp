@@ -121,6 +121,30 @@ BOOST_DATA_TEST_CASE(
 	std::string text = "<% for "s + data + " %><%endfor%>"s;
 	BOOST_TEST_CONTEXT("TEXT=" << text) {
 		BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::block_for, text) );
+		BOOST_TEST( result.content.size() == good_result.content.size() );
+		BOOST_TEST( result.content == good_result.content );
 		BOOST_TEST( result == good_result );
 	}
+}
+
+BOOST_DATA_TEST_CASE(
+	  block_macro
+	, utd::make("macro m"s, "macro m()"s, "macro m(n, n=v)"s)
+	^ utd::make(
+		  ast::make_macro("m"s, {})
+		, ast::make_macro("m"s, {})
+		, ast::make_macro("m"s, {ast::macro_parameter{"n",{}}, ast::macro_parameter{"n", ast::value_term{ast::var_name{"v"}}}})
+		)
+	, data, good_result)
+{
+	ast::block_macro result;
+	std::string text = "<%"s + data + "%><%endmacro%>"s;
+	BOOST_TEST_CONTEXT("TEXT=" << text) {
+		BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::block_macro, text) );
+		BOOST_TEST( result == good_result );
+	}
+
+	text = "<%"s + data + "%><%endmacro m%>"s;
+	BOOST_TEST_CONTEXT("TEXT=" << text)
+		BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::block_macro, text) );
 }

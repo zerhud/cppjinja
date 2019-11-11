@@ -27,7 +27,7 @@ using block_content = x3::variant
 	, forward_ast<block_raw>
 	, forward_ast<block_if>
 	, forward_ast<block_for>
-	//, forward_ast<block_macro>
+	, forward_ast<block_macro>
 >;
 
 struct block : x3::position_tagged
@@ -55,8 +55,17 @@ struct block_for : block
 	std::vector<block_content> content;
 };
 
+struct macro_parameter
+{
+	string_t name;
+	std::optional<value_term> value;
+};
+
 struct block_macro : block
 {
+	string_t name;
+	std::vector<macro_parameter> params;
+	std::vector<block_content> content;
 };
 
 } // namespace cppjinja::ast

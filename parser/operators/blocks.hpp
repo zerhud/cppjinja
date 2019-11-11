@@ -21,7 +21,11 @@ DEFINE_OPERATORS(cppjinja::ast::block_raw,     left.value, right.value,
 DEFINE_OPERATORS(cppjinja::ast::block_if,      left.condition, right.condition, left.content, right.content,
                  left.left_open, right.left_open, left.left_close, right.left_close,
                  left.right_open, right.right_open, left.right_close, right.right_close)
-DEFINE_OPERATORS(cppjinja::ast::block_for, left.vars, right.vars, left.value, right.value, left.content, right.content,
+DEFINE_OPERATORS(cppjinja::ast::block_for, left.vars, right.vars, left.value.var, right.value.var, left.content, right.content,
+                 left.left_open, right.left_open, left.left_close, right.left_close,
+                 left.right_open, right.right_open, left.right_close, right.right_close)
+DEFINE_OPERATORS(cppjinja::ast::macro_parameter, left.name, right.name, left.value, right.value)
+DEFINE_OPERATORS(cppjinja::ast::block_macro, left.name, right.name, left.params, right.params, left.content, right.content,
                  left.left_open, right.left_open, left.left_close, right.left_close,
                  left.right_open, right.right_open, left.right_close, right.right_close)
 
@@ -43,6 +47,14 @@ inline block_for make_for(std::vector<std::string> vars, boost::spirit::x3::vari
 	block_for ret;
 	ret.vars = std::move(vars);
 	ret.value = std::move(val);
+	return ret;
+}
+
+inline block_macro make_macro(std::string n, std::vector<macro_parameter> p)
+{
+	block_macro ret;
+	ret.name = std::move(n);
+	ret.params = std::move(p);
 	return ret;
 }
 
