@@ -57,8 +57,8 @@ BOOST_DATA_TEST_CASE(
 
 BOOST_DATA_TEST_CASE(
           var_name
-        , utd::make("a"s, "a.b"s)
-        ^ utd::make(ast::var_name{"a"s}, ast::var_name{"a"s, "b"s})
+        , utd::make("a"s, "a.b"s, "a['b']"s)
+        ^ utd::make(ast::var_name{"a"s}, ast::var_name{"a"s, "b"s}, ast::var_name{"a"s, "b"s})
         , data, good_result)
 {
 	ast::var_name result;
