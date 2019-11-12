@@ -9,6 +9,8 @@
 #pragma once
 
 #include <ostream>
+#include <boost/spirit/home/x3/support/ast/variant.hpp>
+
 #include "ast/common.hpp"
 
 #define VARIANT_OPERATORS(sname, ...) \
@@ -38,6 +40,7 @@ namespace cppjinja::ast {
 namespace cppjinja {
 
 constexpr int lex_cmp() { return 0; }
+
 template<typename T>
 int lex_cmp(const std::vector<T>& left, const std::vector<T>& right)
 {

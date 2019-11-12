@@ -35,6 +35,9 @@ DEFINE_OPERATORS(cppjinja::ast::block_named, left.name, right.name, left.params,
 DEFINE_OPERATORS(cppjinja::ast::block_filtered, left.name, right.name, left.params, right.params, left.content, right.content,
                  left.left_open, right.left_open, left.left_close, right.left_close,
                  left.right_open, right.right_open, left.right_close, right.right_close)
+DEFINE_OPERATORS(cppjinja::ast::block_set, left.name, right.name, left.filters, right.filters, left.content, right.content,
+                 left.left_open, right.left_open, left.left_close, right.left_close,
+                 left.right_open, right.right_open, left.right_close, right.right_close)
 
 
 namespace cppjinja::ast {

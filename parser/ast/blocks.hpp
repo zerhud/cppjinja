@@ -78,4 +78,11 @@ struct block_macro : block_with_name { };
 struct block_named : block_with_name { };
 struct block_filtered : block_with_name { };
 
+struct block_set : block
+{
+	string_t name;
+	std::vector<filter_call> filters;
+	std::vector<block_content> content;
+};
+
 } // namespace cppjinja::ast

@@ -44,6 +44,14 @@ namespace cppjinja::text {
 		>> block_term_start >> lit("endfor") >> block_term_end
 		;
 
+	const auto block_set_def =
+		   block_term_start
+		>> lit("set") >> single_var_name >> -('|' >> filter_call % '|')
+		>> block_term_end
+		>> *block_content
+		>> block_term_start >> lit("endset") >> block_term_end
+		;
+
 	const auto macro_parameter_def = single_var_name >> -('=' >> value_term);
 	const auto macro_parameters_def = single_var_name >> -('(' >> -(macro_parameter % ',') >> ')');
 	const auto block_macro_def =
@@ -65,6 +73,7 @@ namespace cppjinja::text {
 	class block_if_class          : x3::annotate_on_success {};
 	class block_for_class         : x3::annotate_on_success {};
 	class block_raw_class         : x3::annotate_on_success {};
+	class block_set_class         : x3::annotate_on_success {};
 	class block_macro_class       : x3::annotate_on_success {};
 	class block_named_class       : x3::annotate_on_success {};
 	class block_filtered_class    : x3::annotate_on_success {};
@@ -76,6 +85,7 @@ namespace cppjinja::text {
 	BOOST_SPIRIT_DEFINE( block_if )
 	BOOST_SPIRIT_DEFINE( block_for )
 	BOOST_SPIRIT_DEFINE( block_raw )
+	BOOST_SPIRIT_DEFINE( block_set )
 	BOOST_SPIRIT_DEFINE( block_macro )
 	BOOST_SPIRIT_DEFINE( block_named )
 	BOOST_SPIRIT_DEFINE( block_content )

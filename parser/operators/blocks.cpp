@@ -47,3 +47,13 @@ std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::block_ma
 {
 	return out << "macro: " << obj.name;
 }
+
+std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::block_set& obj)
+{
+	return out
+		<< open_block(obj) << "set" << close_block(obj) << ": "
+		<< obj.name
+		<< ' ' << obj.filters.size()
+		<< ' ' << obj.content.size()
+		;
+}

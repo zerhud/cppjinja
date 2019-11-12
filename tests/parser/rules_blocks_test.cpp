@@ -149,3 +149,16 @@ BOOST_DATA_TEST_CASE(
 	BOOST_TEST_CONTEXT("TEXT=" << text)
 		BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::block_macro, text) );
 }
+
+BOOST_AUTO_TEST_CASE(block_set)
+{
+	std::string data = "<% set name|e %>content<%endset%>"s;
+	ast::block_set good_result;
+	good_result.name = "name"s;
+	good_result.filters.emplace_back(ast::filter_call{ast::var_name{"e"s}});
+	good_result.content.emplace_back("content"s);
+
+	ast::block_set result;
+	BOOST_CHECK_NO_THROW( result = txt::parse(txt::block_set, data) );
+	BOOST_TEST( result == good_result );
+}
