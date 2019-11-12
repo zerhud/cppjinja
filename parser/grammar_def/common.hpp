@@ -31,7 +31,12 @@ namespace cppjinja::text {
 
 	auto const single_var_name_def = lexeme[char_("A-Za-z_") >> *char_("0-9A-Za-z_")];
 
-	auto const var_name_def = lexeme[single_var_name % '.'];
+	auto const var_name_def =
+		single_var_name >> *(
+			  ('.' >> single_var_name % '.')
+			| lexeme[ lit("['")  >> single_var_name >> lit("']") ]
+			| lexeme[ lit("[\"") >> single_var_name >> lit("\"]")]
+			);
 
 	auto const binary_op_sign =
 		  lit("in") >> x3::attr(ast::comparator::in)
