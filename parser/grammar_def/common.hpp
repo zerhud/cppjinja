@@ -31,6 +31,9 @@ namespace cppjinja::text {
 
 	auto const single_var_name_def = lexeme[char_("A-Za-z_") >> *char_("0-9A-Za-z_")];
 
+	auto const array_v_def = lit('[') >> (value_term % ',') >> lit(']');
+	auto const tuple_v_def = lit('(') >> (value_term % ',') >> lit(')');
+
 	auto const var_name_def =
 		single_var_name >> *(
 			  ('.' >> single_var_name % '.')
@@ -51,20 +54,31 @@ namespace cppjinja::text {
 
 	auto const binary_op_def = value_term >> binary_op_sign >> value_term;
 
-	auto const value_term_def = !block_term_start >> (x3::double_ | function_call | quoted_string | var_name | binary_op);
+	auto const value_term_def =
+	        !block_term_start >>
+	              ( x3::double_
+	              | array_v
+	              | tuple_v
+	              | function_call
+	              | quoted_string
+	              | var_name
+	              | binary_op
+	              );
 
 	auto const function_call_parameter_def = -(single_var_name >> '=') >> value_term;
 	auto const function_call_def =
 			var_name >> x3::omit['('] >> -(!char_(')') >> function_call_parameter % ',') >> x3::omit[')']
 		;
 
-	class quoted_string_class : x3::annotate_on_success {};
+	class quoted_string_class   : x3::annotate_on_success {};
 	class single_var_name_class : x3::annotate_on_success {};
-	class var_name_class : x3::annotate_on_success {};
-	class binary_op_class : x3::annotate_on_success {};
-	class value_term_class : x3::annotate_on_success {};
-	class function_call_class : x3::annotate_on_success {};
+	class var_name_class        : x3::annotate_on_success {};
+	class binary_op_class       : x3::annotate_on_success {};
+	class value_term_class      : x3::annotate_on_success {};
+	class function_call_class   : x3::annotate_on_success {};
 	class function_call_parameter_class : x3::annotate_on_success {};
+	class array_class : x3::annotate_on_success {};
+	class tuple_class : x3::annotate_on_success {};
 
 	BOOST_SPIRIT_DEFINE( quoted_string )
 	BOOST_SPIRIT_DEFINE( single_var_name )
@@ -73,5 +87,7 @@ namespace cppjinja::text {
 	BOOST_SPIRIT_DEFINE( value_term )
 	BOOST_SPIRIT_DEFINE( function_call )
 	BOOST_SPIRIT_DEFINE( function_call_parameter )
+	BOOST_SPIRIT_DEFINE( array_v )
+	BOOST_SPIRIT_DEFINE( tuple_v )
 
 } // namespace cppjinja::text

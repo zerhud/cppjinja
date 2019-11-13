@@ -25,6 +25,7 @@ using namespace std::literals;
 namespace ut = boost::unit_test;
 namespace utd = boost::unit_test::data;
 namespace ast = cppjinja::ast;
+namespace txt = cppjinja::text;
 
 BOOST_DATA_TEST_CASE(
         quoted1_string
@@ -94,7 +95,7 @@ BOOST_DATA_TEST_CASE(
 
 BOOST_DATA_TEST_CASE(
           value_term
-        , utd::make("'a'"s, "a"s, "a.a"s, "foo()"s, "1"s, "1.0"s)
+        , utd::make("'a'"s, "a"s, "a.a"s, "foo()"s, "1"s, "1.0"s, "a['b'].c")
         ^ utd::make(
               ast::value_term{"a"s}
             , ast::var_name{"a"s}
@@ -102,6 +103,7 @@ BOOST_DATA_TEST_CASE(
             , ast::function_call{ast::var_name{"foo"s}, {}}
             , 1.0
             , 1.0
+            , ast::var_name{"a"s, "b"s, "c"s}
             )
         , data, good_result)
 {
@@ -125,4 +127,34 @@ BOOST_DATA_TEST_CASE(
 	BOOST_TEST( result.left.get() == value );
 	BOOST_TEST( result.right.get() == value );
 	BOOST_TEST( result.op == ast::comparator::eq );
+}
+
+BOOST_DATA_TEST_CASE(
+        array_v
+        , utd::make("a,b"s, "'a','b'")
+        ^ utd::make(
+              ast::make_array(ast::var_name{"a"s},ast::var_name{"b"s})
+            , ast::make_array("a"s, "b"s)
+            )
+        , data, good_result)
+{
+	std::string text = '[' + data + ']';
+	ast::array_v result;
+	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::array_v, text) );
+	BOOST_TEST( result == good_result );
+}
+
+BOOST_DATA_TEST_CASE(
+        tuple_v
+        , utd::make("a,b"s, "['a','b'], 'a'")
+        ^ utd::make(
+              ast::make_tuple(ast::var_name{"a"s},ast::var_name{"b"s})
+            , ast::make_tuple(ast::make_array("a"s, "b"s),ast::value_term{"a"s})
+            )
+        , data, good_result)
+{
+	std::string text = '(' + data + ')';
+	ast::tuple_v result;
+	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::tuple_v, text) );
+	BOOST_TEST( result == good_result );
 }

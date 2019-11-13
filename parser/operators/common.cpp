@@ -51,3 +51,26 @@ std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::comparat
 	return out;
 }
 
+std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::array_v& obj)
+{
+	if(obj.fields.empty()) return out;
+
+	auto end = obj.fields.end(); --end;
+	auto begin = obj.fields.begin();
+
+	out << '[';
+	while(begin!=end) out << *begin++ << ',';
+	return out << *end << ']';
+}
+
+std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::tuple_v& obj)
+{
+	if(obj.fields.empty()) return out;
+
+	auto end = obj.fields.end(); --end;
+	auto begin = obj.fields.begin();
+
+	out << '(';
+	while(begin!=end) out << *begin++ << ',';
+	return out << *end << ')';
+}

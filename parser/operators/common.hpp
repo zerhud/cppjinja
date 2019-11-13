@@ -62,6 +62,30 @@ constexpr int lex_cmp(const Left& left, const Right& right, const Args&... args)
 	return lex_cmp(args...);
 }
 
+namespace ast {
+template<typename Vec, typename Val, typename... Vals>
+void empback(Vec& vec, Val&& val, Vals&&... vals)
+{
+	vec.emplace_back(value_term{std::forward<Val>(val)});
+	if constexpr (sizeof...(Vals)!=0) empback(vec, std::forward<Vals>(vals)...);
+}
+
+template<typename... Args>
+inline array_v make_array(Args&&... args)
+{
+	array_v ret;
+	empback(ret.fields, std::forward<Args>(args)...);
+	return ret;
+}
+
+template<typename... Args>
+inline tuple_v make_tuple(Args&&... args)
+{
+	tuple_v ret;
+	empback(ret.fields, std::forward<Args>(args)...);
+	return ret;
+}
+} // namespace ast
 } // namespace cppjinja
 
 DEFINE_OPERATORS(cppjinja::ast::var_name, left, right)
@@ -69,5 +93,7 @@ DEFINE_OPERATORS(cppjinja::ast::function_call_parameter, left.name, right.name, 
 DEFINE_OPERATORS(cppjinja::ast::function_call, left.ref, right.ref, left.params, right.params)
 DEFINE_OPERATORS(cppjinja::ast::binary_op, left.left, right.left, left.right, right.right)
 DEFINE_OPERATORS(cppjinja::ast::value_term, left.var, right.var)
+DEFINE_OPERATORS(cppjinja::ast::array_v, left.fields, right.fields)
+DEFINE_OPERATORS(cppjinja::ast::tuple_v, left.fields, right.fields)
 namespace std { std::ostream& operator << (std::ostream& out, const cppjinja::ast::comparator& obj); }
 namespace std { std::ostream& operator << (std::ostream& out, const boost::spirit::x3::forward_ast<cppjinja::ast::value_term>& obj); }

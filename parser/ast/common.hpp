@@ -32,11 +32,14 @@ struct function_call;
 struct binary_op;
 struct value_term;
 struct function_call_parameter;
+struct tuple_v;
+struct array_v;
 
 struct binary_op : x3::position_tagged
 {
 	forward_ast<value_term> left;
 	comparator op;
+	std::int32_t padding;
 	forward_ast<value_term> right;
 };
 
@@ -57,9 +60,21 @@ struct function_call : x3::position_tagged
 	std::vector<function_call_parameter> params;
 };
 
+struct tuple_v : x3::position_tagged
+{
+	std::vector<forward_ast<value_term>> fields;
+};
+
+struct array_v : x3::position_tagged
+{
+	std::vector<forward_ast<value_term>> fields;
+};
+
 using value_term_var = x3::variant<
 	  double
 	, string_t
+	, tuple_v
+	, array_v
 	, var_name
 	, function_call
 	, binary_op
