@@ -27,7 +27,8 @@
     namespace std { std::ostream& operator << (std::ostream& out, const sname& obj); }\
 
 
-namespace cppjinja::ast {
+namespace cppjinja::ast
+{
 	template<typename T>
 	bool operator < (const boost::spirit::x3::forward_ast<T>& left, const boost::spirit::x3::forward_ast<T>& right){ return left.get() < right.get(); }
 	template<typename ... Args>

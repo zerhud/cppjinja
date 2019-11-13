@@ -16,6 +16,7 @@ namespace cppjinja::ast {
 struct block_if;
 struct block_raw;
 struct block_for;
+struct block_set;
 struct block_macro;
 struct block_named;
 struct block_filtered;
@@ -32,6 +33,7 @@ using block_content = x3::variant
 	, forward_ast<block_macro>
 	, forward_ast<block_named>
 	, forward_ast<block_filtered>
+	, forward_ast<block_set>
 >;
 
 struct block : x3::position_tagged
