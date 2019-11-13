@@ -23,3 +23,8 @@ std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::op_set& 
 	return out << obj.name << '=' << obj.value;
 }
 
+std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::op_include& obj)
+{
+	return out << obj.filename;
+}
+

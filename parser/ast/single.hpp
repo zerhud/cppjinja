@@ -42,5 +42,14 @@ struct op_set : x3::position_tagged
 	op_term_end close;
 };
 
+struct op_include : x3::position_tagged
+{
+	string_t filename;
+	std::optional<bool> with_context;
+	std::optional<bool> ignore_missing;
+	op_term_start open;
+	op_term_end close;
+};
+
 } // namespace cppjinja::ast
 

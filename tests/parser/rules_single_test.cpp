@@ -39,6 +39,15 @@ filter_calls make_filter_calls(Args&&... args)
 	return ret;
 }
 
+ast::op_include make_op_include(ast::string_t fn, std::optional<bool> im, std::optional<bool> wc)
+{
+	ast::op_include ret;
+	ret.filename = std::move(fn);
+	ret.ignore_missing = im;
+	ret.with_context = wc;
+	return ret;
+}
+
 BOOST_DATA_TEST_CASE(
 	  op_out
 	, utd::make("kuku"s, "'a'"s, "foo()"s, "foo()|e"s, "foo()|e|a()|b('v')"s)
@@ -121,3 +130,18 @@ BOOST_DATA_TEST_CASE(
 	BOOST_TEST(result.value == good_result);
 }
 
+BOOST_DATA_TEST_CASE(
+        op_include
+        , utd::make("'file'"s, "'file' ignore missing"s, "'f' with context"s)
+        ^ utd::make(
+              make_op_include("file", std::nullopt, std::nullopt)
+            , make_op_include("file", true, std::nullopt)
+            , make_op_include("f", std::nullopt, true)
+            )
+        , data, good_result)
+{
+	ast::op_include result;
+	std::string text = "<% include "+data+"%>"s;
+	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::op_include, text) );
+	BOOST_TEST( result == good_result );
+}

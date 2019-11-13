@@ -54,6 +54,7 @@ target_sources_local(parser2 "common.hpp" "" "parser/ast/")
 target_sources_local(parser2 "opterm.hpp" "" "parser/ast/")
 target_sources_local(parser2 "single.hpp" "" "parser/ast/")
 target_sources_local(parser2 "blocks.hpp" "" "parser/ast/")
+target_sources_local(parser2 "tmpls.hpp" "" "parser/ast/")
 
 target_sources_local(parser2 "common.hpp" "" "parser/fusion/")
 target_sources_local(parser2 "opterm.hpp" "" "parser/fusion/")

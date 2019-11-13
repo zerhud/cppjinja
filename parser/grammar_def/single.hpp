@@ -23,16 +23,31 @@ namespace cppjinja::text {
 
 	auto const op_set_def = block_term_start >> lit("set") >> var_name >> '=' >> value_term >> block_term_end;
 
+	auto const filename_def = quoted_string;
+	auto const op_include_def =
+	           block_term_start
+	        >> omit[lit("include")]
+	        >> filename
+	        >> -(omit[lit("ignore") >> lit("missing")] >> x3::attr(true))
+	        >> -((lit("with")    >> lit("context") >> x3::attr(true))
+	           | (lit("without") >> lit("context") >> x3::attr(false)))
+	        >> block_term_end
+	        ;
+
 	class op_out_class      : x3::annotate_on_success { };
 	class op_set_class      : x3::annotate_on_success { };
 	class op_comment_class  : x3::annotate_on_success { };
+	class op_include_class  : x3::annotate_on_success { };
 	class filter_call_class : x3::annotate_on_success { };
+	class filename_class    : x3::annotate_on_success { };
 
 	BOOST_SPIRIT_DEFINE( op_out )
 	BOOST_SPIRIT_DEFINE( op_comment )
 	BOOST_SPIRIT_DEFINE( op_set )
 	BOOST_SPIRIT_DEFINE( op_comment_value )
+	BOOST_SPIRIT_DEFINE( op_include )
 	BOOST_SPIRIT_DEFINE( filter_call )
+	BOOST_SPIRIT_DEFINE( filename )
 
 } // namespace cppjinja::text
 

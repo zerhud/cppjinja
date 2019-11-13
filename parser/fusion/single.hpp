@@ -23,3 +23,6 @@ BOOST_FUSION_ADAPT_STRUCT(
 		cppjinja::ast::op_set,
 		open, name, value, close)
 
+BOOST_FUSION_ADAPT_STRUCT(
+        cppjinja::ast::op_include,
+        open, filename, ignore_missing, with_context, close)
