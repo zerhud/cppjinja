@@ -29,7 +29,7 @@ struct op_out : x3::position_tagged
 
 struct op_comment : x3::position_tagged
 {
-	std::string value;
+	string_t value;
 	comment_term_start open;
 	comment_term_end close;
 };
@@ -49,6 +49,13 @@ struct op_include : x3::position_tagged
 	std::optional<bool> ignore_missing;
 	op_term_start open;
 	op_term_end close;
+};
+
+struct op_import : x3::position_tagged
+{
+	string_t filename;
+	std::vector<string_t> mods;
+	std::optional<bool> with_context;
 };
 
 } // namespace cppjinja::ast

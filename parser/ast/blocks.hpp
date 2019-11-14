@@ -21,6 +21,11 @@ struct block_macro;
 struct block_named;
 struct block_filtered;
 
+// feature requests
+struct block_with;
+struct block_translate;
+struct block_call;
+
 using block_content = x3::variant
 <
 	  string_t

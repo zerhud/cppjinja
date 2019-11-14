@@ -35,6 +35,9 @@ struct function_call_parameter;
 struct tuple_v;
 struct array_v;
 
+// feature request
+struct i18n_string;
+
 struct binary_op : x3::position_tagged
 {
 	forward_ast<value_term> left;
