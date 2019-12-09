@@ -31,6 +31,7 @@ namespace cppjinja::text {
 	        | block_named
 	        | block_filtered
 	        | block_set
+	        | block_call
 	        ;
 	const auto block_content_vec_def = +block_content;
 
@@ -64,6 +65,18 @@ namespace cppjinja::text {
 		>> block_term_start >> lit("endset") >> block_term_end
 		;
 
+	const auto call_parameter_def = -(single_var_name >> '=') >> value_term ;
+	const auto block_call_def =
+	        block_term_start
+	     >> lit("call") >> single_var_name
+	     >> -(omit['('] >> (macro_parameter % ',') >> omit[')'])
+	     >> -single_var_name
+	     >> -(omit['('] >> (call_parameter % ',') >> omit[')'])
+	     >> block_term_end
+	     >> *block_content
+	     >> block_term_start >> lit("endcall") >> block_term_end
+	        ;
+
 	const auto macro_parameter_def = single_var_name >> -('=' >> value_term);
 	const auto macro_parameters_def = single_var_name >> -('(' >> -(macro_parameter % ',') >> ')');
 	const auto block_macro_def =
@@ -86,10 +99,12 @@ namespace cppjinja::text {
 	class block_for_class         : x3::annotate_on_success {};
 	class block_raw_class         : x3::annotate_on_success {};
 	class block_set_class         : x3::annotate_on_success {};
+	class block_call_class        : x3::annotate_on_success {};
 	class block_macro_class       : x3::annotate_on_success {};
 	class block_named_class       : x3::annotate_on_success {};
 	class block_filtered_class    : x3::annotate_on_success {};
 	class block_raw_text_class    : x3::annotate_on_success {};
+	class call_parameter_calss   : x3::annotate_on_success {};
 	class block_free_text_class   : x3::annotate_on_success {};
 	class macro_parameter_calss   : x3::annotate_on_success {};
 	class block_content_vec_class : x3::annotate_on_success {};
@@ -98,11 +113,13 @@ namespace cppjinja::text {
 	BOOST_SPIRIT_DEFINE( block_for )
 	BOOST_SPIRIT_DEFINE( block_raw )
 	BOOST_SPIRIT_DEFINE( block_set )
+	BOOST_SPIRIT_DEFINE( block_call )
 	BOOST_SPIRIT_DEFINE( block_macro )
 	BOOST_SPIRIT_DEFINE( block_named )
 	BOOST_SPIRIT_DEFINE( block_content )
 	BOOST_SPIRIT_DEFINE( block_filtered )
 	BOOST_SPIRIT_DEFINE( block_raw_text )
+	BOOST_SPIRIT_DEFINE( call_parameter )
 	BOOST_SPIRIT_DEFINE( block_free_text )
 	BOOST_SPIRIT_DEFINE( macro_parameter )
 	BOOST_SPIRIT_DEFINE( block_content_vec )

@@ -162,3 +162,12 @@ BOOST_AUTO_TEST_CASE(block_set)
 	BOOST_CHECK_NO_THROW( result = txt::parse(txt::block_set, data) );
 	BOOST_TEST( result == good_result );
 }
+
+BOOST_AUTO_TEST_CASE(block_call)
+{
+	std::string data = "<% call name(kuku) lala(name=1) %>content<%endcall%>"s;
+	ast::block_call result ;
+	BOOST_CHECK_NO_THROW( result = txt::parse(txt::block_call, data) );
+	data = "<% call name %>content<%endcall%>"s;
+	BOOST_CHECK_NO_THROW( result = txt::parse(txt::block_call, data) );
+}

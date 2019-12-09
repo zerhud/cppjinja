@@ -39,6 +39,7 @@ using block_content = x3::variant
 	, forward_ast<block_named>
 	, forward_ast<block_filtered>
 	, forward_ast<block_set>
+	, forward_ast<block_call>
 >;
 
 struct block : x3::position_tagged
@@ -84,6 +85,15 @@ struct block_with_name : block
 struct block_macro : block_with_name { };
 struct block_named : block_with_name { };
 struct block_filtered : block_with_name { };
+
+struct block_call : block
+{
+	string_t name;
+	string_t call_name;
+	std::vector<macro_parameter> params;
+	std::vector<macro_parameter> call_values;
+	std::vector<block_content> content;
+};
 
 struct block_set : block
 {

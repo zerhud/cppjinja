@@ -18,11 +18,13 @@ namespace cppjinja::text {
 	class block_raw_class;
 	class block_for_class;
 	class block_set_class;
+	class block_call_class;
 	class block_macro_class;
 	class block_named_class;
 	class block_content_class;
 	class block_filtered_class;
 	class block_raw_text_class;
+	class call_parameter_class;
 	class block_free_text_class;
 	class macro_parameter_class;
 	class block_content_vec_class;
@@ -39,20 +41,24 @@ namespace cppjinja::text {
 	const x3::rule<block_for_class, ast::block_for> block_for = "block_for";
 	const x3::rule<block_set_class, ast::block_set> block_set = "block_set";
 
+	const x3::rule<block_call_class, ast::block_call> block_call = "block_call";
 	const x3::rule<block_macro_class, ast::block_macro> block_macro = "block_macro";
 	const x3::rule<block_named_class, ast::block_named> block_named = "block_named";
 	const x3::rule<block_filtered_class, ast::block_named> block_filtered = "block_filtered";
+	const x3::rule<call_parameter_class, ast::macro_parameter> call_parameter = "call_parameter";
 	const x3::rule<macro_parameter_class, ast::macro_parameter> macro_parameter = "macro_parameter";
 
 	BOOST_SPIRIT_DECLARE(decltype(block_if))
 	BOOST_SPIRIT_DECLARE(decltype(block_for))
 	BOOST_SPIRIT_DECLARE(decltype(block_raw))
 	BOOST_SPIRIT_DECLARE(decltype(block_set))
+	BOOST_SPIRIT_DECLARE(decltype(block_call))
 	BOOST_SPIRIT_DECLARE(decltype(block_named))
 	BOOST_SPIRIT_DECLARE(decltype(block_macro))
 	BOOST_SPIRIT_DECLARE(decltype(block_content))
 	BOOST_SPIRIT_DECLARE(decltype(block_filtered))
 	BOOST_SPIRIT_DECLARE(decltype(block_raw_text))
+	BOOST_SPIRIT_DECLARE(decltype(call_parameter))
 	BOOST_SPIRIT_DECLARE(decltype(block_free_text))
 	BOOST_SPIRIT_DECLARE(decltype(macro_parameter))
 	BOOST_SPIRIT_DECLARE(decltype(block_content_vec))
