@@ -9,8 +9,14 @@ option(ENABLE_TESTS "enable tests.. it depends on turtle library" ON)
 option(LOW_MEMORY "assume we don't have efough memroty for complie grammars (gcc optimizations)" ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-#find_package(Boost COMPONENTS program_options unit_test_framework system REQUIRED)
+
 find_package(Boost COMPONENTS unit_test_framework system REQUIRED)
+# CMAKE BUG:
+# find_package sets libraries to Boost::unit_test_framework;Boost::system and so on
+# and cmake tries to find it in /nix/store/[include_hash]-boost-1.71.0-dev/lib/libboost_unit_test_framework.so.1.71.0 
+# but they leaves in /nix/store/[library_hash]/lib... in nix env all libraries can be found
+set(Boost_LIBRARIES "libboost_program_options.so;libboost_unit_test_framework.so;libboost_system.so")
+
 find_package(Threads REQUIRED)
 include(CheckCXXSourceCompiles)
 include(cmake/target_sources_local.cmake)
@@ -40,12 +46,12 @@ add_custom_command(OUTPUT "${lohman_json_file}"
 )
 
 # parser
-add_library(parser SHARED "${main_config_file}" parser/grammar.inl parser/traits.hpp)
-target_include_directories(parser PRIVATE "${Boost_INCLUDE_DIRS}" PUBLIC "${config_files_dir}")
-target_sources_local(parser "grammar.hpp" "grammar.cpp" "parser/")
-target_sources_local(parser "helpers.hpp" "helpers.cpp" "parser/")
-target_sources_local(parser "ast.hpp" "ast.cpp" "parser/")
-target_sources_local(parser "debug_operators.hpp" "debug_operators.cpp" "parser/")
+#add_library(parser SHARED "${main_config_file}" parser/grammar.inl parser/traits.hpp)
+#target_include_directories(parser PRIVATE "${Boost_INCLUDE_DIRS}" PUBLIC "${config_files_dir}")
+#target_sources_local(parser "grammar.hpp" "grammar.cpp" "parser/")
+#target_sources_local(parser "helpers.hpp" "helpers.cpp" "parser/")
+#target_sources_local(parser "ast.hpp" "ast.cpp" "parser/")
+#target_sources_local(parser "debug_operators.hpp" "debug_operators.cpp" "parser/")
 
 #parser2
 add_library(parser2 SHARED "parser/common.hpp" "parser/parse.hpp")

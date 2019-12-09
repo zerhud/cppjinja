@@ -12,6 +12,8 @@
 #include "grammar/opterm.hpp"
 #include "grammar/single.hpp"
 
+#include "common.hpp"
+
 namespace cppjinja::text {
 	auto const extend_st_def =
 		  block_term_start
