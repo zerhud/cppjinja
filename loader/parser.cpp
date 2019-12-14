@@ -7,11 +7,12 @@
  *************************************************************************/
 
 #include <fstream>
+#include <boost/spirit/include/support_istream_iterator.hpp>
 
 #include "parser.hpp"
-#include "parse.hpp"
+#include "parser/parse.hpp"
 
-#include "grammar/tmpls.hpp"
+#include "parser/grammar/tmpls.hpp"
 
 cppjinja::parser::parser(std::vector<std::filesystem::path> inc_dirs) : incs_(std::move(inc_dirs))
 {
@@ -28,11 +29,11 @@ cppjinja::parser& cppjinja::parser::parse(std::filesystem::path file)
 
 cppjinja::parser& cppjinja::parser::parse(std::istream& data)
 {
-	(void) data;
-	//std::istream_iterator<char> end;
-	//std::istream_iterator<char> begin(data);
+	boost::spirit::istream_iterator end;
+	boost::spirit::istream_iterator begin(data);
 
-	//auto tmpl = cppjinja::text::parse(text::tmpl, begin, end)
+	auto tmpl = cppjinja::text::parse(text::tmpl, begin, end);
+	//tmpls_.emplace_back(std::move(tmpl));
 
 	return *this;
 }

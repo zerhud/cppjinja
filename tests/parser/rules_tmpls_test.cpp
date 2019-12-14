@@ -65,3 +65,15 @@ BOOST_AUTO_TEST_CASE(ex_file)
 	BOOST_TEST( *tmpl.extends[0].tmpl_name == "kuku" );
 	BOOST_TEST_REQUIRE( tmpl.content.size() == 1 );
 }
+
+BOOST_AUTO_TEST_CASE(tmpl_link)
+{
+	std::string data = "<% template tmpl extends kuku from 'kuku.tmpl' %>content<% endtemplate %>";
+	std::stringstream data_stream(data);
+	boost::spirit::istream_iterator data_begin(data_stream), data_end;
+
+	ast::tmpl result;
+
+	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::tmpl, data) );
+	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::tmpl, data_begin, data_end) );
+}

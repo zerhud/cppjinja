@@ -48,8 +48,9 @@ add_custom_command(OUTPUT "${lohman_json_file}"
 #parser2
 file(GLOB_RECURSE parser2_src LIST_DIRECTORIES false "parser/*.cpp")
 file(GLOB_RECURSE parser2_hdr LIST_DIRECTORIES false "parser/*.hpp")
-add_library(parser2 SHARED ${parser2_src} ${parser2_hdr})
+add_library(parser2 STATIC ${parser2_src} ${parser2_hdr})
 target_include_directories(parser2 PRIVATE "${Boost_INCLUDE_DIRS}" PUBLIC "${config_files_dir}" "parser")
+set_target_properties(parser2 PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 #loader
 file(GLOB_RECURSE loader_src LIST_DIRECTORIES false "loader/*.cpp")
