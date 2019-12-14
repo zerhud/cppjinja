@@ -23,7 +23,7 @@ namespace cppjinja::text {
 		return boost::spirit::x3::with<Env,Env>(std::move(env))[parser];
 	}
 
-	using iterator_type = std::string_view::const_iterator;
+	using iterator_type = boost::spirit::istream_iterator;
 	using context_type = x3::context<parser_env,parser_env,x3::phrase_parse_context<decltype(x3::space)>::type>;
 
 	template<typename Id, typename Attribute, typename Iterator>
@@ -42,8 +42,9 @@ namespace cppjinja::text {
 	{
 		//auto end = boost::u8_to_u32_iterator(data.end());
 		//auto begin = boost::u8_to_u32_iterator(data.begin());
-		auto end = data.end();
-		auto begin = data.begin();
+		std::stringstream data_stream;
+		data_stream << data << std::noskipws;
+		boost::spirit::istream_iterator begin(data_stream), end;
 		return parse(std::move(rule), begin, end, std::move(env));
 	}
 

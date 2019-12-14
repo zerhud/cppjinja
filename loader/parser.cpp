@@ -33,14 +33,14 @@ cppjinja::parser& cppjinja::parser::parse(std::istream& data)
 	boost::spirit::istream_iterator begin(data);
 
 	auto tmpl = cppjinja::text::parse(text::tmpl, begin, end);
-	//tmpls_.emplace_back(std::move(tmpl));
+	tmpls_.emplace_back(std::move(tmpl));
 
 	return *this;
 }
 
 std::vector<cppjinja::ast::tmpl> cppjinja::parser::tmpls() const
 {
-	return {};
+	return tmpls_;
 }
 
 std::vector<cppjinja::ast::file> cppjinja::parser::files() const

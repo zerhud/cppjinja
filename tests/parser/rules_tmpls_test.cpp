@@ -68,8 +68,9 @@ BOOST_AUTO_TEST_CASE(ex_file)
 
 BOOST_AUTO_TEST_CASE(tmpl_link)
 {
-	std::string data = "<% template tmpl extends kuku from 'kuku.tmpl' %>content<% endtemplate %>";
-	std::stringstream data_stream(data);
+	std::string_view data = "<% template tmpl extends kuku from 'kuku.tmpl' %>content<% endtemplate %>";
+	std::stringstream data_stream;
+	data_stream << data << std::noskipws;
 	boost::spirit::istream_iterator data_begin(data_stream), data_end;
 
 	ast::tmpl result;
