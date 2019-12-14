@@ -42,7 +42,9 @@ std::string cppjinja::evaluator::render(const cppjinja::ast::function_call& var)
 {
 	assert(data_);
 	const ast::block_content* cnt = search_by_name(var.ref);
+
 	if(!cnt) return data_->solve(var);
+
 	const bool is_macro = cnt->var.type() == typeid(ast::block_macro);
 	const bool is_call = cnt->var.type() == typeid(ast::block_call);
 	if(!is_macro && !is_call) throw std::runtime_error("function_call refers to a not callable object");
@@ -70,7 +72,6 @@ cppjinja::evaluator::evaluator(std::vector<cppjinja::ast::tmpl> tmpls)
 void cppjinja::evaluator::render(std::ostream& to, const cppjinja::data_provider& data) const
 {
 	assert(tmpl_);
-//	, op_comment
 //	, op_set
 //	, forward_ast<block_raw>
 //	, forward_ast<block_if>
@@ -86,6 +87,7 @@ void cppjinja::evaluator::render(std::ostream& to, const cppjinja::data_provider
 	overloaded cnt_visitor {
 		  [&to](const ast::string_t& s){ to << s;}
 		, [&to,this](const ast::op_out& o){ render(to, o.value, o.filters); }
+		, [](const ast::op_comment&) {}
 		, [&to](const auto&){ to << ""; }
 	};
 

@@ -55,3 +55,9 @@ BOOST_AUTO_TEST_CASE(no_tmpls)
 {
 	BOOST_CHECK_THROW( cppjinja::evaluator({}), std::runtime_error );
 }
+
+BOOST_AUTO_TEST_CASE(op_comment)
+{
+	auto data = std::make_unique<mocks::data_provider>();
+	BOOST_TEST( parse_single("<# comment #>"sv, *data) == ""sv );
+}
