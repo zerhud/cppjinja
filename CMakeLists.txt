@@ -51,6 +51,13 @@ file(GLOB_RECURSE parser2_hdr LIST_DIRECTORIES false "parser/*.hpp")
 add_library(parser2 SHARED ${parser2_src} ${parser2_hdr})
 target_include_directories(parser2 PRIVATE "${Boost_INCLUDE_DIRS}" PUBLIC "${config_files_dir}" "parser")
 
+#loader
+file(GLOB_RECURSE loader_src LIST_DIRECTORIES false "loader/*.cpp")
+file(GLOB_RECURSE loader_hdr LIST_DIRECTORIES false "loader/*.hpp")
+add_library(loader SHARED ${loader_src} ${loader_hdr})
+target_include_directories(loader PRIVATE "${Boost_INCLUDE_DIRS}" "${CMAKE_CURRENT_SOURCE_DIR}")
+target_link_libraries(loader PUBLIC stdc++fs PRIVATE parser2)
+
 if(ENABLE_TESTS)
 	include(cmake/tests.inc.cmake)
 endif()

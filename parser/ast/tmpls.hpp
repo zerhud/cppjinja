@@ -16,18 +16,13 @@ struct extend_st : x3::position_tagged
 {
 	string_t file_name;
 	std::optional<string_t> tmpl_name;
-	block_term_start open;
-	block_term_end close;
 };
 
 struct tmpl : x3::position_tagged
 {
 	string_t name;
-	std::vector<block_content> content;
 	std::vector<extend_st> extends;
-
-	block_term_start left_open, left_close;
-	std::optional<block_term_end> right_open, right_close;
+	std::vector<block_content> content;
 };
 
 struct file : x3::position_tagged

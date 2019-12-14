@@ -11,14 +11,12 @@ macro(add_unit_test tname path lib)
 	add_test(NAME ${tname} COMMAND ${tname}_test)
 endmacro()
 
-#set(tests_parser basic)#templates )
-#foreach(tname ${tests_parser})
-        #add_unit_test(${tname} "tests/parser/" "parser")
-#endforeach()
-
 set(tests_parser2 rules_common rules_opterm rules_single rules_blocks rules_tmpls)
 foreach(tname ${tests_parser2})
 	add_unit_test(${tname} "tests/parser/" "parser2")
 endforeach()
 
-
+set(tests_loader common)
+foreach(tname ${tests_loader})
+	add_unit_test(${tname} "tests/loader/" "loader")
+endforeach()

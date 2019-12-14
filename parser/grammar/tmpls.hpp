@@ -16,10 +16,31 @@ namespace cppjinja::text {
 	namespace x3 = boost::spirit::x3;
 
 	class extend_st_class;
+	class extend_st_ex_class;
+
+	class tmpl_class;
+	class tmpl_ex_class;
+	class tmpl_original_class;
+
+	class file_class;
 
 	const x3::rule<extend_st_class, ast::extend_st> extend_st = "extend_st";
+	const x3::rule<extend_st_ex_class, ast::extend_st> extend_st_ex = "extend_st_ex";
+
+	const x3::rule<tmpl_class, ast::tmpl> tmpl = "tmpl";
+	const x3::rule<tmpl_ex_class, ast::tmpl> tmpl_ex = "tmpl_ex";
+	const x3::rule<tmpl_original_class, ast::tmpl> tmpl_original = "tmpl_original";
+
+	const x3::rule<file_class, ast::file> file = "file";
 
 	BOOST_SPIRIT_DECLARE(decltype(extend_st))
+	BOOST_SPIRIT_DECLARE(decltype(extend_st_ex))
+
+	BOOST_SPIRIT_DECLARE(decltype(tmpl))
+	BOOST_SPIRIT_DECLARE(decltype(tmpl_ex))
+	BOOST_SPIRIT_DECLARE(decltype(tmpl_original))
+
+	BOOST_SPIRIT_DECLARE(decltype(file))
 
 } // namespace cppjinja::text
 

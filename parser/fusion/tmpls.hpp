@@ -11,7 +11,6 @@
 #include "ast/tmpls.hpp"
 #include <boost/fusion/include/adapt_struct.hpp>
 
-BOOST_FUSION_ADAPT_STRUCT(
-		cppjinja::ast::extend_st,
-		open, tmpl_name, file_name, close)
-
+BOOST_FUSION_ADAPT_STRUCT( cppjinja::ast::extend_st, tmpl_name, file_name)
+BOOST_FUSION_ADAPT_STRUCT( cppjinja::ast::tmpl, name, extends, content)
+BOOST_FUSION_ADAPT_STRUCT( cppjinja::ast::file, tmpls)
