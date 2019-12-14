@@ -9,7 +9,6 @@
 #pragma once
 
 #include <ostream>
-#include "ast.hpp"
 
 namespace cppjinja {
 
