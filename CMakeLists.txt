@@ -11,7 +11,7 @@ option(LOW_MEMORY "assume we don't have efough memroty for complie grammars (gcc
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(Boost COMPONENTS unit_test_framework system REQUIRED)
-# CMAKE BUG:
+# BOOST'S CMAKE BUG:
 # find_package sets libraries to Boost::unit_test_framework;Boost::system and so on
 # and cmake tries to find it in /nix/store/[include_hash]-boost-1.71.0-dev/lib/libboost_unit_test_framework.so.1.71.0 
 # but they leaves in /nix/store/[library_hash]/lib... in nix env all libraries can be found
@@ -45,51 +45,11 @@ add_custom_command(OUTPUT "${lohman_json_file}"
 		"${CMAKE_CURRENT_LIST_DIR}/cmake/download_or_get.cmake"
 )
 
-# parser
-#add_library(parser SHARED "${main_config_file}" parser/grammar.inl parser/traits.hpp)
-#target_include_directories(parser PRIVATE "${Boost_INCLUDE_DIRS}" PUBLIC "${config_files_dir}")
-#target_sources_local(parser "grammar.hpp" "grammar.cpp" "parser/")
-#target_sources_local(parser "helpers.hpp" "helpers.cpp" "parser/")
-#target_sources_local(parser "ast.hpp" "ast.cpp" "parser/")
-#target_sources_local(parser "debug_operators.hpp" "debug_operators.cpp" "parser/")
-
 #parser2
-add_library(parser2 SHARED "parser/common.hpp" "parser/parse.hpp")
+file(GLOB_RECURSE parser2_src LIST_DIRECTORIES false "parser/*.cpp")
+file(GLOB_RECURSE parser2_hdr LIST_DIRECTORIES false "parser/*.hpp")
+add_library(parser2 SHARED ${parser2_src} ${parser2_hdr})
 target_include_directories(parser2 PRIVATE "${Boost_INCLUDE_DIRS}" PUBLIC "${config_files_dir}" "parser")
-target_sources_local(parser2 "common.hpp" "" "parser/ast/")
-target_sources_local(parser2 "opterm.hpp" "" "parser/ast/")
-target_sources_local(parser2 "single.hpp" "" "parser/ast/")
-target_sources_local(parser2 "blocks.hpp" "" "parser/ast/")
-target_sources_local(parser2 "tmpls.hpp" "" "parser/ast/")
-
-target_sources_local(parser2 "common.hpp" "" "parser/fusion/")
-target_sources_local(parser2 "opterm.hpp" "" "parser/fusion/")
-target_sources_local(parser2 "single.hpp" "" "parser/fusion/")
-target_sources_local(parser2 "blocks.hpp" "" "parser/fusion/")
-target_sources_local(parser2 "tmpls.hpp"  "" "parser/fusion/")
-
-target_sources_local(parser2 "common.hpp" "" "parser/grammar/")
-target_sources_local(parser2 "opterm.hpp" "" "parser/grammar/")
-target_sources_local(parser2 "single.hpp" "" "parser/grammar/")
-target_sources_local(parser2 "blocks.hpp" "" "parser/grammar/")
-target_sources_local(parser2 "tmpls.hpp"  "" "parser/grammar/")
-
-target_sources_local(parser2 "common.hpp" "common.cpp" "parser/operators/")
-target_sources_local(parser2 "opterm.hpp" "opterm.cpp" "parser/operators/")
-target_sources_local(parser2 "single.hpp" "single.cpp" "parser/operators/")
-target_sources_local(parser2 "blocks.hpp" "blocks.cpp" "parser/operators/")
-target_sources_local(parser2 "tmpls.hpp"  "tmpls.cpp"  "parser/operators/")
-
-target_sources_local(parser2 "common.hpp" "common.cpp" "parser/grammar_def/")
-target_sources_local(parser2 "opterm.hpp" "opterm.cpp" "parser/grammar_def/")
-target_sources_local(parser2 "single.hpp" "single.cpp" "parser/grammar_def/")
-target_sources_local(parser2 "blocks.hpp" "blocks.cpp" "parser/grammar_def/")
-target_sources_local(parser2 "tmpls.hpp"  "tmpls.cpp"  "parser/grammar_def/")
-
-# some files may slow down system when compiling..
-if(LOW_MEMORY AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-	set_source_files_properties("parser/grammar.cpp" PROPERTIES COMPILE_FLAGS "--param ggc-min-expand=1024 --param ggc-min-heapsize=4096")
-endif()
 
 if(ENABLE_TESTS)
 	include(cmake/tests.inc.cmake)
