@@ -14,7 +14,35 @@
 
 #include "parser/grammar/tmpls.hpp"
 
-cppjinja::parser::parser(std::vector<std::filesystem::path> inc_dirs) : incs_(std::move(inc_dirs))
+std::filesystem::path cppjinja::parser::solve_path(const std::filesystem::path& to) const
+{
+	using namespace std::filesystem;
+
+	if(to.is_absolute()) return to;
+
+	for(auto& d:cur_dir_stack_) if(exists(d/to)) return d / to;
+	for(auto& d:incs_)          if(exists(d/to)) return d / to;
+
+	return absolute(to);
+}
+
+void cppjinja::parser::parse(const cppjinja::ast::op_include& inc)
+{
+	std::filesystem::path fn = inc.filename;
+	fn = solve_path(fn);
+	assert(fn.is_absolute());
+
+	if(inc.ignore_missing && *inc.ignore_missing) {
+		if(!std::filesystem::exists(fn)) return;
+	}
+
+	//TODO: with or without context ignored for now
+
+	parse(fn);
+}
+
+cppjinja::parser::parser(std::vector<std::filesystem::path> inc_dirs)
+    : incs_(std::move(inc_dirs))
 {
 }
 
@@ -23,8 +51,16 @@ cppjinja::parser& cppjinja::parser::parse(std::filesystem::path file)
 	if(!std::filesystem::exists(file))
 		throw std::runtime_error("file " + file.string() + " doesn't exists");
 
+	cur_file_ = &files_.emplace_back();
+	cur_file_->name = file.generic_string();
+
 	std::fstream fdata(file);
-	return parse(fdata);
+
+	cur_dir_stack_.push_back(file.parent_path());
+	parse(fdata);
+	cur_dir_stack_.pop_back();
+
+	return *this;
 }
 
 cppjinja::parser& cppjinja::parser::parse(std::istream& data)
@@ -32,19 +68,23 @@ cppjinja::parser& cppjinja::parser::parse(std::istream& data)
 	boost::spirit::istream_iterator end;
 	boost::spirit::istream_iterator begin(data);
 
-	auto tmpl = cppjinja::text::parse(text::tmpl, begin, end);
-	tmpls_.emplace_back(std::move(tmpl));
+	if(!cur_file_) cur_file_ = &files_.emplace_back();
+	*cur_file_ = cppjinja::text::parse(text::file, begin, end);
+
+	for(auto& inc:cur_file_->includes) parse(inc);
 
 	return *this;
 }
 
 std::vector<cppjinja::ast::tmpl> cppjinja::parser::tmpls() const
 {
-	return tmpls_;
+	std::vector<cppjinja::ast::tmpl> tmpls;
+	for(auto& f:files_) for(auto& t:f.tmpls) tmpls.emplace_back(t);
+	return tmpls;
 }
 
 std::vector<cppjinja::ast::file> cppjinja::parser::files() const
 {
-	return {};
+	return files_;
 }
 

@@ -19,7 +19,10 @@ class parser final {
 	std::vector<std::filesystem::path> cur_dir_stack_;
 	std::vector<std::filesystem::path> incs_;
 	std::vector<ast::file> files_;
-	std::vector<ast::tmpl> tmpls_;
+	ast::file* cur_file_ = nullptr;
+
+	std::filesystem::path solve_path(const std::filesystem::path& to) const ;
+	void parse(const ast::op_include& inc);
 public:
 	parser(const parser&) =delete ;
 	parser& operator = (const parser&) =delete ;

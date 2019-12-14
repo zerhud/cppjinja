@@ -16,10 +16,10 @@
 #include "common.hpp"
 
 namespace cppjinja::text {
-    auto const extend_st_def = omit[block_term_start] >> lit("extends") >> x3::attr(std::nullopt) >> quoted_string >> omit[block_term_end] ;
+	auto const extend_st_def = omit[block_term_start] >> lit("extends") >> x3::attr(std::nullopt) >> quoted_string >> omit[block_term_end] ;
 	auto const extend_st_ex_def = single_var_name >> lit("from") >> quoted_string;
 
-	auto const file_def = +tmpl_ex | +tmpl_original;
+	auto const file_def = *op_include >> (+tmpl_ex | +tmpl_original);
 
 	auto const tmpl_def = tmpl_ex | tmpl_original;
 	auto const tmpl_original_def =

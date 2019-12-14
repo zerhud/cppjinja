@@ -9,6 +9,7 @@
 #pragma once
 
 #include "blocks.hpp"
+#include "single.hpp"
 
 namespace cppjinja::ast {
 
@@ -29,6 +30,7 @@ struct file : x3::position_tagged
 {
 	string_t name;
 	std::vector<tmpl> tmpls;
+	std::vector<op_include> includes;
 };
 
 } // namespace cppjinja::ast

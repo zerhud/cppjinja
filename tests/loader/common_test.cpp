@@ -26,7 +26,10 @@ BOOST_AUTO_TEST_CASE(simple)
 	BOOST_CHECK_NO_THROW( psr.parse(data) );
 	auto tmpls = psr.tmpls();
 	auto files = psr.files();
-	BOOST_TEST( files.size() == 0 );
+
+	BOOST_TEST_REQUIRE( files.size() == 1 );
+	BOOST_TEST( files[0].tmpls.size() == 1 );
+
 	BOOST_TEST_REQUIRE( tmpls.size() == 1 );
 	BOOST_TEST( tmpls[0].name.empty() );
 	BOOST_TEST_REQUIRE( tmpls[0].content.size() == 1 );
