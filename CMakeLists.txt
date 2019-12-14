@@ -59,6 +59,13 @@ add_library(loader SHARED ${loader_src} ${loader_hdr})
 target_include_directories(loader PRIVATE "${Boost_INCLUDE_DIRS}" "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(loader PUBLIC stdc++fs PRIVATE parser2)
 
+#evaluator
+file(GLOB_RECURSE evaluator_src LIST_DIRECTORIES false "evaluator/*.cpp")
+file(GLOB_RECURSE evaluator_hdr LIST_DIRECTORIES false "evaluator/*.hpp")
+add_library(evaluator SHARED ${evaluator_src} ${evaluator_hdr})
+target_include_directories(evaluator PRIVATE "${Boost_INCLUDE_DIRS}" "${CMAKE_CURRENT_SOURCE_DIR}")
+target_link_libraries(evaluator PUBLIC stdc++fs PRIVATE loader)
+
 if(ENABLE_TESTS)
 	include(cmake/tests.inc.cmake)
 endif()

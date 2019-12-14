@@ -16,7 +16,12 @@ foreach(tname ${tests_parser2})
 	add_unit_test(${tname} "tests/parser/" "parser2")
 endforeach()
 
-set(tests_loader common)
+set(tests_loader load_common)
 foreach(tname ${tests_loader})
 	add_unit_test(${tname} "tests/loader/" "loader")
+endforeach()
+
+set(tests_eval eval_common)
+foreach(tname ${tests_eval})
+	add_unit_test(${tname} "tests/eval/" "evaluator")
 endforeach()
