@@ -9,12 +9,77 @@
 #include "eval.hpp"
 #include "parser/helpers.hpp"
 
+using namespace std::literals;
+
+namespace cppjinja::details {
+
+struct name_check_visitor : boost::static_visitor<bool> {
+	ast::string_t name;
+
+	template<typename O>
+	std::enable_if_t<has_str_name_v<O>, bool>
+	    operator()(const O& o) {return o.name==name;}
+
+	template<typename O>
+	std::enable_if_t<!has_str_name_v<O>, bool>
+	    operator()(const O&) {return false;}
+};
+
+} // namespace cppjinja::details
+
 const cppjinja::ast::block_content* cppjinja::evaluator::search_by_name(const ast::var_name& name) const
 {
+	assert(!data_stack_.empty());
+	assert(!name.empty());
+
+	details::name_check_visitor check_last_name;
+	check_last_name.name = name.back();
+
+	for(auto cur=data_stack_.rbegin();cur!=data_stack_.rend();++cur)
+	{
+		assert(*cur);
+		const std::vector<ast::block_content>& cur_cnt = *(*cur);
+		for(const auto& cnt:cur_cnt)
+		{
+			const bool found = boost::apply_visitor(check_last_name, cnt);
+			if(found) return &cnt;
+		}
+	}
+
 	return nullptr;
 }
 
-void cppjinja::evaluator::render(std::ostream& to, const cppjinja::ast::value_term& val, const std::vector<ast::filter_call>& filters) const
+std::string cppjinja::evaluator::render(const cppjinja::ast::block_content& cnt, bool render_data) const
+{
+//	, forward_ast<block_raw>
+//	, forward_ast<block_if>
+//	, forward_ast<block_for>
+//	, forward_ast<block_macro>
+//	, forward_ast<block_named>
+//	, forward_ast<block_filtered>
+//	, forward_ast<block_set>
+//	, forward_ast<block_call>
+
+	overloaded cnt_visitor {
+		  [](const ast::string_t& s){ return s;}
+		, [this](const ast::op_out& o){ return render(o.value, o.filters); }
+		, [](const ast::op_comment&) { return ""s; }
+		, [&render_data,this](const ast::op_set& o){ return render_data ? render(o.value, {}) : ""s;}
+		, [](const auto&){ return ""; }
+	};
+
+	return boost::apply_visitor(cnt_visitor, cnt.var);
+}
+
+void cppjinja::evaluator::render(std::ostream& to, const std::vector<cppjinja::ast::block_content>& cnt) const
+{
+
+	data_stack_.push_back(&cnt);
+	for(auto& cnt:cnt) to << render(cnt, false);
+	data_stack_.pop_back();
+}
+
+std::string cppjinja::evaluator::render(const cppjinja::ast::value_term& val, const std::vector<ast::filter_call>& filters) const
 {
 	overloaded visitor {
 		  [](const ast::string_t& v){ return v;}
@@ -29,13 +94,14 @@ void cppjinja::evaluator::render(std::ostream& to, const cppjinja::ast::value_te
 	std::string base = boost::apply_visitor(visitor, val.var);
 	for(auto& f:filters) base = render(base, f);
 
-	to << base;
+	return base;
 }
 
 std::string cppjinja::evaluator::render(const cppjinja::ast::var_name& var) const
 {
 	assert(data_);
-	return data_->solve(var);
+	const ast::block_content* found_var = search_by_name(var);
+	return found_var ? render(*found_var, true) : data_->solve(var);
 }
 
 std::string cppjinja::evaluator::render(const cppjinja::ast::function_call& var) const
@@ -72,26 +138,8 @@ cppjinja::evaluator::evaluator(std::vector<cppjinja::ast::tmpl> tmpls)
 void cppjinja::evaluator::render(std::ostream& to, const cppjinja::data_provider& data) const
 {
 	assert(tmpl_);
-//	, op_set
-//	, forward_ast<block_raw>
-//	, forward_ast<block_if>
-//	, forward_ast<block_for>
-//	, forward_ast<block_macro>
-//	, forward_ast<block_named>
-//	, forward_ast<block_filtered>
-//	, forward_ast<block_set>
-//	, forward_ast<block_call>
 
 	data_ = &data;
-
-	overloaded cnt_visitor {
-		  [&to](const ast::string_t& s){ to << s;}
-		, [&to,this](const ast::op_out& o){ render(to, o.value, o.filters); }
-		, [](const ast::op_comment&) {}
-		, [&to](const auto&){ to << ""; }
-	};
-
-	for(auto& cnt:tmpl_->content) boost::apply_visitor(cnt_visitor, cnt.var);
-
+	render(to, tmpl_->content);
 	data_ = nullptr;
 }

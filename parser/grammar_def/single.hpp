@@ -21,7 +21,7 @@ namespace cppjinja::text {
 	auto const op_comment_value_def = lexeme[*(char_ >> !comment_term_end) >> char_];
 	auto const op_comment_def = comment_term_start >> !comment_term_end >> op_comment_value >> comment_term_end;
 
-	auto const op_set_def = block_term_start >> lit("set") >> var_name >> '=' >> value_term >> block_term_end;
+	auto const op_set_def = block_term_start >> lit("set") >> single_var_name >> '=' >> value_term >> block_term_end;
 
 	auto const filename_def = quoted_string;
 	auto const op_include_def =

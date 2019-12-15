@@ -26,10 +26,13 @@ class evaluator {
 	std::vector<ast::tmpl> tmpls_;
 	ast::tmpl* tmpl_ = nullptr;
 	mutable const data_provider* data_ = nullptr;
+	mutable std::vector<const std::vector<ast::block_content>*> data_stack_;
 
 	const ast::block_content* search_by_name(const ast::var_name& name) const ;
 
-	void render(std::ostream& to, const ast::value_term& val, const std::vector<ast::filter_call>& filters) const ;
+	std::string render(const ast::block_content& cnt, bool render_data) const ;
+	void render(std::ostream& to, const std::vector<ast::block_content>& cnt) const ;
+	std::string render(const ast::value_term& val, const std::vector<ast::filter_call>& filters) const ;
 	std::string render(const ast::var_name& var) const ;
 	std::string render(const ast::function_call& var) const ;
 	std::string render(const ast::binary_op& var) const ;

@@ -126,7 +126,7 @@ BOOST_DATA_TEST_CASE(
 	BOOST_TEST_CONTEXT("TEXT = " << text)
 	BOOST_CHECK_NO_THROW( result = txt::parse(txt::op_set, text) );
 
-	BOOST_TEST(result.name == ast::var_name{"x"s});
+	BOOST_TEST(result.name == "x"s);
 	BOOST_TEST(result.value == good_result);
 }
 

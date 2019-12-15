@@ -36,7 +36,7 @@ struct op_comment : x3::position_tagged
 
 struct op_set : x3::position_tagged
 {
-	var_name name;
+	string_t name;
 	value_term value;
 	op_term_start open;
 	op_term_end close;
