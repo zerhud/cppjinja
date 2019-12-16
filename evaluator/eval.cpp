@@ -32,6 +32,9 @@ const cppjinja::ast::block_content* cppjinja::evaluator::search_by_name(const as
 	assert(!data_stack_.empty());
 	assert(!name.empty());
 
+	/// only one level can to be setted inside template
+	if(name.size()!=1) return nullptr;
+
 	details::name_check_visitor check_last_name;
 	check_last_name.name = name.back();
 

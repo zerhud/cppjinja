@@ -87,4 +87,12 @@ BOOST_AUTO_TEST_CASE(setted)
 	BOOST_TEST(parse_single(pdata, *data) == "test"sv );
 }
 
+BOOST_AUTO_TEST_CASE(only_single_name_search_allowed)
+{
+	auto data = std::make_unique<mocks::data_provider>();
+	MOCK_EXPECT(data->solve_var_name).once().with(ast::var_name{"a"s,"d"s}).returns("up");
+	auto pdata = "<% set d='test' %><= a.d =>"sv;
+	BOOST_TEST(parse_single(pdata, *data) == "up"sv );
+}
+
 BOOST_AUTO_TEST_SUITE_END() //var_name
