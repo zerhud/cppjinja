@@ -22,6 +22,7 @@
 
 namespace ast = cppjinja::ast;
 namespace txt = cppjinja::text;
+namespace east = cppjinja::east;
 using namespace std::literals;
 
 ast::tmpl parse_tmpl(std::string_view data)
@@ -76,7 +77,7 @@ BOOST_AUTO_TEST_SUITE(var_name)
 	BOOST_AUTO_TEST_CASE(not_setted)
 	{
 		auto data = std::make_unique<mocks::data_provider>();
-		MOCK_EXPECT(data->solve_var_name).once().with(ast::var_name{"data"s}).returns("test");
+		MOCK_EXPECT(data->render_var_name).once().with(ast::var_name{"data"s}).returns("test");
 		BOOST_TEST(parse_single("<= data =>"sv, *data) == "test"sv );
 	}
 
@@ -90,7 +91,7 @@ BOOST_AUTO_TEST_SUITE(var_name)
 	BOOST_AUTO_TEST_CASE(only_single_name_search_allowed)
 	{
 		auto data = std::make_unique<mocks::data_provider>();
-		MOCK_EXPECT(data->solve_var_name).once().with(ast::var_name{"a"s,"d"s}).returns("up");
+		MOCK_EXPECT(data->render_var_name).once().with(ast::var_name{"a"s,"d"s}).returns("up");
 		auto pdata = "<% set d='test' %><= a.d =>"sv;
 		BOOST_TEST(parse_single(pdata, *data) == "up"sv );
 	}
@@ -110,8 +111,8 @@ BOOST_AUTO_TEST_CASE(filter)
 	call.ref = ast::var_name{"filter"s};
 
 	auto data = std::make_unique<mocks::data_provider>();
-	MOCK_EXPECT(data->solve_var_name).once().with(ast::var_name{"a"s}).returns("not ok");
-	MOCK_EXPECT(data->solve_filter_call).once().calls([](const ast::function_call& c, const std::string& b){
+	MOCK_EXPECT(data->render_var_name).once().with(ast::var_name{"a"s}).returns("not ok");
+	MOCK_EXPECT(data->render_filter_call).once().calls([](const east::function_call& c, const std::string& b){
 				BOOST_TEST( c.ref.size() == 1 );
 				BOOST_TEST( c.ref[0] == "filter"s );
 				BOOST_TEST( c.params.empty() );

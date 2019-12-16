@@ -7,9 +7,11 @@
  *************************************************************************/
 
 #include "eval.hpp"
+#include "ast_cvt.hpp"
 #include "parser/helpers.hpp"
 
 using namespace std::literals;
+using cppjinja::details::east_cvt;
 
 namespace cppjinja::details {
 
@@ -26,6 +28,7 @@ struct name_check_visitor : boost::static_visitor<bool> {
 };
 
 } // namespace cppjinja::details
+
 
 const cppjinja::ast::block_content* cppjinja::evaluator::search_by_name(const ast::var_name& name) const
 {
@@ -104,7 +107,7 @@ std::string cppjinja::evaluator::render(const cppjinja::ast::var_name& var) cons
 {
 	assert(data_);
 	const ast::block_content* found_var = search_by_name(var);
-	return found_var ? render(*found_var, true) : data_->solve(var);
+	return found_var ? render(*found_var, true) : data_->render(east_cvt::cvt(var));
 }
 
 std::string cppjinja::evaluator::render(const cppjinja::ast::function_call& var) const
@@ -112,7 +115,7 @@ std::string cppjinja::evaluator::render(const cppjinja::ast::function_call& var)
 	assert(data_);
 	const ast::block_content* cnt = search_by_name(var.ref);
 
-	if(!cnt) return data_->solve(var);
+	if(!cnt) return data_->render(east_cvt::cvt(var));
 
 	const bool is_macro = cnt->var.type() == typeid(ast::block_macro);
 	const bool is_call = cnt->var.type() == typeid(ast::block_call);
@@ -134,7 +137,7 @@ std::string cppjinja::evaluator::render(const std::string& base, const cppjinja:
 		call.ref = boost::get<ast::var_name>(filter.var);
 	else call = boost::get<ast::function_call>(filter.var);
 
-	return data_->solve(call, base);
+	return data_->render(east_cvt::cvt(call), base);
 }
 
 cppjinja::evaluator::evaluator(std::vector<cppjinja::ast::tmpl> tmpls)

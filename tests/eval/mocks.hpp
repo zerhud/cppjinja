@@ -14,9 +14,9 @@ namespace mocks {
 
 MOCK_BASE_CLASS( data_provider, cppjinja::data_provider)
 {
-    MOCK_METHOD( solve, 1, std::string(const cppjinja::ast::var_name&), solve_var_name )
-    MOCK_METHOD( solve, 1, std::string(const cppjinja::ast::function_call&), solve_function_call )
-    MOCK_METHOD( solve, 2, std::string(const cppjinja::ast::function_call&, const std::string&), solve_filter_call )
+    MOCK_METHOD( render, 1, std::string(const cppjinja::east::var_name&), render_var_name )
+    MOCK_METHOD( render, 1, std::string(const cppjinja::east::function_call&), render_function_call )
+    MOCK_METHOD( render, 2, std::string(const cppjinja::east::function_call&, const cppjinja::east::string_t&), render_filter_call )
 };
 
 } // namespace mocks

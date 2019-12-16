@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include "parser/ast/tmpls.hpp"
+#include "ast.hpp"
 
 namespace cppjinja {
 
@@ -18,9 +19,9 @@ class data_provider {
 public:
 	virtual ~data_provider() noexcept =default ;
 
-	virtual std::string solve(const ast::var_name& val) const =0 ;
-	virtual std::string solve(const ast::function_call& val) const =0 ;
-	virtual std::string solve(const ast::function_call& val, const std::string& base) const =0 ;
+	virtual east::string_t render(const east::var_name& val) const =0 ;
+	virtual east::string_t render(const east::function_call& val) const =0 ;
+	virtual east::string_t render(const east::function_call& val, const east::string_t& base) const =0 ;
 };
 
 class evaluator {
