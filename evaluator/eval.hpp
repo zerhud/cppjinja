@@ -20,6 +20,7 @@ public:
 
 	virtual std::string solve(const ast::var_name& val) const =0 ;
 	virtual std::string solve(const ast::function_call& val) const =0 ;
+	virtual std::string solve(const ast::function_call& val, const std::string& base) const =0 ;
 };
 
 class evaluator {

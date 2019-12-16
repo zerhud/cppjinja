@@ -73,26 +73,52 @@ BOOST_AUTO_TEST_CASE(no_output)
 
 BOOST_AUTO_TEST_SUITE(var_name)
 
-BOOST_AUTO_TEST_CASE(not_setted)
-{
-	auto data = std::make_unique<mocks::data_provider>();
-	MOCK_EXPECT(data->solve_var_name).once().with(ast::var_name{"data"s}).returns("test");
-	BOOST_TEST(parse_single("<= data =>"sv, *data) == "test"sv );
-}
+	BOOST_AUTO_TEST_CASE(not_setted)
+	{
+		auto data = std::make_unique<mocks::data_provider>();
+		MOCK_EXPECT(data->solve_var_name).once().with(ast::var_name{"data"s}).returns("test");
+		BOOST_TEST(parse_single("<= data =>"sv, *data) == "test"sv );
+	}
 
-BOOST_AUTO_TEST_CASE(setted)
-{
-	auto data = std::make_unique<mocks::data_provider>();
-	auto pdata = "<% set d='test' %><= d =>"sv;
-	BOOST_TEST(parse_single(pdata, *data) == "test"sv );
-}
+	BOOST_AUTO_TEST_CASE(setted)
+	{
+		auto data = std::make_unique<mocks::data_provider>();
+		auto pdata = "<% set d='test' %><= d =>"sv;
+		BOOST_TEST(parse_single(pdata, *data) == "test"sv );
+	}
 
-BOOST_AUTO_TEST_CASE(only_single_name_search_allowed)
-{
-	auto data = std::make_unique<mocks::data_provider>();
-	MOCK_EXPECT(data->solve_var_name).once().with(ast::var_name{"a"s,"d"s}).returns("up");
-	auto pdata = "<% set d='test' %><= a.d =>"sv;
-	BOOST_TEST(parse_single(pdata, *data) == "up"sv );
-}
+	BOOST_AUTO_TEST_CASE(only_single_name_search_allowed)
+	{
+		auto data = std::make_unique<mocks::data_provider>();
+		MOCK_EXPECT(data->solve_var_name).once().with(ast::var_name{"a"s,"d"s}).returns("up");
+		auto pdata = "<% set d='test' %><= a.d =>"sv;
+		BOOST_TEST(parse_single(pdata, *data) == "up"sv );
+	}
 
 BOOST_AUTO_TEST_SUITE_END() //var_name
+
+BOOST_AUTO_TEST_CASE(block_raw)
+{
+	auto data = std::make_unique<mocks::data_provider>();
+	auto pdata = "<% raw %><= a.d =><% endraw %>"sv;
+	BOOST_TEST(parse_single(pdata, *data) == "<= a.d =>"sv );
+}
+
+BOOST_AUTO_TEST_CASE(filter)
+{
+	ast::function_call call;
+	call.ref = ast::var_name{"filter"s};
+
+	auto data = std::make_unique<mocks::data_provider>();
+	MOCK_EXPECT(data->solve_var_name).once().with(ast::var_name{"a"s}).returns("not ok");
+	MOCK_EXPECT(data->solve_filter_call).once().calls([](const ast::function_call& c, const std::string& b){
+				BOOST_TEST( c.ref.size() == 1 );
+				BOOST_TEST( c.ref[0] == "filter"s );
+				BOOST_TEST( c.params.empty() );
+				BOOST_TEST( b == "not ok"s );
+				return "ok"s;
+			});
+
+	auto pdata = "<= a | filter =>"sv;
+	BOOST_TEST(parse_single(pdata, *data) == "ok"sv );
+}

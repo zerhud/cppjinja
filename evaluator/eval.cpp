@@ -54,7 +54,6 @@ const cppjinja::ast::block_content* cppjinja::evaluator::search_by_name(const as
 
 std::string cppjinja::evaluator::render(const cppjinja::ast::block_content& cnt, bool render_data) const
 {
-//	, forward_ast<block_raw>
 //	, forward_ast<block_if>
 //	, forward_ast<block_for>
 //	, forward_ast<block_macro>
@@ -68,6 +67,7 @@ std::string cppjinja::evaluator::render(const cppjinja::ast::block_content& cnt,
 		, [this](const ast::op_out& o){ return render(o.value, o.filters); }
 		, [](const ast::op_comment&) { return ""s; }
 		, [&render_data,this](const ast::op_set& o){ return render_data ? render(o.value, {}) : ""s;}
+		, [](const ast::forward_ast<ast::block_raw>& o){ return o.get().value; }
 		, [](const auto&){ return ""; }
 	};
 
@@ -128,7 +128,13 @@ std::string cppjinja::evaluator::render(const cppjinja::ast::binary_op& var) con
 
 std::string cppjinja::evaluator::render(const std::string& base, const cppjinja::ast::filter_call& filter) const
 {
-	return "filter call";
+	ast::function_call call;
+
+	if(filter.var.type() == typeid(ast::var_name))
+		call.ref = boost::get<ast::var_name>(filter.var);
+	else call = boost::get<ast::function_call>(filter.var);
+
+	return data_->solve(call, base);
 }
 
 cppjinja::evaluator::evaluator(std::vector<cppjinja::ast::tmpl> tmpls)
