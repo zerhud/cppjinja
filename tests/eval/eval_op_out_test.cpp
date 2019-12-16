@@ -123,3 +123,17 @@ BOOST_AUTO_TEST_CASE(filter)
 	auto pdata = "<= a | filter =>"sv;
 	BOOST_TEST(parse_single(pdata, *data) == "ok"sv );
 }
+
+BOOST_AUTO_TEST_CASE(function_from_provider)
+{
+	auto data = std::make_unique<mocks::data_provider>();
+	MOCK_EXPECT(data->render_function_call).once().calls([](const east::function_call& c){
+		BOOST_TEST( c.ref.size() == 1 );
+		BOOST_TEST( c.ref[0] == "a"s );
+		BOOST_TEST( c.params.size() == 1 );
+		return "ok"s;
+	});
+
+	auto pdata = "<= a('p') =>"sv;
+	BOOST_TEST(parse_single(pdata, *data) == "ok"sv );
+}
