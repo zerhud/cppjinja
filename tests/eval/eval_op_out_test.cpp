@@ -137,3 +137,16 @@ BOOST_AUTO_TEST_CASE(function_from_provider)
 	auto pdata = "<= a('p') =>"sv;
 	BOOST_TEST(parse_single(pdata, *data) == "ok"sv );
 }
+
+BOOST_AUTO_TEST_SUITE(macros)
+
+	BOOST_AUTO_TEST_CASE(named)
+	{
+		auto data = std::make_unique<mocks::data_provider>();
+		auto pdata = "<% block bl %>ok<% endblock %>"sv;
+		BOOST_TEST(parse_single(pdata, *data) == "ok"sv );
+		pdata = "<% block bl %>ok<% endblock %><= self.bl() =>"sv;
+		//BOOST_TEST(parse_single(pdata, *data) == "okok"sv );
+	}
+
+BOOST_AUTO_TEST_SUITE_END() // macros

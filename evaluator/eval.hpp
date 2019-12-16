@@ -39,6 +39,7 @@ class evaluator {
 	std::string render(const ast::function_call& var) const ;
 	std::string render(const ast::binary_op& var) const ;
 	std::string render(const std::string& base, const ast::filter_call& filter) const ;
+	std::string render(const ast::block_named& bl) const ;
 public:
 	evaluator(std::vector<ast::tmpl> tmpls);
 	void render(std::ostream& to, const data_provider& data) const ;

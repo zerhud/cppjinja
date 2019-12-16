@@ -60,7 +60,6 @@ std::string cppjinja::evaluator::render(const cppjinja::ast::block_content& cnt,
 //	, forward_ast<block_if>
 //	, forward_ast<block_for>
 //	, forward_ast<block_macro>
-//	, forward_ast<block_named>
 //	, forward_ast<block_filtered>
 //	, forward_ast<block_set>
 //	, forward_ast<block_call>
@@ -71,6 +70,7 @@ std::string cppjinja::evaluator::render(const cppjinja::ast::block_content& cnt,
 		, [](const ast::op_comment&) { return ""s; }
 		, [&render_data,this](const ast::op_set& o){ return render_data ? render(o.value, {}) : ""s;}
 		, [](const ast::forward_ast<ast::block_raw>& o){ return o.get().value; }
+		, [this](const ast::forward_ast<ast::block_named>& o){ return render(o.get()); }
 		, [](const auto&){ return ""; }
 	};
 
@@ -155,3 +155,13 @@ void cppjinja::evaluator::render(std::ostream& to, const cppjinja::data_provider
 	render(to, tmpl_->content);
 	data_ = nullptr;
 }
+
+std::string cppjinja::evaluator::render(const cppjinja::ast::block_named& bl) const
+{
+	for(auto& param:bl.params) if(!param.value.has_value()) throw std::runtime_error("block must have no parametrs, or all parameters must to have defualt value");
+
+	std::string ret;
+	for(auto& cnt:bl.content) ret += render(cnt, false);
+	return ret;
+}
+
