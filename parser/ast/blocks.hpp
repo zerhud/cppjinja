@@ -26,6 +26,7 @@ struct block_with;
 struct block_translate;
 struct block_call;
 
+//TODO: rename block_content: now bock_* used for blocks
 using block_content = x3::variant
 <
 	  string_t

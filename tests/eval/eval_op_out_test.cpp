@@ -14,7 +14,7 @@
 #include <boost/test/data/monomorphic.hpp>
 
 #include "parser/parse.hpp"
-#include "evaluator/eval.hpp"
+#include "evaluator/evaluate_tree.hpp"
 
 #include "parser/grammar/tmpls.hpp"
 
@@ -46,9 +46,9 @@ std::string parse_single(std::string_view data, cppjinja::data_provider& prov, s
 		tmpls.emplace_back() = parse_tmpl(data);
 		for(auto& ex:extra) tmpls.emplace_back() = parse_tmpl(ex);
 
-		cppjinja::evaluator ev(tmpls);
+		cppjinja::evaluate_tree ev(tmpls);
 
-		BOOST_CHECK_NO_THROW( ev.render(result, prov) );
+		BOOST_CHECK_NO_THROW( ev.render(result, prov, "") );
 	}
 
 	return result.str();
@@ -57,6 +57,7 @@ std::string parse_single(std::string_view data, cppjinja::data_provider& prov, s
 BOOST_AUTO_TEST_CASE(string)
 {
 	auto data = std::make_unique<mocks::data_provider>();
+	BOOST_TEST(parse_single("data"sv, *data) == "data"sv );
 	BOOST_TEST(parse_single("<= 'data' =>"sv, *data) == "data"sv );
 }
 
