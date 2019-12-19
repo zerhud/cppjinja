@@ -9,6 +9,8 @@
 #include "block.hpp"
 #include "parser/helpers.hpp"
 
+#include "evaluator/eval.hpp"
+
 using namespace cppjinja::eval_tree;
 
 block::block(all_blocks cur, const evaluate_tree* et)
@@ -34,6 +36,8 @@ cppjinja::ast::string_t block::render(const std::vector<cppjinja::ast::macro_par
 //	, forward_ast<block_set>
 //	, forward_ast<block_call>
 
+	data_ = &datas;
+
 	overloaded cnt_visitor {
 		  [](const ast::string_t& s){ return s;}
 		, [this](const ast::op_out& o){ return render(o.value, o.filters); }
@@ -54,6 +58,7 @@ cppjinja::ast::string_t block::render(const std::vector<cppjinja::ast::macro_par
 
 	std::visit(block_visitor, cur_block_);
 
+	data_ = nullptr;
 	return ret;
 }
 
@@ -87,7 +92,10 @@ cppjinja::ast::string_t block::render(const cppjinja::ast::value_term& val, cons
 
 cppjinja::ast::string_t block::render(const cppjinja::ast::var_name& var) const
 {
-	return "render_var_name";
+	assert(data_);
+	if(var.size()==1 && has_variable(var[0]))
+		return variable(var[0]);
+	return data_->render(var);
 }
 
 cppjinja::ast::string_t block::render(const cppjinja::ast::function_call& var) const

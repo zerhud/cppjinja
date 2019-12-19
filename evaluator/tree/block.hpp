@@ -48,6 +48,7 @@ private:
 
 	all_blocks cur_block_;
 	const evaluate_tree* evaluator_;
+	mutable const data_provider* data_ = nullptr;
 };
 
 } // namespace eval_tree
