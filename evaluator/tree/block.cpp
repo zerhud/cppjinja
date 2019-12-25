@@ -12,24 +12,33 @@
 #include "evaluator/eval.hpp"
 #include "../ast_cvt.hpp"
 
+#include "tmpl.hpp"
+
 using namespace cppjinja::eval_tree;
 using namespace std::literals;
 
-block::block(all_blocks cur, const evaluate_tree* et)
+block::block(all_blocks cur, const tmpl* par)
     : cur_block_(std::move(cur))
-    , evaluator_(et)
+    , parent_(par)
 {
-	assert(et);
+	assert(parent_);
 }
 
 std::optional<cppjinja::ast::string_t> block::name() const
 {
 	const ast::block_named* named = std::get_if<ast::block_named>(&cur_block_);
 	if(named) return named->name;
+
+	const ast::block_macro* macro = std::get_if<ast::block_macro>(&cur_block_);
+	if(macro) return macro->name;
+
 	return std::nullopt;
 }
 
-cppjinja::ast::string_t block::render(const std::vector<cppjinja::ast::macro_parameter>& params, const data_provider& datas) const
+cppjinja::ast::string_t block::render(
+          const std::vector<ast::function_call_parameter>& params
+        , const data_provider& datas
+        ) const
 {
 //	, forward_ast<block_if>
 //	, forward_ast<block_for>
@@ -46,7 +55,8 @@ cppjinja::ast::string_t block::render(const std::vector<cppjinja::ast::macro_par
 		, [](const ast::op_comment&) { return ""s; }
 		, [](const ast::op_set&){ return ""s;}
 		, [](const ast::forward_ast<ast::block_raw>& o){ return o.get().value; }
-		//, [this](const ast::forward_ast<ast::block_named>& o){ return render(o.get()); }
+		, [this](const ast::forward_ast<ast::block_named>& o){ return render(o.get()); }
+		, [this](const ast::forward_ast<ast::block_macro>& o){ return render(o.get()); }
 		, [](const auto&){ return "default_block"; }
 	};
 
@@ -66,7 +76,7 @@ cppjinja::ast::string_t block::render(const std::vector<cppjinja::ast::macro_par
 
 cppjinja::ast::string_t block::variable(cppjinja::ast::string_t name) const
 {
-	auto iterate_content = [&name,this](auto& obj)
+	auto iterate_content = [&name,this](auto& obj) -> ast::string_t
 	{
 		if constexpr (has_blockcontent_content_v<decltype(obj)>) {
 			for(auto& c:obj.content) {
@@ -74,8 +84,8 @@ cppjinja::ast::string_t block::variable(cppjinja::ast::string_t name) const
 				if(set && set->name==name) return render(set->value, {});
 			}
 		}
-		assert(false);
-		return ""s;
+
+		throw std::runtime_error("no variable with name " + name);
 	};
 
 	return std::visit(iterate_content, cur_block_);
@@ -97,7 +107,10 @@ bool block::has_variable(cppjinja::ast::string_t name) const
 	return std::visit(iterate_content, cur_block_);
 }
 
-cppjinja::ast::string_t block::render(const cppjinja::ast::value_term& val, const std::vector<cppjinja::ast::filter_call>& filters) const
+cppjinja::ast::string_t block::render(
+          const cppjinja::ast::value_term& val
+        , const std::vector<cppjinja::ast::filter_call>& filters
+        ) const
 {
 	overloaded visitor {
 		  [](const ast::string_t& v){ return v;}
@@ -123,18 +136,12 @@ cppjinja::ast::string_t block::render(const cppjinja::ast::var_name& var) const
 	return data_->render(var);
 }
 
-cppjinja::ast::string_t block::render(const cppjinja::ast::function_call& var) const
+cppjinja::ast::string_t block::render(
+        const cppjinja::ast::function_call& fnc
+        ) const
 {
-	assert(data_);
-	//const ast::block_content* cnt = search_by_name(var.ref);
-
-	//if(!cnt) return data_->render(details::east_cvt::cvt(var));
-
-	//const bool is_macro = cnt->var.type() == typeid(ast::block_macro);
-	//const bool is_call = cnt->var.type() == typeid(ast::block_call);
-	//if(!is_macro && !is_call) throw std::runtime_error("function_call refers to a not callable object");
-
-	return "render_fnc_call";
+	assert(parent_);
+	return parent_->render(fnc);
 }
 
 cppjinja::ast::string_t block::render(const cppjinja::ast::binary_op& var) const
@@ -142,7 +149,10 @@ cppjinja::ast::string_t block::render(const cppjinja::ast::binary_op& var) const
 	return "render_binary_op";
 }
 
-cppjinja::ast::string_t block::render(const std::string& base, const cppjinja::ast::filter_call& filter) const
+cppjinja::ast::string_t block::render(
+          const std::string& base
+        , const cppjinja::ast::filter_call& filter
+        ) const
 {
 	ast::function_call call;
 
@@ -151,4 +161,29 @@ cppjinja::ast::string_t block::render(const std::string& base, const cppjinja::a
 	else call = boost::get<ast::function_call>(filter.var);
 
 	return data_->render(details::east_cvt::cvt(call), base);
+}
+
+cppjinja::ast::string_t block::render(
+        const cppjinja::ast::block_named& obj
+        ) const
+{
+	assert(parent_);
+	return "named_block";
+	//for(auto& param:obj.params) if(!param.value.has_value()) throw std::runtime_error("block must have no parametrs, or all parameters must to have defualt value");
+
+	//std::string ret;
+	//for(auto& cnt:obj.content) ret += render(cnt, false);
+	//return ret;
+}
+
+cppjinja::ast::string_t block::render(
+        const cppjinja::ast::block_macro& obj
+        ) const
+{
+	return "named_macro";
+	//for(auto& param:obj.params) if(!param.value.has_value()) throw std::runtime_error("block must have no parametrs, or all parameters must to have defualt value");
+
+	//std::string ret;
+	//for(auto& cnt:obj.content) ret += render(cnt, false);
+	//return ret;
 }

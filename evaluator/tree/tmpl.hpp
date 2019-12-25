@@ -24,11 +24,15 @@ class tmpl
 	ast::tmpl cur_tmpl_;
 	const evaluate_tree* evaluator_;
 	std::vector<eval_tree::block> blocks_;
+	mutable const data_provider* cur_data_;
+
+	void extract_blocks(std::vector<ast::block_content>& cnt);
 public:
 	tmpl(ast::tmpl cur, const evaluate_tree* et);
 	std::string name() const ;
 	ast::string_t render(const data_provider& data) const ;
 	bool has_block(ast::string_t name) const ;
+	ast::string_t render(const ast::function_call& fnc) const ;
 };
 
 } // namespace eval_tree
