@@ -78,3 +78,19 @@ BOOST_AUTO_TEST_CASE(tmpl_link)
 	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::tmpl, data) );
 	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::tmpl, data_begin, data_end) );
 }
+BOOST_AUTO_TEST_CASE(few_templates)
+{
+	std::string data =
+	        "<% template base %>base<%endtemplate%>"
+	        "<%template child extends base%>child<%endtemplate%>";
+	ast::file result;
+
+	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::file, data) );
+	BOOST_TEST( result.name.empty() );
+	BOOST_TEST_REQUIRE( result.tmpls.size() == 2);
+	BOOST_TEST( result.tmpls[0].name == "base" );
+	BOOST_TEST( result.tmpls[1].name == "child" );
+	BOOST_TEST_REQUIRE( result.tmpls[1].extends.size() == 1 );
+	BOOST_TEST_REQUIRE( result.tmpls[1].extends[0].tmpl_name.has_value() );
+	BOOST_TEST( *result.tmpls[1].extends[0].tmpl_name == "base" );
+}
