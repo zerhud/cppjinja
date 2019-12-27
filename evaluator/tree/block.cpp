@@ -107,6 +107,12 @@ bool block::has_variable(cppjinja::ast::string_t name) const
 	return std::visit(iterate_content, cur_block_);
 }
 
+const tmpl* block::parent() const
+{
+	assert(parent_);
+	return parent_;
+}
+
 cppjinja::ast::string_t block::render(
           const cppjinja::ast::value_term& val
         , const std::vector<cppjinja::ast::filter_call>& filters

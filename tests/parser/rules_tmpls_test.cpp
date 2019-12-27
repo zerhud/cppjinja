@@ -93,4 +93,7 @@ BOOST_AUTO_TEST_CASE(few_templates)
 	BOOST_TEST_REQUIRE( result.tmpls[1].extends.size() == 1 );
 	BOOST_TEST_REQUIRE( result.tmpls[1].extends[0].tmpl_name.has_value() );
 	BOOST_TEST( *result.tmpls[1].extends[0].tmpl_name == "base" );
+
+	BOOST_TEST( result.tmpls[0].content.size() == 1 );
+	BOOST_TEST( result.tmpls[1].content.size() == 1 );
 }

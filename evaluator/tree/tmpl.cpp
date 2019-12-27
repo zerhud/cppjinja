@@ -42,14 +42,7 @@ void tmpl::extract_blocks(std::vector<cppjinja::ast::block_content>& cnt)
 tmpl::tmpl(ast::tmpl cur, const evaluate_tree* et)
     : cur_tmpl_(std::move(cur)), evaluator_(et)
 {
-	extract_blocks(cur_tmpl_.content);
-
-	ast::block_named main_block;
-	for(auto& cnt:cur_tmpl_.content)
-		main_block.content.emplace_back(std::move(cnt));
-	cur_tmpl_.content.clear();
-
-	blocks_.emplace_back(std::move(main_block), this);
+	//extract_blocks(cur_tmpl_.content);
 }
 
 std::string tmpl::name() const
@@ -91,4 +84,34 @@ cppjinja::ast::string_t tmpl::render(const cppjinja::ast::function_call& fnc) co
 
 	if(ref.at(0) == "super"s) ;
 	return "tmpl_function";
+}
+
+void tmpl::add_child(tmpl* t)
+{
+	children_tmpls_.emplace_back(t);
+}
+
+void tmpl::add_child(block b)
+{
+	blocks_.emplace_back(std::move(b));
+}
+
+std::vector<tmpl*> tmpl::child_tmpls()
+{
+	return children_tmpls_;
+}
+
+std::vector<const tmpl*> tmpl::child_tmpls() const
+{
+	std::vector<const tmpl*> ret;
+	for(auto& c:children_tmpls_) ret.emplace_back(c);
+	return ret;
+}
+
+std::vector<const block*> tmpl::child_blocks() const
+{
+	std::vector<const block*> ret;
+	ret.reserve(blocks_.size());
+	for(auto& b:blocks_) ret.emplace_back(&b);
+	return ret;
 }

@@ -40,6 +40,8 @@ public:
 
 	ast::string_t variable(ast::string_t name) const ;
 	bool has_variable(ast::string_t name) const ;
+
+	const tmpl* parent() const ;
 private:
 	ast::string_t render(const ast::value_term& val, const std::vector<ast::filter_call>& filters) const ;
 	ast::string_t render(const ast::var_name& var) const ;
