@@ -21,7 +21,11 @@ foreach(tname ${tests_loader})
 	add_unit_test(${tname} "tests/loader/" "loader")
 endforeach()
 
-set(tests_eval eval_common eval_op_out eval_tree)
+set(tests_eval
+	#eval_common
+	eval_op_out
+	eval_tree
+	)
 foreach(tname ${tests_eval})
 	add_unit_test(${tname} "tests/eval/" "evaluator;parser2")
 endforeach()

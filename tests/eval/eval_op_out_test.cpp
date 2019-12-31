@@ -14,7 +14,7 @@
 #include <boost/test/data/monomorphic.hpp>
 
 #include "parser/parse.hpp"
-#include "evaluator/evaluate_tree.hpp"
+#include "evtree/evtree.hpp"
 
 #include "parser/grammar/tmpls.hpp"
 
@@ -46,7 +46,8 @@ std::string parse_single(std::string_view data, cppjinja::data_provider& prov, s
 		tmpls.emplace_back() = parse_tmpl(data);
 		for(auto& ex:extra) tmpls.emplace_back() = parse_tmpl(ex);
 
-		cppjinja::evaluate_tree ev(tmpls);
+		cppjinja::evtree ev;
+		for(auto& t:tmpls) ev.add_tmpl(t);
 
 		BOOST_CHECK_NO_THROW( ev.render(result, prov, "") );
 	}

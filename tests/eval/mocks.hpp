@@ -8,7 +8,7 @@
 
 #include <turtle/mock.hpp>
 
-#include "evaluator/eval.hpp"
+#include "eval/eval.hpp"
 
 namespace mocks {
 
