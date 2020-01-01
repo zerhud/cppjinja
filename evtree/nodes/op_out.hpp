@@ -12,10 +12,11 @@
 
 namespace cppjinja::evtnodes {
 
-class block_named : public node {
-	ast::block_named block;
+class op_out : public node {
+	ast::op_out op;
 public:
-	block_named(ast::block_named nb);
+	op_out(ast::op_out o);
+
 	render_info rinfo() const override ;
 	ast::string_t name() const override ;
 	bool is_leaf() const override ;

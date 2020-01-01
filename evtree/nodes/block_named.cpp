@@ -7,11 +7,17 @@
  *************************************************************************/
 
 #include "block_named.hpp"
-
+#include "parser/helpers.hpp"
+#include "../evtree.hpp"
 
 cppjinja::evtnodes::block_named::block_named(cppjinja::ast::block_named nb)
     : block(std::move(nb))
 {
+}
+
+cppjinja::node::render_info cppjinja::evtnodes::block_named::rinfo() const
+{
+	return render_info{ false, false };
 }
 
 cppjinja::ast::string_t cppjinja::evtnodes::block_named::name() const
@@ -22,4 +28,43 @@ cppjinja::ast::string_t cppjinja::evtnodes::block_named::name() const
 bool cppjinja::evtnodes::block_named::is_leaf() const
 {
 	return true;
+}
+
+void cppjinja::evtnodes::block_named::render(
+          std::ostream& out
+        , const cppjinja::evtree& tree
+        , evt::context& ctx
+        ) const
+{
+/*
+using block_content = x3::variant
+<
+	  string_t
+	, op_out
+	, op_comment
+	, op_set
+	, forward_ast<block_raw>
+	, forward_ast<block_if>
+	, forward_ast<block_for>
+	, forward_ast<block_macro>
+	, forward_ast<block_named>
+	, forward_ast<block_filtered>
+	, forward_ast<block_set>
+	, forward_ast<block_call>
+>;
+*/
+
+	//node* cur_cnt = nullptr;
+	//overloaded renderer {
+	    //[&out](const ast::string_t& obj){ out << obj; },
+	    //[&out](const ast::op_out& obj) { out << "op_out"; },
+	    //[&out](const auto&){ out << "not ready yet"; }
+	//};
+	//for(auto& c:block.content) boost::apply_visitor(renderer, c.var);
+
+	ctx.push_callstack(this);
+	auto children = tree.children(this);
+	for(auto&& child:children) ctx.add_context(child);
+	for(auto&& child:children) child->render(out, tree, ctx);
+	ctx.pop_callstack(this);
 }

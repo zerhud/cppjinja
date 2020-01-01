@@ -13,35 +13,50 @@ using namespace std::literals;
 
 namespace cppjinja::details {
 
-template<typename Src, typename Default>
+template<typename Block, typename... Args>
+node* create_node(
+          std::vector<std::unique_ptr<node>>& dest
+        , node* parent
+        , Args&&... args)
+{
+	node* block = dest.emplace_back(
+	            std::make_unique<Block>(std::forward<Args>(args)...)
+	            ).get();
+	block->add_parent(parent);
+	return block;
+}
+
+template<typename Src>
 static void insert_content(
           std::vector<std::unique_ptr<node>>& dest
         , node* parent
         , Src& src
-        , Default& def
+        , node* def
         )
 {
 	overloaded insterter {
 		[&dest,parent](ast::forward_ast<ast::block_named>& nb)
 		{
-			node* tnode = dest.emplace_back(
-			            std::make_unique<evtnodes::block_named>(nb.get())
-			            ).get();
-			if(parent) tnode->add_parent(parent);
-			insert_content(dest, parent, nb.get(), nb.get());
+			node* tnode = create_node<evtnodes::block_named>(
+			            dest, parent, nb.get());
+			insert_content(dest, parent, nb.get(), tnode);
 		},
 		[&dest,parent](ast::forward_ast<ast::block_macro>& mb)
 		{
 			// macro cannot be declared inside a block
-			node* tnode = dest.emplace_back(
-			            std::make_unique<evtnodes::block_macro>(mb.get())
-			            ).get();
-			if(parent) tnode->add_parent(parent);
-			//insert_content(dest, paretn, mb.get(), mb.get());
+			create_node<evtnodes::block_macro>(dest, parent, mb.get());
 		},
-		[&def](auto& cnt)
+		[&dest,&def](ast::string_t& str)
 		{
-			def.content.emplace_back(std::move(cnt));
+			create_node<evtnodes::content>(dest, def, str);
+		},
+		[&dest,&def](ast::op_out& obj)
+		{
+			create_node<evtnodes::op_out>(dest, def, obj);
+		},
+		[](auto&)//[&def](auto& cnt)
+		{
+			//def.content.emplace_back(std::move(cnt));
 		}
 	};
 
@@ -83,13 +98,14 @@ void cppjinja::evtree::tbuild_blocks(cppjinja::node* p, ast::tmpl& t)
 {
 	ast::block_named main;
 	main.name = ""s;
-	details::insert_content(nodes, p, t, main);
 
-	node* tnode = nodes.emplace_back(
+	node* mnode = nodes.emplace_back(
 	            std::make_unique<evtnodes::block_named>(std::move(main))
 	            ).get();
-	assert( tnode );
-	tnode->add_parent(p);
+	mnode->add_parent(p);
+
+	details::insert_content(nodes, p, t, mnode);
+
 }
 
 const cppjinja::node* cppjinja::evtree::search_child(
@@ -178,7 +194,23 @@ void cppjinja::evtree::render(
         , const ast::string_t &name
         ) const
 {
-	(void) to;
-	(void) data;
-	(void) name;
+	node* tnode = nullptr;
+	if(name.empty())
+		for(auto& n:nodes) { if(!n->is_leaf()) { tnode = n.get(); break; } }
+	else
+	{
+		for(auto& n:nodes)
+		{
+			if(!n->is_leaf() && n->name() == name)
+			{
+				tnode = n.get();
+				break;
+			}
+		}
+	}
+
+	if(!tnode) throw std::runtime_error("cannot find " + name);
+
+	evt::context ctx(&data);
+	tnode->render(to, *this, ctx);
 }

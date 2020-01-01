@@ -16,6 +16,8 @@
 #include "nodes/tmpl.hpp"
 #include "nodes/block_named.hpp"
 #include "nodes/block_macro.hpp"
+#include "nodes/content.hpp"
+#include "nodes/op_out.hpp"
 
 namespace cppjinja {
 

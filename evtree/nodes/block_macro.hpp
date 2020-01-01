@@ -16,8 +16,14 @@ class block_macro : public node {
 	ast::block_macro block;
 public:
 	block_macro(ast::block_macro nb);
+	render_info rinfo() const override ;
 	ast::string_t name() const override ;
 	bool is_leaf() const override ;
+	void render(
+	          std::ostream& out
+	        , const evtree& tree
+	        , evt::context& ctx
+	        ) const override ;
 };
 
 } // namespace cppjinja::evtnodes

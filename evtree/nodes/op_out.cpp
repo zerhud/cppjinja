@@ -6,34 +6,37 @@
  * or <http://www.gnu.org/licenses/> for details
  *************************************************************************/
 
-#include <istream>
-#include "block_macro.hpp"
+#include "op_out.hpp"
 
-cppjinja::evtnodes::block_macro::block_macro(cppjinja::ast::block_macro nb)
-    : block(std::move(nb))
+using namespace std::literals;
+
+cppjinja::evtnodes::op_out::op_out(cppjinja::ast::op_out o)
+    : op(std::move(o))
 {
 }
 
-cppjinja::node::render_info cppjinja::evtnodes::block_macro::rinfo() const
+cppjinja::node::render_info cppjinja::evtnodes::op_out::rinfo() const
 {
-	return render_info{ false, false };
+	return render_info{ op.open.trim, op.close.trim };
 }
 
-cppjinja::ast::string_t cppjinja::evtnodes::block_macro::name() const
+cppjinja::ast::string_t cppjinja::evtnodes::op_out::name() const
 {
-	return block.name;
+	return "op_out"s;
 }
 
-bool cppjinja::evtnodes::block_macro::is_leaf() const
+bool cppjinja::evtnodes::op_out::is_leaf() const
 {
 	return true;
 }
 
-void cppjinja::evtnodes::block_macro::render(
+void cppjinja::evtnodes::op_out::render(
           std::ostream& out
         , const cppjinja::evtree& tree
-        , evt::context& ctx
+        , cppjinja::evt::context& ctx
         ) const
 {
-	out << "block_macro" ;
+	(void) tree;
+	(void) ctx;
+	out << "op_out"sv ;
 }
