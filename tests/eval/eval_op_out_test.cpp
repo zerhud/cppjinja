@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(function_from_provider)
 
 BOOST_AUTO_TEST_SUITE(macros)
 
-	BOOST_AUTO_TEST_CASE(named)
+	BOOST_AUTO_TEST_CASE(named_outputs)
 	{
 		auto data = std::make_unique<mocks::data_provider>();
 		auto pdata = "<% block bl %>ok<% endblock %>"sv;
@@ -171,4 +171,40 @@ BOOST_AUTO_TEST_SUITE(macros)
 		BOOST_TEST(parse_single(pdata, *data) == "okok"sv );
 	}
 
+	BOOST_AUTO_TEST_CASE(no_macro_output)
+	{
+		auto data = std::make_unique<mocks::data_provider>();
+		auto pdata = "<% macro bl %>ok<% endmacro %>"sv;
+		BOOST_TEST(parse_single(pdata, *data) == ""sv );
+		pdata = "<% macro bl %>ok<% endmacro %><= bl() =>"sv;
+		BOOST_TEST(parse_single(pdata, *data) == "ok"sv );
+	}
+
+	BOOST_AUTO_TEST_CASE(block_with_params)
+	{
+		auto data = std::make_unique<mocks::data_provider>();
+		auto pdata = "<% block bl(a) %><= a =><% endblock %><= bl('ok') =>"sv;
+		BOOST_TEST(parse_single(pdata, *data) == "ok"sv );
+	}
+
+	BOOST_AUTO_TEST_CASE(block_with_default_params)
+	{
+		auto data = std::make_unique<mocks::data_provider>();
+		auto pdata =
+		        "<% block bl(a, b='bok') %><= b =><% endblock %>"
+		        "<= bl('ok') =><= bl('ok', 'test') =>"sv;
+		BOOST_TEST(parse_single(pdata, *data) == "boktest"sv );
+	}
+
 BOOST_AUTO_TEST_SUITE_END() // macros
+
+BOOST_AUTO_TEST_SUITE(binary_ops)
+BOOST_AUTO_TEST_CASE(simple_if)
+{
+	    auto data = std::make_unique<mocks::data_provider>();
+		auto pdata = "<% if 1 is 1 %>simple<% endif %>"sv;
+		BOOST_TEST(parse_single(pdata, *data) == "simple"sv );
+		pdata = "<% if 1 == 1 %>simple<% endif %>"sv;
+		BOOST_TEST(parse_single(pdata, *data) == "simple"sv );
+}
+BOOST_AUTO_TEST_SUITE_END() // binary_ops
