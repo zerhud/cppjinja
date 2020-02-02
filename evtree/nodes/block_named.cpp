@@ -15,9 +15,12 @@ cppjinja::evtnodes::block_named::block_named(cppjinja::ast::block_named nb)
 {
 }
 
-cppjinja::node::render_info cppjinja::evtnodes::block_named::rinfo() const
+cppjinja::evt::node::render_info cppjinja::evtnodes::block_named::rinfo() const
 {
-	return render_info{ false, false };
+	return render_info{
+		{block.left_open.trim, block.right_close.trim},
+		{block.left_close.trim, block.right_open.trim}
+	};
 }
 
 cppjinja::ast::string_t cppjinja::evtnodes::block_named::name() const
@@ -30,11 +33,7 @@ bool cppjinja::evtnodes::block_named::is_leaf() const
 	return true;
 }
 
-void cppjinja::evtnodes::block_named::render(
-          std::ostream& out
-        , const cppjinja::evtree& tree
-        , evt::context& ctx
-        ) const
+void cppjinja::evtnodes::block_named::render(evt::context& ctx) const
 {
 /*
 using block_content = x3::variant
@@ -62,9 +61,10 @@ using block_content = x3::variant
 	//};
 	//for(auto& c:block.content) boost::apply_visitor(renderer, c.var);
 
+	ctx.current_node(this);
 	ctx.push_callstack(this);
-	auto children = tree.children(this);
+	auto children = ctx.tree().children(this);
 	for(auto&& child:children) ctx.add_context(child);
-	for(auto&& child:children) child->render(out, tree, ctx);
+	for(auto&& child:children) child->render(ctx);
 	ctx.pop_callstack(this);
 }

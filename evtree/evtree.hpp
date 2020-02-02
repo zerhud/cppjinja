@@ -18,18 +18,19 @@
 #include "nodes/block_macro.hpp"
 #include "nodes/content.hpp"
 #include "nodes/op_out.hpp"
+#include "nodes/op_set.hpp"
 
 namespace cppjinja {
 
 class evtree : public evaluator {
-	std::vector<std::unique_ptr<node>> nodes;
+	std::vector<std::unique_ptr<evt::node>> nodes;
 
-	void tbuild_blocks(node* p, ast::tmpl& t);
-	const node* search_child(const ast::string_t& name, const node* par) const ;
+	void tbuild_blocks(evt::node* p, ast::tmpl& t);
+	const evt::node* search_child(const ast::string_t& name, const evt::node* par) const ;
 public:
-	const node* search(const ast::var_name& name, const node* ctx=nullptr) const ;
-	std::vector<const node*> all_tree() const ;
-	std::vector<const node*> children(const node* selected) const ;
+	const evt::node* search(const ast::var_name& name, const evt::node* ctx=nullptr) const ;
+	std::vector<const evt::node*> all_tree() const ;
+	std::vector<const evt::node*> children(const evt::node* selected) const ;
 
 	evtree& add_tmpl(ast::tmpl& tmpl) override ;
 	void render(

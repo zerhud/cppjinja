@@ -23,9 +23,9 @@ void cppjinja::evtnodes::content::trim_right()
 {
 }
 
-cppjinja::node::render_info cppjinja::evtnodes::content::rinfo() const
+cppjinja::evt::node::render_info cppjinja::evtnodes::content::rinfo() const
 {
-	return render_info{ false, false };
+	return render_info{ {false, false}, {false, false} };
 }
 
 cppjinja::ast::string_t cppjinja::evtnodes::content::name() const
@@ -38,11 +38,8 @@ bool cppjinja::evtnodes::content::is_leaf() const
 	return true;
 }
 
-void cppjinja::evtnodes::content::render(
-          std::ostream& out
-        , const cppjinja::evtree&// tree
-        , cppjinja::evt::context&// ctx
-        ) const
+void cppjinja::evtnodes::content::render(cppjinja::evt::context& ctx) const
 {
-	out << cnt;
+	ctx.current_node(this);
+	ctx.out() << cnt;
 }

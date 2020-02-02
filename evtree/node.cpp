@@ -7,10 +7,11 @@
  *************************************************************************/
 
 #include "node.hpp"
+#include "parser/helpers.hpp"
 
 using namespace std::literals;
 
-void cppjinja::node::add_parent(cppjinja::node* np)
+void cppjinja::evt::node::add_parent(cppjinja::evt::node* np)
 {
 	assert(
 	      std::find(
@@ -22,20 +23,41 @@ void cppjinja::node::add_parent(cppjinja::node* np)
 	parents_.emplace_back(np);
 }
 
-std::vector<cppjinja::node*> cppjinja::node::parents()
+std::vector<cppjinja::evt::node*> cppjinja::evt::node::parents()
 {
 	return parents_;
 }
 
-std::vector<const cppjinja::node*> cppjinja::node::parents() const
+std::vector<const cppjinja::evt::node*> cppjinja::evt::node::parents() const
 {
-	std::vector<const cppjinja::node*> ret;
+	std::vector<const cppjinja::evt::node*> ret;
 	for(auto& p:parents_) ret.emplace_back(p);
 	return ret;
 }
 
-bool cppjinja::node::is_parent(const cppjinja::node* n) const
+bool cppjinja::evt::node::is_parent(const cppjinja::evt::node* n) const
 {
 	for(auto& p:parents_) if(p==n) return true;
 	return false;
+}
+
+void cppjinja::evt::node::render_value(
+          context& ctx
+        , const cppjinja::ast::value_term& value
+        ) const
+{
+	struct renderer {
+		context& ctx;
+		renderer(context& c) : ctx(c) {}
+		void operator()(const double& obj) { ctx.out() << obj; }
+		void operator()(const ast::string_t& obj) { ctx.out() << obj; }
+		void operator()(const ast::tuple_v&) { }
+		void operator()(const ast::array_v&) { }
+		void operator()(const ast::var_name& obj) { ctx.render_variable(obj); }
+		void operator()(const ast::function_call&) { ctx.out() << "fnc"; }
+		void operator()(const ast::binary_op&) { ctx.out() << "binary"; }
+	};
+
+	renderer rnd(ctx);
+	boost::apply_visitor(rnd, value.var);
 }

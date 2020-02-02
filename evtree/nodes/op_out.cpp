@@ -15,9 +15,12 @@ cppjinja::evtnodes::op_out::op_out(cppjinja::ast::op_out o)
 {
 }
 
-cppjinja::node::render_info cppjinja::evtnodes::op_out::rinfo() const
+cppjinja::evt::node::render_info cppjinja::evtnodes::op_out::rinfo() const
 {
-	return render_info{ op.open.trim, op.close.trim };
+	return render_info{
+		{op.open.trim, op.close.trim},
+		{op.open.trim, op.close.trim}
+	};
 }
 
 cppjinja::ast::string_t cppjinja::evtnodes::op_out::name() const
@@ -30,13 +33,29 @@ bool cppjinja::evtnodes::op_out::is_leaf() const
 	return true;
 }
 
-void cppjinja::evtnodes::op_out::render(
-          std::ostream& out
-        , const cppjinja::evtree& tree
-        , cppjinja::evt::context& ctx
-        ) const
+void cppjinja::evtnodes::op_out::render(cppjinja::evt::context& ctx) const
 {
-	(void) tree;
-	(void) ctx;
-	out << "op_out"sv ;
+	ctx.current_node(this);
+
+	struct {
+		evt::context& ctx;
+		ast::string_t operator()(ast::var_name& var)
+		{
+			return "var_filter"s;
+		}
+		ast::string_t operator()(ast::function_call& fnc)
+		{
+			return "fnc_filter"s;
+		}
+
+	} caller { ctx };
+
+	ctx.push_callstack(this);
+	ast::string_t result = op.value;
+	for(auto& filter:op.filters) {
+		boost::apply_visitor(caller, filter.var);
+	}
+	ctx.pop_callstack(this);
+
+	render_value(ctx, op.value);
 }

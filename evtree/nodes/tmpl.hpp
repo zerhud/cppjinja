@@ -12,7 +12,7 @@
 
 namespace cppjinja::evtnodes {
 
-class tmpl : public node {
+class tmpl : public evt::node {
 	ast::tmpl itmpl_;
 public:
 	tmpl(ast::tmpl t);
@@ -20,11 +20,7 @@ public:
 	render_info rinfo() const override ;
 	ast::string_t name() const override ;
 	bool is_leaf() const override ;
-	void render(
-	          std::ostream& out
-	        , const evtree& tree
-	        , evt::context& ctx
-	        ) const override ;
+	void render(evt::context& ctx) const override ;
 };
 
 }  // namespace cppjinja::evtnodes

@@ -14,12 +14,12 @@ using namespace std::literals;
 namespace cppjinja::details {
 
 template<typename Block, typename... Args>
-node* create_node(
-          std::vector<std::unique_ptr<node>>& dest
-        , node* parent
+evt::node* create_node(
+          std::vector<std::unique_ptr<evt::node>>& dest
+        , evt::node* parent
         , Args&&... args)
 {
-	node* block = dest.emplace_back(
+	evt::node* block = dest.emplace_back(
 	            std::make_unique<Block>(std::forward<Args>(args)...)
 	            ).get();
 	block->add_parent(parent);
@@ -28,16 +28,16 @@ node* create_node(
 
 template<typename Src>
 static void insert_content(
-          std::vector<std::unique_ptr<node>>& dest
-        , node* parent
+          std::vector<std::unique_ptr<evt::node>>& dest
+        , evt::node* parent
         , Src& src
-        , node* def
+        , evt::node* def
         )
 {
 	overloaded insterter {
 		[&dest,parent](ast::forward_ast<ast::block_named>& nb)
 		{
-			node* tnode = create_node<evtnodes::block_named>(
+			evt::node* tnode = create_node<evtnodes::block_named>(
 			            dest, parent, nb.get());
 			insert_content(dest, parent, nb.get(), tnode);
 		},
@@ -53,6 +53,14 @@ static void insert_content(
 		[&dest,&def](ast::op_out& obj)
 		{
 			create_node<evtnodes::op_out>(dest, def, obj);
+		},
+		[&dest,&def](ast::op_set& obj)
+		{
+			create_node<evtnodes::op_set>(dest, def, obj);
+		},
+		[&dest,&def](ast::forward_ast<ast::block_raw>& obj)
+		{
+			create_node<evtnodes::content>(dest, def, obj.get().value);
 		},
 		[](auto&)//[&def](auto& cnt)
 		{
@@ -70,7 +78,7 @@ static void insert_content(
 
 cppjinja::evtree& cppjinja::evtree::add_tmpl(ast::tmpl &tmpl)
 {
-	std::vector<node*> cur_parents;
+	std::vector<evt::node*> cur_parents;
 	for(auto& ex:tmpl.extends)
 	{
 		ast::string_t exname = ex.file_name;
@@ -84,7 +92,7 @@ cppjinja::evtree& cppjinja::evtree::add_tmpl(ast::tmpl &tmpl)
 	if(cur_parents.size() != tmpl.extends.size())
 		throw std::runtime_error("cannot find all parents");
 
-	node* tnode = nodes.emplace_back(
+	evt::node* tnode = nodes.emplace_back(
 	            std::make_unique<evtnodes::tmpl>(tmpl)).get();
 	assert( tnode );
 
@@ -94,12 +102,12 @@ cppjinja::evtree& cppjinja::evtree::add_tmpl(ast::tmpl &tmpl)
 	return *this;
 }
 
-void cppjinja::evtree::tbuild_blocks(cppjinja::node* p, ast::tmpl& t)
+void cppjinja::evtree::tbuild_blocks(cppjinja::evt::node* p, ast::tmpl& t)
 {
 	ast::block_named main;
 	main.name = ""s;
 
-	node* mnode = nodes.emplace_back(
+	evt::node* mnode = nodes.emplace_back(
 	            std::make_unique<evtnodes::block_named>(std::move(main))
 	            ).get();
 	mnode->add_parent(p);
@@ -108,9 +116,9 @@ void cppjinja::evtree::tbuild_blocks(cppjinja::node* p, ast::tmpl& t)
 
 }
 
-const cppjinja::node* cppjinja::evtree::search_child(
+const cppjinja::evt::node* cppjinja::evtree::search_child(
           const cppjinja::ast::string_t& name
-        , const cppjinja::node* par
+        , const cppjinja::evt::node* par
         ) const
 {
 	for(auto& n:nodes)
@@ -125,9 +133,9 @@ const cppjinja::node* cppjinja::evtree::search_child(
 	return nullptr;
 }
 
-const cppjinja::node* cppjinja::evtree::search(
+const cppjinja::evt::node* cppjinja::evtree::search(
           const cppjinja::ast::var_name& name
-        , const cppjinja::node* ctx
+        , const cppjinja::evt::node* ctx
         ) const
 {
 	if(name.empty()) return nullptr;
@@ -156,9 +164,9 @@ const cppjinja::node* cppjinja::evtree::search(
 	return nullptr;
 }
 
-std::vector<const cppjinja::node*> cppjinja::evtree::all_tree() const
+std::vector<const cppjinja::evt::node*> cppjinja::evtree::all_tree() const
 {
-	std::vector<const cppjinja::node*> ret;
+	std::vector<const cppjinja::evt::node*> ret;
 	ret.reserve(nodes.size());
 	for(auto& n:nodes) ret.emplace_back(n.get());
 
@@ -167,12 +175,12 @@ std::vector<const cppjinja::node*> cppjinja::evtree::all_tree() const
 	return ret;
 }
 
-std::vector<const cppjinja::node*> cppjinja::evtree::children(
-        const cppjinja::node* selected
+std::vector<const cppjinja::evt::node*> cppjinja::evtree::children(
+        const cppjinja::evt::node* selected
         ) const
 {
-	std::vector<const cppjinja::node*> ret;
-	std::vector<const cppjinja::node*> subs;
+	std::vector<const cppjinja::evt::node*> ret;
+	std::vector<const cppjinja::evt::node*> subs;
 
 	for(auto& n:nodes) if(n->is_parent(selected)) ret.emplace_back(n.get());
 
@@ -194,7 +202,7 @@ void cppjinja::evtree::render(
         , const ast::string_t &name
         ) const
 {
-	node* tnode = nullptr;
+	evt::node* tnode = nullptr;
 	if(name.empty())
 		for(auto& n:nodes) { if(!n->is_leaf()) { tnode = n.get(); break; } }
 	else
@@ -211,6 +219,6 @@ void cppjinja::evtree::render(
 
 	if(!tnode) throw std::runtime_error("cannot find " + name);
 
-	evt::context ctx(&data);
-	tnode->render(to, *this, ctx);
+	evt::context ctx(&data, this, to);
+	tnode->render(ctx);
 }

@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(few_blocks)
 
 	BOOST_TEST_REQUIRE( nodes.size() == 7 );
 
-	const cppjinja::node* tmpl = nodes[0];
+	const cppjinja::evt::node* tmpl = nodes[0];
 
 	BOOST_TEST( nodes[1]->is_parent(tmpl) );
 	BOOST_TEST( nodes[2]->is_parent(nodes[1]) );
@@ -95,12 +95,12 @@ BOOST_AUTO_TEST_CASE(extends)
 	BOOST_TEST_REQUIRE( nodes.size() == 10 );
 	BOOST_TEST( tree.search(ast::var_name{"base"s}) == nodes[0] );
 
-	const cppjinja::node* base = nodes[0];
+	const cppjinja::evt::node* base = nodes[0];
 	BOOST_TEST_REQUIRE( base != nullptr );
 	BOOST_TEST( !base->is_leaf() );
 	BOOST_TEST( base->name() == "base"s );
 
-	const cppjinja::node* child = tree.search(ast::var_name{"child"s});
+	const cppjinja::evt::node* child = tree.search(ast::var_name{"child"s});
 	BOOST_TEST_REQUIRE( child != nullptr );
 	BOOST_TEST( !child->is_leaf() );
 	BOOST_TEST( child->name() == "child"s );
