@@ -33,6 +33,10 @@ class context {
 	const evtree* tree_;
 
 	std::ostream& outstream;
+	std::optional<std::stringstream> filters_out;
+
+	bool is_filtering() const ;
+	std::string reset_filtering_content() ;
 public:
 	context(const data_provider* p, const evtree* t, std::ostream& out);
 
@@ -41,7 +45,9 @@ public:
 	const data_provider& data() const ;
 	const evtree& tree() const ;
 
+	void render_filter(const ast::var_name& var) ;
 	void render_variable(const ast::var_name& var) ;
+	void render_function(const ast::function_call& var);
 
 	void pop_context();
 	void push_context();
@@ -53,7 +59,7 @@ public:
 
 	const node* caller() const ;
 	void pop_callstack(const node* n);
-	void push_callstack(const node* n);
+	void push_callstack(const node* n, bool is_filtering);
 	std::vector<ast::function_call_parameter> call_params() const ;
 	void call_params(std::vector<ast::function_call_parameter> params);
 };

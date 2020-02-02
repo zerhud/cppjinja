@@ -30,7 +30,7 @@ cppjinja::ast::string_t cppjinja::evtnodes::block_named::name() const
 
 bool cppjinja::evtnodes::block_named::is_leaf() const
 {
-	return true;
+	return false;
 }
 
 void cppjinja::evtnodes::block_named::render(evt::context& ctx) const
@@ -62,7 +62,7 @@ using block_content = x3::variant
 	//for(auto& c:block.content) boost::apply_visitor(renderer, c.var);
 
 	ctx.current_node(this);
-	ctx.push_callstack(this);
+	ctx.push_callstack(this, false);
 	auto children = ctx.tree().children(this);
 	for(auto&& child:children) ctx.add_context(child);
 	for(auto&& child:children) child->render(ctx);

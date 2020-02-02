@@ -37,25 +37,27 @@ void cppjinja::evtnodes::op_out::render(cppjinja::evt::context& ctx) const
 {
 	ctx.current_node(this);
 
-	struct {
-		evt::context& ctx;
-		ast::string_t operator()(ast::var_name& var)
-		{
-			return "var_filter"s;
-		}
-		ast::string_t operator()(ast::function_call& fnc)
-		{
-			return "fnc_filter"s;
-		}
+	if(op.filters.empty()) render_value(ctx, op.value);
+	else {
+		struct {
+			evt::context& ctx;
+			void operator()(const ast::var_name& var)
+			{
+				ctx.render_filter(var);
+			}
+			void operator()(const ast::function_call& fnc)
+			{
+				ctx.call_params(fnc.params);
+				ctx.render_filter(fnc.ref);
+			}
 
-	} caller { ctx };
+		} caller { ctx };
 
-	ctx.push_callstack(this);
-	ast::string_t result = op.value;
-	for(auto& filter:op.filters) {
-		boost::apply_visitor(caller, filter.var);
+
+		ctx.push_callstack(this, true);
+		render_value(ctx, op.value);
+		for(auto& filter:op.filters)
+			boost::apply_visitor(caller, filter.var);
+		ctx.pop_callstack(this);
 	}
-	ctx.pop_callstack(this);
-
-	render_value(ctx, op.value);
 }

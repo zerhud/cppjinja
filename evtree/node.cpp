@@ -48,16 +48,22 @@ void cppjinja::evt::node::render_value(
 {
 	struct renderer {
 		context& ctx;
-		renderer(context& c) : ctx(c) {}
+		const node* self;
+		renderer(context& c, const node* s) : ctx(c), self(s) {}
+
 		void operator()(const double& obj) { ctx.out() << obj; }
 		void operator()(const ast::string_t& obj) { ctx.out() << obj; }
 		void operator()(const ast::tuple_v&) { }
 		void operator()(const ast::array_v&) { }
 		void operator()(const ast::var_name& obj) { ctx.render_variable(obj); }
-		void operator()(const ast::function_call&) { ctx.out() << "fnc"; }
+		void operator()(const ast::function_call& obj) {
+			ctx.push_callstack(self, false);
+			ctx.render_function(obj);
+			ctx.pop_callstack(self);
+		}
 		void operator()(const ast::binary_op&) { ctx.out() << "binary"; }
 	};
 
-	renderer rnd(ctx);
+	renderer rnd(ctx, this);
 	boost::apply_visitor(rnd, value.var);
 }

@@ -35,11 +35,18 @@ static void insert_content(
         )
 {
 	overloaded insterter {
-		[&dest,parent](ast::forward_ast<ast::block_named>& nb)
+		[&dest,parent,def](ast::forward_ast<ast::block_named>& nb)
 		{
 			evt::node* tnode = create_node<evtnodes::block_named>(
 			            dest, parent, nb.get());
 			insert_content(dest, parent, nb.get(), tnode);
+
+
+			ast::op_out out_this_block;
+			out_this_block.value = ast::var_name{tnode->name()};
+			out_this_block.open.trim = nb.get().left_open.trim;
+			out_this_block.close.trim = nb.get().right_close.trim;
+			create_node<evtnodes::op_out>(dest, def, out_this_block);
 		},
 		[&dest,parent](ast::forward_ast<ast::block_macro>& mb)
 		{
@@ -76,7 +83,7 @@ static void insert_content(
 } // namespace cppjinja::details
 
 
-cppjinja::evtree& cppjinja::evtree::add_tmpl(ast::tmpl &tmpl)
+cppjinja::evtree& cppjinja::evtree::add_tmpl(ast::tmpl& tmpl)
 {
 	std::vector<evt::node*> cur_parents;
 	for(auto& ex:tmpl.extends)
@@ -85,7 +92,7 @@ cppjinja::evtree& cppjinja::evtree::add_tmpl(ast::tmpl &tmpl)
 		if(ex.tmpl_name) exname = *ex.tmpl_name;
 
 		for(auto&& n:nodes)
-			if(!n->is_leaf() && n->name() == exname)
+			if(is_tmpl(*n) && n->name() == exname)
 				cur_parents.emplace_back(n.get());
 	}
 
@@ -133,6 +140,11 @@ const cppjinja::evt::node* cppjinja::evtree::search_child(
 	return nullptr;
 }
 
+bool cppjinja::evtree::is_tmpl(const cppjinja::evt::node& n) const
+{
+	return dynamic_cast<const evtnodes::tmpl*>(&n) != nullptr;
+}
+
 const cppjinja::evt::node* cppjinja::evtree::search(
           const cppjinja::ast::var_name& name
         , const cppjinja::evt::node* ctx
@@ -146,7 +158,7 @@ const cppjinja::evt::node* cppjinja::evtree::search(
 		if(2<name.size()) return nullptr;
 		for(auto& n:nodes)
 		{
-			if(!n->is_leaf() && n->name()==name[0])
+			if(is_tmpl(*n) && n->name()==name[0])
 			{
 				if(name.size() == 1) return n.get();
 				return search_child(name[1], n.get());
@@ -159,6 +171,12 @@ const cppjinja::evt::node* cppjinja::evtree::search(
 		for(auto& p:pars)
 			if(auto found = search_child(name[0], p); found)
 				return found;
+	}
+	else if(name[0]=="self")
+	{
+		ast::var_name self_name = name;
+		self_name.erase(self_name.begin());
+		return search(self_name, ctx);
 	}
 
 	return nullptr;
@@ -204,12 +222,12 @@ void cppjinja::evtree::render(
 {
 	evt::node* tnode = nullptr;
 	if(name.empty())
-		for(auto& n:nodes) { if(!n->is_leaf()) { tnode = n.get(); break; } }
+		for(auto& n:nodes) { if(is_tmpl(*n)) { tnode = n.get(); break; } }
 	else
 	{
 		for(auto& n:nodes)
 		{
-			if(!n->is_leaf() && n->name() == name)
+			if(is_tmpl(*n) && n->name() == name)
 			{
 				tnode = n.get();
 				break;

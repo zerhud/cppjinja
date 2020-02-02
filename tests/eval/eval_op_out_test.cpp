@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_SUITE(macros)
 		auto pdata = "<% block bl %>ok<% endblock %>"sv;
 		BOOST_TEST(parse_single(pdata, *data) == "ok"sv );
 		pdata = "<% block bl %>ok<% endblock %><= self.bl() =>"sv;
-		//BOOST_TEST(parse_single(pdata, *data) == "okok"sv );
+		BOOST_TEST(parse_single(pdata, *data) == "okok"sv );
 	}
 
 BOOST_AUTO_TEST_SUITE_END() // macros

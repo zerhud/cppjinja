@@ -8,8 +8,21 @@
 
 #include "context.hpp"
 #include "evtree.hpp"
+#include "eval/ast_cvt.hpp"
 
 using namespace std::literals;
+
+bool cppjinja::evt::context::is_filtering() const
+{
+	return filters_out.has_value();
+}
+
+std::string cppjinja::evt::context::reset_filtering_content()
+{
+	auto cnt = filters_out->str();
+	filters_out->str(std::string());
+	return cnt;
+}
 
 cppjinja::evt::context::context(
           const data_provider* p
@@ -22,7 +35,7 @@ cppjinja::evt::context::context(
 
 std::ostream& cppjinja::evt::context::out()
 {
-	return outstream;
+	return is_filtering() ? *filters_out : outstream;
 }
 
 const cppjinja::data_provider& cppjinja::evt::context::data() const
@@ -36,12 +49,31 @@ const cppjinja::evtree& cppjinja::evt::context::tree() const
 	return *tree_;
 }
 
+void cppjinja::evt::context::render_filter(
+        const cppjinja::ast::var_name& var)
+{
+	assert(is_filtering());
+
+	ast::function_call icall{var, call_params()};
+	auto call = details::east_cvt::cvt(icall);
+	auto base = reset_filtering_content();
+	out() << prov->render(std::move(call), base);
+}
+
 void cppjinja::evt::context::render_variable(
         const cppjinja::ast::var_name& var)
 {
 	auto inner_node = tree_->search(var, cur_node);
 	if(inner_node) inner_node->render(*this);
 	else out() << prov->render(var);
+}
+
+void cppjinja::evt::context::render_function(
+        const cppjinja::ast::function_call& var)
+{
+	auto inner_node = tree_->search(var.ref, current_node());
+	if(inner_node) inner_node->render(*this);
+	else out() << prov->render(details::east_cvt::cvt(var));
 }
 
 void cppjinja::evt::context::pop_context()
@@ -114,12 +146,23 @@ void cppjinja::evt::context::pop_callstack(const cppjinja::evt::node* n)
 {
 	assert( !callstack.empty() );
 	assert( callstack.back().caller == n );
+
+	if(is_filtering())
+	{
+		outstream << filters_out->str();
+		filters_out.reset();
+	}
+
 	callstack.pop_back();
 	pop_context();
 }
 
-void cppjinja::evt::context::push_callstack(const cppjinja::evt::node* n)
+void cppjinja::evt::context::push_callstack(
+          const cppjinja::evt::node* n
+        , bool is_filtering
+        )
 {
+	if(is_filtering) filters_out.emplace(std::string());
 	callstack.push_back(callstack_frame{n, {}});
 	push_context();
 }

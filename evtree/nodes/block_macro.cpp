@@ -26,7 +26,7 @@ cppjinja::ast::string_t cppjinja::evtnodes::block_macro::name() const
 
 bool cppjinja::evtnodes::block_macro::is_leaf() const
 {
-	return true;
+	return false;
 }
 
 void cppjinja::evtnodes::block_macro::render(evt::context& ctx) const

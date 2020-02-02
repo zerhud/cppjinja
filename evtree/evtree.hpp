@@ -27,6 +27,7 @@ class evtree : public evaluator {
 
 	void tbuild_blocks(evt::node* p, ast::tmpl& t);
 	const evt::node* search_child(const ast::string_t& name, const evt::node* par) const ;
+	bool is_tmpl(const evt::node& n) const ;
 public:
 	const evt::node* search(const ast::var_name& name, const evt::node* ctx=nullptr) const ;
 	std::vector<const evt::node*> all_tree() const ;
