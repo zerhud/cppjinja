@@ -44,7 +44,7 @@ static void insert_content(
 			if(!nb.get().params.empty()) return;
 
 			ast::op_out print_this_block;
-			print_this_block.value = ast::var_name{tnode->name()};
+			print_this_block.value = ast::function_call{{tnode->name()}, {}};
 			print_this_block.open.trim = nb.get().left_open.trim;
 			print_this_block.close.trim = nb.get().right_close.trim;
 			create_node<evtnodes::op_out>(dest, def, print_this_block);
