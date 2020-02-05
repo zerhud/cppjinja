@@ -32,6 +32,7 @@ bool cppjinja::evtnodes::tmpl::is_leaf() const
 void cppjinja::evtnodes::tmpl::render(evt::context& ctx) const
 {
 	ctx.current_node(this);
+	ctx.push_context(this);
 	ctx.push_callstack(this, false);
 
 	auto children = ctx.tree().children(this);
@@ -41,4 +42,5 @@ void cppjinja::evtnodes::tmpl::render(evt::context& ctx) const
 			child->render(ctx);
 
 	ctx.pop_callstack(this);
+	ctx.pop_context(this);
 }

@@ -6,6 +6,7 @@
  * or <http://www.gnu.org/licenses/> for details
  *************************************************************************/
 
+#include <string>
 #include "op_out.hpp"
 
 using namespace std::literals;
@@ -25,7 +26,7 @@ cppjinja::evt::node::render_info cppjinja::evtnodes::op_out::rinfo() const
 
 cppjinja::ast::string_t cppjinja::evtnodes::op_out::name() const
 {
-	return "op_out"s;
+	return "op_out ("s + std::to_string((std::size_t)this) + ')';
 }
 
 bool cppjinja::evtnodes::op_out::is_leaf() const

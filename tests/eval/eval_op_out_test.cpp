@@ -183,8 +183,8 @@ BOOST_AUTO_TEST_SUITE(macros)
 	BOOST_AUTO_TEST_CASE(block_with_params)
 	{
 		auto data = std::make_unique<mocks::data_provider>();
-		auto pdata = "<% block bl(a) %><= a =><% endblock %><= bl('ok') =>"sv;
-		BOOST_TEST(parse_single(pdata, *data) == "ok"sv );
+		auto pdata = "<% block bl(a) %>a<= a =><% endblock %><= bl('ok') =>"sv;
+		BOOST_TEST(parse_single(pdata, *data) == "aok"sv );
 	}
 
 	BOOST_AUTO_TEST_CASE(block_with_default_params)

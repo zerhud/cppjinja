@@ -25,7 +25,13 @@ class context {
 		std::vector<ast::function_call_parameter> params;
 	};
 
-	std::vector<std::vector<const node*>> ctx;
+	struct context_frame
+	{
+		const node* maker;
+		std::vector<const node*> ctx;
+	};
+
+	std::vector<context_frame> ctx;
 	std::vector<callstack_frame> callstack;
 	const node* cur_node;
 
@@ -49,13 +55,14 @@ public:
 	void render_variable(const ast::var_name& var) ;
 	void render_function(const ast::function_call& var);
 
-	void pop_context();
-	void push_context();
+	void pop_context(const node* m);
+	void push_context(const node* m);
 	void add_context(const node* n);
 	std::vector<const node*> ctx_all() const;
 	const node* ctx_last() const ;
 	void current_node(const node* n);
 	const node* current_node() const ;
+	const node* ctx_maker() const ;
 
 	const node* caller() const ;
 	void pop_callstack(const node* n);

@@ -33,6 +33,38 @@ bool cppjinja::evtnodes::block_named::is_leaf() const
 	return false;
 }
 
+bool cppjinja::evtnodes::block_named::render_param(
+		  evt::context& ctx
+		, const ast::var_name& pname
+		) const
+{
+	if(pname.size()!=1) return false;
+	for(std::size_t outer = 0;outer<block.params.size();++outer)
+	{
+		auto& p = block.params[outer];
+		if(p.name != pname[0]) continue;
+
+		auto params = ctx.call_params();
+		for(std::size_t inner = 0;outer<params.size();++outer)
+		{
+			auto& cp = params[inner];
+			bool found = cp.name.has_value() && *cp.name == pname[0];
+			if(!found && !cp.name) found = outer == inner;
+			if(found)
+			{
+				render_value(ctx, cp.value.get());
+				return true;
+			}
+		}
+
+		if(p.value) render_value(ctx, *p.value);
+		else throw std::runtime_error("requried parameter not specified");
+		return true;
+	}
+
+	return false;
+}
+
 void cppjinja::evtnodes::block_named::render(evt::context& ctx) const
 {
 /*
@@ -62,9 +94,9 @@ using block_content = x3::variant
 	//for(auto& c:block.content) boost::apply_visitor(renderer, c.var);
 
 	ctx.current_node(this);
-	ctx.push_callstack(this, false);
+	ctx.push_context(this);
 	auto children = ctx.tree().children(this);
 	for(auto&& child:children) ctx.add_context(child);
 	for(auto&& child:children) child->render(ctx);
-	ctx.pop_callstack(this);
+	ctx.pop_context(this);
 }

@@ -8,6 +8,7 @@
 
 #include <istream>
 #include "block_macro.hpp"
+#include "../evtree.hpp"
 
 cppjinja::evtnodes::block_macro::block_macro(cppjinja::ast::block_macro nb)
     : block(std::move(nb))
@@ -32,5 +33,5 @@ bool cppjinja::evtnodes::block_macro::is_leaf() const
 void cppjinja::evtnodes::block_macro::render(evt::context& ctx) const
 {
 	ctx.current_node(this);
-	ctx.out() << "block_macro" ;
+	ctx.out() << "block_macro";
 }

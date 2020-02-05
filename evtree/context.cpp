@@ -63,6 +63,9 @@ void cppjinja::evt::context::render_filter(
 void cppjinja::evt::context::render_variable(
         const cppjinja::ast::var_name& var)
 {
+	auto* cb_cur = dynamic_cast<const evtnodes::callable*>(ctx_maker());
+	if(cb_cur && cb_cur->render_param(*this, var)) return;
+
 	auto inner_node = tree_->search(var, cur_node);
 	if(inner_node) inner_node->render(*this);
 	else out() << prov->render(var);
@@ -76,34 +79,35 @@ void cppjinja::evt::context::render_function(
 	else out() << prov->render(details::east_cvt::cvt(var));
 }
 
-void cppjinja::evt::context::pop_context()
+void cppjinja::evt::context::pop_context(const node* m)
 {
 	assert( !ctx.empty() );
+	assert(ctx.back().maker == m);
 	ctx.pop_back();
 }
 
-void cppjinja::evt::context::push_context()
+void cppjinja::evt::context::push_context(const node* m)
 {
-	ctx.push_back({});
+	ctx.push_back({m, {}});
 }
 
 void cppjinja::evt::context::add_context(const evt::node* n)
 {
 	assert( !ctx.empty() );
-	ctx.back().emplace_back(n);
+	ctx.back().ctx.emplace_back(n);
 }
 
 std::vector<const cppjinja::evt::node*> cppjinja::evt::context::ctx_all() const
 {
 	assert( !ctx.empty() );
-	return ctx.back();
+	return ctx.back().ctx;
 }
 
 const cppjinja::evt::node* cppjinja::evt::context::ctx_last() const
 {
 	assert( !ctx.empty() );
-	if(ctx.back().empty()) return nullptr;
-	return ctx.back().back();
+	if(ctx.back().ctx.empty()) return nullptr;
+	return ctx.back().ctx.back();
 }
 
 void cppjinja::evt::context::current_node(const cppjinja::evt::node* n)
@@ -136,6 +140,12 @@ const cppjinja::evt::node* cppjinja::evt::context::current_node() const
 	return cur_node;
 }
 
+const cppjinja::evt::node* cppjinja::evt::context::ctx_maker() const
+{
+	assert( !ctx.empty() );
+	return ctx.back().maker;
+}
+
 const cppjinja::evt::node* cppjinja::evt::context::caller() const
 {
 	assert( !callstack.empty() );
@@ -154,7 +164,6 @@ void cppjinja::evt::context::pop_callstack(const cppjinja::evt::node* n)
 	}
 
 	callstack.pop_back();
-	pop_context();
 }
 
 void cppjinja::evt::context::push_callstack(
@@ -164,7 +173,6 @@ void cppjinja::evt::context::push_callstack(
 {
 	if(is_filtering) filters_out.emplace(std::string());
 	callstack.push_back(callstack_frame{n, {}});
-	push_context();
 }
 
 std::vector<cppjinja::ast::function_call_parameter>

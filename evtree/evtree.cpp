@@ -41,17 +41,20 @@ static void insert_content(
 			            dest, parent, nb.get());
 			insert_content(dest, parent, nb.get(), tnode);
 
+			if(!nb.get().params.empty()) return;
 
-			ast::op_out out_this_block;
-			out_this_block.value = ast::var_name{tnode->name()};
-			out_this_block.open.trim = nb.get().left_open.trim;
-			out_this_block.close.trim = nb.get().right_close.trim;
-			create_node<evtnodes::op_out>(dest, def, out_this_block);
+			ast::op_out print_this_block;
+			print_this_block.value = ast::var_name{tnode->name()};
+			print_this_block.open.trim = nb.get().left_open.trim;
+			print_this_block.close.trim = nb.get().right_close.trim;
+			create_node<evtnodes::op_out>(dest, def, print_this_block);
 		},
 		[&dest,parent](ast::forward_ast<ast::block_macro>& mb)
 		{
 			// macro cannot be declared inside a block
-			create_node<evtnodes::block_macro>(dest, parent, mb.get());
+			evt::node* tnode =
+			        create_node<evtnodes::block_macro>(dest, parent, mb.get());
+			insert_content(dest, parent, mb.get(), tnode);
 		},
 		[&dest,&def](ast::string_t& str)
 		{

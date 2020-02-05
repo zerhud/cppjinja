@@ -8,22 +8,17 @@
 
 #pragma once
 
-#include "callable.hpp"
+#include "../node.hpp"
 
 namespace cppjinja::evtnodes {
 
-class block_named : public callable {
-	ast::block_named block;
+class callable : public evt::node {
 public:
-	block_named(ast::block_named nb);
-	render_info rinfo() const override ;
-	ast::string_t name() const override ;
-	bool is_leaf() const override ;
-	void render(evt::context& ctx) const override ;
-	bool render_param(
+	virtual bool render_param(
 			  evt::context& ctx
 			, const ast::var_name& pname
-			) const override ;
+			) const =0 ;
 };
 
 } // namespace cppjinja::evtnodes
+

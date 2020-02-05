@@ -50,16 +50,17 @@ ast::op_include make_op_include(ast::string_t fn, std::optional<bool> im, std::o
 
 BOOST_DATA_TEST_CASE(
 	  op_out
-	, utd::make("kuku"s, "'a'"s, "foo()"s, "foo()|e"s, "foo()|e|a()|b('v')"s)
+	, utd::make("kuku"s, "'a'"s, "foo()"s, "foo('ok')"s, "foo()|e"s, "foo()|e|a()|b('v')"s)
 	^ utd::make(
 		  ast::value_term{ast::var_name{"kuku"}}
 		, "a"s
 		, ast::function_call{ast::var_name{"foo"}, {}}
+		, ast::function_call{ast::var_name{"foo"}, {ast::value_term{"ok"s}}}
 		, ast::function_call{ast::var_name{"foo"}, {}}
 		, ast::function_call{ast::var_name{"foo"}, {}}
 		)
 	^ utd::make(
-		  make_filter_calls(), make_filter_calls(), filter_calls()
+		  make_filter_calls(), make_filter_calls(), filter_calls(), filter_calls()
 		, make_filter_calls(ast::var_name{"e"s})
 		, make_filter_calls(
 			  ast::var_name{"e"s}
@@ -73,7 +74,8 @@ BOOST_DATA_TEST_CASE(
 
 	std::string text = "<="s + data + "=>"s;
 	BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(txt::op_out, text) );
-	BOOST_TEST( result.value == good_result );
+	BOOST_TEST_CONTEXT( "text: " << text )
+		BOOST_TEST( result.value == good_result );
 	BOOST_TEST( !result.open.trim );
 	BOOST_TEST( !result.close.trim );
 	BOOST_TEST( result.filters == good_filters );
@@ -81,7 +83,8 @@ BOOST_DATA_TEST_CASE(
 
 	text = "<=+"s + data + "+=>"s;
 	BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(txt::op_out, text) );
-	BOOST_TEST( result.value == good_result );
+	BOOST_TEST_CONTEXT( "text: " << text )
+		BOOST_TEST( result.value == good_result );
 	BOOST_TEST( result.open.trim );
 	BOOST_TEST( result.close.trim );
 	BOOST_TEST( result.filters == good_filters );

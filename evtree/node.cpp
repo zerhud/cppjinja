@@ -58,6 +58,7 @@ void cppjinja::evt::node::render_value(
 		void operator()(const ast::var_name& obj) { ctx.render_variable(obj); }
 		void operator()(const ast::function_call& obj) {
 			ctx.push_callstack(self, false);
+			ctx.call_params(obj.params);
 			ctx.render_function(obj);
 			ctx.pop_callstack(self);
 		}
