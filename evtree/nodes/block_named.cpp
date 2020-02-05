@@ -45,7 +45,7 @@ bool cppjinja::evtnodes::block_named::render_param(
 		if(p.name != pname[0]) continue;
 
 		auto params = ctx.call_params();
-		for(std::size_t inner = 0;outer<params.size();++outer)
+		for(std::size_t inner = 0;inner<params.size();++inner)
 		{
 			auto& cp = params[inner];
 			bool found = cp.name.has_value() && *cp.name == pname[0];
