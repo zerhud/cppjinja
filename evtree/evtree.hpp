@@ -26,10 +26,17 @@ class evtree : public evaluator {
 	std::vector<std::unique_ptr<evt::node>> nodes;
 
 	void tbuild_blocks(evt::node* p, ast::tmpl& t);
-	const evt::node* search_child(const ast::string_t& name, const evt::node* par) const ;
+	const evtnodes::callable* search_child(
+	          const ast::string_t& name
+	        , const evt::node* par
+	        ) const ;
 	bool is_tmpl(const evt::node& n) const ;
 public:
-	const evt::node* search(const ast::var_name& name, const evt::node* ctx=nullptr) const ;
+	const evtnodes::tmpl* search_tmpl(const ast::var_name& name) const ;
+	const evtnodes::callable* search(
+	          const ast::var_name& name
+	        , const evt::node* ctx=nullptr
+	        ) const ;
 	std::vector<const evt::node*> all_tree() const ;
 	std::vector<const evt::node*> children(const evt::node* selected) const ;
 

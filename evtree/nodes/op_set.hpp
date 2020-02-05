@@ -8,11 +8,11 @@
 
 #pragma once
 
-#include "../node.hpp"
+#include "callable.hpp"
 
 namespace cppjinja::evtnodes {
 
-class op_set : public evt::node {
+class op_set : public callable {
 	ast::op_set op;
 public:
 	op_set(ast::op_set o);
@@ -21,6 +21,10 @@ public:
 	ast::string_t name() const override ;
 	bool is_leaf() const override ;
 	void render( evt::context& ctx ) const override ;
+	bool render_param(
+	          evt::context& ctx
+	        , const ast::var_name& pname
+	        ) const override ;
 };
 
 } // namespace cppjinja::evtnodes

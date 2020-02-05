@@ -36,9 +36,25 @@ bool op_set::is_leaf() const
 
 void op_set::render( evt::context& ctx ) const
 {
-	const node* cur_node = ctx.current_node();
-	if(!cur_node || cur_node->name() != "op_out"sv) return;
+	(void) ctx;
+}
+
+bool op_set::render_param(
+          cppjinja::evt::context& ctx
+        , const cppjinja::ast::var_name& pname
+        ) const
+{
+	if(pname.empty()) throw std::runtime_error("var name is empty");
+	if(pname.back()!=op.name)
+	{
+		auto message = "var name is "s;
+		for(auto& n:pname) message += n + '.';
+		message.back() = ' ';
+		message += "but called "s + op.name;
+		throw std::runtime_error(message);
+	}
 
 	ctx.current_node(this);
 	render_value(ctx, op.value);
+	return true;
 }

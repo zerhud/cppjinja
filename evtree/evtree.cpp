@@ -126,14 +126,20 @@ void cppjinja::evtree::tbuild_blocks(cppjinja::evt::node* p, ast::tmpl& t)
 
 }
 
-const cppjinja::evt::node* cppjinja::evtree::search_child(
+const cppjinja::evtnodes::callable* cppjinja::evtree::search_child(
           const cppjinja::ast::string_t& name
         , const cppjinja::evt::node* par
         ) const
 {
 	for(auto& n:nodes)
+	{
 		if(n->name() == name && n->is_parent(par))
-			return n.get();
+		{
+			auto* cb = dynamic_cast<const evtnodes::callable*>(n.get());
+			if(cb) return cb;
+			throw std::runtime_error(name + " found, but the node is wrong");
+		}
+	}
 
 	auto ppars = par->parents();
 	for(auto&& p:ppars)
@@ -148,7 +154,17 @@ bool cppjinja::evtree::is_tmpl(const cppjinja::evt::node& n) const
 	return dynamic_cast<const evtnodes::tmpl*>(&n) != nullptr;
 }
 
-const cppjinja::evt::node* cppjinja::evtree::search(
+const cppjinja::evtnodes::tmpl* cppjinja::evtree::search_tmpl(
+        const cppjinja::ast::var_name& name) const
+{
+	if(name.size()!=1) return nullptr;
+	for(auto& n:nodes)
+		if(is_tmpl(*n) && n->name()==name[0])
+			return dynamic_cast<const evtnodes::tmpl*>(n.get());
+	return nullptr;
+}
+
+const cppjinja::evtnodes::callable* cppjinja::evtree::search(
           const cppjinja::ast::var_name& name
         , const cppjinja::evt::node* ctx
         ) const
@@ -163,7 +179,8 @@ const cppjinja::evt::node* cppjinja::evtree::search(
 		{
 			if(is_tmpl(*n) && n->name()==name[0])
 			{
-				if(name.size() == 1) return n.get();
+				if(name.size() == 1)
+					throw std::runtime_error(name[0] + " is a template"s);
 				return search_child(name[1], n.get());
 			}
 		}

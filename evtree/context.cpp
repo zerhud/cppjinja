@@ -66,8 +66,8 @@ void cppjinja::evt::context::render_variable(
 	auto* cb_cur = dynamic_cast<const evtnodes::callable*>(ctx_maker());
 	if(cb_cur && cb_cur->render_param(*this, var)) return;
 
-	auto inner_node = tree_->search(var, cur_node);
-	if(inner_node) inner_node->render(*this);
+	auto* inner_node = tree_->search(var, cur_node);
+	if(inner_node) inner_node->render_param(*this, var);
 	else out() << prov->render(var);
 }
 
