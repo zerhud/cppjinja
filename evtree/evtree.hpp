@@ -19,6 +19,7 @@
 #include "nodes/content.hpp"
 #include "nodes/op_out.hpp"
 #include "nodes/op_set.hpp"
+#include "nodes/block_if.hpp"
 
 namespace cppjinja {
 

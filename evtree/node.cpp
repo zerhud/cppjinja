@@ -41,6 +41,11 @@ bool cppjinja::evt::node::is_parent(const cppjinja::evt::node* n) const
 	return false;
 }
 
+bool cppjinja::evt::node::calculate(const ast::binary_op& op) const
+{
+	return false;
+}
+
 void cppjinja::evt::node::render_value(
           context& ctx
         , const cppjinja::ast::value_term& value

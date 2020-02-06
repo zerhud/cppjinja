@@ -84,6 +84,15 @@ static void insert_content(
 		{
 			create_node<evtnodes::content>(dest, def, obj.get().value);
 		},
+		[&dest,&def](ast::forward_ast<ast::block_if>& obj)
+		{
+			auto* tnode = create_node<evtnodes::block_if>
+					( dest
+					, def
+					, obj.get()
+					);
+			insert_content(dest, parent, obj.get(), tnode);
+		}
 		[](auto&)//[&def](auto& cnt)
 		{
 			//def.content.emplace_back(std::move(cnt));
