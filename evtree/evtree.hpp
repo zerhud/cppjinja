@@ -39,7 +39,11 @@ public:
 	        , const evt::node* ctx=nullptr
 	        ) const ;
 	std::vector<const evt::node*> all_tree() const ;
-	std::vector<const evt::node*> children(const evt::node* selected) const ;
+	std::vector<const evt::node*> children(
+	          const evt::node* selected
+	        , bool add_subs=false) const ;
+
+	void print_subtree(const evt::node* par=nullptr, std::string prefix="") const ;
 
 	evtree& add_tmpl(ast::tmpl& tmpl) override ;
 	void render(

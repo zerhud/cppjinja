@@ -7,6 +7,7 @@
  *************************************************************************/
 
 #include "block_if.hpp"
+#include "../evtree.hpp"
 
 using namespace std::literals;
 using namespace cppjinja::evtnodes;
@@ -45,5 +46,9 @@ bool block_if::render_param(
 
 void block_if::render(evt::context& ctx) const
 {
-	ctx.out() << "if";
+	ctx.current_node(this);
+	if(!calculate(block.condition)) return;
+
+	auto children = ctx.tree().children(this);
+	for(auto&& child:children) child->render(ctx);
 }

@@ -6,6 +6,7 @@
  * or <http://www.gnu.org/licenses/> for details
  *************************************************************************/
 
+#include <iostream>
 #include "evtree.hpp"
 #include "parser/helpers.hpp"
 
@@ -84,7 +85,7 @@ static void insert_content(
 		{
 			create_node<evtnodes::content>(dest, def, obj.get().value);
 		},
-		[&dest,&def](ast::forward_ast<ast::block_if>& obj)
+		[&dest,parent,&def](ast::forward_ast<ast::block_if>& obj)
 		{
 			auto* tnode = create_node<evtnodes::block_if>
 					( dest
@@ -92,7 +93,7 @@ static void insert_content(
 					, obj.get()
 					);
 			insert_content(dest, parent, obj.get(), tnode);
-		}
+		},
 		[](auto&)//[&def](auto& cnt)
 		{
 			//def.content.emplace_back(std::move(cnt));
@@ -235,14 +236,15 @@ std::vector<const cppjinja::evt::node*> cppjinja::evtree::all_tree() const
 }
 
 std::vector<const cppjinja::evt::node*> cppjinja::evtree::children(
-        const cppjinja::evt::node* selected
-        ) const
+          const cppjinja::evt::node* selected
+        , bool add_subs) const
 {
 	std::vector<const cppjinja::evt::node*> ret;
-	std::vector<const cppjinja::evt::node*> subs;
-
 	for(auto& n:nodes) if(n->is_parent(selected)) ret.emplace_back(n.get());
 
+	if(!add_subs) return ret;
+
+	std::vector<const cppjinja::evt::node*> subs;
 	for(auto& n:ret)
 	{
 		auto isubs = children(n);
@@ -253,6 +255,23 @@ std::vector<const cppjinja::evt::node*> cppjinja::evtree::children(
 
 	assert( std::find(std::begin(ret), std::end(ret), nullptr) == std::end(ret));
 	return ret;
+}
+
+void cppjinja::evtree::print_subtree(const cppjinja::evt::node* par, std::string prefix) const
+{
+	std::vector<const evt::node*> pars;
+	if(par!=nullptr) pars.emplace_back(par);
+	else for(auto& n:nodes) if(n->parents().empty()) pars.emplace_back(n.get());
+
+	for(auto& p:pars)
+	{
+		auto name = p->name();
+		if(name.empty()) name = "[empty]";
+		std::cout << prefix << name << std::endl;
+
+		for(auto&& c:children(p))
+			print_subtree(c, prefix + "\t");
+	}
 }
 
 void cppjinja::evtree::render(

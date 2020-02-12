@@ -95,8 +95,9 @@ using block_content = x3::variant
 
 	ctx.current_node(this);
 	ctx.push_context(this);
-	auto children = ctx.tree().children(this);
+	auto children = ctx.tree().children(this, true);
 	for(auto&& child:children) ctx.add_context(child);
+	children = ctx.tree().children(this, false);
 	for(auto&& child:children) child->render(ctx);
 	ctx.pop_context(this);
 }

@@ -206,5 +206,7 @@ BOOST_AUTO_TEST_CASE(simple_if)
 		BOOST_TEST(parse_single(pdata, *data) == "simple"sv );
 		pdata = "<% if 1 == 1 %>simple<% endif %>"sv;
 		BOOST_TEST(parse_single(pdata, *data) == "simple"sv );
+		pdata = "<% if 1 != 1 %>simple<% endif %>"sv;
+		BOOST_TEST(parse_single(pdata, *data) == ""sv );
 }
 BOOST_AUTO_TEST_SUITE_END() // binary_ops
