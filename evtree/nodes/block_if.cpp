@@ -55,7 +55,7 @@ std::optional<cppjinja::ast::value_term> block_if::param(
 void block_if::render(evt::context& ctx) const
 {
 	ctx.current_node(this);
-	if(!calculate(block.condition)) return;
+	if(!calculate(ctx, block.condition)) return;
 
 	auto children = ctx.tree().children(this);
 	for(auto&& child:children) child->render(ctx);

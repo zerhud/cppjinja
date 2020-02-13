@@ -10,6 +10,7 @@
 #include "parser/helpers.hpp"
 #include "evtree.hpp"
 #include "eval/ast.hpp"
+#include "helpers/binary_op.hpp"
 
 using namespace std::literals;
 
@@ -43,20 +44,15 @@ bool cppjinja::evt::node::is_parent(const cppjinja::evt::node* n) const
 	return false;
 }
 
-bool cppjinja::evt::node::calculate(const ast::binary_op& op) const
+bool cppjinja::evt::node::calculate(
+        context& ctx, const ast::binary_op& op) const
 {
-	if(op.op == ast::comparator::no)
-	{
-		// check left is true
-		return false;
-	}
-
-	struct {
-		const ast::value_term& left_val;
-		ast::comparator cmp;
-	} beval{op.left.get(), op.op} ;
-
-	return false;
+	evtnodes::binary_op_helper cmp(op.op);
+	east::value_term left = ctx.concreate_value(this, op.left);
+	east::value_term right = ctx.concreate_value(this, op.right);
+	return std::visit(cmp,
+	            (east::value_term_var&)left,
+	            (east::value_term_var&)right);
 }
 
 void cppjinja::evt::node::render_value(
@@ -91,7 +87,7 @@ void cppjinja::evt::node::render_value(
 			ctx.pop_callstack(self);
 		}
 		void operator()(const ast::binary_op& obj) {
-			ctx.out() << self->calculate(obj); }
+			ctx.out() << self->calculate(ctx, obj); }
 	};
 
 	renderer rnd(ctx, this);

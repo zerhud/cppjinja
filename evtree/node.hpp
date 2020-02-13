@@ -43,7 +43,7 @@ public:
 	std::vector<const node*> parents() const ;
 	bool is_parent(const node* n) const ;
 protected:
-	bool calculate(const ast::binary_op& op) const ;
+        bool calculate(evt::context& ctx, const ast::binary_op& op) const ;
 	void render_value(
 	          evt::context& ctx
 	        , const ast::value_term& value
