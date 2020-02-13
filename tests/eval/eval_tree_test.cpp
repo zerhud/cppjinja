@@ -120,8 +120,8 @@ BOOST_AUTO_TEST_CASE(extends)
 	BOOST_TEST( child->name() == "child"s );
 	BOOST_TEST( child->is_parent(base) );
 
-	auto base_blocks = tree.children(base);
-	BOOST_TEST_REQUIRE( base_blocks.size() == 11,
+	auto base_blocks = tree.children(base, true);
+	BOOST_TEST_REQUIRE( base_blocks.size() == 8,
 	                       "block children is main blocks, template child and "
 	                    << "all blocks, but it's count is "
 	                    << base_blocks.size()
