@@ -17,8 +17,10 @@ class data_provider {
 public:
 	virtual ~data_provider() noexcept =default ;
 
+	virtual east::value_term value(const east::var_name& val) const =0 ;
+	virtual east::value_term value(const east::function_call& val) const =0 ;
+
 	virtual east::string_t render(const east::var_name& val) const =0 ;
-	virtual east::string_t render(const east::function_call& val) const =0 ;
 	virtual east::string_t render(
 	          const east::function_call& val
 	        , const east::string_t& base

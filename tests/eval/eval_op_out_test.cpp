@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(filter)
 BOOST_AUTO_TEST_CASE(function_from_provider)
 {
 	auto data = std::make_unique<mocks::data_provider>();
-	MOCK_EXPECT(data->render_function_call)
+	MOCK_EXPECT(data->value_function_call)
 	        .once()
 	        .calls([](const east::function_call& c){
 		BOOST_TEST( c.ref.size() == 1 );

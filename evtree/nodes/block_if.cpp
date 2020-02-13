@@ -44,6 +44,14 @@ bool block_if::render_param(
 	return false;
 }
 
+std::optional<cppjinja::ast::value_term> block_if::param(
+        cppjinja::evt::context& ctx, const cppjinja::ast::var_name& name) const
+{
+	(void)ctx;
+	(void)name;
+	return std::nullopt;
+}
+
 void block_if::render(evt::context& ctx) const
 {
 	ctx.current_node(this);

@@ -24,6 +24,17 @@ std::string cppjinja::evt::context::reset_filtering_content()
 	return cnt;
 }
 
+const cppjinja::evtnodes::callable* cppjinja::evt::context::cb_ctx_maker() const
+{
+	return dynamic_cast<const evtnodes::callable*>(ctx_maker());
+}
+
+const cppjinja::evtnodes::callable* cppjinja::evt::context::search_in_tree(
+        const ast::var_name& n) const
+{
+	return tree_->search(n, cur_node);
+}
+
 cppjinja::evt::context::context(
           const data_provider* p
         , const evtree* t
@@ -49,6 +60,54 @@ const cppjinja::evtree& cppjinja::evt::context::tree() const
 	return *tree_;
 }
 
+cppjinja::east::value_term cppjinja::evt::context::concreate_value(
+        const node* asker, const cppjinja::ast::value_term& val)
+{
+	struct {
+		context* self;
+		const node* asker;
+
+		east::value_term operator()(const double& obj) { return obj; }
+		east::value_term operator()(const ast::string_t& obj) { return obj; }
+		east::value_term operator()(const ast::tuple_v&) { return false; }
+		east::value_term operator()(const ast::array_v& obj)
+		{
+			east::array_v ret;
+			for(auto&& src:obj.fields)
+			{
+				auto cv = self->concreate_value(asker, src.get());
+				auto val = std::make_unique<east::value_term>(std::move(cv));
+				ret.items.emplace_back(std::move(val));
+			}
+
+			return ret;
+		}
+		east::value_term operator()(const ast::var_name& obj)
+		{
+			auto* val = self->cb_ctx_maker();
+			if(!val) val = self->search_in_tree(obj);
+			if(val) {
+				auto p = val->param(*self, obj);
+				if(p) return self->concreate_value(asker, *p);
+			}
+			return self->prov->value(details::east_cvt::cvt(obj));
+		}
+		east::value_term operator()(const ast::function_call& obj)
+		{
+			east::function_call call;
+			call.ref = details::east_cvt::cvt(obj.ref);
+			for(auto& src:obj.params)
+				call.params.emplace_back(east::function_parameter{
+				            src.name,
+				            self->concreate_value(asker, src.value.get())});
+			return self->prov->value(call);
+		}
+		east::value_term operator()(const ast::binary_op&) { return false; }
+	} rnd{this, asker};
+
+	return boost::apply_visitor(rnd, val.var);
+}
+
 void cppjinja::evt::context::render_filter(
         const cppjinja::ast::var_name& var)
 {
@@ -58,25 +117,6 @@ void cppjinja::evt::context::render_filter(
 	auto call = details::east_cvt::cvt(icall);
 	auto base = reset_filtering_content();
 	out() << prov->render(std::move(call), base);
-}
-
-void cppjinja::evt::context::render_variable(
-        const cppjinja::ast::var_name& var)
-{
-	auto* cb_cur = dynamic_cast<const evtnodes::callable*>(ctx_maker());
-	if(cb_cur && cb_cur->render_param(*this, var)) return;
-
-	auto* inner_node = tree_->search(var, cur_node);
-	if(inner_node) inner_node->render_param(*this, var);
-	else out() << prov->render(var);
-}
-
-void cppjinja::evt::context::render_function(
-        const cppjinja::ast::function_call& var)
-{
-	auto inner_node = tree_->search(var.ref, current_node());
-	if(inner_node) inner_node->render(*this);
-	else out() << prov->render(details::east_cvt::cvt(var));
 }
 
 void cppjinja::evt::context::pop_context(const node* m)

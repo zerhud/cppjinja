@@ -8,21 +8,23 @@
 
 #pragma once
 
-#include "../node.hpp"
+#include "eval/ast.hpp"
+#include "parser/ast/common.hpp"
 
 namespace cppjinja::evtnodes {
 
-class callable : public evt::node {
+class binary_op_helper {
+	const ast::value_term& left_;
+	ast::comparator cmp_;
 public:
-	virtual bool render_param(
-			  evt::context& ctx
-			, const ast::var_name& pname
-			) const =0 ;
+	binary_op_helper(const ast::value_term& left, ast::comparator op);
 
-	virtual std::optional<ast::value_term> param(
-	          evt::context& ctx
-	        , const ast::var_name& name) const =0 ;
+	bool operator()(const bool& v) const ;
+	bool operator()(const int& v) const =delete ;
+	bool operator()(const double& v) const ;
+	bool operator()(const east::string_t& v) const ;
+	bool operator()(const east::array_v& v) const ;
+	bool operator()(const east::map_v& v) const ;
 };
 
 } // namespace cppjinja::evtnodes
-

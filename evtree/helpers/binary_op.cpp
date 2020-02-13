@@ -6,23 +6,4 @@
  * or <http://www.gnu.org/licenses/> for details
  *************************************************************************/
 
-#pragma once
-
-#include "../node.hpp"
-
-namespace cppjinja::evtnodes {
-
-class callable : public evt::node {
-public:
-	virtual bool render_param(
-			  evt::context& ctx
-			, const ast::var_name& pname
-			) const =0 ;
-
-	virtual std::optional<ast::value_term> param(
-	          evt::context& ctx
-	        , const ast::var_name& name) const =0 ;
-};
-
-} // namespace cppjinja::evtnodes
-
+#include "binary_op.hpp"

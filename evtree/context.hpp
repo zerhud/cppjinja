@@ -14,6 +14,10 @@ namespace cppjinja {
 
 class evtree;
 
+namespace evtnodes {
+class callable;
+} // namespace evtnodes
+
 namespace evt {
 
 class node;
@@ -43,6 +47,9 @@ class context {
 
 	bool is_filtering() const ;
 	std::string reset_filtering_content() ;
+
+	const evtnodes::callable* cb_ctx_maker()const;
+	const evtnodes::callable* search_in_tree(const ast::var_name& n)const;
 public:
 	context(const data_provider* p, const evtree* t, std::ostream& out);
 
@@ -51,9 +58,11 @@ public:
 	const data_provider& data() const ;
 	const evtree& tree() const ;
 
+	east::value_term concreate_value(
+	        const node* asker,
+	        const ast::value_term& val) ;
+
 	void render_filter(const ast::var_name& var) ;
-	void render_variable(const ast::var_name& var) ;
-	void render_function(const ast::function_call& var);
 
 	void pop_context(const node* m);
 	void push_context(const node* m);

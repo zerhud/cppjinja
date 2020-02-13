@@ -38,31 +38,35 @@ bool cppjinja::evtnodes::block_named::render_param(
 		, const ast::var_name& pname
 		) const
 {
-	if(pname.size()!=1) return false;
+	auto found_param = param(ctx, pname);
+	if(found_param) render_value(ctx, *found_param);
+	return found_param.has_value();
+}
+
+std::optional<cppjinja::ast::value_term> cppjinja::evtnodes::block_named::param(
+        evt::context& ctx,
+        const cppjinja::ast::var_name& name) const
+{
+	if(name.size()!=1) return std::nullopt;
 	for(std::size_t outer = 0;outer<block.params.size();++outer)
 	{
 		auto& p = block.params[outer];
-		if(p.name != pname[0]) continue;
+		if(p.name != name[0]) continue;
 
 		auto params = ctx.call_params();
 		for(std::size_t inner = 0;inner<params.size();++inner)
 		{
 			auto& cp = params[inner];
-			bool found = cp.name.has_value() && *cp.name == pname[0];
+			bool found = cp.name.has_value() && *cp.name == name[0];
 			if(!found && !cp.name) found = outer == inner;
-			if(found)
-			{
-				render_value(ctx, cp.value.get());
-				return true;
-			}
+			if(found) return cp.value.get();
 		}
 
-		if(p.value) render_value(ctx, *p.value);
+		if(p.value) return p.value;
 		else throw std::runtime_error("requried parameter not specified");
-		return true;
 	}
 
-	return false;
+	return std::nullopt;
 }
 
 void cppjinja::evtnodes::block_named::render(evt::context& ctx) const

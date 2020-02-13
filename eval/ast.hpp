@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <map>
+#include <memory>
 #include <string>
 #include <vector>
 #include <variant>
@@ -18,11 +20,18 @@ namespace cppjinja::east {
 typedef std::string string_t;
 
 struct value_term;
-struct tuple_v { std::vector<std::reference_wrapper<value_term>> items; };
-struct array_v { std::vector<std::reference_wrapper<value_term>> items; };
+struct array_v { std::vector<std::unique_ptr<value_term>> items; };
+struct map_v {
+	std::map<std::variant<double, string_t>, std::unique_ptr<value_term>> items;
+};
 
 using var_name = std::vector<string_t>;
-using value_term_var = std::variant<double, string_t, tuple_v, array_v>;
+using value_term_var = std::variant<
+  double
+, string_t
+, array_v
+, map_v
+>;
 
 struct value_term : value_term_var
 {

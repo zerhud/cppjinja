@@ -44,17 +44,26 @@ bool op_set::render_param(
         , const cppjinja::ast::var_name& pname
         ) const
 {
-	if(pname.empty()) throw std::runtime_error("var name is empty");
-	if(pname.back()!=op.name)
+	render_value(ctx, param(ctx, pname).value());
+	return true;
+}
+
+std::optional<cppjinja::ast::value_term> op_set::param(
+          cppjinja::evt::context& ctx
+        , const cppjinja::ast::var_name& name
+        ) const
+{
+	(void) ctx; //TODO: why ctx unused?
+
+	if(name.empty()) throw std::runtime_error("var name is empty");
+	if(name.back()!=op.name)
 	{
 		auto message = "var name is "s;
-		for(auto& n:pname) message += n + '.';
+		for(auto& n:name) message += n + '.';
 		message.back() = ' ';
 		message += "but called "s + op.name;
 		throw std::runtime_error(message);
 	}
 
-	ctx.current_node(this);
-	render_value(ctx, op.value);
-	return true;
+	return op.value;
 }

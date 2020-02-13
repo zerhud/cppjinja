@@ -8,6 +8,8 @@
 
 #include "node.hpp"
 #include "parser/helpers.hpp"
+#include "evtree.hpp"
+#include "eval/ast.hpp"
 
 using namespace std::literals;
 
@@ -43,6 +45,17 @@ bool cppjinja::evt::node::is_parent(const cppjinja::evt::node* n) const
 
 bool cppjinja::evt::node::calculate(const ast::binary_op& op) const
 {
+	if(op.op == ast::comparator::no)
+	{
+		// check left is true
+		return false;
+	}
+
+	struct {
+		const ast::value_term& left_val;
+		ast::comparator cmp;
+	} beval{op.left.get(), op.op} ;
+
 	return false;
 }
 
@@ -60,16 +73,45 @@ void cppjinja::evt::node::render_value(
 		void operator()(const ast::string_t& obj) { ctx.out() << obj; }
 		void operator()(const ast::tuple_v&) { }
 		void operator()(const ast::array_v&) { }
-		void operator()(const ast::var_name& obj) { ctx.render_variable(obj); }
+		void operator()(const ast::var_name& obj) {
+			auto val = ctx.concreate_value(self, ast::value_term{obj});
+			self->render_value(ctx, val);
+		}
 		void operator()(const ast::function_call& obj) {
+			auto* node = ctx.tree().search(obj.ref, self);
+			if(!node) {
+				auto cv = ctx.concreate_value(self, ast::value_term{obj});
+				self->render_value(ctx, cv);
+				return;
+			}
+
 			ctx.push_callstack(self, false);
 			ctx.call_params(obj.params);
-			ctx.render_function(obj);
+			node->render(ctx);
 			ctx.pop_callstack(self);
 		}
-		void operator()(const ast::binary_op&) { ctx.out() << "binary"; }
+		void operator()(const ast::binary_op& obj) {
+			ctx.out() << self->calculate(obj); }
 	};
 
 	renderer rnd(ctx, this);
 	boost::apply_visitor(rnd, value.var);
+}
+
+
+void cppjinja::evt::node::render_value(
+          context& ctx
+        , const cppjinja::east::value_term& value
+        ) const
+{
+	struct {
+		context& ctx;
+		void operator()(const double& v) { ctx.out() << v ; }
+		void operator()(const east::string_t& v) { ctx.out() << v; }
+		void operator()(const east::array_v&) {}
+		void operator()(const east::map_v&) {}
+	} rnd{ctx};
+
+	const east::value_term_var& var_val = value;
+	std::visit(rnd, var_val);
 }
