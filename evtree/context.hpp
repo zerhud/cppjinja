@@ -62,8 +62,6 @@ public:
 	void pop_context(const node* m);
 	void push_context(const node* m);
 	void add_context(const node* n);
-	std::vector<const node*> ctx_all() const;
-	const node* ctx_last() const ;
 	void current_node(const node* n);
 	const node* current_node() const ;
 	const node* ctx_maker() const ;

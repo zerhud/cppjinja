@@ -16,6 +16,7 @@ BOOST_SPIRIT_INSTANTIATE( decltype(block_for),         iterator_type, context_ty
 BOOST_SPIRIT_INSTANTIATE( decltype(block_raw),         iterator_type, context_type )
 BOOST_SPIRIT_INSTANTIATE( decltype(block_set),         iterator_type, context_type )
 BOOST_SPIRIT_INSTANTIATE( decltype(block_call),        iterator_type, context_type )
+BOOST_SPIRIT_INSTANTIATE( decltype(else_thread),       iterator_type, context_type )
 BOOST_SPIRIT_INSTANTIATE( decltype(block_macro),       iterator_type, context_type )
 BOOST_SPIRIT_INSTANTIATE( decltype(block_named),       iterator_type, context_type )
 BOOST_SPIRIT_INSTANTIATE( decltype(block_content),     iterator_type, context_type )

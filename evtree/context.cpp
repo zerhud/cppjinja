@@ -144,19 +144,6 @@ void cppjinja::evt::context::add_context(const evt::node* n)
 	ctx.back().ctx.emplace_back(n);
 }
 
-std::vector<const cppjinja::evt::node*> cppjinja::evt::context::ctx_all() const
-{
-	assert( !ctx.empty() );
-	return ctx.back().ctx;
-}
-
-const cppjinja::evt::node* cppjinja::evt::context::ctx_last() const
-{
-	assert( !ctx.empty() );
-	if(ctx.back().ctx.empty()) return nullptr;
-	return ctx.back().ctx.back();
-}
-
 void cppjinja::evt::context::current_node(const cppjinja::evt::node* n)
 {
 	/*

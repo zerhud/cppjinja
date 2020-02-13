@@ -54,10 +54,18 @@ struct block_raw : block
 	string_t value;
 };
 
+struct else_thread
+{
+	block_term_start left_open;
+	block_term_end left_close;
+	std::vector<block_content> content;
+};
+
 struct block_if : block
 {
 	binary_op condition;
 	std::vector<block_content> content;
+	std::optional<else_thread> else_block;
 };
 
 struct block_for : block

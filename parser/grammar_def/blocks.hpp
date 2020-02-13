@@ -43,9 +43,15 @@ namespace cppjinja::text {
 
 	const auto block_if_def =
 		   block_term_start >> omit[lit("if")] >> binary_op >> block_term_end
-		>> *block_content
+		>> *block_content >> -else_thread
 		>> block_term_start >> lit("endif") >> block_term_end
 		;
+
+	const auto else_thread_def =
+		   block_term_start
+		>> omit[lit("else")]
+		>> block_term_end
+		>> *block_content ;
 
 	const auto block_for_def =
 		   block_term_start
@@ -100,11 +106,12 @@ namespace cppjinja::text {
 	class block_raw_class         : x3::annotate_on_success {};
 	class block_set_class         : x3::annotate_on_success {};
 	class block_call_class        : x3::annotate_on_success {};
+	class else_thread_class       : x3::annotate_on_success {};
 	class block_macro_class       : x3::annotate_on_success {};
 	class block_named_class       : x3::annotate_on_success {};
 	class block_filtered_class    : x3::annotate_on_success {};
 	class block_raw_text_class    : x3::annotate_on_success {};
-	class call_parameter_calss   : x3::annotate_on_success {};
+	class call_parameter_calss    : x3::annotate_on_success {};
 	class block_free_text_class   : x3::annotate_on_success {};
 	class macro_parameter_calss   : x3::annotate_on_success {};
 	class block_content_vec_class : x3::annotate_on_success {};
@@ -114,6 +121,7 @@ namespace cppjinja::text {
 	BOOST_SPIRIT_DEFINE( block_raw )
 	BOOST_SPIRIT_DEFINE( block_set )
 	BOOST_SPIRIT_DEFINE( block_call )
+	BOOST_SPIRIT_DEFINE( else_thread )
 	BOOST_SPIRIT_DEFINE( block_macro )
 	BOOST_SPIRIT_DEFINE( block_named )
 	BOOST_SPIRIT_DEFINE( block_content )
