@@ -48,8 +48,8 @@ bool cppjinja::evt::node::calculate(
         context& ctx, const ast::binary_op& op) const
 {
 	evtnodes::binary_op_helper cmp(op.op);
-	east::value_term left = ctx.concreate_value(this, op.left);
-	east::value_term right = ctx.concreate_value(this, op.right);
+	east::value_term left = ctx.concreate_value(op.left);
+	east::value_term right = ctx.concreate_value(op.right);
 	return std::visit(cmp,
 	            (east::value_term_var&)left,
 	            (east::value_term_var&)right);
@@ -70,13 +70,13 @@ void cppjinja::evt::node::render_value(
 		void operator()(const ast::tuple_v&) { }
 		void operator()(const ast::array_v&) { }
 		void operator()(const ast::var_name& obj) {
-			auto val = ctx.concreate_value(self, ast::value_term{obj});
+			auto val = ctx.concreate_value(ast::value_term{obj});
 			self->render_value(ctx, val);
 		}
 		void operator()(const ast::function_call& obj) {
 			auto* node = ctx.tree().search(obj.ref, self);
 			if(!node) {
-				auto cv = ctx.concreate_value(self, ast::value_term{obj});
+				auto cv = ctx.concreate_value(ast::value_term{obj});
 				self->render_value(ctx, cv);
 				return;
 			}

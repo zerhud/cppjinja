@@ -51,11 +51,10 @@ const cppjinja::evtree& cppjinja::evt::context::tree() const
 }
 
 cppjinja::east::value_term cppjinja::evt::context::concreate_value(
-        const node* asker, const cppjinja::ast::value_term& val)
+        const cppjinja::ast::value_term& val)
 {
 	struct {
 		context* self;
-		const node* asker;
 
 		east::value_term operator()(const double& obj) { return obj; }
 		east::value_term operator()(const ast::string_t& obj) { return obj; }
@@ -65,7 +64,7 @@ cppjinja::east::value_term cppjinja::evt::context::concreate_value(
 			east::array_v ret;
 			for(auto&& src:obj.fields)
 			{
-				auto cv = self->concreate_value(asker, src.get());
+				auto cv = self->concreate_value(src.get());
 				auto val = std::make_unique<east::value_term>(std::move(cv));
 				ret.items.emplace_back(std::move(val));
 			}
@@ -79,7 +78,7 @@ cppjinja::east::value_term cppjinja::evt::context::concreate_value(
 			if(!val || !(par=val->param(*self, obj)))
 				val = self->search_in_tree(obj);
 			if(val && (par = val->param(*self, obj)))
-				return self->concreate_value(asker, *par);
+				return self->concreate_value(*par);
 			return self->prov->value(east_cvt::cvt(obj));
 		}
 		east::value_term operator()(const ast::function_call& obj)
@@ -89,11 +88,11 @@ cppjinja::east::value_term cppjinja::evt::context::concreate_value(
 			for(auto& src:obj.params)
 				call.params.emplace_back(east::function_parameter{
 				            src.name,
-				            self->concreate_value(asker, src.value.get())});
+				            self->concreate_value(src.value.get())});
 			return self->prov->value(call);
 		}
 		east::value_term operator()(const ast::binary_op&) { return false; }
-	} rnd{this, asker};
+	} rnd{this};
 
 	return boost::apply_visitor(rnd, val.var);
 }
@@ -115,7 +114,7 @@ cppjinja::east::value_term cppjinja::evt::context::filter(
 				call.params.emplace_back(
 				            east::function_parameter{
 				                p.name,
-				                concreate_value(nullptr, p.value.get())
+				                concreate_value(p.value.get())
 				            });
 			return prov->filter(call, base);
 		},

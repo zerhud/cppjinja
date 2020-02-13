@@ -53,7 +53,7 @@ void cppjinja::evtnodes::op_out::render(cppjinja::evt::context& ctx) const
 				base = ctx.filter(base, ast::value_term{fnc});
 			}
 
-		} caller { ctx, ctx.concreate_value(this, op.value) };
+		} caller { ctx, ctx.concreate_value(op.value) };
 
 
 		for(auto& filter:op.filters)
