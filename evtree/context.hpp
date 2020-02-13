@@ -43,10 +43,6 @@ class context {
 	const evtree* tree_;
 
 	std::ostream& outstream;
-	std::optional<std::stringstream> filters_out;
-
-	bool is_filtering() const ;
-	std::string reset_filtering_content() ;
 
 	const evtnodes::callable* cb_ctx_maker()const;
 	const evtnodes::callable* search_in_tree(const ast::var_name& n)const;
@@ -76,7 +72,7 @@ public:
 
 	const node* caller() const ;
 	void pop_callstack(const node* n);
-	void push_callstack(const node* n, bool is_filtering);
+	void push_callstack(const node* n);
 	std::vector<ast::function_call_parameter> call_params() const ;
 	void call_params(std::vector<ast::function_call_parameter> params);
 };

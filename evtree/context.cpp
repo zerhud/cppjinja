@@ -14,18 +14,6 @@
 using namespace std::literals;
 using namespace cppjinja::details;
 
-bool cppjinja::evt::context::is_filtering() const
-{
-	return filters_out.has_value();
-}
-
-std::string cppjinja::evt::context::reset_filtering_content()
-{
-	auto cnt = filters_out->str();
-	filters_out->str(std::string());
-	return cnt;
-}
-
 const cppjinja::evtnodes::callable* cppjinja::evt::context::cb_ctx_maker() const
 {
 	return dynamic_cast<const evtnodes::callable*>(ctx_maker());
@@ -48,7 +36,7 @@ cppjinja::evt::context::context(
 
 std::ostream& cppjinja::evt::context::out()
 {
-	return is_filtering() ? *filters_out : outstream;
+	return outstream;
 }
 
 const cppjinja::data_provider& cppjinja::evt::context::data() const
@@ -217,21 +205,11 @@ void cppjinja::evt::context::pop_callstack(const cppjinja::evt::node* n)
 	assert( !callstack.empty() );
 	assert( callstack.back().caller == n );
 
-	if(is_filtering())
-	{
-		outstream << filters_out->str();
-		filters_out.reset();
-	}
-
 	callstack.pop_back();
 }
 
-void cppjinja::evt::context::push_callstack(
-          const cppjinja::evt::node* n
-        , bool is_filtering
-        )
+void cppjinja::evt::context::push_callstack(const cppjinja::evt::node* n)
 {
-	if(is_filtering) filters_out.emplace(std::string());
 	callstack.push_back(callstack_frame{n, {}});
 }
 

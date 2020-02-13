@@ -85,7 +85,7 @@ void cppjinja::evt::node::render_value(
 				return;
 			}
 
-			ctx.push_callstack(self, false);
+			ctx.push_callstack(self);
 			ctx.call_params(obj.params);
 			node->render(ctx);
 			ctx.pop_callstack(self);

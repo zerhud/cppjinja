@@ -33,7 +33,7 @@ void cppjinja::evtnodes::tmpl::render(evt::context& ctx) const
 {
 	ctx.current_node(this);
 	ctx.push_context(this);
-	ctx.push_callstack(this, false);
+	ctx.push_callstack(this);
 
 	auto children = ctx.tree().children(this);
 	for(auto&& child:children) ctx.add_context(child);
