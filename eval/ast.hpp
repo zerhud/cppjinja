@@ -20,8 +20,22 @@ namespace cppjinja::east {
 typedef std::string string_t;
 
 struct value_term;
-struct array_v { std::vector<std::unique_ptr<value_term>> items; };
-struct map_v {
+struct array_v final {
+	array_v(array_v&&) noexcept =default ;
+	array_v& operator = (array_v&&) noexcept =default ;
+	array_v(const array_v& other);
+	array_v& operator = (const array_v& other);
+	array_v() noexcept =default ;
+	~array_v() noexcept =default ;
+	std::vector<std::unique_ptr<value_term>> items;
+};
+struct map_v final {
+	map_v(map_v&&) noexcept =default ;
+	map_v& operator = (map_v&&) noexcept =default ;
+	map_v(const map_v& other);
+	map_v& operator = (const map_v& other);
+	map_v() noexcept =default ;
+	~map_v() noexcept =default ;
 	std::map<std::variant<double, string_t>, std::unique_ptr<value_term>> items;
 };
 

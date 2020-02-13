@@ -9,8 +9,10 @@
 #include "context.hpp"
 #include "evtree.hpp"
 #include "eval/ast_cvt.hpp"
+#include "parser/helpers.hpp"
 
 using namespace std::literals;
+using namespace cppjinja::details;
 
 bool cppjinja::evt::context::is_filtering() const
 {
@@ -84,18 +86,18 @@ cppjinja::east::value_term cppjinja::evt::context::concreate_value(
 		}
 		east::value_term operator()(const ast::var_name& obj)
 		{
+			std::optional<ast::value_term> par;
 			auto* val = self->cb_ctx_maker();
-			if(!val) val = self->search_in_tree(obj);
-			if(val) {
-				auto p = val->param(*self, obj);
-				if(p) return self->concreate_value(asker, *p);
-			}
-			return self->prov->value(details::east_cvt::cvt(obj));
+			if(!val || !(par=val->param(*self, obj)))
+				val = self->search_in_tree(obj);
+			if(val && (par = val->param(*self, obj)))
+				return self->concreate_value(asker, *par);
+			return self->prov->value(east_cvt::cvt(obj));
 		}
 		east::value_term operator()(const ast::function_call& obj)
 		{
 			east::function_call call;
-			call.ref = details::east_cvt::cvt(obj.ref);
+			call.ref = east_cvt::cvt(obj.ref);
 			for(auto& src:obj.params)
 				call.params.emplace_back(east::function_parameter{
 				            src.name,
@@ -108,15 +110,33 @@ cppjinja::east::value_term cppjinja::evt::context::concreate_value(
 	return boost::apply_visitor(rnd, val.var);
 }
 
-void cppjinja::evt::context::render_filter(
-        const cppjinja::ast::var_name& var)
+cppjinja::east::value_term cppjinja::evt::context::filter(
+        const cppjinja::east::value_term& base,
+        const cppjinja::ast::value_term& val)
 {
-	assert(is_filtering());
+	overloaded vget{
+		[this, &base](const ast::var_name& obj){
+			east::function_call call;
+			call.ref = east_cvt::cvt(obj);
+			return prov->filter(call, base);
+		},
+		[this, &base](const ast::function_call& obj){
+			east::function_call call;
+			call.ref = east_cvt::cvt(obj.ref);
+			for(auto& p:obj.params)
+				call.params.emplace_back(
+				            east::function_parameter{
+				                p.name,
+				                concreate_value(nullptr, p.value.get())
+				            });
+			return prov->filter(call, base);
+		},
+		[](const auto&) -> east::value_term {
+			throw std::logic_error("filter called with unexpected value");
+		}
+	};
 
-	ast::function_call icall{var, call_params()};
-	auto call = details::east_cvt::cvt(icall);
-	auto base = reset_filtering_content();
-	out() << prov->render(std::move(call), base);
+	return boost::apply_visitor(vget, val.var);
 }
 
 void cppjinja::evt::context::pop_context(const node* m)

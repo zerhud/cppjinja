@@ -83,10 +83,10 @@ BOOST_AUTO_TEST_SUITE(var_name)
 	BOOST_AUTO_TEST_CASE(not_setted)
 	{
 		auto data = std::make_unique<mocks::data_provider>();
-		MOCK_EXPECT(data->render_var_name)
+		MOCK_EXPECT(data->value_var_name)
 		        .once()
-		        .with(ast::var_name{"data"s})
-		        .returns("test")
+		        .with(east::var_name{"data"s})
+		        .returns(east::value_term{"test"s})
 		        ;
 		BOOST_TEST(parse_single("<= data =>"sv, *data) == "test"sv );
 	}
@@ -101,10 +101,10 @@ BOOST_AUTO_TEST_SUITE(var_name)
 	BOOST_AUTO_TEST_CASE(only_single_name_search_allowed)
 	{
 		auto data = std::make_unique<mocks::data_provider>();
-		MOCK_EXPECT(data->render_var_name)
+		MOCK_EXPECT(data->value_var_name)
 		        .once()
-		        .with(ast::var_name{"a"s,"d"s})
-		        .returns("up")
+		        .with(east::var_name{"a"s,"d"s})
+		        .returns(east::value_term{"up"})
 		        ;
 		auto pdata = "<% set d='test' %><= a.d =>"sv;
 		BOOST_TEST(parse_single(pdata, *data) == "up"sv );
@@ -125,18 +125,19 @@ BOOST_AUTO_TEST_CASE(filter)
 	call.ref = ast::var_name{"filter"s};
 
 	auto data = std::make_unique<mocks::data_provider>();
-	MOCK_EXPECT(data->render_var_name)
+	MOCK_EXPECT(data->value_var_name)
 	        .once()
-	        .with(ast::var_name{"a"s})
-	        .returns("not ok")
+	        .with(east::var_name{"a"s})
+	        .returns(east::value_term{"not ok"})
 	        ;
-	MOCK_EXPECT(data->render_filter_call)
+	MOCK_EXPECT(data->filter)
 	        .once()
-	        .calls([](const east::function_call& c, const std::string& b){
+	        .calls([](const east::function_call& c, const east::value_term& b){
 				BOOST_TEST( c.ref.size() == 1 );
 				BOOST_TEST( c.ref[0] == "filter"s );
 				BOOST_TEST( c.params.empty() );
-				BOOST_TEST( b == "not ok"s );
+				BOOST_TEST_REQUIRE( std::holds_alternative<east::string_t>(b) );
+				BOOST_TEST( std::get<east::string_t>(b) == "not ok"s );
 				return "ok"s;
 			});
 

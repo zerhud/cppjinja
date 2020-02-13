@@ -59,10 +59,11 @@ public:
 	const evtree& tree() const ;
 
 	east::value_term concreate_value(
-	        const node* asker,
+	        const node* asker, //TODO: remove asker
 	        const ast::value_term& val) ;
-
-	void render_filter(const ast::var_name& var) ;
+	east::value_term filter(
+	        const east::value_term& base,
+	        const ast::value_term& val);
 
 	void pop_context(const node* m);
 	void push_context(const node* m);

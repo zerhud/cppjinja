@@ -42,23 +42,23 @@ void cppjinja::evtnodes::op_out::render(cppjinja::evt::context& ctx) const
 	else {
 		struct {
 			evt::context& ctx;
+			east::value_term base;
 			void operator()(const ast::var_name& var)
 			{
-				ctx.render_filter(var);
+				base = ctx.filter(base, ast::value_term{var});
 			}
 			void operator()(const ast::function_call& fnc)
 			{
 				ctx.call_params(fnc.params);
-				ctx.render_filter(fnc.ref);
+				base = ctx.filter(base, ast::value_term{fnc});
 			}
 
-		} caller { ctx };
+		} caller { ctx, ctx.concreate_value(this, op.value) };
 
 
-		ctx.push_callstack(this, true);
-		render_value(ctx, op.value);
 		for(auto& filter:op.filters)
 			boost::apply_visitor(caller, filter.var);
-		ctx.pop_callstack(this);
+
+		render_value(ctx, caller.base);
 	}
 }
