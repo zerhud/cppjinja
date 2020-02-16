@@ -86,6 +86,14 @@ BOOST_DATA_TEST_CASE(
 		BOOST_REQUIRE_THROW( result = cppjinja::text::parse(txt::block_if, text), std::exception );
 	}
 }
+BOOST_AUTO_TEST_CASE(else_thread)
+{
+	ast::block_if result;
+	std::string text = "<% if 1==2 %>never seen<% else %>ok<% endif %>"s;
+	BOOST_REQUIRE_NO_THROW( result = cppjinja::text::parse(txt::block_if, text) );
+	BOOST_TEST_REQUIRE( result.else_block.has_value() );
+	BOOST_TEST_REQUIRE( result.else_block->content.size() == 1 );
+}
 BOOST_AUTO_TEST_SUITE_END() // block_if
 
 BOOST_AUTO_TEST_SUITE(inner)
