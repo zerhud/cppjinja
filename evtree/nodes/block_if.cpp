@@ -34,24 +34,6 @@ bool block_if::is_leaf() const
 	return false;
 }
 
-bool block_if::render_param(
-		  evt::context& ctx
-		, const ast::var_name& pname
-		) const
-{
-	(void) ctx;
-	(void) pname;
-	return false;
-}
-
-std::optional<cppjinja::ast::value_term> block_if::param(
-        cppjinja::evt::context& ctx, const cppjinja::ast::var_name& name) const
-{
-	(void)ctx;
-	(void)name;
-	return std::nullopt;
-}
-
 void block_if::render(evt::context& ctx) const
 {
 	ctx.current_node(this);
