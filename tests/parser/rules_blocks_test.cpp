@@ -60,6 +60,7 @@ BOOST_DATA_TEST_CASE(
 	std::string text = "<%"s + left + space + "if "s + condition + "%>"s + data + "<%"s + space + "endif" + right + "%>"s;
 	BOOST_TEST_CONTEXT("TEXT=" << text) {
 		BOOST_REQUIRE_NO_THROW( result = cppjinja::text::parse(txt::block_if, text) );
+		BOOST_TEST_REQUIRE( !result.else_block.has_value() );
 		BOOST_TEST( result.condition == txt::parse(txt::binary_op, condition) );
 		BOOST_TEST( !left.empty() == result.left_open.trim );
 		BOOST_TEST( !right.empty() == result.right_close.trim );
@@ -84,6 +85,7 @@ BOOST_DATA_TEST_CASE(
 	BOOST_TEST_CONTEXT("TEXT=" << text) {
 		BOOST_REQUIRE_NO_THROW( txt::parse(txt::binary_op, condition) );
 		BOOST_REQUIRE_THROW( result = cppjinja::text::parse(txt::block_if, text), std::exception );
+		BOOST_TEST_REQUIRE( !result.else_block.has_value() );
 	}
 }
 BOOST_AUTO_TEST_CASE(else_thread)
