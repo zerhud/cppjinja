@@ -22,9 +22,9 @@ foreach(tname ${tests_loader})
 endforeach()
 
 set(tests_eval
-	#eval_common
-	eval_op_out
 	eval_tree
+	eval_op_out
+	eval_tabs
 	)
 foreach(tname ${tests_eval})
 	add_unit_test(${tname} "tests/eval/" "evaluator;parser2")
