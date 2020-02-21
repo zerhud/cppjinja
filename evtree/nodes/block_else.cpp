@@ -6,36 +6,41 @@
  * or <http://www.gnu.org/licenses/> for details
  *************************************************************************/
 
-#include "block_else.hpp"
+#include "content_block.hpp"
 #include "parser/helpers.hpp"
 #include "../evtree.hpp"
 
-cppjinja::evtnodes::block_else::block_else(cppjinja::ast::else_thread nb)
-    : block(std::move(nb))
+cppjinja::evtnodes::content_block::content_block(
+		render_info ri, ast::string_t n)
+    : rinfo_(std::move(ri))
+    , name_(std::move(n))
 {
 }
 
-cppjinja::evt::node::render_info cppjinja::evtnodes::block_else::rinfo() const
+cppjinja::evt::node::render_info
+cppjinja::evtnodes::content_block::rinfo() const
 {
-	return render_info{
-		{block.left_open.trim, false},
-		//{block.left_open.trim, block.right_close.trim},
-		//{block.left_close.trim, block.right_open.trim}
-		{block.left_close.trim, false}
-	};
+	return rinfo_;
 }
 
-cppjinja::ast::string_t cppjinja::evtnodes::block_else::name() const
+cppjinja::ast::string_t cppjinja::evtnodes::content_block::name() const
 {
-	return "else_thread";
+	return name_;
 }
 
-bool cppjinja::evtnodes::block_else::is_leaf() const
+bool cppjinja::evtnodes::content_block::is_leaf() const
 {
 	return false;
 }
 
-void cppjinja::evtnodes::block_else::render(evt::context& ctx) const
+void cppjinja::evtnodes::content_block::render(evt::context& ctx) const
 {
+	ctx.current_node(this);
+	ctx.push_context(this);
+	auto children = ctx.tree().children(this, true);
+	for(auto&& child:children) ctx.add_context(child);
+	children = ctx.tree().children(this, false);
+	for(auto&& child:children) child->render(ctx);
+	ctx.pop_context(this);
 }
 

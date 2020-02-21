@@ -12,10 +12,11 @@
 
 namespace cppjinja::evtnodes {
 
-class block_else : public evt::node {
-	ast::else_thread block;
+class content_block : public evt::node {
+	render_info rinfo_;
+	ast::string_t name_;
 public:
-	block_else(ast::else_thread nb);
+	content_block(render_info ri, ast::string_t n);
 	render_info rinfo() const override ;
 	ast::string_t name() const override ;
 	bool is_leaf() const override ;

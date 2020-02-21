@@ -20,7 +20,7 @@
 #include "nodes/op_out.hpp"
 #include "nodes/op_set.hpp"
 #include "nodes/block_if.hpp"
-#include "nodes/block_else.hpp"
+#include "nodes/content_block.hpp"
 
 namespace cppjinja {
 
