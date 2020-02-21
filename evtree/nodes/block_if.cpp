@@ -37,8 +37,10 @@ bool block_if::is_leaf() const
 void block_if::render(evt::context& ctx) const
 {
 	ctx.current_node(this);
-	if(!calculate(ctx, block.condition)) return;
+	auto ifresult = calculate(ctx, block.condition);
 
 	auto children = ctx.tree().children(this);
-	for(auto&& child:children) child->render(ctx);
+	assert(!children.empty() && children.size() < 3);
+	if(ifresult) children[0]->render(ctx);
+	if(children.size()==2 && !ifresult) children[1]->render(ctx);
 }

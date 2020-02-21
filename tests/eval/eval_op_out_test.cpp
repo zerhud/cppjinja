@@ -52,6 +52,7 @@ std::string parse_single(
 
 		cppjinja::evtree ev;
 		for(auto& t:tmpls) ev.add_tmpl(t);
+		ev.print_subtree();
 
 		BOOST_CHECK_NO_THROW( ev.render(result, prov, "") );
 	}

@@ -87,12 +87,27 @@ static void insert_content(
 		},
 		[&dest,parent,&def](ast::forward_ast<ast::block_if>& obj)
 		{
-			auto* tnode = create_node<evtnodes::block_if>
+			ast::block_if& oif = obj.get();
+			auto* bl_if = create_node<evtnodes::block_if>
 					( dest
 					, def
-					, obj.get()
+					, oif
 					);
-			insert_content(dest, parent, obj.get(), tnode);
+			evt::node::render_info ri{
+				{oif.left_open.trim, oif.right_close.trim},
+				{oif.left_close.trim, oif.right_open.trim}
+			};
+			auto* cnt_if   = create_node<evtnodes::content_block>(
+					dest, bl_if, ri, "if"s
+					);
+			auto* cnt_else = create_node<evtnodes::content_block>(
+					dest, bl_if, ri, "else"s
+					);
+			insert_content(dest, parent, oif, cnt_if);
+			if(oif.else_block)
+				insert_content(
+					dest, parent,
+					*oif.else_block, cnt_else);
 		},
 		[](auto&)//[&def](auto& cnt)
 		{
