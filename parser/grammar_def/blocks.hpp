@@ -16,12 +16,21 @@
 #include "single.hpp"
 
 namespace cppjinja::text {
-	const auto block_free_text_term_def = lexeme[block_term_start | op_term_start | comment_term_start | x3::eoi];
-	const auto block_free_text_def = lexeme[!block_free_text_term_def >> *(char_ >> !block_free_text_term_def) >> char_];
+	const auto block_free_text_term_def = lexeme[
+		  block_term_start
+		| op_term_start
+		| comment_term_start
+		| x3::eoi
+	];
+	const auto block_free_text_def = lexeme[
+		   !block_free_text_term_def
+		>> *(char_ >> !block_free_text_term_def)
+		>> char_
+	];
 
 	const auto block_content_def =
-	          op_comment
-	        | block_free_text
+	          block_free_text
+	        | op_comment
 	        | op_out
 	        | op_set
 	        | block_raw
@@ -35,70 +44,79 @@ namespace cppjinja::text {
 	        ;
 	const auto block_content_vec_def = +block_content;
 
-	const auto block_raw_text_def = lexeme[+(char_ >> !block_term_start) >> char_];
+	const auto block_term_end_cnt =
+		lexeme[block_term_end >> -block_free_text];
+
+	const auto block_raw_text_def =
+		lexeme[+(char_ >> !block_term_start) >> char_];
 	const auto block_raw_def =
-		   block_term_start >> lit("raw") >> block_term_end
-		>> -block_raw_text
-		>> block_term_start >> lit("endraw") >> block_term_end;
+		   block_term_start >> lit("raw")
+		>> lexeme[block_term_end
+		>> -block_raw_text >> block_term_start]
+		>> lit("endraw") >> block_term_end;
 
 	const auto block_if_def =
-		   block_term_start >> omit[lit("if")] >> binary_op >> block_term_end
-		>> *block_content >> -else_thread
-		>> block_term_start >> lit("endif") >> block_term_end
+		   block_term_start >> omit[lit("if")] >> binary_op
+		>> block_term_end_cnt >> *block_content
+		>> -else_thread >> block_term_start
+		>> lit("endif") >> block_term_end
 		;
 
 	const auto else_thread_def =
 		   block_term_start
 		>> omit[lit("else")]
-		>> block_term_end
-		>> *block_content ;
+		>> block_term_end_cnt >> *block_content
+		;
 
 	const auto block_for_def =
 		   block_term_start
 		>> lit("for") >> (single_var_name % ',')
 		>> lit("in") >> ( function_call | var_name )
 		>> -(lit("recursive") >> x3::attr(true))
-		>> block_term_end
-		>> *block_content
-		>> block_term_start >> lit("endfor") >> block_term_end
+		>> block_term_end_cnt >> *block_content >> block_term_start
+		>> lit("endfor") >> block_term_end
 		;
 
 	const auto block_set_def =
 		   block_term_start
 		>> lit("set") >> single_var_name >> -('|' >> filter_call % '|')
-		>> block_term_end
-		>> *block_content
-		>> block_term_start >> lit("endset") >> block_term_end
+		>> block_term_end_cnt >> *block_content >> block_term_start
+		>> lit("endset") >> block_term_end
 		;
 
-	const auto call_parameter_def = -(single_var_name >> '=') >> value_term ;
+	const auto call_parameter_def =
+		-(single_var_name >> '=') >> value_term ;
 	const auto block_call_def =
-	        block_term_start
-	     >> lit("call") >> single_var_name
-	     >> -(omit['('] >> (macro_parameter % ',') >> omit[')'])
-	     >> -single_var_name
-	     >> -(omit['('] >> (call_parameter % ',') >> omit[')'])
-	     >> block_term_end
-	     >> *block_content
-	     >> block_term_start >> lit("endcall") >> block_term_end
-	        ;
+		   block_term_start
+		>> lit("call") >> single_var_name
+		>> -(omit['('] >> (macro_parameter % ',') >> omit[')'])
+		>> -single_var_name
+		>> -(omit['('] >> (call_parameter % ',') >> omit[')'])
+		>> block_term_end_cnt >> *block_content >> block_term_start
+		>> lit("endcall") >> block_term_end
+		;
 
-	const auto macro_parameter_def = single_var_name >> -('=' >> value_term);
-	const auto macro_parameters_def = single_var_name >> -('(' >> -(macro_parameter % ',') >> ')');
+	const auto macro_parameter_def =
+		single_var_name >> -('=' >> value_term);
+	const auto macro_parameters_def =
+		single_var_name >> -('(' >> -(macro_parameter % ',') >> ')');
 	const auto block_macro_def =
-		   block_term_start >> lit("macro") >> macro_parameters_def >> block_term_end
-		>> *block_content
-		>> block_term_start >> lexeme[lit("endmacro") >> -omit[+space >> single_var_name]] >> block_term_end
+		   block_term_start >> lit("macro") >> macro_parameters_def
+		>> block_term_end_cnt >> *block_content >> block_term_start
+		>> lexeme[lit("endmacro") >> -omit[+space >> single_var_name]]
+		>> block_term_end
 		;
 	const auto block_named_def =
-		   block_term_start >> lit("block") >> macro_parameters_def >> block_term_end
-		>> *block_content
-		>> block_term_start >> lexeme[lit("endblock") >> -omit[+space >> single_var_name]] >> block_term_end
+		   block_term_start >> lit("block") >> macro_parameters_def
+		>> block_term_end_cnt >> *block_content >> block_term_start
+		>> lit("endblock") >> -omit[+space >> single_var_name]
+		>> block_term_end
 		;
 	const auto block_filtered_def =
-		   block_term_start >> lit("filter") >> macro_parameters_def >> block_term_end
-		>> *block_content
-		>> block_term_start >> lexeme[lit("endfilter") >> -omit[+space >> single_var_name]] >> block_term_end
+		   block_term_start >> lit("filter") >> macro_parameters_def
+		>> block_term_end_cnt >> *block_content >> block_term_start
+		>> lexeme[lit("endfilter") >> -omit[+space >> single_var_name]]
+		>> block_term_end
 		;
 
 	class block_if_class          : x3::annotate_on_success {};
