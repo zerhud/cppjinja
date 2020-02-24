@@ -51,3 +51,9 @@ BOOST_AUTO_TEST_CASE(op_block)
 	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::block_term_start, data) );
 	BOOST_TEST( !result.trim );
 }
+
+BOOST_AUTO_TEST_CASE(no_space)
+{
+	std::string data = "< %";
+	BOOST_CHECK_THROW( txt::parse(txt::block_term_start, data), std::exception );
+}

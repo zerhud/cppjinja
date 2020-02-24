@@ -27,7 +27,8 @@ namespace utd = boost::unit_test::data;
 BOOST_AUTO_TEST_SUITE(block_raw)
 BOOST_DATA_TEST_CASE(
 	  good
-	, utd::make("kuku"s, "'a'"s, "foo()"s, "<#"s, "<="s, "<%"s, "<%endraw_%>"s, "a b"s)
+    , utd::make("kuku"s, "'a'"s, "foo()"s, "<#"s,
+                "<="s, "<%"s, "<%endraw_%>"s, "a b"s, "\nok"s)
 	* utd::make(""s, "+"s)
 	* utd::make(""s, "+"s)
 	* utd::make(""s, " "s, "\n"s)
@@ -35,7 +36,9 @@ BOOST_DATA_TEST_CASE(
 {
 	ast::block_raw result;
 
-	std::string text = "<%"s + left + space + "raw"s + "%>"s + data + "<%"s + space + "endraw" + right + "%>"s;
+	std::string text =
+	        "<%"s + left + space + "raw"s + "%>"s +
+	        data + "<%"s + space + "endraw" + right + "%>"s ;
 	BOOST_TEST_CONTEXT("TEXT=" << text) {
 		BOOST_REQUIRE_NO_THROW( result = cppjinja::text::parse(txt::block_raw, text) );
 		BOOST_TEST( result.value == data );
@@ -95,6 +98,20 @@ BOOST_AUTO_TEST_CASE(else_thread)
 	BOOST_REQUIRE_NO_THROW( result = cppjinja::text::parse(txt::block_if, text) );
 	BOOST_TEST_REQUIRE( result.else_block.has_value() );
 	BOOST_TEST_REQUIRE( result.else_block->content.size() == 1 );
+
+	text = "<% if 1==2 %> never seen <% else %> ok <% endif %>"s;
+	BOOST_REQUIRE_NO_THROW( result = cppjinja::text::parse(txt::block_if, text) );
+	BOOST_TEST_REQUIRE( result.content.size() == 1 );
+	BOOST_TEST_REQUIRE( result.else_block.has_value() );
+	BOOST_TEST_REQUIRE( result.else_block->content.size() == 1 );
+
+	auto* else_cnt = boost::get<std::string>(&result.else_block->content[0]);
+	BOOST_TEST_REQUIRE( else_cnt != nullptr );
+	BOOST_TEST( *else_cnt == " ok "s );
+
+	auto* if_cnt = boost::get<std::string>(&result.content[0]);
+	BOOST_TEST_REQUIRE( if_cnt != nullptr );
+	BOOST_TEST( *if_cnt == " never seen "s );
 }
 BOOST_AUTO_TEST_SUITE_END() // block_if
 
