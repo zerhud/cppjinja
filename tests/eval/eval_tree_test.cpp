@@ -27,7 +27,10 @@ using namespace std::literals;
 
 cppjinja::evtree build_tree(std::string_view ptxt)
 {
-	ast::file file = txt::parse(txt::file, ptxt);
+	ast::file file;
+	BOOST_TEST_CONTEXT("parsing: " << ptxt)
+	    BOOST_REQUIRE_NO_THROW( file = txt::parse(txt::file, ptxt) );
+
 	cppjinja::evtree tree;
 	for(auto& t:file.tmpls) BOOST_CHECK_NO_THROW( tree.add_tmpl(t) );
 	return tree;

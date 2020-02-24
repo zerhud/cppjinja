@@ -25,4 +25,34 @@ namespace txt = cppjinja::text;
 namespace east = cppjinja::east;
 using namespace std::literals;
 
+std::string parse_single(
+          std::string_view data
+        , cppjinja::data_provider& prov
+        )
+{
+	std::stringstream result;
 
+	BOOST_TEST_CONTEXT("primary == " << data)
+	{
+		cppjinja::evtree ev;
+		auto tmpl = txt::parse(txt::tmpl, data);
+		ev.add_tmpl( tmpl );
+
+		BOOST_CHECK_NO_THROW( ev.render(result, prov, "") );
+	}
+
+	return result.str();
+}
+
+BOOST_AUTO_TEST_CASE(inner_content)
+{
+	mocks::data_provider prov;
+	auto data = "<%block a %>\nok<% endblock %>"sv;
+	BOOST_TEST( parse_single(data, prov) == "\nok"sv );
+	data = "<%block a +%>\nok<% endblock %>"sv;
+	BOOST_TEST( parse_single(data, prov) == "ok"sv );
+	data = "<%block a %>ok\n<% endblock %>"sv;
+	BOOST_TEST( parse_single(data, prov) == "ok\n"sv );
+	data = "<%block a %>ok\n<%+ endblock %>"sv;
+	BOOST_TEST( parse_single(data, prov) == "ok"sv );
+}
