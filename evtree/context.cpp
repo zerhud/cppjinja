@@ -22,7 +22,7 @@ const cppjinja::evtnodes::callable* cppjinja::evt::context::cb_ctx_maker() const
 const cppjinja::evtnodes::callable* cppjinja::evt::context::search_in_tree(
         const ast::var_name& n) const
 {
-	return tree_->search(n, cur_node);
+	return tree_->search(n, current_node());
 }
 
 cppjinja::evt::context::context(
@@ -166,12 +166,13 @@ void cppjinja::evt::context::current_node(const cppjinja::evt::node* n)
 	}
 	*/
 
-	cur_node = n;
+	cur_nodes.emplace_back(n);
 }
 
-const cppjinja::evt::node* cppjinja::evt::context::current_node() const
+const cppjinja::evt::node* cppjinja::evt::context::current_node(std::size_t ind) const
 {
-	return cur_node;
+	std::size_t i = cur_nodes.size() - ind - 1;
+	return cur_nodes.at(i);
 }
 
 const cppjinja::evt::node* cppjinja::evt::context::ctx_maker() const

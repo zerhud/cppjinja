@@ -37,7 +37,7 @@ class context {
 
 	std::vector<context_frame> ctx;
 	std::vector<callstack_frame> callstack;
-	const node* cur_node;
+	std::vector<const node*> cur_nodes;
 
 	const data_provider* prov;
 	const evtree* tree_;
@@ -63,7 +63,7 @@ public:
 	void push_context(const node* m);
 	void add_context(const node* n);
 	void current_node(const node* n);
-	const node* current_node() const ;
+	const node* current_node(std::size_t ind=0) const ;
 	const node* ctx_maker() const ;
 
 	const node* caller() const ;
