@@ -11,13 +11,13 @@
 #include "../evtree.hpp"
 
 cppjinja::evtnodes::content_block::content_block(
-		render_info ri, ast::string_t n)
+        evt::render_info ri, ast::string_t n)
     : rinfo_(std::move(ri))
     , name_(std::move(n))
 {
 }
 
-cppjinja::evt::node::render_info
+cppjinja::evt::render_info
 cppjinja::evtnodes::content_block::rinfo() const
 {
 	return rinfo_;

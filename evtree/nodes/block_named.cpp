@@ -15,12 +15,9 @@ cppjinja::evtnodes::block_named::block_named(cppjinja::ast::block_named nb)
 {
 }
 
-cppjinja::evt::node::render_info cppjinja::evtnodes::block_named::rinfo() const
+cppjinja::evt::render_info cppjinja::evtnodes::block_named::rinfo() const
 {
-	return render_info{
-		{block.left_open.trim, block.right_close.trim},
-		{block.left_close.trim, block.right_open.trim}
-	};
+	return {block.left_open.trim, block.right_close.trim};
 }
 
 cppjinja::ast::string_t cppjinja::evtnodes::block_named::name() const

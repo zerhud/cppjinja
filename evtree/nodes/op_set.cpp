@@ -16,12 +16,9 @@ op_set::op_set(cppjinja::ast::op_set o) : op(std::move(o))
 {
 }
 
-cppjinja::evt::node::render_info op_set::rinfo() const
+cppjinja::evt::render_info op_set::rinfo() const
 {
-	return render_info{
-		{op.open.trim, op.close.trim},
-		{op.open.trim, op.close.trim}
-	};
+	return {op.open.trim, op.close.trim};
 }
 
 cppjinja::ast::string_t op_set::name() const

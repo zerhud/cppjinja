@@ -23,9 +23,9 @@ void cppjinja::evtnodes::content::trim_right()
 {
 }
 
-cppjinja::evt::node::render_info cppjinja::evtnodes::content::rinfo() const
+cppjinja::evt::render_info cppjinja::evtnodes::content::rinfo() const
 {
-	return render_info{ {false, false}, {false, false} };
+	return {false, false};
 }
 
 cppjinja::ast::string_t cppjinja::evtnodes::content::name() const

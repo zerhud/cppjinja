@@ -169,10 +169,22 @@ void cppjinja::evt::context::current_node(const cppjinja::evt::node* n)
 	cur_nodes.emplace_back(n);
 }
 
-const cppjinja::evt::node* cppjinja::evt::context::current_node(std::size_t ind) const
+const cppjinja::evt::node*
+cppjinja::evt::context::current_node(std::size_t ind) const
 {
 	std::size_t i = cur_nodes.size() - ind - 1;
 	return cur_nodes.at(i);
+}
+
+std::optional<cppjinja::evt::render_info>
+cppjinja::evt::context::cur_render_info() const
+{
+	return cur_info;
+}
+
+void cppjinja::evt::context::cur_render_info(std::optional<render_info> ni)
+{
+	cur_info = ni;
 }
 
 const cppjinja::evt::node* cppjinja::evt::context::ctx_maker() const

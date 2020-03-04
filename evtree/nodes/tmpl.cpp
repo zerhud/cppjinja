@@ -14,9 +14,9 @@ cppjinja::evtnodes::tmpl::tmpl(cppjinja::ast::tmpl t)
 {
 }
 
-cppjinja::evt::node::render_info cppjinja::evtnodes::tmpl::rinfo() const
+cppjinja::evt::render_info cppjinja::evtnodes::tmpl::rinfo() const
 {
-	return render_info{ {false, false}, {false, false} };
+	return {false, false};
 }
 
 cppjinja::ast::string_t cppjinja::evtnodes::tmpl::name() const

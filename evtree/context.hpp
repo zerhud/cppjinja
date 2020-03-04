@@ -20,7 +20,15 @@ class callable;
 
 namespace evt {
 
+/// render unit, node in render tree.
+/// contains infromation for render.
 class node;
+/// help iformation for render node in context
+struct render_info
+{
+	bool trim_left:4;
+	bool trim_right:4;
+};
 
 class context {
 	struct callstack_frame
@@ -38,6 +46,7 @@ class context {
 	std::vector<context_frame> ctx;
 	std::vector<callstack_frame> callstack;
 	std::vector<const node*> cur_nodes;
+	std::optional<render_info> cur_info;
 
 	const data_provider* prov;
 	const evtree* tree_;
@@ -62,9 +71,13 @@ public:
 	void pop_context(const node* m);
 	void push_context(const node* m);
 	void add_context(const node* n);
+	const node* ctx_maker() const ;
+
 	void current_node(const node* n);
 	const node* current_node(std::size_t ind=0) const ;
-	const node* ctx_maker() const ;
+
+	std::optional<render_info> cur_render_info() const ;
+	void cur_render_info(std::optional<render_info> ni) ;
 
 	const node* caller() const ;
 	void pop_callstack(const node* n);

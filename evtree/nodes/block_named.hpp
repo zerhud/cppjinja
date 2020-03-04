@@ -16,7 +16,7 @@ class block_named : public callable {
 	ast::block_named block;
 public:
 	block_named(ast::block_named nb);
-	render_info rinfo() const override ;
+	evt::render_info rinfo() const override ;
 	ast::string_t name() const override ;
 	bool is_leaf() const override ;
 	void render(evt::context& ctx) const override ;

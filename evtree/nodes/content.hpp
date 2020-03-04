@@ -20,7 +20,7 @@ class content : public evt::node {
 public:
 	content(ast::string_t c);
 
-	render_info rinfo() const override ;
+	evt::render_info rinfo() const override ;
 	ast::string_t name() const override ;
 	bool is_leaf() const override ;
 	void render(evt::context& ctx) const override ;

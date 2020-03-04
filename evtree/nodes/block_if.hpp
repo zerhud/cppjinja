@@ -16,7 +16,7 @@ class block_if : public evt::node {
 	ast::block_if block;
 public:
 	block_if(ast::block_if nb);
-	render_info rinfo() const override ;
+	evt::render_info rinfo() const override ;
 	ast::string_t name() const override ;
 	bool is_leaf() const override ;
 	void render(evt::context& ctx) const override ;

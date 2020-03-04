@@ -15,9 +15,9 @@ cppjinja::evtnodes::block_macro::block_macro(cppjinja::ast::block_macro nb)
 {
 }
 
-cppjinja::evt::node::render_info cppjinja::evtnodes::block_macro::rinfo() const
+cppjinja::evt::render_info cppjinja::evtnodes::block_macro::rinfo() const
 {
-	return render_info{ {false, false}, {false, false} };
+	return {false, false};
 }
 
 cppjinja::ast::string_t cppjinja::evtnodes::block_macro::name() const

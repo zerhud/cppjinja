@@ -16,12 +16,9 @@ cppjinja::evtnodes::op_out::op_out(cppjinja::ast::op_out o)
 {
 }
 
-cppjinja::evt::node::render_info cppjinja::evtnodes::op_out::rinfo() const
+cppjinja::evt::render_info cppjinja::evtnodes::op_out::rinfo() const
 {
-	return render_info{
-		{op.open.trim, op.close.trim},
-		{op.open.trim, op.close.trim}
-	};
+	return {op.open.trim, op.close.trim};
 }
 
 cppjinja::ast::string_t cppjinja::evtnodes::op_out::name() const

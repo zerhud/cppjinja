@@ -93,10 +93,7 @@ static void insert_content(
 					, def
 					, oif
 					);
-			evt::node::render_info ri{
-				{oif.left_open.trim, oif.right_close.trim},
-				{oif.left_close.trim, oif.right_open.trim}
-			};
+			evt::render_info ri{oif.left_close.trim, oif.right_open.trim};
 			auto* cnt_if   = create_node<evtnodes::content_block>(
 					dest, bl_if, ri, "if"s
 					);

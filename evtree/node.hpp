@@ -22,13 +22,6 @@ namespace evt {
 class node {
 	std::vector<node*> parents_;
 public:
-	struct render_info
-	{
-		struct iinfo {
-			bool trim_left;
-			bool trim_right;
-		} sibling, content;
-	};
 
 	virtual ~node() noexcept =default ;
 

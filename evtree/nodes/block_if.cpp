@@ -16,12 +16,9 @@ block_if::block_if(cppjinja::ast::block_if nb) : block(std::move(nb))
 {
 }
 
-cppjinja::evt::node::render_info block_if::rinfo() const
+cppjinja::evt::render_info block_if::rinfo() const
 {
-	return render_info{
-		{block.left_open.trim, block.right_close.trim},
-		{block.left_close.trim, block.right_open.trim}
-	};
+	return {block.left_open.trim, block.right_close.trim};
 }
 
 cppjinja::ast::string_t block_if::name() const
