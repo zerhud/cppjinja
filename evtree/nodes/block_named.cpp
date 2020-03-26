@@ -68,35 +68,9 @@ std::optional<cppjinja::ast::value_term> cppjinja::evtnodes::block_named::param(
 
 void cppjinja::evtnodes::block_named::render(evt::context& ctx) const
 {
-/*
-using block_content = x3::variant
-<
-	  string_t
-	, op_out
-	, op_comment
-	, op_set
-	, forward_ast<block_raw>
-	, forward_ast<block_if>
-	, forward_ast<block_for>
-	, forward_ast<block_macro>
-	, forward_ast<block_named>
-	, forward_ast<block_filtered>
-	, forward_ast<block_set>
-	, forward_ast<block_call>
->;
-*/
-
-	//node* cur_cnt = nullptr;
-	//overloaded renderer {
-	    //[&out](const ast::string_t& obj){ out << obj; },
-	    //[&out](const ast::op_out& obj) { out << "op_out"; },
-	    //[&out](const auto&){ out << "not ready yet"; }
-	//};
-	//for(auto& c:block.content) boost::apply_visitor(renderer, c.var);
-
 	ctx.current_node(this);
 	ctx.push_context(this);
-	auto children = ctx.tree().children(this, true);
+	auto children = ctx.tree().children(this, false);
 	for(auto&& child:children) ctx.add_context(child);
 	children = ctx.tree().children(this, false);
 	for(auto&& child:children) child->render(ctx);
