@@ -25,6 +25,8 @@ namespace txt = cppjinja::text;
 namespace east = cppjinja::east;
 using namespace std::literals;
 
+namespace data = boost::unit_test::data;
+
 std::string parse_single(
           std::string_view data
         , cppjinja::data_provider& prov
@@ -44,15 +46,51 @@ std::string parse_single(
 	return result.str();
 }
 
-BOOST_AUTO_TEST_CASE(inner_content)
+BOOST_DATA_TEST_CASE(trim_left,
+                     data::make({
+         "<%block a +%>\nok<% endblock %>"sv,
+         "<%block a +%> ok<% endblock %>"sv,
+         "<%block a +%>\n ok<% endblock %>"sv,
+                                }),
+                     data)
 {
 	mocks::data_provider prov;
-	auto data = "<%block a %>\nok<% endblock %>"sv;
-	BOOST_TEST( parse_single(data, prov) == "\nok"sv );
-	data = "<%block a +%>\nok<% endblock %>"sv;
 	BOOST_TEST( parse_single(data, prov) == "ok"sv );
-	data = "<%block a %>ok\n<% endblock %>"sv;
-	BOOST_TEST( parse_single(data, prov) == "ok\n"sv );
-	data = "<%block a %>ok\n<%+ endblock %>"sv;
+}
+
+BOOST_DATA_TEST_CASE(trim_right,
+                     data::make({
+         "<%block a %>ok\n<%+ endblock %>"sv,
+         "<%block a %>ok <%+ endblock %>"sv,
+         "<%block a %>ok\n  <%+ endblock %>"sv,
+                                }),
+                     data)
+{
+	mocks::data_provider prov;
 	BOOST_TEST( parse_single(data, prov) == "ok"sv );
+}
+
+BOOST_DATA_TEST_CASE(trim_both,
+                     data::make({
+         "<%block a +%> ok\n<%+ endblock %>"sv,
+         "<%block a +%>\n ok <%+ endblock %>"sv,
+         "<%block a +%> ok\n  <%+ endblock %>"sv,
+         "<%block a %><% if 1 == 1 +%> ok <%+ endif %><% endblock %>"sv,
+                                }),
+                     data)
+{
+	mocks::data_provider prov;
+	BOOST_TEST( parse_single(data, prov) == "ok"sv );
+}
+
+BOOST_DATA_TEST_CASE(no_trim,
+                     data::make({
+         "<%block a %> ok <% endblock %>"sv,
+         "<%block a %><% if 1 == 1 %> ok <% endif %><% endblock %>"sv,
+         "<%block a %><% if 1 == 1 %> ok <% endif %><%+ endblock %>"sv,
+                                }),
+                     data)
+{
+	mocks::data_provider prov;
+	BOOST_TEST( parse_single(data, prov) == " ok "sv );
 }
