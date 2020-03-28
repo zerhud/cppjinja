@@ -36,7 +36,10 @@ public:
 	std::vector<const node*> parents() const ;
 	bool is_parent(const node* n) const ;
 protected:
-        bool calculate(evt::context& ctx, const ast::binary_op& op) const ;
+	bool calculate(context& ctx, const ast::binary_op& op) const ;
+	void render_children(
+		const std::vector<const node*>& children,
+		context& ctx, render_info default_ri) const ;
 	void render_value(
 	          evt::context& ctx
 	        , const ast::value_term& value

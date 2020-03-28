@@ -11,6 +11,7 @@
 #include "evtree.hpp"
 #include "eval/ast.hpp"
 #include "helpers/binary_op.hpp"
+#include "helpers/loop_by_three.hpp"
 
 using namespace std::literals;
 
@@ -42,6 +43,26 @@ bool cppjinja::evt::node::is_parent(const cppjinja::evt::node* n) const
 {
 	for(auto& p:parents_) if(p==n) return true;
 	return false;
+}
+
+void cppjinja::evt::node::render_children(
+		const std::vector<const node*>& children,
+		context& ctx, render_info default_ri) const
+{
+	ctx.current_node(this);
+	ctx.push_context(this);
+	for(auto&& child:children) ctx.add_context(child);
+	auto rnd = [&ctx,&default_ri]
+		(const node* p, const node* c, const node* n)
+	{
+		render_info ri = default_ri;
+		if(p) ri.trim_left = p->rinfo().trim_right;
+		if(n) ri.trim_right = n->rinfo().trim_left;
+		ctx.cur_render_info(std::move(ri));
+		c->render(ctx);
+	};
+	evtnodes::loop_by_three(children, rnd);
+	ctx.pop_context(this);
 }
 
 bool cppjinja::evt::node::calculate(

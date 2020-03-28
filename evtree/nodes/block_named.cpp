@@ -9,7 +9,6 @@
 #include "block_named.hpp"
 #include "parser/helpers.hpp"
 #include "../evtree.hpp"
-#include "../helpers/loop_by_three.hpp"
 
 cppjinja::evtnodes::block_named::block_named(cppjinja::ast::block_named nb)
     : block(std::move(nb))
@@ -69,23 +68,7 @@ std::optional<cppjinja::ast::value_term> cppjinja::evtnodes::block_named::param(
 
 void cppjinja::evtnodes::block_named::render(evt::context& ctx) const
 {
-	ctx.current_node(this);
-	ctx.push_context(this);
+	evt::render_info ri{ block.left_close.trim, block.right_open.trim };
 	auto children = ctx.tree().children(this, false);
-	for(auto&& child:children) ctx.add_context(child);
-	children = ctx.tree().children(this, false);
-	loop_by_three(children, [this,&ctx](
-				  const node* prev
-				, const node* cur
-				, const node* next
-				){
-			evt::render_info ri{
-				block.left_close.trim,
-				block.right_open.trim };
-			if(prev) ri.trim_left = prev->rinfo().trim_right;
-			if(next) ri.trim_right = next->rinfo().trim_left;
-			ctx.cur_render_info(std::move(ri));
-			cur->render(ctx);
-			});
-	ctx.pop_context(this);
+	render_children(children, ctx, ri);
 }

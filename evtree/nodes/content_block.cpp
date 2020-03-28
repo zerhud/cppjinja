@@ -35,12 +35,9 @@ bool cppjinja::evtnodes::content_block::is_leaf() const
 
 void cppjinja::evtnodes::content_block::render(evt::context& ctx) const
 {
-	ctx.current_node(this);
-	ctx.push_context(this);
-	auto children = ctx.tree().children(this, true);
-	for(auto&& child:children) ctx.add_context(child);
-	children = ctx.tree().children(this, false);
-	for(auto&& child:children) child->render(ctx);
-	ctx.pop_context(this);
+	auto def_ri = ctx.cur_render_info();
+	if(!def_ri) def_ri = rinfo();
+	auto children = ctx.tree().children(this, false);
+	render_children(children, ctx, *def_ri);
 }
 

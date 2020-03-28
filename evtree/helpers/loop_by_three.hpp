@@ -12,10 +12,14 @@
 
 namespace cppjinja::evtnodes {
 
-template<typename E, typename Body, template<typename...> typename List, typename ... LArgs>
-	// requires(List<E, LArgs...>{}[0])
+template<
+	  typename E
+	, typename Body
+	, template<typename...> typename List
+	, typename ... LArgs
+	> // requires(List<E, LArgs...>{}[0])
 std::enable_if_t<std::is_pointer_v<E>>
-loop_by_three(List<E, LArgs...>& list, const Body& body)
+loop_by_three(const List<E, LArgs...>& list, const Body& body)
 {
 	for(std::size_t i=0;i<list.size();++i)
 	{
@@ -26,10 +30,14 @@ loop_by_three(List<E, LArgs...>& list, const Body& body)
 	}
 }
 
-template<typename E, typename Body, template<typename...> typename List, typename ... LArgs>
-	// requires(List<E, LArgs...>{}[0])
+template<
+	  typename E
+	, typename Body
+	, template<typename...> typename List
+	, typename ... LArgs
+	> // requires(List<E, LArgs...>{}[0])
 std::enable_if_t<!std::is_pointer_v<E>>
-loop_by_three(List<E, LArgs...>& list, const Body& body)
+loop_by_three(const List<E, LArgs...>& list, const Body& body)
 {
 	for(std::size_t i=0;i<list.size();++i)
 	{
