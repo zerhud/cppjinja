@@ -94,3 +94,29 @@ BOOST_DATA_TEST_CASE(no_trim,
 	mocks::data_provider prov;
 	BOOST_TEST( parse_single(data, prov) == " ok "sv );
 }
+
+BOOST_DATA_TEST_CASE(few_no_trim,
+                     data::make({
+         "<%block a %> ok <= '1' =><% endblock %>"sv,
+         "<%block a %><% if 1 == 1 %> ok <= '1' =><% endif %><% endblock %>"sv,
+         "<%block a %><% if 1 == 1 %> ok <= '1' =><% endif %><%+ endblock %>"sv,
+         "<%block a %><% if 1 == 1 %> ok <% endif %><= '1' =><%+ endblock %>"sv,
+                                }),
+                     data)
+{
+	mocks::data_provider prov;
+	BOOST_TEST( parse_single(data, prov) == " ok 1"sv );
+}
+
+BOOST_DATA_TEST_CASE(few_trim_right,
+                     data::make({
+         "<%block a %> ok <=+ '1' =><% endblock %>"sv,
+         "<%block a %><% if 1 == 1 %> ok <=+ '1' =><% endif %><% endblock %>"sv,
+         "<%block a %><% if 1 == 1 %> ok <=+ '1' =><% endif %><%+ endblock %>"sv,
+         "<%block a %><% if 1 == 1 %> ok <%+ endif %><= '1' =><%+ endblock %>"sv,
+                                }),
+                     data)
+{
+	mocks::data_provider prov;
+	BOOST_TEST( parse_single(data, prov) == " ok1"sv );
+}
