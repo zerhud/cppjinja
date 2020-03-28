@@ -8,6 +8,8 @@
 
 #include "content.hpp"
 
+#include <boost/algorithm/string.hpp>
+
 using namespace std::literals;
 
 cppjinja::evtnodes::content::content(cppjinja::ast::string_t c)
@@ -41,5 +43,12 @@ bool cppjinja::evtnodes::content::is_leaf() const
 void cppjinja::evtnodes::content::render(cppjinja::evt::context& ctx) const
 {
 	ctx.current_node(this);
-	ctx.out() << cnt;
+	auto ri = ctx.cur_render_info();
+	if(!ri) ctx.out() << cnt;
+	else {
+		auto trimmed = cnt;
+		if(ri->trim_left) boost::trim_left(trimmed);
+		if(ri->trim_right) boost::trim_right(trimmed);
+		ctx.out() << trimmed;
+	}
 }

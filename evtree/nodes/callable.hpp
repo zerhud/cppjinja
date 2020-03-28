@@ -12,7 +12,7 @@
 
 namespace cppjinja::evtnodes {
 
-class callable : public evt::node {
+class callable : virtual public evt::node {
 public:
 	virtual bool render_param(
 			  evt::context& ctx
