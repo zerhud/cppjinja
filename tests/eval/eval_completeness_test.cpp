@@ -77,31 +77,15 @@ BOOST_DATA_TEST_CASE(set_var
 	BOOST_TEST( parse_single(data, prov) == "okok"sv );
 }
 
-BOOST_DATA_TEST_CASE(get_var
-      , data::make("<= a.b =>"sv, "<= a['b'] =>"sv)
-      , data
-      )
-{
-	mocks::data_provider prov;
-	MOCK_EXPECT(prov.value_var_name)
-	        .once()
-	        .calls([](cppjinja::east::var_name v){
-		BOOST_TEST(v.size()==2);
-		BOOST_TEST(v[0]=="a");
-		BOOST_TEST(v[1]=="b");
-		return "ok";
-	});
-	BOOST_TEST( parse_single(data, prov) == "ok"sv );
-}
-
-
 BOOST_DATA_TEST_CASE(get_var_filter
-      , data::make( "<= a.b | a =>"sv
+      , data::make( "<= a.b =>"sv
+                  , "<= a['b'] =>"sv
+                  , "<= a.b | a =>"sv
                   , "<= a['b'] | a =>"sv
                   , "<= a['b'] | a | b =>"sv
                   , "<= a['b'] | a | b | b =>"sv
                   )
-      ^ data::make(1, 1, 2, 3)
+      ^ data::make(0, 0, 1, 1, 2, 3)
       , data, count
       )
 {
@@ -112,24 +96,22 @@ BOOST_DATA_TEST_CASE(get_var_filter
 		BOOST_TEST( fnc.params.size() == 0 );
 		BOOST_TEST( fnc.ref.size() == 1 );
 		if( cur_count == 1 ) BOOST_TEST( fnc.ref[0] == "b"s );
-		if( cur_count == 0 ) {
-			BOOST_TEST( fnc.ref[0] == "a"s );
-			BOOST_TEST( std::get<east::string_t>(v) == "ok"s );
-		} else {
+		if( cur_count == 0 ) BOOST_TEST( fnc.ref[0] == "a"s );
+		else {
 			BOOST_TEST( std::get<east::string_t>(v) ==
 			            "filter"s+std::to_string(cur_count) );
 		}
 		return "filter"s+std::to_string(++cur_count);
 	};
-	auto make_var = [](east::var_name v){
+	auto make_var = [&cur_count](east::var_name v){
 		BOOST_TEST(v.size()==2);
 		BOOST_TEST(v[0]=="a");
 		BOOST_TEST(v[1]=="b");
-		return "ok";
+		return "filter"s+std::to_string(cur_count);
 	};
 
 	mocks::data_provider prov;
 	MOCK_EXPECT(prov.value_var_name).once().calls(make_var);
 	MOCK_EXPECT(prov.filter).exactly(count).calls(filter);
-	BOOST_TEST( parse_single(data, prov) == "filter"s + std::to_string(cur_count) );
+	BOOST_TEST( parse_single(data, prov)=="filter"s+std::to_string(cur_count) );
 }
