@@ -25,6 +25,7 @@ set(tests_eval
 	eval_tree
 	eval_op_out
 	eval_tabs
+	eval_completeness
 	)
 foreach(tname ${tests_eval})
 	add_unit_test(${tname} "tests/eval/" "evaluator;parser2")

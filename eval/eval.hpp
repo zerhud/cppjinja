@@ -23,12 +23,6 @@ public:
 	virtual east::value_term filter(
 	        const east::function_call& val,
 	        const east::value_term& base) const =0 ;
-
-	virtual east::string_t render(const east::var_name& val) const =0 ;
-	virtual east::string_t render(
-	          const east::function_call& val
-	        , const east::string_t& base
-	        ) const =0 ;
 };
 
 class evaluator {

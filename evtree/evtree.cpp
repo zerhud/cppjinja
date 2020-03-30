@@ -1,5 +1,5 @@
 /*************************************************************************
- * Copyright © 2019 Hudyaev Alexy <hudyaev.alexy@gmail.com>
+ * Copyright © 2019-2020 Hudyaev Alexy <hudyaev.alexy@gmail.com>
  * This file is part of cppjinja.
  * Distributed under the GNU Affero General Public License.
  * See accompanying file copying (at the root of this repository)
@@ -83,7 +83,8 @@ static void insert_content(
 		},
 		[&dest,&def](ast::forward_ast<ast::block_raw>& obj)
 		{
-			create_node<evtnodes::content>(dest, def, obj.get().value);
+			create_node<evtnodes::content>(
+					dest, def, obj.get().value);
 		},
 		[&dest,parent,&def](ast::forward_ast<ast::block_if>& obj)
 		{
@@ -93,7 +94,8 @@ static void insert_content(
 					, def
 					, oif
 					);
-			evt::render_info ri{oif.left_close.trim, oif.right_open.trim};
+			evt::render_info ri{
+				oif.left_close.trim, oif.right_open.trim};
 			auto* cnt_if   = create_node<evtnodes::content_block>(
 					dest, bl_if, ri, "if"s
 					);
@@ -165,13 +167,15 @@ const cppjinja::evtnodes::callable* cppjinja::evtree::search_child(
         , const cppjinja::evt::node* par
         ) const
 {
+	using evtnodes::callable;
 	for(auto& n:nodes)
 	{
 		if(n->name() == name && n->is_parent(par))
 		{
-			auto* cb = dynamic_cast<const evtnodes::callable*>(n.get());
+			auto* cb = dynamic_cast<const callable*>(n.get());
 			if(cb) return cb;
-			throw std::runtime_error(name + " found, but the node is wrong");
+			throw std::runtime_error(
+					name + " found, but the node is wrong");
 		}
 	}
 
@@ -242,7 +246,8 @@ std::vector<const cppjinja::evt::node*> cppjinja::evtree::all_tree() const
 	ret.reserve(nodes.size());
 	for(auto& n:nodes) ret.emplace_back(n.get());
 
-	assert( std::find(std::begin(ret), std::end(ret), nullptr) == std::end(ret));
+	assert( std::find(std::begin(ret), std::end(ret), nullptr)
+			== std::end(ret));
 
 	return ret;
 }
@@ -265,15 +270,18 @@ std::vector<const cppjinja::evt::node*> cppjinja::evtree::children(
 
 	for(auto& n:subs) ret.emplace_back(n);
 
-	assert( std::find(std::begin(ret), std::end(ret), nullptr) == std::end(ret));
+	assert( std::find(std::begin(ret), std::end(ret), nullptr)
+			== std::end(ret));
 	return ret;
 }
 
-void cppjinja::evtree::print_subtree(const cppjinja::evt::node* par, std::string prefix) const
+void cppjinja::evtree::print_subtree(
+		const cppjinja::evt::node* par, std::string prefix) const
 {
 	std::vector<const evt::node*> pars;
 	if(par!=nullptr) pars.emplace_back(par);
-	else for(auto& n:nodes) if(n->parents().empty()) pars.emplace_back(n.get());
+	else for(auto& n:nodes)
+		if(n->parents().empty()) pars.emplace_back(n.get());
 
 	for(auto& p:pars)
 	{

@@ -34,7 +34,8 @@ BOOST_DATA_TEST_CASE(
       )
 {
 	std::string result;
-	BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(cppjinja::text::quoted_string, data) );
+	BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(
+				cppjinja::text::quoted_string, data) );
 	BOOST_TEST( result == good_result );
 }
 
