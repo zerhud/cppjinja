@@ -8,11 +8,11 @@
 
 #pragma once
 
-#include "../node.hpp"
+#include "callable.hpp"
 
 namespace cppjinja::evtnodes {
 
-class block_macro : public evt::node {
+class block_macro : public callable {
 	ast::block_macro block;
 public:
 	block_macro(ast::block_macro nb);

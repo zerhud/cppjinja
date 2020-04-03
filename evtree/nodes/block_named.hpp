@@ -14,6 +14,7 @@ namespace cppjinja::evtnodes {
 
 class block_named : public callable {
 	ast::block_named block;
+	using callable::param;
 public:
 	block_named(ast::block_named nb);
 	evt::render_info rinfo() const override ;

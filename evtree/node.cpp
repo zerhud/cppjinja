@@ -45,15 +45,13 @@ bool cppjinja::evt::node::is_parent(const cppjinja::evt::node* n) const
 	return false;
 }
 
-void cppjinja::evt::node::render_children(
-		const std::vector<const node*>& children,
-		context& ctx, render_info default_ri) const
+void cppjinja::evt::node::render_children_wc(
+        const std::vector<const node*>& children,
+        context& ctx, render_info default_ri) const
 {
-	ctx.current_node(this);
-	ctx.push_context(this);
 	for(auto&& child:children) ctx.add_context(child);
 	auto rnd = [&ctx,&default_ri]
-		(const node* p, const node* c, const node* n)
+	    (const node* p, const node* c, const node* n)
 	{
 		render_info ri = default_ri;
 		if(p) ri.trim_left = p->rinfo().trim_right;
@@ -62,6 +60,15 @@ void cppjinja::evt::node::render_children(
 		c->render(ctx);
 	};
 	evtnodes::loop_by_three(children, rnd);
+}
+
+void cppjinja::evt::node::render_children(
+		const std::vector<const node*>& children,
+		context& ctx, render_info default_ri) const
+{
+	ctx.current_node(this);
+	ctx.push_context(this);
+	render_children_wc(children, ctx, std::move(default_ri));
 	ctx.pop_context(this);
 }
 

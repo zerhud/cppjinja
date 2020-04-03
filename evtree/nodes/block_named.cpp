@@ -44,26 +44,7 @@ std::optional<cppjinja::ast::value_term> cppjinja::evtnodes::block_named::param(
         evt::context& ctx,
         const cppjinja::ast::var_name& name) const
 {
-	if(name.size()!=1) return std::nullopt;
-	for(std::size_t outer = 0;outer<block.params.size();++outer)
-	{
-		auto& p = block.params[outer];
-		if(p.name != name[0]) continue;
-
-		auto params = ctx.call_params();
-		for(std::size_t inner = 0;inner<params.size();++inner)
-		{
-			auto& cp = params[inner];
-			bool found = cp.name.has_value() && *cp.name == name[0];
-			if(!found && !cp.name) found = outer == inner;
-			if(found) return cp.value.get();
-		}
-
-		if(p.value) return p.value;
-		else throw std::runtime_error("requried parameter not specified");
-	}
-
-	return std::nullopt;
+	return param(block.params, name, ctx);
 }
 
 void cppjinja::evtnodes::block_named::render(evt::context& ctx) const

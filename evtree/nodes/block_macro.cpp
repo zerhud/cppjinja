@@ -17,7 +17,7 @@ cppjinja::evtnodes::block_macro::block_macro(cppjinja::ast::block_macro nb)
 
 cppjinja::evt::render_info cppjinja::evtnodes::block_macro::rinfo() const
 {
-	return {false, false};
+	return {block.left_open.trim, block.right_close.trim};
 }
 
 cppjinja::ast::string_t cppjinja::evtnodes::block_macro::name() const
@@ -32,6 +32,7 @@ bool cppjinja::evtnodes::block_macro::is_leaf() const
 
 void cppjinja::evtnodes::block_macro::render(evt::context& ctx) const
 {
-	ctx.current_node(this);
-	ctx.out() << "block_macro";
+	evt::render_info ri{ block.left_close.trim, block.right_open.trim };
+	auto children = ctx.tree().children(this, false);
+	render_children_wc(children, ctx, ri);
 }
