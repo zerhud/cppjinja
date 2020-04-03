@@ -54,7 +54,7 @@ class context {
 	std::ostream& outstream;
 
 	const evtnodes::callable* cb_ctx_maker()const;
-	const evtnodes::callable* search_in_tree(const ast::var_name& n)const;
+	const node* search_in_tree(const ast::var_name& n)const;
 public:
 	context(const data_provider* p, const evtree* t, std::ostream& out);
 

@@ -33,25 +33,12 @@ bool op_set::is_leaf() const
 
 void op_set::render( evt::context& ctx ) const
 {
-	(void) ctx;
+	ctx.current_node(this);
 }
 
-bool op_set::render_param(
-          cppjinja::evt::context& ctx
-        , const cppjinja::ast::var_name& pname
-        ) const
+cppjinja::ast::value_term op_set::value(
+        const cppjinja::ast::var_name& name) const
 {
-	render_value(ctx, param(ctx, pname).value());
-	return true;
-}
-
-std::optional<cppjinja::ast::value_term> op_set::param(
-          cppjinja::evt::context& ctx
-        , const cppjinja::ast::var_name& name
-        ) const
-{
-	(void) ctx; //TODO: why ctx unused?
-
 	if(name.empty()) throw std::runtime_error("var name is empty");
 	if(name.back()!=op.name)
 	{

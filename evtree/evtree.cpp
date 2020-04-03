@@ -162,21 +162,15 @@ void cppjinja::evtree::tbuild_blocks(cppjinja::evt::node* p, ast::tmpl& t)
 
 }
 
-const cppjinja::evtnodes::callable* cppjinja::evtree::search_child(
+const cppjinja::evt::node* cppjinja::evtree::search_child(
           const cppjinja::ast::string_t& name
         , const cppjinja::evt::node* par
         ) const
 {
-	using evtnodes::callable;
 	for(auto& n:nodes)
 	{
 		if(n->name() == name && n->is_parent(par))
-		{
-			auto* cb = dynamic_cast<const callable*>(n.get());
-			if(cb) return cb;
-			throw std::runtime_error(
-					name + " found, but the node is wrong");
-		}
+			return n.get();
 	}
 
 	auto ppars = par->parents();
@@ -202,7 +196,7 @@ const cppjinja::evtnodes::tmpl* cppjinja::evtree::search_tmpl(
 	return nullptr;
 }
 
-const cppjinja::evtnodes::callable* cppjinja::evtree::search(
+const cppjinja::evt::node* cppjinja::evtree::search(
           const cppjinja::ast::var_name& name
         , const cppjinja::evt::node* ctx
         ) const
