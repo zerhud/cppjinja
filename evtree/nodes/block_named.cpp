@@ -30,16 +30,6 @@ bool cppjinja::evtnodes::block_named::is_leaf() const
 	return false;
 }
 
-bool cppjinja::evtnodes::block_named::render_param(
-		  evt::context& ctx
-		, const ast::var_name& pname
-		) const
-{
-	auto found_param = param(ctx, pname);
-	if(found_param) render_value(ctx, *found_param);
-	return found_param.has_value();
-}
-
 std::optional<cppjinja::ast::value_term> cppjinja::evtnodes::block_named::param(
         evt::context& ctx,
         const cppjinja::ast::var_name& name) const

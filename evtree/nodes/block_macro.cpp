@@ -36,3 +36,14 @@ void cppjinja::evtnodes::block_macro::render(evt::context& ctx) const
 	auto children = ctx.tree().children(this, false);
 	render_children_wc(children, ctx, ri);
 }
+
+std::optional<cppjinja::ast::value_term>
+cppjinja::evtnodes::block_macro::param(
+          cppjinja::evt::context& ctx
+        , const cppjinja::ast::var_name& name
+        ) const
+{
+	(void)ctx;
+	(void)name;
+	return std::nullopt;
+}

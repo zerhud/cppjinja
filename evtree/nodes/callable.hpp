@@ -19,11 +19,6 @@ protected:
 	        , const ast::var_name& name
 	        , evt::context& ctx) const ;
 public:
-	virtual bool render_param(
-			  evt::context& ctx
-			, const ast::var_name& pname
-			) const =0 ;
-
 	virtual std::optional<ast::value_term> param(
 	          evt::context& ctx
 	        , const ast::var_name& name) const =0 ;
