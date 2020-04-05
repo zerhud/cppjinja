@@ -45,11 +45,11 @@ bool cppjinja::evt::node::is_parent(const cppjinja::evt::node* n) const
 	return false;
 }
 
-void cppjinja::evt::node::render_children_wc(
+void cppjinja::evt::node::render_children(
         const std::vector<const node*>& children,
         context& ctx, render_info default_ri) const
 {
-	for(auto&& child:children) ctx.add_context(child);
+	for(auto&& child:children) ctx.add_to_context(child);
 	auto rnd = [&ctx,&default_ri]
 	    (const node* p, const node* c, const node* n)
 	{
@@ -60,16 +60,6 @@ void cppjinja::evt::node::render_children_wc(
 		c->render(ctx);
 	};
 	evtnodes::loop_by_three(children, rnd);
-}
-
-void cppjinja::evt::node::render_children(
-		const std::vector<const node*>& children,
-		context& ctx, render_info default_ri) const
-{
-	ctx.current_node(this);
-	ctx.push_context(this);
-	render_children_wc(children, ctx, std::move(default_ri));
-	ctx.pop_context(this);
 }
 
 bool cppjinja::evt::node::calculate(
@@ -109,10 +99,9 @@ void cppjinja::evt::node::render_value(
 				return;
 			}
 
-			ctx.push_callstack(self);
+			maker_callstack cmaker(self, &ctx);
 			ctx.call_params(obj.params);
 			node->render(ctx);
-			ctx.pop_callstack(self);
 		}
 		void operator()(const ast::binary_op& obj) {
 			ctx.out() << self->calculate(ctx, obj); }

@@ -23,6 +23,7 @@
 namespace ast = cppjinja::ast;
 namespace txt = cppjinja::text;
 namespace east = cppjinja::east;
+namespace tdata = boost::unit_test::data;
 using namespace std::literals;
 
 ast::tmpl parse_tmpl(std::string_view data)
@@ -59,30 +60,29 @@ std::string parse_single(
 	return result.str();
 }
 
-BOOST_AUTO_TEST_CASE(string)
+struct mock_data_provider_fixture
 {
-	auto data = std::make_unique<mocks::data_provider>();
-	BOOST_TEST(parse_single("data"sv, *data) == "data"sv );
-	BOOST_TEST(parse_single("<= 'data' =>"sv, *data) == "data"sv );
-}
+	std::unique_ptr<mocks::data_provider> data =
+	        std::make_unique<mocks::data_provider>();
+};
 
-BOOST_AUTO_TEST_CASE(number)
+auto block_macro_data =
+        tdata::make("block"s,    "macro"s)
+      ^ tdata::make("endblock"s, "endmacro"s);
+auto rvterm_data = tdata::make(
+            "data"sv, "<= 'data' =>"sv, "<= 42 =>"sv, "<= ['one', 'two'] =>"sv
+            ) ^ tdata::make(
+            "data"sv, "data"sv,         "42"sv,       ""sv );
+BOOST_DATA_TEST_CASE_F(mock_data_provider_fixture, render_vterm
+         , rvterm_data , code, result)
 {
-	auto data = std::make_unique<mocks::data_provider>();
-	BOOST_TEST(parse_single("<= 42 =>"sv, *data) == std::to_string(42) );
-}
-
-BOOST_AUTO_TEST_CASE(no_output)
-{
-	auto data = std::make_unique<mocks::data_provider>();
-	BOOST_TEST( parse_single("<= ['one', 'two'] =>"sv, *data) == ""sv );
+	BOOST_TEST(parse_single(code, *data) == result );
 }
 
 BOOST_AUTO_TEST_SUITE(var_name)
 
-	BOOST_AUTO_TEST_CASE(not_setted)
+	BOOST_FIXTURE_TEST_CASE(not_setted, mock_data_provider_fixture)
 	{
-		auto data = std::make_unique<mocks::data_provider>();
 		MOCK_EXPECT(data->value_var_name)
 		        .once()
 		        .with(east::var_name{"data"s})
@@ -91,16 +91,14 @@ BOOST_AUTO_TEST_SUITE(var_name)
 		BOOST_TEST(parse_single("<= data =>"sv, *data) == "test"sv );
 	}
 
-	BOOST_AUTO_TEST_CASE(setted)
+	BOOST_FIXTURE_TEST_CASE(setted, mock_data_provider_fixture)
 	{
-		auto data = std::make_unique<mocks::data_provider>();
 		auto pdata = "<% set d='test' %><= d =>"sv;
 		BOOST_TEST(parse_single(pdata, *data) == "test"sv );
 	}
 
-	BOOST_AUTO_TEST_CASE(only_single_name_search_allowed)
+	BOOST_FIXTURE_TEST_CASE(only_single_name_search, mock_data_provider_fixture)
 	{
-		auto data = std::make_unique<mocks::data_provider>();
 		MOCK_EXPECT(data->value_var_name)
 		        .once()
 		        .with(east::var_name{"a"s,"d"s})
@@ -163,38 +161,53 @@ BOOST_AUTO_TEST_CASE(function_from_provider)
 
 BOOST_AUTO_TEST_SUITE(macros)
 
-	BOOST_AUTO_TEST_CASE(named_outputs)
+	BOOST_FIXTURE_TEST_CASE(named_outputs, mock_data_provider_fixture)
 	{
-		auto data = std::make_unique<mocks::data_provider>();
 		auto pdata = "<% block bl %>ok<% endblock %>"sv;
 		BOOST_TEST(parse_single(pdata, *data) == "ok"sv );
 		pdata = "<% block bl %>ok<% endblock %><= self.bl() =>"sv;
 		BOOST_TEST(parse_single(pdata, *data) == "okok"sv );
 	}
 
-	BOOST_AUTO_TEST_CASE(no_macro_output)
+	BOOST_FIXTURE_TEST_CASE(no_macro_output, mock_data_provider_fixture)
 	{
-		auto data = std::make_unique<mocks::data_provider>();
 		auto pdata = "<% macro bl %>ok<% endmacro %>"sv;
 		BOOST_TEST(parse_single(pdata, *data) == ""sv );
 		pdata = "<% macro bl %>ok<% endmacro %><= bl() =>"sv;
 		BOOST_TEST(parse_single(pdata, *data) == "ok"sv );
 	}
 
-	BOOST_AUTO_TEST_CASE(block_with_params)
+	BOOST_FIXTURE_TEST_CASE(has_params_no_output, mock_data_provider_fixture)
 	{
-		auto data = std::make_unique<mocks::data_provider>();
-		auto pdata = "<% block bl(a) %>a<= a =><% endblock %><= bl('ok') =>"sv;
+		auto pdata = "<% block bl(a) %>a<= a =><% endblock %>"sv;
+		BOOST_TEST(parse_single(pdata, *data) == ""sv );
+	}
+
+	BOOST_DATA_TEST_CASE_F(mock_data_provider_fixture, with_params
+	             , block_macro_data , open, close )
+	{
+		auto pdata =
+		        "<% "s + open + " bl(a) %>a<= a =><% "s
+		        + close + " %><= bl('ok') =>"s;
 		BOOST_TEST(parse_single(pdata, *data) == "aok"sv );
 	}
 
-	BOOST_AUTO_TEST_CASE(block_with_default_params)
+	BOOST_DATA_TEST_CASE_F(mock_data_provider_fixture, default_params,
+	                       block_macro_data, open, close)
 	{
-		auto data = std::make_unique<mocks::data_provider>();
 		auto pdata =
-		        "<% block bl(a, b='bok') %><= b =><% endblock %>"
-		        "<= bl('ok') =><= bl('ok', 'test') =>"sv;
-		BOOST_TEST(parse_single(pdata, *data) == "boktest"sv );
+		        "<% "s + open + " bl(a, b='bok') %><= b =><% "s + close + " %>"s
+		        "<= bl('ok') =><= bl('ok', 'test') =>"s;
+		BOOST_TEST(parse_single(pdata, *data) == "boktest"s );
+	}
+
+	BOOST_DATA_TEST_CASE_F(mock_data_provider_fixture, param_name_same_as_set
+	             , block_macro_data, open, close )
+	{
+		auto pdata =
+		        "<% set a='bad' %><% "s + open +
+		        "bl(a) %><= a =><% "s + close + " %><=  bl('ok') =>"s;
+		BOOST_TEST(parse_single(pdata, *data) == "ok"sv );
 	}
 
 BOOST_AUTO_TEST_SUITE_END() // macros

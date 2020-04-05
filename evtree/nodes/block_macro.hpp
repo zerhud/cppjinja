@@ -14,6 +14,7 @@ namespace cppjinja::evtnodes {
 
 class block_macro : public callable {
 	ast::block_macro block;
+	evt::render_info inner_ri() const ;
 public:
 	block_macro(ast::block_macro nb);
 	evt::render_info rinfo() const override ;
@@ -22,7 +23,7 @@ public:
 	void render(evt::context& ctx) const override ;
 
 	std::optional<ast::value_term> param(
-	          evt::context& ctx
+	          const evt::context& ctx
 	        , const ast::var_name& name) const override ;
 };
 

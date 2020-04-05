@@ -20,6 +20,7 @@ class callable;
 
 namespace evt {
 
+class context;
 /// render unit, node in render tree.
 /// contains infromation for render.
 class node;
@@ -28,6 +29,30 @@ struct render_info
 {
 	bool trim_left:4;
 	bool trim_right:4;
+};
+
+class maker_context {
+	context* ctx;
+	const node* maker;
+public:
+	maker_context(const node* n, context* c);
+	~maker_context() ;
+};
+
+class maker_callstack {
+	context* ctx;
+	const node* maker;
+public:
+	maker_callstack(const node* n, context* c);
+	~maker_callstack() ;
+};
+
+class maker_injection {
+	context* ctx;
+	const evtnodes::callable* injection;
+public:
+	maker_injection(const evtnodes::callable* i, context* c);
+	~maker_injection();
 };
 
 class context {
@@ -41,6 +66,7 @@ class context {
 	{
 		const node* maker;
 		std::vector<const node*> ctx;
+		std::vector<const evtnodes::callable*> injections;
 	};
 
 	std::vector<context_frame> ctx;
@@ -53,8 +79,10 @@ class context {
 
 	std::ostream& outstream;
 
+	const evtnodes::callable* cb_caller()const;
 	const evtnodes::callable* cb_ctx_maker()const;
 	const node* search_in_tree(const ast::var_name& n)const;
+	std::optional<ast::value_term> search_in_params(const ast::var_name& obj) const ;
 public:
 	context(const data_provider* p, const evtree* t, std::ostream& out);
 
@@ -70,7 +98,9 @@ public:
 
 	void pop_context(const node* m);
 	void push_context(const node* m);
-	void add_context(const node* n);
+	void add_to_context(const node* n);
+	void inject_to_context(const evtnodes::callable* node);
+	void takeout_from_context(const evtnodes::callable* node);
 	const node* ctx_maker() const ;
 
 	void current_node(const node* n);

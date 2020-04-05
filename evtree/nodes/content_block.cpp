@@ -38,6 +38,8 @@ void cppjinja::evtnodes::content_block::render(evt::context& ctx) const
 	auto def_ri = ctx.cur_render_info();
 	if(!def_ri) def_ri = rinfo();
 	auto children = ctx.tree().children(this, false);
+	ctx.current_node(this);
+	evt::maker_context cm(this, &ctx);
 	render_children(children, ctx, *def_ri);
 }
 

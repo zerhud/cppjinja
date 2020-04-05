@@ -25,6 +25,18 @@ const cppjinja::evt::node* cppjinja::evt::context::search_in_tree(
 	return tree_->search(n, current_node());
 }
 
+std::optional<cppjinja::ast::value_term>
+cppjinja::evt::context::search_in_params(const cppjinja::ast::var_name& obj) const
+{
+	using evtnodes::callable;
+	for(auto i:ctx.back().injections)
+		if(auto p = i->param(*this, obj);p)
+			return p;
+	if(const callable* v = cb_ctx_maker())
+		return v->param(*this, obj);
+	return std::nullopt;
+}
+
 cppjinja::evt::context::context(
           const data_provider* p
         , const evtree* t
@@ -73,11 +85,7 @@ cppjinja::east::value_term cppjinja::evt::context::concreate_value(
 		}
 		east::value_term operator()(const ast::var_name& obj)
 		{
-			using evtnodes::callable;
-			std::optional<ast::value_term> result;
-
-			if(const callable* v = self->cb_ctx_maker())
-				result = v->param(*self, obj);
+			std::optional<ast::value_term> result = self->search_in_params(obj);
 
 			if(auto* set = dynamic_cast<const evtnodes::op_set*>(
 			            self->search_in_tree(obj)); set)
@@ -142,37 +150,29 @@ void cppjinja::evt::context::pop_context(const node* m)
 
 void cppjinja::evt::context::push_context(const node* m)
 {
-	ctx.push_back({m, {}});
+	ctx.push_back({m, {}, {}});
 }
 
-void cppjinja::evt::context::add_context(const evt::node* n)
+void cppjinja::evt::context::add_to_context(const evt::node* n)
 {
 	assert( !ctx.empty() );
 	ctx.back().ctx.emplace_back(n);
 }
 
+void cppjinja::evt::context::inject_to_context(const cppjinja::evtnodes::callable* node)
+{
+	ctx.back().injections.emplace_back(node);
+}
+
+void cppjinja::evt::context::takeout_from_context(const cppjinja::evtnodes::callable* node)
+{
+	auto& ins = ctx.back().injections;
+	auto pos = std::find(ins.begin(), ins.end(), node);
+	if(pos!=ins.end()) ins.erase(pos);
+}
+
 void cppjinja::evt::context::current_node(const cppjinja::evt::node* n)
 {
-	/*
-	if(ctx.empty())
-	{
-		cur_node = n;
-		return;
-	}
-
-	auto& cur_ctx = ctx.back();
-	auto cur_pos = std::find(std::begin(cur_ctx), std::end(cur_ctx), cur_node);
-	assert(cur_pos==std::end(cur_ctx) || cur_node!=nullptr);
-	if(n!=nullptr)
-	{
-		auto n_pos = std::find(std::begin(cur_ctx), std::end(cur_ctx), n);
-		if( n_pos==std::end(cur_ctx) )
-			throw std::runtime_error("cannot find new current node");
-		if( ++cur_pos != n_pos )
-			throw std::runtime_error("callstack error");
-	}
-	*/
-
 	cur_nodes.emplace_back(n);
 }
 
@@ -231,4 +231,40 @@ void cppjinja::evt::context::call_params(
 {
 	assert( !callstack.empty() );
 	callstack.back().params = std::move(params);
+}
+
+cppjinja::evt::maker_context::maker_context(
+        const cppjinja::evt::node* n, cppjinja::evt::context* c)
+    : ctx(c), maker(n)
+{
+	if(ctx && maker) ctx->push_context(maker);
+}
+
+cppjinja::evt::maker_context::~maker_context()
+{
+	if(ctx && maker) ctx->pop_context(maker);
+}
+
+cppjinja::evt::maker_callstack::maker_callstack(
+        const cppjinja::evt::node* n, cppjinja::evt::context* c)
+    : ctx(c), maker(n)
+{
+	if(ctx && maker) ctx->push_callstack(maker);
+}
+
+cppjinja::evt::maker_callstack::~maker_callstack()
+{
+	if(ctx && maker) ctx->pop_callstack(maker);
+}
+
+cppjinja::evt::maker_injection::maker_injection(
+        const cppjinja::evtnodes::callable* i, cppjinja::evt::context* c)
+    : ctx(c), injection(i)
+{
+	if(ctx && injection) ctx->inject_to_context(injection);
+}
+
+cppjinja::evt::maker_injection::~maker_injection()
+{
+	if(ctx && injection) ctx->takeout_from_context(injection);
 }

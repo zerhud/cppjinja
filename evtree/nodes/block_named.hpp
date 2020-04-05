@@ -23,7 +23,7 @@ public:
 	void render(evt::context& ctx) const override ;
 
 	std::optional<ast::value_term> param(
-	          evt::context& ctx
+	          const evt::context& ctx
 	        , const ast::var_name& name
 	        ) const override ;
 };

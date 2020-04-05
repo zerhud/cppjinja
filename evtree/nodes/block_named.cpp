@@ -31,7 +31,7 @@ bool cppjinja::evtnodes::block_named::is_leaf() const
 }
 
 std::optional<cppjinja::ast::value_term> cppjinja::evtnodes::block_named::param(
-        evt::context& ctx,
+        const evt::context& ctx,
         const cppjinja::ast::var_name& name) const
 {
 	return param(block.params, name, ctx);
@@ -41,5 +41,7 @@ void cppjinja::evtnodes::block_named::render(evt::context& ctx) const
 {
 	evt::render_info ri{ block.left_close.trim, block.right_open.trim };
 	auto children = ctx.tree().children(this, false);
+	ctx.current_node(this);
+	evt::maker_context cm(this, &ctx);
 	render_children(children, ctx, ri);
 }

@@ -56,20 +56,6 @@ static void insert_content(
 			evt::node* tnode =
 			        create_node<evtnodes::block_macro>(dest, parent, mb.get());
 			insert_content(dest, parent, mb.get(), tnode);
-			/*
-			ast::block_named tmp_block;
-			tmp_block.name = mb.get().name;
-			tmp_block.params = mb.get().params;
-			tmp_block.content = mb.get().content;
-			tmp_block.left_open = mb.get().left_open;
-			tmp_block.right_open = mb.get().right_open;
-			tmp_block.left_close = mb.get().left_close;
-			tmp_block.right_close = mb.get().right_close;
-
-			evt::node* tnode = create_node<evtnodes::block_named>(
-			            dest, parent, tmp_block);
-			insert_content(dest, parent, tmp_block, tnode);
-			*/
 		},
 		[&dest,&def](ast::string_t& str)
 		{
