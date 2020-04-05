@@ -37,6 +37,7 @@ bool cppjinja::evtnodes::block_macro::is_leaf() const
 
 void cppjinja::evtnodes::block_macro::render(evt::context& ctx) const
 {
+	ctx.current_node(this);
 	auto children = ctx.tree().children(this, false);
 	evt::maker_injection injection(this, &ctx);
 	render_children(children, ctx, inner_ri());

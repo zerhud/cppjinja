@@ -27,15 +27,24 @@ void cppjinja::evt::node::add_parent(cppjinja::evt::node* np)
 	parents_.emplace_back(np);
 }
 
-std::vector<cppjinja::evt::node*> cppjinja::evt::node::parents()
+std::vector<cppjinja::evt::node*> cppjinja::evt::node::parents(bool all)
 {
-	return parents_;
+	auto ret = parents_;
+	if(all) for(auto&p:ret) {
+		auto ppars = p->parents(true);
+		ret.insert(ret.end(), ppars.begin(), ppars.end());
+	}
+	return ret;
 }
 
-std::vector<const cppjinja::evt::node*> cppjinja::evt::node::parents() const
+std::vector<const cppjinja::evt::node*> cppjinja::evt::node::parents(bool all) const
 {
 	std::vector<const cppjinja::evt::node*> ret;
 	for(auto& p:parents_) ret.emplace_back(p);
+	if(all) for(auto&p:ret) {
+		auto ppars = p->parents(true);
+		ret.insert(ret.end(), ppars.begin(), ppars.end());
+	}
 	return ret;
 }
 

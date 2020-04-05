@@ -32,8 +32,8 @@ public:
 	virtual void render( evt::context& ctx ) const =0 ;
 
 	void add_parent(node* np) ;
-	std::vector<node*> parents() ;
-	std::vector<const node*> parents() const ;
+	std::vector<node*> parents(bool all=false) ;
+	std::vector<const node*> parents(bool all=false) const ;
 	bool is_parent(const node* n) const ;
 protected:
 	bool calculate(context& ctx, const ast::binary_op& op) const ;

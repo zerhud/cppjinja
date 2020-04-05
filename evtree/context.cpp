@@ -19,10 +19,15 @@ const cppjinja::evtnodes::callable* cppjinja::evt::context::cb_ctx_maker() const
 	return dynamic_cast<const evtnodes::callable*>(ctx_maker());
 }
 
-const cppjinja::evt::node* cppjinja::evt::context::search_in_tree(
+const cppjinja::evt::node* cppjinja::evt::context::search_in_tree_by_ctx(
         const ast::var_name& n) const
 {
-	return tree_->search(n, current_node());
+	if(n.size() != 1) return nullptr;
+
+	auto children = tree_->children(ctx_maker(), false);
+	for(auto& child:children) if(child->name() == n[0]) return child;
+
+	return nullptr;
 }
 
 std::optional<cppjinja::ast::value_term>
@@ -86,13 +91,12 @@ cppjinja::east::value_term cppjinja::evt::context::concreate_value(
 		east::value_term operator()(const ast::var_name& obj)
 		{
 			std::optional<ast::value_term> result = self->search_in_params(obj);
+			if(result) return self->concreate_value(*result);
 
-			if(auto* set = dynamic_cast<const evtnodes::op_set*>(
-			            self->search_in_tree(obj)); set)
-				result = set->value(obj);
-
-			return result
-			        ? self->concreate_value(*result)
+			auto* set = dynamic_cast<const evtnodes::op_set*>(
+			            self->search_in_tree_by_ctx(obj));
+			return set
+			        ? self->concreate_value(set->value(obj))
 			        : self->prov->value(east_cvt::cvt(obj))
 			        ;
 		}

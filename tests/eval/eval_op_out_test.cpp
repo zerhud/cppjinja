@@ -159,13 +159,15 @@ BOOST_AUTO_TEST_CASE(function_from_provider)
 	BOOST_TEST(parse_single(pdata, *data) == "ok"sv );
 }
 
-BOOST_AUTO_TEST_SUITE(macros)
+BOOST_AUTO_TEST_SUITE(access_to_variable_from_blocks)
 
 	BOOST_FIXTURE_TEST_CASE(named_outputs, mock_data_provider_fixture)
 	{
 		auto pdata = "<% block bl %>ok<% endblock %>"sv;
 		BOOST_TEST(parse_single(pdata, *data) == "ok"sv );
 		pdata = "<% block bl %>ok<% endblock %><= self.bl() =>"sv;
+		BOOST_TEST(parse_single(pdata, *data) == "okok"sv );
+		pdata = "<% block bl %>ok<% endblock %><= bl() =>"sv;
 		BOOST_TEST(parse_single(pdata, *data) == "okok"sv );
 	}
 
@@ -201,16 +203,23 @@ BOOST_AUTO_TEST_SUITE(macros)
 		BOOST_TEST(parse_single(pdata, *data) == "boktest"s );
 	}
 
-	BOOST_DATA_TEST_CASE_F(mock_data_provider_fixture, param_name_same_as_set
-	             , block_macro_data, open, close )
+	BOOST_FIXTURE_TEST_CASE(macro_access_outuer_set, mock_data_provider_fixture)
 	{
 		auto pdata =
-		        "<% set a='bad' %><% "s + open +
-		        "bl(a) %><= a =><% "s + close + " %><=  bl('ok') =>"s;
-		BOOST_TEST(parse_single(pdata, *data) == "ok"sv );
+		        "<% set u='outer' %><% set a='bad' %><% macrobl(a) %>"
+		        "<= a =><= u =><% endmacro %><=  bl('ok') =>"sv;
+		BOOST_TEST(parse_single(pdata, *data) == "okouter"sv );
 	}
 
-BOOST_AUTO_TEST_SUITE_END() // macros
+	BOOST_FIXTURE_TEST_CASE(block_cannt_access_outuer_set, mock_data_provider_fixture)
+	{
+		MOCK_EXPECT(data->value_var_name).once().returns("out"s);
+		auto pdata =
+		        "<% set u='outer' %><% set a='bad' %><% block bl(a) %>"
+		        "<= a =><= u =><% endblock %><=  bl('ok') =>"sv;
+		BOOST_TEST(parse_single(pdata, *data) == "okout"sv );
+	}
+BOOST_AUTO_TEST_SUITE_END() // access_to_variable_from_blocks
 
 BOOST_AUTO_TEST_SUITE(binary_ops)
 BOOST_AUTO_TEST_CASE(simple_if)
