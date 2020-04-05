@@ -62,5 +62,8 @@ struct function_call {
 	std::vector<function_parameter> params;
 };
 
+bool operator == (const map_v& left, const map_v& right);
+bool operator == (const array_v& left, const array_v& right);
+std::ostream& operator << (std::ostream& out, const value_term& val);
 
 } // namespace cppjinja::east
