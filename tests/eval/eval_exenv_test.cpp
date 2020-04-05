@@ -16,14 +16,14 @@
 #include "mocks.hpp"
 #include "evtree/node.hpp"
 #include "evtree/exenv.hpp"
+#include "parser/operators/common.hpp"
 
 using namespace std::literals;
 namespace tdata = boost::unit_test::data;
 
 struct mock_env_fixture
 {
-	std::unique_ptr<mocks::data_provider> data =
-	        std::make_unique<mocks::data_provider>();
+	mocks::data_provider data;
 	cppjinja::evtree compiled;
 	std::stringstream out;
 };
@@ -31,17 +31,17 @@ struct mock_env_fixture
 struct mock_exenv_fixture : mock_env_fixture
 {
 	cppjinja::evt::exenv env;
-	mock_exenv_fixture() : env(data.get(), &compiled, out) {}
+	cppjinja::evt::context_new ctx;
+	mock_exenv_fixture() : env(&data, &compiled, out) {}
 };
 
 
 BOOST_AUTO_TEST_SUITE(exenv)
-BOOST_FIXTURE_TEST_CASE(environment, mock_env_fixture)
+BOOST_FIXTURE_TEST_CASE(environment, mock_exenv_fixture)
 {
-	cppjinja::evt::exenv env(data.get(), &compiled, out);
-	BOOST_TEST(&env.tmpl() == &compiled);
-	BOOST_TEST(env.data() == data.get());
 	BOOST_TEST(&env.out() == &out);
+	BOOST_TEST(env.data() == &data);
+	BOOST_TEST(&env.tmpl() == &compiled);
 }
 BOOST_AUTO_TEST_SUITE(context)
 BOOST_FIXTURE_TEST_CASE(current_node, mock_exenv_fixture)
@@ -104,9 +104,11 @@ BOOST_AUTO_TEST_CASE(simples)
 	value_test = value_term{std::move(array_test_v)};
 	BOOST_TEST(ctx.solve_value(value_test) == right_array);
 }
-BOOST_AUTO_TEST_CASE(variable_name)
+BOOST_FIXTURE_TEST_CASE(variable_from_provider, mock_exenv_fixture)
 {
-	;
+	cppjinja::ast::value_term vn{cppjinja::ast::var_name{ "a" }};
+	MOCK_EXPECT(data.value_var_name).once().returns(42);
+	BOOST_TEST(ctx.solve_value(vn) == cppjinja::east::value_term{42});
 }
 BOOST_AUTO_TEST_SUITE_END() // solve_value
 BOOST_AUTO_TEST_SUITE_END() // context
