@@ -34,6 +34,7 @@ class evtree : public evaluator {
 	        ) const ;
 	bool is_tmpl(const evt::node& n) const ;
 public:
+	/// debug function
 	const evtnodes::tmpl* search_tmpl(const ast::var_name& name) const ;
 	const evt::node* search(
 	          const ast::var_name& name
@@ -44,6 +45,7 @@ public:
 	          const evt::node* selected
 	        , bool add_subs=false) const ;
 
+	/// debug function
 	void print_subtree(const evt::node* par=nullptr, std::string prefix="") const ;
 
 	evtree& add_tmpl(ast::tmpl& tmpl) override ;

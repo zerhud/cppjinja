@@ -53,9 +53,10 @@ static void insert_content(
 		[&dest,parent](ast::forward_ast<ast::block_macro>& mb)
 		{
 			// macro cannot be declared inside a block
-			//evt::node* tnode =
-			        //create_node<evtnodes::block_macro>(dest, parent, mb.get());
-			//insert_content(dest, parent, mb.get(), tnode);
+			evt::node* tnode =
+			        create_node<evtnodes::block_macro>(dest, parent, mb.get());
+			insert_content(dest, parent, mb.get(), tnode);
+			/*
 			ast::block_named tmp_block;
 			tmp_block.name = mb.get().name;
 			tmp_block.params = mb.get().params;
@@ -68,6 +69,7 @@ static void insert_content(
 			evt::node* tnode = create_node<evtnodes::block_named>(
 			            dest, parent, tmp_block);
 			insert_content(dest, parent, tmp_block, tnode);
+			*/
 		},
 		[&dest,&def](ast::string_t& str)
 		{
