@@ -46,16 +46,20 @@ BOOST_FIXTURE_TEST_CASE(environment, mock_exenv_fixture)
 BOOST_AUTO_TEST_SUITE(context)
 BOOST_FIXTURE_TEST_CASE(current_node, mock_exenv_fixture)
 {
-	cppjinja::evt::context_new ctx;
-	BOOST_CHECK_THROW(ctx.current_node(), std::exception);
-
 	mocks::node fnode1, fnode2;
+
+	BOOST_CHECK_THROW(ctx.current_node(), std::exception);
+	BOOST_CHECK_THROW(ctx.current_node(&fnode1), std::exception);
+
+	ctx.push(&fnode1);
 	ctx.current_node(&fnode1);
 	BOOST_TEST(ctx.current_node() == &fnode1);
 
 	ctx.current_node(&fnode2);
 	BOOST_TEST(ctx.current_node() == &fnode2);
 	BOOST_TEST(ctx.current_node(1) == &fnode1);
+
+	BOOST_CHECK_THROW(ctx.current_node(2), std::exception);
 }
 BOOST_FIXTURE_TEST_CASE(stack, mock_exenv_fixture)
 {
@@ -80,6 +84,11 @@ BOOST_AUTO_TEST_CASE(injection)
 	BOOST_CHECK_THROW(ctx.inject(nullptr), std::exception);
 }
 BOOST_AUTO_TEST_SUITE(solve_value)
+BOOST_AUTO_TEST_CASE(var_not_setted)
+{
+	cppjinja::ast::value_term vn{cppjinja::ast::var_name{ "a" }};
+	BOOST_TEST(!ctx.solve_value(vn).has_value());
+}
 BOOST_AUTO_TEST_CASE(simples)
 {
 	using cppjinja::ast::value_term;
@@ -104,10 +113,18 @@ BOOST_AUTO_TEST_CASE(simples)
 	value_test = value_term{std::move(array_test_v)};
 	BOOST_TEST(ctx.solve_value(value_test) == right_array);
 }
-BOOST_FIXTURE_TEST_CASE(variable_from_provider, mock_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(setted_variable, mock_exenv_fixture)
 {
+	cppjinja::ast::op_set data;
+	data.name = "a";
+	data.value = 42;
+	cppjinja::evtnodes::op_set snode(std::move(data));
+	mocks::node fnode1;
+
+	ctx.push(&fnode1);
+	ctx.current_node(&snode);
+
 	cppjinja::ast::value_term vn{cppjinja::ast::var_name{ "a" }};
-	MOCK_EXPECT(data.value_var_name).once().returns(42);
 	BOOST_TEST(ctx.solve_value(vn) == cppjinja::east::value_term{42});
 }
 BOOST_AUTO_TEST_SUITE_END() // solve_value
