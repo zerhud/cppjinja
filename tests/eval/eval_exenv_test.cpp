@@ -83,35 +83,15 @@ BOOST_AUTO_TEST_CASE(injection)
 
 	BOOST_CHECK_THROW(ctx.inject(nullptr), std::exception);
 }
-BOOST_AUTO_TEST_SUITE(solve_value)
-BOOST_AUTO_TEST_CASE(var_not_setted)
+BOOST_AUTO_TEST_SUITE(solve_name)
+BOOST_FIXTURE_TEST_CASE(var_not_setted, mock_exenv_fixture)
 {
-	cppjinja::ast::value_term vn{cppjinja::ast::var_name{ "a" }};
-	BOOST_TEST(!ctx.solve_value(vn).has_value());
-}
-BOOST_AUTO_TEST_CASE(simples)
-{
-	using cppjinja::ast::value_term;
-	using east_value_term = cppjinja::east::value_term;
-	cppjinja::evt::context_new ctx;
-	BOOST_TEST(ctx.solve_value(value_term{42}) == east_value_term{42});
-	BOOST_TEST(ctx.solve_value(value_term{"a"}) == east_value_term{"a"});
+	cppjinja::ast::var_name vn{ "a" };
+	BOOST_CHECK_THROW(ctx.solve_var(vn), std::exception);
 
-	cppjinja::ast::tuple_v tuple_test_v;
-	tuple_test_v.fields.push_back(value_term{42});
-	tuple_test_v.fields.push_back(value_term{"a"});
-	value_term value_test{std::move(tuple_test_v)};
-	cppjinja::east::array_v tuple_right_v;
-	tuple_right_v.items.push_back(std::make_unique<east_value_term>(42));
-	tuple_right_v.items.push_back(std::make_unique<east_value_term>("a"));
-	east_value_term right_array{std::move(tuple_right_v)};
-	BOOST_TEST(ctx.solve_value(value_test) == right_array);
-
-	cppjinja::ast::array_v array_test_v;
-	array_test_v.fields.push_back(value_term{42});
-	array_test_v.fields.push_back(value_term{"a"});
-	value_test = value_term{std::move(array_test_v)};
-	BOOST_TEST(ctx.solve_value(value_test) == right_array);
+	mocks::node fnode1;
+	ctx.push(&fnode1);
+	BOOST_TEST(!ctx.solve_var(vn).has_value());
 }
 BOOST_FIXTURE_TEST_CASE(setted_variable, mock_exenv_fixture)
 {
@@ -124,9 +104,35 @@ BOOST_FIXTURE_TEST_CASE(setted_variable, mock_exenv_fixture)
 	ctx.push(&fnode1);
 	ctx.current_node(&snode);
 
-	cppjinja::ast::value_term vn{cppjinja::ast::var_name{ "a" }};
-	BOOST_TEST(ctx.solve_value(vn) == cppjinja::east::value_term{42});
+	cppjinja::ast::var_name vn{ "a" };
+	BOOST_TEST(ctx.solve_var(vn) == cppjinja::ast::value_term{42});
+}
+BOOST_AUTO_TEST_SUITE_END() // solve_name
+BOOST_AUTO_TEST_SUITE_END() // context
+
+BOOST_AUTO_TEST_SUITE(solve_value)
+BOOST_FIXTURE_TEST_CASE(simples, mock_exenv_fixture)
+{
+	using cppjinja::ast::value_term;
+	using east_value_term = cppjinja::east::value_term;
+	BOOST_TEST(env.solve_value(value_term{42}) == east_value_term{42});
+	BOOST_TEST(env.solve_value(value_term{"a"}) == east_value_term{"a"});
+
+	cppjinja::ast::tuple_v tuple_test_v;
+	tuple_test_v.fields.push_back(value_term{42});
+	tuple_test_v.fields.push_back(value_term{"a"});
+	value_term value_test{std::move(tuple_test_v)};
+	cppjinja::east::array_v tuple_right_v;
+	tuple_right_v.items.push_back(std::make_unique<east_value_term>(42));
+	tuple_right_v.items.push_back(std::make_unique<east_value_term>("a"));
+	east_value_term right_array{std::move(tuple_right_v)};
+	BOOST_TEST(env.solve_value(value_test) == right_array);
+
+	cppjinja::ast::array_v array_test_v;
+	array_test_v.fields.push_back(value_term{42});
+	array_test_v.fields.push_back(value_term{"a"});
+	value_test = value_term{std::move(array_test_v)};
+	BOOST_TEST(env.solve_value(value_test) == right_array);
 }
 BOOST_AUTO_TEST_SUITE_END() // solve_value
-BOOST_AUTO_TEST_SUITE_END() // context
 BOOST_AUTO_TEST_SUITE_END() // exenv

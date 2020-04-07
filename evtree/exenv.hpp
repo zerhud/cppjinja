@@ -22,6 +22,8 @@ public:
 	const evtree& tmpl() const ;
 	const data_provider* data() const ;
 	std::ostream& out() ;
+
+	east::value_term solve_value(const cppjinja::ast::value_term& val) const ;
 };
 
 } // namespace cppjinja::evt

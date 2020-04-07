@@ -22,8 +22,6 @@ class context_new final {
 	std::vector<frame> ctx;
 
 	void require_not_empty() const ;
-	std::optional<east::value_term> solve_var_name(
-	        const ast::var_name& var) const ;
 public:
 	context_new();
 
@@ -37,8 +35,8 @@ public:
 	void inject(const evtnodes::callable* n);
 	void takeout(const evtnodes::callable* n);
 
-	std::optional<east::value_term> solve_value(
-	        const cppjinja::ast::value_term& val) const ;
+	std::optional<ast::value_term> solve_var(
+	        const cppjinja::ast::var_name& var) const;
 };
 
 } // namespace cppjinja::evt

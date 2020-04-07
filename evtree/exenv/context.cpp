@@ -16,17 +16,6 @@ void cppjinja::evt::context_new::require_not_empty() const
 	if(ctx.empty()) throw std::runtime_error("context is mepty");
 }
 
-std::optional<cppjinja::east::value_term>
-cppjinja::evt::context_new::solve_var_name(
-        const cppjinja::ast::var_name& var) const
-{
-	for(auto& ctx_node:ctx.back().node_stack)
-		if(auto set = dynamic_cast<const evtnodes::op_set*>(ctx_node);
-		        ctx_node->name() == var[0] && set)
-			return solve_value(set->value(var));
-	return std::nullopt;
-}
-
 cppjinja::evt::context_new::context_new()
 {
 }
@@ -78,39 +67,12 @@ void cppjinja::evt::context_new::takeout(const cppjinja::evtnodes::callable* n)
 	if(pos!=ins.end()) ins.erase(pos);
 }
 
-std::optional<cppjinja::east::value_term>
-cppjinja::evt::context_new::solve_value(
-        const cppjinja::ast::value_term& val) const
+std::optional<cppjinja::ast::value_term> cppjinja::evt::context_new::solve_var(const cppjinja::ast::var_name& var) const
 {
-	struct {
-		const context_new* self;
-		typedef std::optional<east::value_term> optv_t;
-
-		east::value_term make_array(
-		            const std::vector<ast::forward_ast<ast::value_term>>& fields)
-		{
-			east::array_v ret;
-			for(auto& i:fields)
-				ret.items.push_back(
-				            std::make_unique<east::value_term>(
-				                self->solve_value(i.get())));
-			return ret;
-		}
-
-		optv_t operator()(const double& obj) { return obj; }
-		optv_t operator()(const ast::string_t& obj) { return obj; }
-		optv_t operator()(const ast::tuple_v& obj) { return make_array(obj.fields); }
-		optv_t operator()(const ast::array_v& obj) { return make_array(obj.fields); }
-		optv_t operator()(const ast::var_name& obj)
-		{
-			return self->solve_var_name(obj);
-		}
-		optv_t operator()(const ast::function_call& obj)
-		{
-			return 1.1;
-		}
-		optv_t operator()(const ast::binary_op&) { return false; }
-	} rnd{this};
-
-	return boost::apply_visitor(rnd, val.var);
+	require_not_empty();
+	for(auto& ctx_node:ctx.back().node_stack)
+		if(auto set = dynamic_cast<const evtnodes::op_set*>(ctx_node);
+		        ctx_node->name() == var[0] && set)
+			return set->value(var);
+	return std::nullopt;
 }
