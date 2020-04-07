@@ -8,6 +8,7 @@
 
 #include "exenv.hpp"
 #include "eval/ast_cvt.hpp"
+#include "helpers/binary_op.hpp"
 
 using namespace cppjinja::details;
 
@@ -76,7 +77,15 @@ cppjinja::east::value_term cppjinja::evt::exenv::solve_value(
 				            self->solve_value(src.value.get())});
 			return self->user_data->value(call);
 		}
-		ret_t operator()(const ast::binary_op&) { return false; }
+		ret_t operator()(const ast::binary_op& op)
+		{
+			auto left = self->solve_value(op.left);
+			auto right = self->solve_value(op.right);
+			evtnodes::binary_op_helper cmp(op.op);
+			return std::visit(cmp,
+			            (east::value_term_var&)left,
+			            (east::value_term_var&)right);
+		}
 	} rnd{this};
 
 	return boost::apply_visitor(rnd, val.var);

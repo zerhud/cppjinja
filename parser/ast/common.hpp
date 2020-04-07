@@ -40,6 +40,9 @@ struct i18n_string;
 
 struct binary_op : x3::position_tagged
 {
+	binary_op() =default ;
+	binary_op(forward_ast<value_term> l, comparator o, forward_ast<value_term> r)
+	    : left(std::move(l)), op(o), right(std::move(r)) {}
 	forward_ast<value_term> left;
 	comparator op;
 	std::int32_t padding;

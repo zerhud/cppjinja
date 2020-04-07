@@ -21,6 +21,10 @@
 using namespace std::literals;
 namespace tdata = boost::unit_test::data;
 
+using cppjinja::ast::comparator;
+using cppjinja::ast::value_term;
+using east_value_term = cppjinja::east::value_term;
+
 struct mock_env_fixture
 {
 	mocks::data_provider data;
@@ -124,8 +128,6 @@ BOOST_AUTO_TEST_SUITE_END() // context
 BOOST_AUTO_TEST_SUITE(solve_value)
 BOOST_FIXTURE_TEST_CASE(simples, mock_exenv_fixture)
 {
-	using cppjinja::ast::value_term;
-	using east_value_term = cppjinja::east::value_term;
 	BOOST_TEST(env.solve_value(value_term{42}) == east_value_term{42});
 	BOOST_TEST(env.solve_value(value_term{"a"}) == east_value_term{"a"});
 
@@ -147,14 +149,26 @@ BOOST_FIXTURE_TEST_CASE(simples, mock_exenv_fixture)
 }
 BOOST_FIXTURE_TEST_CASE(functions, mock_exenv_fixture)
 {
-	using cppjinja::ast::value_term;
-	using east_value_term = cppjinja::east::value_term;
-
 	cppjinja::ast::var_name fnc_name{"a"};
 	cppjinja::ast::function_call_parameter param1(value_term{1});
 	value_term call{cppjinja::ast::function_call{fnc_name, {param1}}};
 	MOCK_EXPECT(data.value_function_call).once().returns(east_value_term{42});
 	BOOST_TEST(env.solve_value(call) == east_value_term{42});
+}
+BOOST_DATA_TEST_CASE_F(mock_exenv_fixture, binary_ops
+          , tdata::make( value_term{1}, 2, "str"s )
+          ^ tdata::make( value_term{1}, 3, "str"s )
+          ^ tdata::make( comparator::eq, comparator::less, comparator::eq )
+          ^ tdata::make( cppjinja::east::value_term{1}, 1, 1 )
+          , left, right, op, result )
+{
+	using cppjinja::ast::var_name;
+	using cppjinja::ast::binary_op;
+	binary_op bop{left, op, right};
+	BOOST_TEST(env.solve_value(value_term{bop}) == result);
+	MOCK_EXPECT(data.value_function_call).once().returns(env.solve_value(left));
+	bop.left = value_term{cppjinja::ast::function_call{var_name{"a"}, {}}};
+	BOOST_TEST(env.solve_value(value_term{bop}) == result);
 }
 BOOST_AUTO_TEST_SUITE_END() // solve_value
 BOOST_AUTO_TEST_SUITE_END() // exenv
