@@ -7,6 +7,9 @@
  *************************************************************************/
 
 #include "exenv.hpp"
+#include "eval/ast_cvt.hpp"
+
+using namespace cppjinja::details;
 
 cppjinja::evt::exenv::exenv(
           const cppjinja::data_provider* prov
@@ -65,7 +68,13 @@ cppjinja::east::value_term cppjinja::evt::exenv::solve_value(
 		}
 		ret_t operator()(const ast::function_call& obj)
 		{
-			return 1.1;
+			east::function_call call;
+			call.ref = east_cvt::cvt(obj.ref);
+			for(auto& src:obj.params)
+				call.params.emplace_back(east::function_parameter{
+				            src.name,
+				            self->solve_value(src.value.get())});
+			return self->user_data->value(call);
 		}
 		ret_t operator()(const ast::binary_op&) { return false; }
 	} rnd{this};

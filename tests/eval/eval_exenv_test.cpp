@@ -107,6 +107,17 @@ BOOST_FIXTURE_TEST_CASE(setted_variable, mock_exenv_fixture)
 	cppjinja::ast::var_name vn{ "a" };
 	BOOST_TEST(ctx.solve_var(vn) == cppjinja::ast::value_term{42});
 }
+BOOST_FIXTURE_TEST_CASE(in_params, mock_exenv_fixture, * boost::unit_test::disabled())
+{
+	cppjinja::ast::var_name vn{ "a" };
+	cppjinja::ast::value_term val{42};
+
+	mocks::callable_node maker;
+	MOCK_EXPECT(maker.param).once().returns(val);
+
+	ctx.push(&maker);
+	BOOST_TEST(ctx.solve_var(vn) == val);
+}
 BOOST_AUTO_TEST_SUITE_END() // solve_name
 BOOST_AUTO_TEST_SUITE_END() // context
 
@@ -133,6 +144,17 @@ BOOST_FIXTURE_TEST_CASE(simples, mock_exenv_fixture)
 	array_test_v.fields.push_back(value_term{"a"});
 	value_test = value_term{std::move(array_test_v)};
 	BOOST_TEST(env.solve_value(value_test) == right_array);
+}
+BOOST_FIXTURE_TEST_CASE(functions, mock_exenv_fixture)
+{
+	using cppjinja::ast::value_term;
+	using east_value_term = cppjinja::east::value_term;
+
+	cppjinja::ast::var_name fnc_name{"a"};
+	cppjinja::ast::function_call_parameter param1(value_term{1});
+	value_term call{cppjinja::ast::function_call{fnc_name, {param1}}};
+	MOCK_EXPECT(data.value_function_call).once().returns(east_value_term{42});
+	BOOST_TEST(env.solve_value(call) == east_value_term{42});
 }
 BOOST_AUTO_TEST_SUITE_END() // solve_value
 BOOST_AUTO_TEST_SUITE_END() // exenv

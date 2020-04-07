@@ -16,6 +16,29 @@ void cppjinja::evt::context_new::require_not_empty() const
 	if(ctx.empty()) throw std::runtime_error("context is mepty");
 }
 
+std::optional<cppjinja::ast::value_term>
+cppjinja::evt::context_new::search_in_setts(
+        const cppjinja::ast::var_name& var) const
+{
+	assert(!ctx.empty());
+	for(auto& ctx_node:ctx.back().node_stack)
+		if(auto set = dynamic_cast<const evtnodes::op_set*>(ctx_node);
+		        ctx_node->name() == var[0] && set)
+			return set->value(var);
+	return std::nullopt;
+}
+
+std::optional<cppjinja::ast::value_term>
+cppjinja::evt::context_new::search_in_params(
+        const cppjinja::ast::var_name& var) const
+{
+	const evtnodes::callable* mk =
+	        dynamic_cast<const evtnodes::callable*>(maker());
+	if(!mk) return std::nullopt;
+	//return mk->param(this, var);
+	return std::nullopt;
+}
+
 cppjinja::evt::context_new::context_new()
 {
 }
@@ -67,12 +90,11 @@ void cppjinja::evt::context_new::takeout(const cppjinja::evtnodes::callable* n)
 	if(pos!=ins.end()) ins.erase(pos);
 }
 
-std::optional<cppjinja::ast::value_term> cppjinja::evt::context_new::solve_var(const cppjinja::ast::var_name& var) const
+std::optional<cppjinja::ast::value_term>
+cppjinja::evt::context_new::solve_var(const cppjinja::ast::var_name& var) const
 {
 	require_not_empty();
-	for(auto& ctx_node:ctx.back().node_stack)
-		if(auto set = dynamic_cast<const evtnodes::op_set*>(ctx_node);
-		        ctx_node->name() == var[0] && set)
-			return set->value(var);
-	return std::nullopt;
+	auto in_params = search_in_params(var);
+	if(in_params) return in_params;
+	return search_in_setts(var);
 }

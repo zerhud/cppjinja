@@ -22,6 +22,10 @@ class context_new final {
 	std::vector<frame> ctx;
 
 	void require_not_empty() const ;
+	std::optional<ast::value_term> search_in_setts(
+	        const cppjinja::ast::var_name& var) const;
+	std::optional<ast::value_term> search_in_params(
+	        const cppjinja::ast::var_name& var) const;
 public:
 	context_new();
 
