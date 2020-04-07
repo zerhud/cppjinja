@@ -35,8 +35,13 @@ struct mock_env_fixture
 struct mock_exenv_fixture : mock_env_fixture
 {
 	cppjinja::evt::exenv env;
-	cppjinja::evt::context_new ctx;
-	mock_exenv_fixture() : env(&data, &compiled, out) {}
+	cppjinja::evt::context_new& ctx;
+	cppjinja::evt::callstack& calls;
+	mock_exenv_fixture()
+	    : env(&data, &compiled, out)
+	    , ctx(env.ctx())
+	    , calls(env.calls())
+	{}
 };
 
 
@@ -46,7 +51,10 @@ BOOST_FIXTURE_TEST_CASE(environment, mock_exenv_fixture)
 	BOOST_TEST(&env.out() == &out);
 	BOOST_TEST(env.data() == &data);
 	BOOST_TEST(&env.tmpl() == &compiled);
+	BOOST_CHECK_NO_THROW(env.ctx());
+	BOOST_CHECK_NO_THROW(env.calls());
 }
+
 BOOST_AUTO_TEST_SUITE(context)
 BOOST_FIXTURE_TEST_CASE(current_node, mock_exenv_fixture)
 {
@@ -67,7 +75,6 @@ BOOST_FIXTURE_TEST_CASE(current_node, mock_exenv_fixture)
 }
 BOOST_FIXTURE_TEST_CASE(stack, mock_exenv_fixture)
 {
-	cppjinja::evt::context_new ctx;
 	mocks::node fnode1, fnode2;
 	BOOST_CHECK_THROW(ctx.maker(), std::exception);
 	BOOST_CHECK_THROW(ctx.pop(&fnode1), std::exception);
@@ -171,4 +178,73 @@ BOOST_DATA_TEST_CASE_F(mock_exenv_fixture, binary_ops
 	BOOST_TEST(env.solve_value(value_term{bop}) == result);
 }
 BOOST_AUTO_TEST_SUITE_END() // solve_value
+
+BOOST_AUTO_TEST_SUITE(callstack)
+BOOST_FIXTURE_TEST_CASE(cannot_push_nullptr, mock_exenv_fixture)
+{
+	BOOST_CHECK_THROW(calls.push(nullptr), std::exception);
+}
+BOOST_FIXTURE_TEST_CASE(push_pop_caller, mock_exenv_fixture)
+{
+	mocks::node caller, caller2;
+	BOOST_CHECK_THROW(calls.caller(), std::exception);
+	BOOST_CHECK_THROW(calls.pop(&caller), std::exception);
+
+	BOOST_CHECK_NO_THROW(calls.push(&caller));
+	BOOST_TEST(calls.caller() == &caller);
+
+	BOOST_CHECK_NO_THROW(calls.push(&caller2));
+	BOOST_TEST(calls.caller() == &caller2);
+	BOOST_CHECK_THROW(calls.pop(&caller), std::exception);
+	BOOST_CHECK_NO_THROW(calls.pop(&caller2));
+	BOOST_TEST(calls.caller() == &caller);
+}
+BOOST_FIXTURE_TEST_CASE(call_params, mock_exenv_fixture)
+{
+	mocks::node caller, caller2;
+	BOOST_CHECK_THROW(calls.call_params(), std::exception);
+	BOOST_CHECK_NO_THROW(calls.push(&caller));
+	BOOST_CHECK(calls.call_params().empty());
+
+	cppjinja::ast::function_call_parameter p1;
+	BOOST_CHECK_NO_THROW(calls.call_params({p1}));
+	BOOST_TEST_REQUIRE(calls.call_params().size() == 1);
+	BOOST_TEST(calls.call_params()[0] == p1);
+
+	BOOST_CHECK_NO_THROW(calls.push(&caller2));
+	BOOST_CHECK(calls.call_params().empty());
+	BOOST_CHECK_NO_THROW(calls.pop(&caller2));
+	BOOST_TEST_REQUIRE(calls.call_params().size() == 1);
+	BOOST_TEST(calls.call_params()[0] == p1);
+}
+BOOST_FIXTURE_TEST_CASE(cannot_add_params_to_empty, mock_exenv_fixture)
+{
+	cppjinja::ast::function_call_parameter p1;
+	BOOST_CHECK_THROW(calls.call_params({p1}), std::exception);
+}
+BOOST_AUTO_TEST_SUITE_END() // callstack
+
+BOOST_AUTO_TEST_SUITE(raii)
+BOOST_FIXTURE_TEST_CASE(push_ctx, mock_exenv_fixture)
+{
+	mocks::node maker;
+	BOOST_CHECK_THROW(ctx.maker(), std::exception);
+	{
+		cppjinja::evt::raii_push_ctx pusher(&maker, &ctx);
+		BOOST_TEST(ctx.maker() == &maker);
+	}
+	BOOST_CHECK_THROW(ctx.maker(), std::exception);
+}
+BOOST_FIXTURE_TEST_CASE(push_callstack, mock_exenv_fixture)
+{
+	mocks::node caller;
+	BOOST_CHECK_THROW(calls.caller(), std::exception);
+	{
+		cppjinja::evt::raii_push_callstack pusher(&caller, &calls);
+		BOOST_TEST(calls.caller() == &caller);
+	}
+	BOOST_CHECK_THROW(calls.caller(), std::exception);
+}
+BOOST_AUTO_TEST_SUITE_END() // raii
+
 BOOST_AUTO_TEST_SUITE_END() // exenv

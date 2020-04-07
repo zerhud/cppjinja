@@ -98,3 +98,16 @@ cppjinja::evt::context_new::solve_var(const cppjinja::ast::var_name& var) const
 	if(in_params) return in_params;
 	return search_in_setts(var);
 }
+
+cppjinja::evt::raii_push_ctx::raii_push_ctx(
+        const cppjinja::evt::node* n, cppjinja::evt::context_new* c)
+    : ctx(c)
+    , maker(n)
+{
+	ctx->push(maker);
+}
+
+cppjinja::evt::raii_push_ctx::~raii_push_ctx()
+{
+	ctx->pop(maker);
+}

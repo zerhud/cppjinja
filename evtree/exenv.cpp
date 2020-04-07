@@ -90,3 +90,13 @@ cppjinja::east::value_term cppjinja::evt::exenv::solve_value(
 
 	return boost::apply_visitor(rnd, val.var);
 }
+
+cppjinja::evt::context_new& cppjinja::evt::exenv::ctx()
+{
+	return exectx;
+}
+
+cppjinja::evt::callstack& cppjinja::evt::exenv::calls()
+{
+	return execalls;
+}

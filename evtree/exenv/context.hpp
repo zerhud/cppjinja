@@ -43,4 +43,12 @@ public:
 	        const cppjinja::ast::var_name& var) const;
 };
 
+class raii_push_ctx {
+	context_new* ctx;
+	const node* maker;
+public:
+	raii_push_ctx(const node* n, context_new* c);
+	~raii_push_ctx() ;
+};
+
 } // namespace cppjinja::evt
