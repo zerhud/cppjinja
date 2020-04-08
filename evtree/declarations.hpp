@@ -18,6 +18,8 @@ namespace evt {
 /// a node of template, compilation unit
 class node;
 
+class exenv;
+
 } // namespace evt
 
 namespace evtnodes {

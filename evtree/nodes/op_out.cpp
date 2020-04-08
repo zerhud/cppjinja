@@ -8,6 +8,8 @@
 
 #include <string>
 #include "op_out.hpp"
+#include "evtree/exenv/expr_solver.hpp"
+#include "evtree/exenv/expr_filter.hpp"
 
 using namespace std::literals;
 
@@ -33,6 +35,7 @@ bool cppjinja::evtnodes::op_out::is_leaf() const
 
 void cppjinja::evtnodes::op_out::render(evt::exenv& ctx) const
 {
+	using evt::expr_filter;
 	ctx.ctx().current_node(this);
 
 	if(op.filters.empty()) render_value(ctx, op.value);
@@ -42,15 +45,15 @@ void cppjinja::evtnodes::op_out::render(evt::exenv& ctx) const
 			east::value_term base;
 			void operator()(const ast::var_name& var)
 			{
-				base = ctx.filter(base, ast::value_term{var});
+				base = expr_filter(&ctx, base)(var);
 			}
 			void operator()(const ast::function_call& fnc)
 			{
 				ctx.calls().call_params(fnc.params);
-				base = ctx.filter(base, ast::value_term{fnc});
+				base = expr_filter(&ctx, base)(fnc);
 			}
 
-		} caller { ctx, ctx.solve_value(op.value) };
+		} caller { ctx, evt::expr_solver(&ctx)(op.value) };
 
 
 		for(auto& filter:op.filters)

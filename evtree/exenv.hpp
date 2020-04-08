@@ -28,20 +28,15 @@ class exenv final {
 	context exectx;
 	callstack execalls;
 	std::optional<render_info> cur_rinfo;
-	std::optional<ast::value_term> search_in_params(
-	        const cppjinja::ast::var_name& var) const;
 public:
 	exenv(const data_provider* prov, const evtree* tmpl, std::ostream& out);
 	const evtree& tmpl() const ;
 	const data_provider* data() const ;
 	std::ostream& out() ;
 
-	east::value_term solve_value(const cppjinja::ast::value_term& val) const ;
-	east::value_term filter(
-	            const east::value_term& base,
-	            const ast::value_term& val) const ;
-
 	context& ctx() ;
+	const context& ctx() const ;
+
 	callstack& calls() ;
 	const callstack& calls() const ;
 	std::optional<render_info> rinfo() const ;

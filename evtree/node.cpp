@@ -12,6 +12,7 @@
 #include "eval/ast.hpp"
 #include "helpers/binary_op.hpp"
 #include "helpers/loop_by_three.hpp"
+#include "exenv/expr_solver.hpp"
 
 using namespace std::literals;
 
@@ -74,9 +75,10 @@ bool cppjinja::evt::node::calculate(
         exenv& ctx, const ast::binary_op& op) const
 {
 	//TODO: remove this method (exenv already do it)?
+	expr_solver solver(&ctx);
 	evtnodes::binary_op_helper cmp(op.op);
-	east::value_term left = ctx.solve_value(op.left);
-	east::value_term right = ctx.solve_value(op.right);
+	east::value_term left = solver(op.left);
+	east::value_term right = solver(op.right);
 	return std::visit(cmp,
 	            (east::value_term_var&)left,
 	            (east::value_term_var&)right);
@@ -89,21 +91,22 @@ void cppjinja::evt::node::render_value(
 {
 	struct renderer {
 		exenv& ctx;
+		expr_solver solver;
 		const node* self;
-		renderer(exenv& c, const node* s) : ctx(c), self(s) {}
+		renderer(exenv& c, const node* s) : ctx(c), solver(&c), self(s) {}
 
 		void operator()(const double& obj) { ctx.out() << obj; }
 		void operator()(const ast::string_t& obj) { ctx.out() << obj; }
 		void operator()(const ast::tuple_v&) { }
 		void operator()(const ast::array_v&) { }
 		void operator()(const ast::var_name& obj) {
-			auto val = ctx.solve_value(ast::value_term{obj});
+			auto val = solver(ast::value_term{obj});
 			self->render_value(ctx, val);
 		}
 		void operator()(const ast::function_call& obj) {
 			auto* node = ctx.tmpl().search(obj.ref, self);
 			if(!node) {
-				auto cv = ctx.solve_value(ast::value_term{obj});
+				auto cv = solver(ast::value_term{obj});
 				self->render_value(ctx, cv);
 				return;
 			}
