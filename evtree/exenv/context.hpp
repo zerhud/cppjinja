@@ -14,7 +14,7 @@
 
 namespace cppjinja::evt {
 
-class context_new final {
+class context final {
 	struct frame
 	{
 		const node* maker;
@@ -27,7 +27,7 @@ class context_new final {
 	std::optional<ast::value_term> search_in_setts(
 	        const cppjinja::ast::var_name& var) const;
 public:
-	context_new();
+	context();
 
 	void current_node(const node* n) ;
 	const node* current_node(std::size_t ind=0) const ;
@@ -45,18 +45,18 @@ public:
 };
 
 class raii_push_ctx final {
-	context_new* ctx;
+	context* ctx;
 	const node* maker;
 public:
-	raii_push_ctx(const node* n, context_new* c);
+	raii_push_ctx(const node* n, context* c);
 	~raii_push_ctx() ;
 };
 
 class raii_inject final {
-	context_new* ctx;
+	context* ctx;
 	const evtnodes::callable* maker;
 public:
-	raii_inject(const evtnodes::callable* n, context_new* c);
+	raii_inject(const evtnodes::callable* n, context* c);
 	~raii_inject() ;
 };
 

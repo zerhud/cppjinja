@@ -36,7 +36,7 @@ struct mock_env_fixture
 struct mock_exenv_fixture : mock_env_fixture
 {
 	cppjinja::evt::exenv env;
-	cppjinja::evt::context_new& ctx;
+	cppjinja::evt::context& ctx;
 	cppjinja::evt::callstack& calls;
 	mock_exenv_fixture()
 	    : env(&data, &compiled, out)
@@ -86,7 +86,7 @@ BOOST_FIXTURE_TEST_CASE(stack, mock_exenv_fixture)
 }
 BOOST_AUTO_TEST_CASE(injection)
 {
-	cppjinja::evt::context_new ctx;
+	cppjinja::evt::context ctx;
 	mocks::node node;
 	mocks::callable_node calling, wrong_calling;
 

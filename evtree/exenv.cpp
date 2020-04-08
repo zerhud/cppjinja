@@ -140,7 +140,7 @@ cppjinja::east::value_term cppjinja::evt::exenv::filter(
 	    return boost::apply_visitor(vget, val.var);
 }
 
-cppjinja::evt::context_new& cppjinja::evt::exenv::ctx()
+cppjinja::evt::context& cppjinja::evt::exenv::ctx()
 {
 	return exectx;
 }

@@ -25,7 +25,7 @@ class exenv final {
 	const evtree* compiled_template;
 	const data_provider* user_data;
 	std::ostream& ostream;
-	context_new exectx;
+	context exectx;
 	callstack execalls;
 	std::optional<render_info> cur_rinfo;
 	std::optional<ast::value_term> search_in_params(
@@ -41,7 +41,7 @@ public:
 	            const east::value_term& base,
 	            const ast::value_term& val) const ;
 
-	context_new& ctx() ;
+	context& ctx() ;
 	callstack& calls() ;
 	const callstack& calls() const ;
 	std::optional<render_info> rinfo() const ;
