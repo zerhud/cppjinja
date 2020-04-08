@@ -31,16 +31,16 @@ bool block_if::is_leaf() const
 	return false;
 }
 
-void block_if::render(evt::context& ctx) const
+void block_if::render(evt::exenv& ctx) const
 {
-	ctx.current_node(this);
+	ctx.ctx().current_node(this);
 	auto ifresult = calculate(ctx, block.condition);
 
-	auto children = ctx.tree().children(this);
+	auto children = ctx.tmpl().children(this);
 	assert(!children.empty() && children.size() < 3);
 
 	evt::render_info ri{ block.left_close.trim, block.right_open.trim };
-	ctx.cur_render_info(ri);
+	ctx.rinfo(ri);
 	if(ifresult) children[0]->render(ctx);
 	if(children.size()==2 && !ifresult) children[1]->render(ctx);
 }

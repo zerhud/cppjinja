@@ -40,10 +40,10 @@ bool cppjinja::evtnodes::content::is_leaf() const
 	return true;
 }
 
-void cppjinja::evtnodes::content::render(cppjinja::evt::context& ctx) const
+void cppjinja::evtnodes::content::render(evt::exenv& ctx) const
 {
-	ctx.current_node(this);
-	auto ri = ctx.cur_render_info();
+	ctx.ctx().current_node(this);
+	auto ri = ctx.rinfo();
 	if(!ri) ctx.out() << cnt;
 	else {
 		auto trimmed = cnt;

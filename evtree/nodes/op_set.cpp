@@ -7,7 +7,7 @@
  *************************************************************************/
 
 #include "op_set.hpp"
-#include "../context.hpp"
+#include "exenv.hpp"
 
 using namespace cppjinja::evtnodes;
 using namespace std::literals;
@@ -31,9 +31,9 @@ bool op_set::is_leaf() const
 	return true;
 }
 
-void op_set::render( evt::context& ctx ) const
+void op_set::render(evt::exenv& ctx ) const
 {
-	ctx.current_node(this);
+	ctx.ctx().current_node(this);
 }
 
 cppjinja::ast::value_term op_set::value(

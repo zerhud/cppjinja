@@ -56,60 +56,62 @@ bool cppjinja::evt::node::is_parent(const cppjinja::evt::node* n) const
 
 void cppjinja::evt::node::render_children(
         const std::vector<const node*>& children,
-        context& ctx, render_info default_ri) const
+        exenv& ctx, render_info default_ri) const
 {
-	for(auto&& child:children) ctx.add_to_context(child);
 	auto rnd = [&ctx,&default_ri]
 	    (const node* p, const node* c, const node* n)
 	{
 		render_info ri = default_ri;
 		if(p) ri.trim_left = p->rinfo().trim_right;
 		if(n) ri.trim_right = n->rinfo().trim_left;
-		ctx.cur_render_info(std::move(ri));
+		ctx.rinfo(std::move(ri));
 		c->render(ctx);
 	};
 	evtnodes::loop_by_three(children, rnd);
 }
 
 bool cppjinja::evt::node::calculate(
-        context& ctx, const ast::binary_op& op) const
+        exenv& ctx, const ast::binary_op& op) const
 {
+	//TODO: remove this method (exenv already do it)?
 	evtnodes::binary_op_helper cmp(op.op);
-	east::value_term left = ctx.concreate_value(op.left);
-	east::value_term right = ctx.concreate_value(op.right);
+	east::value_term left = ctx.solve_value(op.left);
+	east::value_term right = ctx.solve_value(op.right);
 	return std::visit(cmp,
 	            (east::value_term_var&)left,
 	            (east::value_term_var&)right);
 }
 
 void cppjinja::evt::node::render_value(
-          context& ctx
+          exenv& ctx
         , const cppjinja::ast::value_term& value
         ) const
 {
 	struct renderer {
-		context& ctx;
+		exenv& ctx;
 		const node* self;
-		renderer(context& c, const node* s) : ctx(c), self(s) {}
+		renderer(exenv& c, const node* s) : ctx(c), self(s) {}
 
 		void operator()(const double& obj) { ctx.out() << obj; }
 		void operator()(const ast::string_t& obj) { ctx.out() << obj; }
 		void operator()(const ast::tuple_v&) { }
 		void operator()(const ast::array_v&) { }
 		void operator()(const ast::var_name& obj) {
-			auto val = ctx.concreate_value(ast::value_term{obj});
+			auto val = ctx.solve_value(ast::value_term{obj});
 			self->render_value(ctx, val);
 		}
 		void operator()(const ast::function_call& obj) {
-			auto* node = ctx.tree().search(obj.ref, self);
+			auto* node = ctx.tmpl().search(obj.ref, self);
 			if(!node) {
-				auto cv = ctx.concreate_value(ast::value_term{obj});
+				auto cv = ctx.solve_value(ast::value_term{obj});
 				self->render_value(ctx, cv);
 				return;
 			}
 
-			maker_callstack cmaker(self, &ctx);
-			ctx.call_params(obj.params);
+			auto* canode = dynamic_cast<const evtnodes::callable*>(node);
+			if(!canode) throw std::runtime_error("cannot call not callable node");
+			raii_push_callstack cmaker(self, canode, &ctx.calls());
+			ctx.calls().call_params(obj.params);
 			node->render(ctx);
 		}
 		void operator()(const ast::binary_op& obj) {
@@ -122,12 +124,12 @@ void cppjinja::evt::node::render_value(
 
 
 void cppjinja::evt::node::render_value(
-          context& ctx
+          exenv& ctx
         , const cppjinja::east::value_term& value
         ) const
 {
 	struct {
-		context& ctx;
+		exenv& ctx;
 		void operator()(const double& v) { ctx.out() << v ; }
 		void operator()(const east::string_t& v) { ctx.out() << v; }
 		void operator()(const east::array_v&) {}

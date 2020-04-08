@@ -31,14 +31,14 @@ bool cppjinja::evtnodes::op_out::is_leaf() const
 	return true;
 }
 
-void cppjinja::evtnodes::op_out::render(cppjinja::evt::context& ctx) const
+void cppjinja::evtnodes::op_out::render(evt::exenv& ctx) const
 {
-	ctx.current_node(this);
+	ctx.ctx().current_node(this);
 
 	if(op.filters.empty()) render_value(ctx, op.value);
 	else {
 		struct {
-			evt::context& ctx;
+			evt::exenv& ctx;
 			east::value_term base;
 			void operator()(const ast::var_name& var)
 			{
@@ -46,11 +46,11 @@ void cppjinja::evtnodes::op_out::render(cppjinja::evt::context& ctx) const
 			}
 			void operator()(const ast::function_call& fnc)
 			{
-				ctx.call_params(fnc.params);
+				ctx.calls().call_params(fnc.params);
 				base = ctx.filter(base, ast::value_term{fnc});
 			}
 
-		} caller { ctx, ctx.concreate_value(op.value) };
+		} caller { ctx, ctx.solve_value(op.value) };
 
 
 		for(auto& filter:op.filters)

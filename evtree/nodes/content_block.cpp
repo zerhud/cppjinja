@@ -33,13 +33,13 @@ bool cppjinja::evtnodes::content_block::is_leaf() const
 	return false;
 }
 
-void cppjinja::evtnodes::content_block::render(evt::context& ctx) const
+void cppjinja::evtnodes::content_block::render(evt::exenv& ctx) const
 {
-	auto def_ri = ctx.cur_render_info();
+	auto def_ri = ctx.rinfo();
 	if(!def_ri) def_ri = rinfo();
-	auto children = ctx.tree().children(this, false);
-	ctx.current_node(this);
-	evt::maker_context cm(this, &ctx);
+	auto children = ctx.tmpl().children(this, false);
+	ctx.ctx().current_node(this);
+	evt::raii_push_ctx cm(this, &ctx.ctx());
 	render_children(children, ctx, *def_ri);
 }
 

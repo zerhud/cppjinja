@@ -12,7 +12,7 @@ std::optional<cppjinja::ast::value_term>
 cppjinja::evtnodes::callable::param(
           const std::vector<cppjinja::ast::macro_parameter>& params
         , const ast::var_name& name
-        , const cppjinja::evt::context& ctx
+        , const evt::callstack& ctx
         ) const
 {
 	if(name.size()!=1) return std::nullopt;

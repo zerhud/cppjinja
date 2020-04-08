@@ -8,19 +8,23 @@
 
 #pragma once
 
-#include "../node.hpp"
+namespace cppjinja {
 
-namespace cppjinja::evtnodes {
+/// compiled template
+class evtree;
 
-class content_block : public evt::node {
-	evt::render_info rinfo_;
-	ast::string_t name_;
-public:
-	content_block(evt::render_info ri, ast::string_t n);
-	evt::render_info rinfo() const override ;
-	ast::string_t name() const override ;
-	bool is_leaf() const override ;
-	void render(evt::exenv& ctx) const override ;
-};
+namespace evt {
 
-} // namespace cppjinja::evtnodes
+/// a node of template, compilation unit
+class node;
+
+} // namespace evt
+
+namespace evtnodes {
+
+/// a callable node: block, macro..
+class callable;
+
+} // namespace evtnodes
+
+} // namespace cppjinja

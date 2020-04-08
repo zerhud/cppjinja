@@ -8,7 +8,9 @@
 
 #pragma once
 
-#include "../evtree.hpp"
+#include <vector>
+#include "evtree/declarations.hpp"
+#include "parser/ast/common.hpp"
 
 namespace cppjinja::evt {
 
@@ -24,8 +26,6 @@ class context_new final {
 	void require_not_empty() const ;
 	std::optional<ast::value_term> search_in_setts(
 	        const cppjinja::ast::var_name& var) const;
-	std::optional<ast::value_term> search_in_params(
-	        const cppjinja::ast::var_name& var) const;
 public:
 	context_new();
 
@@ -38,17 +38,26 @@ public:
 
 	void inject(const evtnodes::callable* n);
 	void takeout(const evtnodes::callable* n);
+	std::vector<const evtnodes::callable*> injections() const ;
 
 	std::optional<ast::value_term> solve_var(
 	        const cppjinja::ast::var_name& var) const;
 };
 
-class raii_push_ctx {
+class raii_push_ctx final {
 	context_new* ctx;
 	const node* maker;
 public:
 	raii_push_ctx(const node* n, context_new* c);
 	~raii_push_ctx() ;
+};
+
+class raii_inject final {
+	context_new* ctx;
+	const evtnodes::callable* maker;
+public:
+	raii_inject(const evtnodes::callable* n, context_new* c);
+	~raii_inject() ;
 };
 
 } // namespace cppjinja::evt

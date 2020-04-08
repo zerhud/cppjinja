@@ -17,10 +17,10 @@ protected:
 	std::optional<ast::value_term> param(
 	          const std::vector<ast::macro_parameter>& params
 	        , const ast::var_name& name
-	        , const evt::context& ctx) const ;
+	        , const evt::callstack& ctx) const ;
 public:
 	virtual std::optional<ast::value_term> param(
-	          const evt::context& ctx
+	          const evt::callstack& ctx
 	        , const ast::var_name& name) const =0 ;
 };
 

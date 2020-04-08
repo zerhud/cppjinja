@@ -34,7 +34,7 @@ MOCK_BASE_CLASS( callable_node, cppjinja::evtnodes::callable )
 	MOCK_METHOD( name, 0 )
 	MOCK_METHOD( is_leaf, 0 )
 	MOCK_METHOD( render, 1 )
-	MOCK_METHOD( param, 2, std::optional<cppjinja::ast::value_term>(const cppjinja::evt::context& ctx,const cppjinja::ast::var_name& name) )
+	MOCK_METHOD( param, 2, std::optional<cppjinja::ast::value_term>(const cppjinja::evt::callstack& ctx,const cppjinja::ast::var_name& name) )
 };
 
 } // namespace mocks

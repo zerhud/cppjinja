@@ -8,6 +8,8 @@
 
 #include "context.hpp"
 #include "eval/ast_cvt.hpp"
+#include "nodes/op_set.hpp"
+#include "nodes/callable.hpp"
 
 using namespace cppjinja::details;
 
@@ -25,17 +27,6 @@ cppjinja::evt::context_new::search_in_setts(
 		if(auto set = dynamic_cast<const evtnodes::op_set*>(ctx_node);
 		        ctx_node->name() == var[0] && set)
 			return set->value(var);
-	return std::nullopt;
-}
-
-std::optional<cppjinja::ast::value_term>
-cppjinja::evt::context_new::search_in_params(
-        const cppjinja::ast::var_name& var) const
-{
-	const evtnodes::callable* mk =
-	        dynamic_cast<const evtnodes::callable*>(maker());
-	if(!mk) return std::nullopt;
-	//return mk->param(this, var);
 	return std::nullopt;
 }
 
@@ -80,6 +71,7 @@ void cppjinja::evt::context_new::inject(const cppjinja::evtnodes::callable* n)
 {
 	require_not_empty();
 	if(n==nullptr) throw std::runtime_error("cannot inject nullptr");
+	ctx.back().injections.emplace_back(n);
 }
 
 void cppjinja::evt::context_new::takeout(const cppjinja::evtnodes::callable* n)
@@ -88,14 +80,20 @@ void cppjinja::evt::context_new::takeout(const cppjinja::evtnodes::callable* n)
 	auto& ins = ctx.back().injections;
 	auto pos = std::find(ins.begin(), ins.end(), n);
 	if(pos!=ins.end()) ins.erase(pos);
+	else throw std::runtime_error("cannot takeout that wasn't inject");
+}
+
+std::vector<const cppjinja::evtnodes::callable*>
+cppjinja::evt::context_new::injections() const
+{
+	require_not_empty();
+	return ctx.back().injections;
 }
 
 std::optional<cppjinja::ast::value_term>
 cppjinja::evt::context_new::solve_var(const cppjinja::ast::var_name& var) const
 {
 	require_not_empty();
-	auto in_params = search_in_params(var);
-	if(in_params) return in_params;
 	return search_in_setts(var);
 }
 
@@ -110,4 +108,17 @@ cppjinja::evt::raii_push_ctx::raii_push_ctx(
 cppjinja::evt::raii_push_ctx::~raii_push_ctx()
 {
 	ctx->pop(maker);
+}
+
+cppjinja::evt::raii_inject::raii_inject(
+        const evtnodes::callable* n, cppjinja::evt::context_new* c)
+    : ctx(c)
+    , maker(n)
+{
+	ctx->inject(maker);
+}
+
+cppjinja::evt::raii_inject::~raii_inject()
+{
+	ctx->takeout(maker);
 }

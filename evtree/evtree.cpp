@@ -299,6 +299,6 @@ void cppjinja::evtree::render(
 
 	if(!tnode) throw std::runtime_error("cannot find " + name);
 
-	evt::context ctx(&data, this, to);
+	evt::exenv ctx(&data, this, to);
 	tnode->render(ctx);
 }

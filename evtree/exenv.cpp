@@ -7,10 +7,26 @@
  *************************************************************************/
 
 #include "exenv.hpp"
+#include "evtree.hpp"
 #include "eval/ast_cvt.hpp"
 #include "helpers/binary_op.hpp"
+#include "parser/helpers.hpp"
 
 using namespace cppjinja::details;
+
+std::optional<cppjinja::ast::value_term> cppjinja::evt::exenv::search_in_params(
+        const cppjinja::ast::var_name& var) const
+{
+	std::vector<const evtnodes::callable*> callings = calls().calling_stack();
+	assert(!callings.empty());
+	for(auto* calling:callings)
+	{
+		auto cur_param = calling->param(calls(), var);
+		if(cur_param.has_value()|| calling == exectx.maker())
+			return cur_param;
+	}
+	return std::nullopt;
+}
 
 cppjinja::evt::exenv::exenv(
           const cppjinja::data_provider* prov
@@ -64,8 +80,11 @@ cppjinja::east::value_term cppjinja::evt::exenv::solve_value(
 		ret_t operator()(const ast::array_v& obj) { return make_array(obj.fields); }
 		ret_t operator()(const ast::var_name& obj)
 		{
-			//return self->solve_var_name(obj);
-			return 1.1;
+			auto param_val = self->search_in_params(obj);
+			if(param_val) return self->solve_value(*param_val);
+			auto ctx_val = self->exectx.solve_var(obj);
+			if(ctx_val) return self->solve_value(*ctx_val);
+			return self->user_data->value(east_cvt::cvt(obj));
 		}
 		ret_t operator()(const ast::function_call& obj)
 		{
@@ -91,6 +110,36 @@ cppjinja::east::value_term cppjinja::evt::exenv::solve_value(
 	return boost::apply_visitor(rnd, val.var);
 }
 
+cppjinja::east::value_term cppjinja::evt::exenv::filter(
+          const cppjinja::east::value_term& base
+        , const cppjinja::ast::value_term& val
+        ) const
+{
+	overloaded vget{
+		[this, &base](const ast::var_name& obj){
+			east::function_call call;
+			call.ref = east_cvt::cvt(obj);
+			return user_data->filter(call, base);
+		},
+		[this, &base](const ast::function_call& obj){
+			east::function_call call;
+			call.ref = east_cvt::cvt(obj.ref);
+			for(auto& p:obj.params)
+				call.params.emplace_back(
+					east::function_parameter{
+					p.name,
+					solve_value(p.value.get())
+				});
+			return user_data->filter(call, base);
+		},
+		[](const auto&) -> east::value_term {
+			throw std::logic_error("filter called with unexpected value");
+		}
+	    };
+
+	    return boost::apply_visitor(vget, val.var);
+}
+
 cppjinja::evt::context_new& cppjinja::evt::exenv::ctx()
 {
 	return exectx;
@@ -99,4 +148,19 @@ cppjinja::evt::context_new& cppjinja::evt::exenv::ctx()
 cppjinja::evt::callstack& cppjinja::evt::exenv::calls()
 {
 	return execalls;
+}
+
+const cppjinja::evt::callstack& cppjinja::evt::exenv::calls() const
+{
+	return execalls;
+}
+
+std::optional<cppjinja::evt::render_info> cppjinja::evt::exenv::rinfo() const
+{
+	return cur_rinfo;
+}
+
+void cppjinja::evt::exenv::rinfo(std::optional<cppjinja::evt::render_info> ri)
+{
+	cur_rinfo = ri;
 }

@@ -8,15 +8,13 @@
 
 #pragma once
 
+#include "declarations.hpp"
 #include "eval/eval.hpp"
 #include "parser/ast/tmpls.hpp"
 
-#include "context.hpp"
+#include "exenv.hpp"
 
 namespace cppjinja {
-
-class evtree;
-
 namespace evt {
 
 class node {
@@ -29,23 +27,23 @@ public:
 
 	virtual ast::string_t name() const =0 ;
 	virtual bool is_leaf() const =0 ;
-	virtual void render( evt::context& ctx ) const =0 ;
+	virtual void render( evt::exenv& ctx ) const =0 ;
 
 	void add_parent(node* np) ;
 	std::vector<node*> parents(bool all=false) ;
 	std::vector<const node*> parents(bool all=false) const ;
 	bool is_parent(const node* n) const ;
 protected:
-	bool calculate(context& ctx, const ast::binary_op& op) const ;
+	bool calculate(exenv& ctx, const ast::binary_op& op) const ;
 	void render_children(
 	    const std::vector<const node*>& children,
-	    context& ctx, render_info default_ri) const ;
+	    exenv& ctx, render_info default_ri) const ;
 	void render_value(
-	          evt::context& ctx
+	          evt::exenv& ctx
 	        , const ast::value_term& value
 	        ) const ;
 	void render_value(
-	          evt::context& ctx
+	          evt::exenv& ctx
 	        , const east::value_term& value
 	        ) const ;
 };

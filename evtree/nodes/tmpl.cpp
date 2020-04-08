@@ -29,18 +29,18 @@ bool cppjinja::evtnodes::tmpl::is_leaf() const
 	return false;
 }
 
-void cppjinja::evtnodes::tmpl::render(evt::context& ctx) const
+void cppjinja::evtnodes::tmpl::render(evt::exenv& ctx) const
 {
-	ctx.current_node(this);
-	ctx.push_context(this);
-	ctx.push_callstack(this);
+	evt::raii_push_ctx ctx_maker(this, &ctx.ctx());
+	ctx.ctx().current_node(this);
 
-	auto children = ctx.tree().children(this);
-	for(auto&& child:children) ctx.add_to_context(child);
+
+	auto children = ctx.tmpl().children(this);
 	for(auto&& child:children)
 		if(child->name().empty())
+		{
+			auto* cb_child = dynamic_cast<const callable*>(child);
+			evt::raii_push_callstack calls_maker(this, cb_child, &ctx.calls());
 			child->render(ctx);
-
-	ctx.pop_callstack(this);
-	ctx.pop_context(this);
+		}
 }

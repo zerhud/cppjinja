@@ -35,17 +35,16 @@ bool cppjinja::evtnodes::block_macro::is_leaf() const
 	return false;
 }
 
-void cppjinja::evtnodes::block_macro::render(evt::context& ctx) const
+void cppjinja::evtnodes::block_macro::render(evt::exenv& ctx) const
 {
-	ctx.current_node(this);
-	auto children = ctx.tree().children(this, false);
-	evt::maker_injection injection(this, &ctx);
+	ctx.ctx().current_node(this);
+	auto children = ctx.tmpl().children(this, false);
+	evt::raii_inject injection(this, &ctx.ctx());
 	render_children(children, ctx, inner_ri());
 }
 
 std::optional<cppjinja::ast::value_term>
-cppjinja::evtnodes::block_macro::param(
-          const cppjinja::evt::context& ctx
+cppjinja::evtnodes::block_macro::param(const evt::callstack& ctx
         , const cppjinja::ast::var_name& name
         ) const
 {

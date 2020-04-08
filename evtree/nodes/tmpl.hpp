@@ -21,7 +21,7 @@ public:
 
 	ast::string_t name() const override ;
 	bool is_leaf() const override ;
-	void render(evt::context& ctx) const override ;
+	void render(evt::exenv& ctx) const override ;
 };
 
 }  // namespace cppjinja::evtnodes
