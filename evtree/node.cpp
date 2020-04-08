@@ -71,19 +71,6 @@ void cppjinja::evt::node::render_children(
 	evtnodes::loop_by_three(children, rnd);
 }
 
-bool cppjinja::evt::node::calculate(
-        exenv& ctx, const ast::binary_op& op) const
-{
-	//TODO: remove this method (exenv already do it)?
-	expr_solver solver(&ctx);
-	evtnodes::binary_op_helper cmp(op.op);
-	east::value_term left = solver(op.left);
-	east::value_term right = solver(op.right);
-	return std::visit(cmp,
-	            (east::value_term_var&)left,
-	            (east::value_term_var&)right);
-}
-
 void cppjinja::evt::node::render_value(
           exenv& ctx
         , const cppjinja::ast::value_term& value
@@ -118,7 +105,7 @@ void cppjinja::evt::node::render_value(
 			node->render(ctx);
 		}
 		void operator()(const ast::binary_op& obj) {
-			ctx.out() << self->calculate(ctx, obj); }
+			ctx.out() << solver(obj); }
 	};
 
 	renderer rnd(ctx, this);
