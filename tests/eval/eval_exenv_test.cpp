@@ -64,6 +64,19 @@ BOOST_FIXTURE_TEST_CASE(environment, mock_exenv_fixture)
 	BOOST_CHECK_NO_THROW(env.ctx());
 	BOOST_CHECK_NO_THROW(env.calls());
 }
+BOOST_FIXTURE_TEST_CASE(rinfo, mock_exenv_fixture)
+{
+	using cppjinja::evt::render_info;
+	render_info ri{true, false};
+	BOOST_CHECK(!env.rinfo().has_value());
+	BOOST_CHECK_NO_THROW(env.rinfo(ri));
+	std::optional<render_info> val_after_set = env.rinfo();
+	BOOST_REQUIRE(val_after_set);
+	bool ltrim = val_after_set->trim_left;
+	bool rtrim = val_after_set->trim_right;
+	BOOST_TEST(ltrim == true);
+	BOOST_TEST(rtrim == false);
+}
 
 BOOST_AUTO_TEST_SUITE(context)
 BOOST_FIXTURE_TEST_CASE(current_node, mock_exenv_fixture)
