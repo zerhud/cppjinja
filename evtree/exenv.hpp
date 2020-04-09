@@ -10,7 +10,6 @@
 
 #include "declarations.hpp"
 #include "exenv/raii.hpp"
-#include "exenv/callstack.hpp"
 #include "eval/eval.hpp"
 
 namespace cppjinja::evt {

@@ -10,6 +10,7 @@
 #include "op_out.hpp"
 #include "evtree/exenv/expr_solver.hpp"
 #include "evtree/exenv/expr_filter.hpp"
+#include "evtree/exenv/callstack.hpp"
 
 using namespace std::literals;
 

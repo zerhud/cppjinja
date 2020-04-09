@@ -7,6 +7,7 @@
  *************************************************************************/
 
 #include "callable.hpp"
+#include "exenv/callstack.hpp"
 
 std::optional<cppjinja::ast::value_term>
 cppjinja::evtnodes::callable::param(

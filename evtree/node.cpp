@@ -13,6 +13,7 @@
 #include "helpers/binary_op.hpp"
 #include "helpers/loop_by_three.hpp"
 #include "exenv/expr_solver.hpp"
+#include "exenv/callstack.hpp"
 
 using namespace std::literals;
 
