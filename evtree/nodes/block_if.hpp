@@ -14,6 +14,7 @@ namespace cppjinja::evtnodes {
 
 class block_if : public evt::node {
 	ast::block_if block;
+	evt::render_info rinfo_for_children() const ;
 public:
 	block_if(ast::block_if nb);
 	evt::render_info rinfo() const override ;

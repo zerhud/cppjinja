@@ -11,13 +11,15 @@
 #include "evtree/exenv.hpp"
 #include "eval/eval.hpp"
 
+#include "context_impl.hpp"
+
 namespace cppjinja::evt {
 
 class exenv_impl final : public exenv {
 	const evtree* compiled_template;
 	const data_provider* user_data;
 	std::ostream& ostream;
-	context exectx;
+	context_impl exectx;
 	callstack execalls;
 	std::optional<render_info> cur_rinfo;
 public:

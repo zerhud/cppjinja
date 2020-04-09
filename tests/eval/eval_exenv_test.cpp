@@ -17,6 +17,7 @@
 #include "evtree/node.hpp"
 #include "evtree/evtree.hpp"
 #include "evtree/exenv/impl.hpp"
+#include "evtree/exenv/context_impl.hpp"
 #include "evtree/exenv/expr_solver.hpp"
 #include "evtree/exenv/expr_filter.hpp"
 #include "parser/operators/common.hpp"
@@ -39,11 +40,11 @@ struct mock_env_fixture
 struct mock_exenv_fixture : mock_env_fixture
 {
 	cppjinja::evt::exenv_impl env;
-	cppjinja::evt::context& ctx;
+	cppjinja::evt::context_impl& ctx;
 	cppjinja::evt::callstack& calls;
 	mock_exenv_fixture()
 	    : env(&data, &compiled, out)
-	    , ctx(env.ctx())
+	    , ctx(static_cast<cppjinja::evt::context_impl&>(env.ctx()))
 	    , calls(env.calls())
 	{}
 };
@@ -79,6 +80,7 @@ BOOST_FIXTURE_TEST_CASE(rinfo, mock_exenv_fixture)
 }
 
 BOOST_AUTO_TEST_SUITE(context)
+
 BOOST_FIXTURE_TEST_CASE(current_node, mock_exenv_fixture)
 {
 	mocks::node fnode1, fnode2;
@@ -106,9 +108,8 @@ BOOST_FIXTURE_TEST_CASE(stack, mock_exenv_fixture)
 	BOOST_TEST(ctx.maker() == &fnode1);
 	BOOST_CHECK_THROW(ctx.pop(&fnode2), std::exception);
 }
-BOOST_AUTO_TEST_CASE(injection)
+BOOST_FIXTURE_TEST_CASE(injection, mock_exenv_fixture)
 {
-	cppjinja::evt::context ctx;
 	mocks::node node;
 	mocks::callable_node calling, wrong_calling;
 

@@ -13,6 +13,11 @@
 using namespace std::literals;
 using namespace cppjinja::evtnodes;
 
+cppjinja::evt::render_info block_if::rinfo_for_children() const
+{
+	return evt::render_info{ block.left_close.trim, block.right_open.trim };
+}
+
 block_if::block_if(cppjinja::ast::block_if nb) : block(std::move(nb))
 {
 }
@@ -40,8 +45,7 @@ void block_if::render(evt::exenv& ctx) const
 	auto children = ctx.tmpl().children(this);
 	assert(!children.empty() && children.size() < 3);
 
-	evt::render_info ri{ block.left_close.trim, block.right_open.trim };
-	ctx.rinfo(ri);
+	ctx.rinfo(rinfo_for_children());
 	if(ifresult) children[0]->render(ctx);
 	if(children.size()==2 && !ifresult) children[1]->render(ctx);
 }

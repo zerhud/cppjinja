@@ -14,34 +14,23 @@
 
 namespace cppjinja::evt {
 
-class context final {
-	struct frame
-	{
-		const node* maker;
-		std::vector<const evtnodes::callable*> injections;
-		std::vector<const node*> node_stack;
-	};
-	std::vector<frame> ctx;
-
-	void require_not_empty() const ;
-	std::optional<ast::value_term> search_in_setts(
-	        const cppjinja::ast::var_name& var) const;
+class context {
 public:
-	context();
+	virtual ~context() noexcept =default ;
 
-	void current_node(const node* n) ;
-	const node* current_node(std::size_t ind=0) const ;
+	virtual void current_node(const node* n) =0 ;
+	virtual const node* current_node(std::size_t ind=0) const =0 ;
 
-	void pop(const node* n);
-	void push(const node* n);
-	const node* maker() const ;
+	virtual void pop(const node* n)=0 ;
+	virtual void push(const node* n)=0 ;
+	virtual const node* maker() const =0 ;
 
-	void inject(const evtnodes::callable* n);
-	void takeout(const evtnodes::callable* n);
-	std::vector<const evtnodes::callable*> injections() const ;
+	virtual void inject(const evtnodes::callable* n)=0 ;
+	virtual void takeout(const evtnodes::callable* n)=0 ;
+	virtual std::vector<const evtnodes::callable*> injections() const =0 ;
 
-	std::optional<ast::value_term> solve_var(
-	        const cppjinja::ast::var_name& var) const;
+	virtual std::optional<ast::value_term> solve_var(
+	        const cppjinja::ast::var_name& var) const=0 ;
 };
 
 class raii_push_ctx final {
