@@ -291,10 +291,18 @@ BOOST_FIXTURE_TEST_CASE(by_fnc, mock_exenv_fixture)
 	};
 	MOCK_EXPECT(data.filter).once().calls(check);
 	BOOST_TEST(expr_filter(&env, 2)(fc) == east_value_term{101});
+	MOCK_EXPECT(data.filter).once().calls(check);
+	BOOST_TEST(expr_filter(&env, 2)(value_term{fc}) == east_value_term{101});
 }
 BOOST_FIXTURE_TEST_CASE(by_wrong, mock_exenv_fixture)
 {
+	using namespace cppjinja::ast;
+	BOOST_CHECK_THROW(expr_filter(nullptr, 42), std::exception);
 	BOOST_CHECK_THROW(expr_filter(&env, 42)(2), std::exception);
+	BOOST_CHECK_THROW(expr_filter(&env, 42)("str"s), std::exception);
+	BOOST_CHECK_THROW(expr_filter(&env, 42)(tuple_v{}), std::exception);
+	BOOST_CHECK_THROW(expr_filter(&env, 42)(array_v{}), std::exception);
+	BOOST_CHECK_THROW(expr_filter(&env, 42)(binary_op{}), std::exception);
 }
 BOOST_AUTO_TEST_SUITE_END() // filter
 
