@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include "evtree.hpp"
+#include "exenv/impl.hpp"
 #include "parser/helpers.hpp"
 
 using namespace std::literals;
@@ -299,6 +300,6 @@ void cppjinja::evtree::render(
 
 	if(!tnode) throw std::runtime_error("cannot find " + name);
 
-	evt::exenv ctx(&data, this, to);
+	evt::exenv_impl ctx(&data, this, to);
 	tnode->render(ctx);
 }

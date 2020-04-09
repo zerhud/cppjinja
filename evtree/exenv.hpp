@@ -21,26 +21,22 @@ struct render_info
 	bool trim_right:4;
 };
 
-class exenv final {
-	const evtree* compiled_template;
-	const data_provider* user_data;
-	std::ostream& ostream;
-	context exectx;
-	callstack execalls;
-	std::optional<render_info> cur_rinfo;
+class exenv {
 public:
-	exenv(const data_provider* prov, const evtree* tmpl, std::ostream& out);
-	const evtree& tmpl() const ;
-	const data_provider* data() const ;
-	std::ostream& out() ;
+	virtual ~exenv() noexcept =default ;
 
-	context& ctx() ;
-	const context& ctx() const ;
+	virtual const evtree& tmpl() const =0 ;
+	virtual const data_provider* data() const =0 ;
+	virtual std::ostream& out() =0 ;
 
-	callstack& calls() ;
-	const callstack& calls() const ;
-	std::optional<render_info> rinfo() const ;
-	void rinfo(std::optional<render_info> ri) ;
+	virtual context& ctx() =0 ;
+	virtual const context& ctx() const =0 ;
+
+	virtual callstack& calls() =0 ;
+	virtual const callstack& calls() const =0 ;
+
+	virtual std::optional<render_info> rinfo() const =0 ;
+	virtual void rinfo(std::optional<render_info> ri) =0 ;
 };
 
 } // namespace cppjinja::evt

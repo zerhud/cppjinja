@@ -1,5 +1,5 @@
 /*************************************************************************
- * Copyright © 2019 Hudyaev Alexy <hudyaev.alexy@gmail.com>
+ * Copyright © 2020 Hudyaev Alexy <hudyaev.alexy@gmail.com>
  * This file is part of cppjinja.
  * Distributed under the GNU Affero General Public License.
  * See accompanying file copying (at the root of this repository)
@@ -7,7 +7,7 @@
  *************************************************************************/
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE evaluator op_out
+#define BOOST_TEST_MODULE evaluator exenv
 
 #include <boost/test/unit_test.hpp>
 #include <boost/test/data/test_case.hpp>
@@ -15,8 +15,8 @@
 
 #include "mocks.hpp"
 #include "evtree/node.hpp"
-#include "evtree/exenv.hpp"
 #include "evtree/evtree.hpp"
+#include "evtree/exenv/impl.hpp"
 #include "evtree/exenv/expr_solver.hpp"
 #include "evtree/exenv/expr_filter.hpp"
 #include "parser/operators/common.hpp"
@@ -38,7 +38,7 @@ struct mock_env_fixture
 
 struct mock_exenv_fixture : mock_env_fixture
 {
-	cppjinja::evt::exenv env;
+	cppjinja::evt::exenv_impl env;
 	cppjinja::evt::context& ctx;
 	cppjinja::evt::callstack& calls;
 	mock_exenv_fixture()

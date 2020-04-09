@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <memory>
+
 namespace cppjinja {
 
 /// compiled template
@@ -18,7 +20,16 @@ namespace evt {
 /// a node of template, compilation unit
 class node;
 
+/// environment for execution
 class exenv;
+class context;
+class callstack;
+
+class factory {
+public:
+	virtual ~factory() noexcept =default ;
+	virtual std::unique_ptr<exenv> craete_execution_env() const =0 ;
+};
 
 } // namespace evt
 
