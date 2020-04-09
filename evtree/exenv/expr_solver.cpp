@@ -107,5 +107,5 @@ cppjinja::evt::expr_solver::search_in_params(const cppjinja::ast::var_name& var)
 		if(cur_param.has_value()|| calling == env->ctx().maker())
 			return cur_param;
 	}
-	return std::nullopt;
+	throw std::runtime_error("no calling node in context");
 }

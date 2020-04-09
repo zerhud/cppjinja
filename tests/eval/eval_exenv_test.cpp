@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_SUITE_END() // solve_name
 
 BOOST_AUTO_TEST_SUITE_END() // context
 
-BOOST_AUTO_TEST_SUITE(solve_value)
+BOOST_AUTO_TEST_SUITE(solver)
 BOOST_DATA_TEST_CASE_F(mock_solver_fixture, simples_num
        , tdata::random(-90000000.0,90000000.0)^tdata::xrange(93)
        , v, ind)
@@ -255,7 +255,20 @@ BOOST_FIXTURE_TEST_CASE(two_in_stack_one_in_ctx, mock_solver_fixture)
 	cppjinja::ast::var_name vn{ "a" };
 	BOOST_TEST(solver(value_term{vn}) == east_value_term{42});
 }
-BOOST_AUTO_TEST_SUITE_END() // solve_value
+BOOST_FIXTURE_TEST_CASE(no_calling_in_ctx, mock_solver_fixture)
+{
+	mocks::node caller;
+	mocks::callable_node calling, maker;
+	ctx.push(&maker);
+	calls.push(&caller, &calling);
+	MOCK_EXPECT(calling.param).once().returns(std::nullopt);
+	BOOST_CHECK_THROW(solver(cppjinja::ast::var_name{"a"}), std::exception);
+}
+BOOST_AUTO_TEST_CASE(cannot_create_without_context)
+{
+	BOOST_CHECK_THROW(cppjinja::evt::expr_solver(nullptr), std::exception);
+}
+BOOST_AUTO_TEST_SUITE_END() // solver
 
 BOOST_AUTO_TEST_SUITE(filter)
 BOOST_FIXTURE_TEST_CASE(by_var, mock_exenv_fixture)
