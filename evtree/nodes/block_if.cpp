@@ -39,7 +39,7 @@ bool block_if::is_leaf() const
 
 void block_if::render(evt::exenv& ctx) const
 {
-	ctx.ctx().current_node(this);
+	ctx.current_node(this);
 	auto ifresult = evt::expr_solver(&ctx)(block.condition) == east::value_term{1};
 
 	auto children = ctx.tmpl().children(this);

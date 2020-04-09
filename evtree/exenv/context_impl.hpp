@@ -12,9 +12,6 @@
 
 #include "context.hpp"
 
-#include "evtree/declarations.hpp"
-#include "parser/ast/common.hpp"
-
 namespace cppjinja::evt {
 
 class context_impl final : public context {

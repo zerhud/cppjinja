@@ -12,6 +12,7 @@
 #include "eval/eval.hpp"
 
 #include "context_impl.hpp"
+#include "callstack_impl.hpp"
 
 namespace cppjinja::evt {
 
@@ -20,7 +21,7 @@ class exenv_impl final : public exenv {
 	const data_provider* user_data;
 	std::ostream& ostream;
 	context_impl exectx;
-	callstack execalls;
+	callstack_impl execalls;
 	std::optional<render_info> cur_rinfo;
 public:
 	exenv_impl(const data_provider* prov, const evtree* tmpl, std::ostream& out);
@@ -31,6 +32,8 @@ public:
 
 	context& ctx() override ;
 	const context& ctx() const override ;
+	void current_node(const node* n) override ;
+	const node* current_node(std::size_t ind=0) const override ;
 
 	callstack& calls() override ;
 	const callstack& calls() const override ;

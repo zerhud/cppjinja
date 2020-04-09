@@ -18,6 +18,7 @@
 #include "evtree/evtree.hpp"
 #include "evtree/exenv/impl.hpp"
 #include "evtree/exenv/context_impl.hpp"
+#include "evtree/exenv/callstack_impl.hpp"
 #include "evtree/exenv/expr_solver.hpp"
 #include "evtree/exenv/expr_filter.hpp"
 #include "parser/operators/common.hpp"
@@ -41,11 +42,11 @@ struct mock_exenv_fixture : mock_env_fixture
 {
 	cppjinja::evt::exenv_impl env;
 	cppjinja::evt::context_impl& ctx;
-	cppjinja::evt::callstack& calls;
+	cppjinja::evt::callstack_impl& calls;
 	mock_exenv_fixture()
 	    : env(&data, &compiled, out)
 	    , ctx(static_cast<cppjinja::evt::context_impl&>(env.ctx()))
-	    , calls(env.calls())
+	    , calls(static_cast<cppjinja::evt::callstack_impl&>(env.calls()))
 	{}
 };
 
@@ -77,6 +78,14 @@ BOOST_FIXTURE_TEST_CASE(rinfo, mock_exenv_fixture)
 	bool rtrim = val_after_set->trim_right;
 	BOOST_TEST(ltrim == true);
 	BOOST_TEST(rtrim == false);
+}
+BOOST_FIXTURE_TEST_CASE(current_node, mock_exenv_fixture)
+{
+	mocks::node fnode1, fnode2;
+	ctx.push(&fnode2);
+	env.current_node(&fnode1);
+	BOOST_TEST(ctx.current_node() == &fnode1);
+	BOOST_TEST(env.current_node() == &fnode1);
 }
 
 BOOST_AUTO_TEST_SUITE(context)

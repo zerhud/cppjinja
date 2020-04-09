@@ -36,7 +36,7 @@ bool cppjinja::evtnodes::op_out::is_leaf() const
 void cppjinja::evtnodes::op_out::render(evt::exenv& ctx) const
 {
 	using evt::expr_filter;
-	ctx.ctx().current_node(this);
+	ctx.current_node(this);
 
 	if(op.filters.empty()) render_value(ctx, op.value);
 	else {

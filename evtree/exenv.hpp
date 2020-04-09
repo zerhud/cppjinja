@@ -9,7 +9,7 @@
 #pragma once
 
 #include "declarations.hpp"
-#include "exenv/context.hpp"
+#include "exenv/raii.hpp"
 #include "exenv/callstack.hpp"
 #include "eval/eval.hpp"
 
@@ -31,6 +31,9 @@ public:
 
 	virtual context& ctx() =0 ;
 	virtual const context& ctx() const =0 ;
+
+	virtual void current_node(const node* n) =0 ;
+	virtual const node* current_node(std::size_t ind=0) const =0 ;
 
 	virtual callstack& calls() =0 ;
 	virtual const callstack& calls() const =0 ;

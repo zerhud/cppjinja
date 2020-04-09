@@ -33,20 +33,4 @@ public:
 	        const cppjinja::ast::var_name& var) const=0 ;
 };
 
-class raii_push_ctx final {
-	context* ctx;
-	const node* maker;
-public:
-	raii_push_ctx(const node* n, context* c);
-	~raii_push_ctx() ;
-};
-
-class raii_inject final {
-	context* ctx;
-	const evtnodes::callable* maker;
-public:
-	raii_inject(const evtnodes::callable* n, context* c);
-	~raii_inject() ;
-};
-
 } // namespace cppjinja::evt

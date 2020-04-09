@@ -7,6 +7,9 @@
  *************************************************************************/
 
 #include "expr_solver.hpp"
+#include "context.hpp"
+#include "callstack.hpp"
+
 #include "evtree/exenv.hpp"
 #include "eval/ast_cvt.hpp"
 #include "evtree/helpers/binary_op.hpp"

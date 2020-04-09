@@ -6,7 +6,9 @@
  * or <http://www.gnu.org/licenses/> for details
  *************************************************************************/
 
+#include "raii.hpp"
 #include "context.hpp"
+#include "callstack.hpp"
 
 cppjinja::evt::raii_push_ctx::raii_push_ctx(
         const cppjinja::evt::node* n, cppjinja::evt::context* c)
@@ -32,4 +34,20 @@ cppjinja::evt::raii_inject::raii_inject(
 cppjinja::evt::raii_inject::~raii_inject()
 {
 	ctx->takeout(maker);
+}
+
+cppjinja::evt::raii_push_callstack::raii_push_callstack(
+          const cppjinja::evt::node* n
+        , const evtnodes::callable* c
+        , cppjinja::evt::callstack* m
+        )
+    : ctx(m)
+    , maker(n)
+{
+	ctx->push(maker, c);
+}
+
+cppjinja::evt::raii_push_callstack::~raii_push_callstack()
+{
+	ctx->pop(maker);
 }

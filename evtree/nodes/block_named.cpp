@@ -40,7 +40,7 @@ void cppjinja::evtnodes::block_named::render(evt::exenv& ctx) const
 {
 	evt::render_info ri{ block.left_close.trim, block.right_open.trim };
 	auto children = ctx.tmpl().children(this, false);
-	ctx.ctx().current_node(this);
+	ctx.current_node(this);
 	evt::raii_push_ctx ctx_maker(this, &ctx.ctx());
 	render_children(children, ctx, ri);
 }

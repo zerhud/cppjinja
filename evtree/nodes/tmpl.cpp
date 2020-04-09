@@ -32,7 +32,7 @@ bool cppjinja::evtnodes::tmpl::is_leaf() const
 void cppjinja::evtnodes::tmpl::render(evt::exenv& ctx) const
 {
 	evt::raii_push_ctx ctx_maker(this, &ctx.ctx());
-	ctx.ctx().current_node(this);
+	ctx.current_node(this);
 
 
 	auto children = ctx.tmpl().children(this);

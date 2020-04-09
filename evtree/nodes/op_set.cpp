@@ -33,7 +33,7 @@ bool op_set::is_leaf() const
 
 void op_set::render(evt::exenv& ctx ) const
 {
-	ctx.ctx().current_node(this);
+	ctx.current_node(this);
 }
 
 cppjinja::ast::value_term op_set::value(

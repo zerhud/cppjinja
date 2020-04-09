@@ -42,7 +42,7 @@ bool cppjinja::evtnodes::content::is_leaf() const
 
 void cppjinja::evtnodes::content::render(evt::exenv& ctx) const
 {
-	ctx.ctx().current_node(this);
+	ctx.current_node(this);
 	auto ri = ctx.rinfo();
 	if(!ri) ctx.out() << cnt;
 	else {

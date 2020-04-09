@@ -53,6 +53,16 @@ const cppjinja::evt::context& cppjinja::evt::exenv_impl::ctx() const
 	return exectx;
 }
 
+void cppjinja::evt::exenv_impl::current_node(const cppjinja::evt::node* n)
+{
+	ctx().current_node(n);
+}
+
+const cppjinja::evt::node* cppjinja::evt::exenv_impl::current_node(std::size_t ind) const
+{
+	return ctx().current_node(ind);
+}
+
 cppjinja::evt::callstack& cppjinja::evt::exenv_impl::calls()
 {
 	return execalls;
