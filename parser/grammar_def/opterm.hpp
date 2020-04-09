@@ -37,6 +37,11 @@ namespace cppjinja::text {
 			>)
 		_val(c).trim=true;
 	};
+	auto set_bsign = [](auto& c){
+		_val(c).bsign=_attr(c);
+		if(_val(c).bsign && *_val(c).bsign < 0)
+			_val(c).trim = true;
+	};
 
 	// ---
 	// helpers expressions
@@ -54,9 +59,9 @@ namespace cppjinja::text {
 		lexeme[check_trim >> op_seq_def[check_if_term_end]];
 
 	const auto block_term_start_def =
-		lexeme[op_seq_def[check_if_block_start] >> check_trim];
+		lexeme[op_seq_def[check_if_block_start] >> check_trim >> -x3::int_[set_bsign]];
 	const auto block_term_end_def   =
-		lexeme[check_trim >> op_seq_def[check_if_block_end]];
+		lexeme[check_trim >> -x3::int_[set_bsign] >> op_seq_def[check_if_block_end]];
 
 	const auto comment_term_start_def =
 		lexeme[op_seq_def[check_if_comment_start] >> check_trim];

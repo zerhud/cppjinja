@@ -21,8 +21,12 @@
 using namespace std::literals;
 namespace txt = cppjinja::text;
 namespace ast = cppjinja::ast;
+namespace tdata = boost::unit_test::data;
 
-BOOST_AUTO_TEST_CASE(op_term)
+BOOST_AUTO_TEST_SUITE(parser)
+BOOST_AUTO_TEST_SUITE(op_term)
+
+BOOST_AUTO_TEST_CASE(common)
 {
 	ast::op_term_start result;
 
@@ -57,3 +61,35 @@ BOOST_AUTO_TEST_CASE(no_space)
 	std::string data = "< %";
 	BOOST_CHECK_THROW( txt::parse(txt::block_term_start, data), std::exception );
 }
+
+BOOST_AUTO_TEST_SUITE(bsign)
+BOOST_DATA_TEST_CASE(begin, tdata::random(-100, 100) ^ tdata::xrange(10), sign, ind)
+{
+	(void)ind;
+	std::string data = "<%" + (0 < sign ? ('+' + std::to_string(sign)) : std::to_string(sign));
+	ast::block_term_start result;
+	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::block_term_start, data) );
+	BOOST_TEST( result.trim );
+	BOOST_CHECK( result.bsign );
+	BOOST_TEST( *result.bsign == sign );
+}
+BOOST_DATA_TEST_CASE(end, tdata::random(-100, 100) ^ tdata::xrange(10), sign, ind)
+{
+	(void)ind;
+	std::string data = (0 < sign ? ('+' + std::to_string(sign)) : std::to_string(sign)) + "%>"s;
+	ast::block_term_end result;
+	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::block_term_end, data) );
+	BOOST_TEST( result.trim );
+	BOOST_CHECK( result.bsign );
+	BOOST_TEST( *result.bsign == sign );
+}
+BOOST_AUTO_TEST_CASE(only_block)
+{
+	// start cannot be checke here: the tail is ommited
+	BOOST_CHECK_THROW( txt::parse(txt::op_term_end, "+1=>"s), std::exception );
+	BOOST_CHECK_THROW( txt::parse(txt::comment_term_end, "+1#>"s), std::exception );
+}
+BOOST_AUTO_TEST_SUITE_END() // bsign
+
+BOOST_AUTO_TEST_SUITE_END() // parser
+BOOST_AUTO_TEST_SUITE_END() // op_term
