@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(ENABLE_TODO "enable todo warnings in debug mode" ON)
 option(ENABLE_TESTS "enable tests.. it depends on turtle library" ON)
 option(LOW_MEMORY "assume we don't have efough memroty for complie grammars (gcc optimizations)" ON)
+option(CODE_COVERAGE "enable code coverage generation" OFF)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -21,6 +22,11 @@ find_package(Threads REQUIRED)
 include(CheckCXXSourceCompiles)
 include(cmake/target_sources_local.cmake)
 include(cmake/flags.cmake)
+include(cmake/code-coverage.cmake)
+
+add_code_coverage()
+add_code_coverage_all_targets(EXCLUDE tests/*)
+
 
 CHECK_CXX_SOURCE_COMPILES("#include <filesystem>\nint main(int,char**){return 0;}" HAVE_FILESYSTEM)
 if(NOT HAVE_FILESYSTEM)
@@ -74,6 +80,7 @@ target_include_directories(evaluator
                 "${CMAKE_CURRENT_SOURCE_DIR}/evtree"
         )
 target_link_libraries(evaluator PUBLIC stdc++fs PRIVATE loader)
+target_code_coverage(evaluator)
 
 if(ENABLE_TESTS)
 	include(cmake/tests.inc.cmake)

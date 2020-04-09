@@ -9,6 +9,7 @@ macro(add_unit_test tname path lib)
 	target_link_libraries(${tname}_test PRIVATE ${lib} ${Boost_LIBRARIES} ${CMAKE_DL_LIBS})
 	target_include_directories(${tname}_test SYSTEM PRIVATE "${Boost_INCLUDE_DIR}" "${turtle}" "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/${path}")
 	add_test(NAME ${tname} COMMAND ${tname}_test)
+	target_code_coverage(${tname}_test AUTO ALL OBJECTS ${lib})
 endmacro()
 
 set(tests_parser2 parser_helpers rules_common rules_opterm rules_single rules_blocks rules_tmpls)
