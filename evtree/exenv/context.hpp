@@ -19,7 +19,7 @@ public:
 	virtual ~context() noexcept =default ;
 
 	virtual void current_node(const node* n) =0 ;
-	virtual const node* current_node(std::size_t ind=0) const =0 ;
+	virtual const node* nth_node_on_stack(std::size_t ind) const =0 ;
 
 	virtual void pop(const node* n)=0 ;
 	virtual void push(const node* n)=0 ;

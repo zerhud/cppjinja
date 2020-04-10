@@ -32,6 +32,13 @@ const cppjinja::evtree& cppjinja::evt::exenv_impl::tmpl() const
 	return *compiled_template;
 }
 
+std::vector<const cppjinja::evt::node*>
+cppjinja::evt::exenv_impl::children(const cppjinja::evt::node* selected) const
+{
+	assert(compiled_template);
+	return compiled_template->children(selected);
+}
+
 const cppjinja::data_provider* cppjinja::evt::exenv_impl::data() const
 {
 	assert(user_data);
@@ -56,11 +63,6 @@ const cppjinja::evt::context& cppjinja::evt::exenv_impl::ctx() const
 void cppjinja::evt::exenv_impl::current_node(const cppjinja::evt::node* n)
 {
 	ctx().current_node(n);
-}
-
-const cppjinja::evt::node* cppjinja::evt::exenv_impl::current_node(std::size_t ind) const
-{
-	return ctx().current_node(ind);
 }
 
 cppjinja::evt::callstack& cppjinja::evt::exenv_impl::calls()

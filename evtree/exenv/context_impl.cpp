@@ -41,7 +41,7 @@ void cppjinja::evt::context_impl::current_node(const cppjinja::evt::node* n)
 }
 
 const cppjinja::evt::node*
-cppjinja::evt::context_impl::current_node(std::size_t ind) const
+cppjinja::evt::context_impl::nth_node_on_stack(std::size_t ind) const
 {
 	require_not_empty();
 	std::size_t i = ctx.back().node_stack.size() - ind - 1;

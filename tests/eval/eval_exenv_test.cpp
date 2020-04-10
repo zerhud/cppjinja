@@ -83,9 +83,13 @@ BOOST_FIXTURE_TEST_CASE(current_node, mock_exenv_fixture)
 {
 	mocks::node fnode1, fnode2;
 	ctx.push(&fnode2);
-	env.current_node(&fnode1);
-	BOOST_TEST(ctx.current_node() == &fnode1);
-	BOOST_TEST(env.current_node() == &fnode1);
+	BOOST_CHECK_NO_THROW( env.current_node(&fnode1) );
+	BOOST_TEST(ctx.nth_node_on_stack(0) == &fnode1);
+}
+BOOST_FIXTURE_TEST_CASE(children, mock_exenv_fixture)
+{
+	// cannot normaly test: tree cannot be mocked
+	BOOST_TEST( env.children(nullptr).empty() );
 }
 
 BOOST_AUTO_TEST_SUITE(context)
@@ -94,18 +98,18 @@ BOOST_FIXTURE_TEST_CASE(current_node, mock_exenv_fixture)
 {
 	mocks::node fnode1, fnode2;
 
-	BOOST_CHECK_THROW(ctx.current_node(), std::exception);
+	BOOST_CHECK_THROW(ctx.nth_node_on_stack(0), std::exception);
 	BOOST_CHECK_THROW(ctx.current_node(&fnode1), std::exception);
 
 	ctx.push(&fnode1);
 	ctx.current_node(&fnode1);
-	BOOST_TEST(ctx.current_node() == &fnode1);
+	BOOST_TEST(ctx.nth_node_on_stack(0) == &fnode1);
 
 	ctx.current_node(&fnode2);
-	BOOST_TEST(ctx.current_node() == &fnode2);
-	BOOST_TEST(ctx.current_node(1) == &fnode1);
+	BOOST_TEST(ctx.nth_node_on_stack(0) == &fnode2);
+	BOOST_TEST(ctx.nth_node_on_stack(1) == &fnode1);
 
-	BOOST_CHECK_THROW(ctx.current_node(2), std::exception);
+	BOOST_CHECK_THROW(ctx.nth_node_on_stack(2), std::exception);
 }
 BOOST_FIXTURE_TEST_CASE(stack, mock_exenv_fixture)
 {

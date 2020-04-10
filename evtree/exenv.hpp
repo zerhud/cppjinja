@@ -25,6 +25,9 @@ public:
 	virtual ~exenv() noexcept =default ;
 
 	virtual const evtree& tmpl() const =0 ;
+	virtual std::vector<const node*> children(
+		const node* selected ) const =0 ;
+
 	virtual const data_provider* data() const =0 ;
 	virtual std::ostream& out() =0 ;
 
@@ -32,7 +35,6 @@ public:
 	virtual const context& ctx() const =0 ;
 
 	virtual void current_node(const node* n) =0 ;
-	virtual const node* current_node(std::size_t ind=0) const =0 ;
 
 	virtual callstack& calls() =0 ;
 	virtual const callstack& calls() const =0 ;

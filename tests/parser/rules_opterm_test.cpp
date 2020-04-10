@@ -65,8 +65,9 @@ BOOST_AUTO_TEST_CASE(no_space)
 BOOST_AUTO_TEST_SUITE(bsign)
 BOOST_DATA_TEST_CASE(begin, tdata::random(-100, 100) ^ tdata::xrange(10), sign, ind)
 {
+	// TODO: 10'000'000'000 iterations blocks the system.. memory leaks?
 	(void)ind;
-	std::string data = "<%" + (0 < sign ? ('+' + std::to_string(sign)) : std::to_string(sign));
+	std::string data = "<%" + (0 <= sign ? ('+' + std::to_string(sign)) : std::to_string(sign));
 	ast::block_term_start result;
 	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::block_term_start, data) );
 	BOOST_TEST( result.trim );

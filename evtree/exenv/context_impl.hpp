@@ -30,7 +30,7 @@ public:
 	context_impl();
 
 	void current_node(const node* n) ;
-	const node* current_node(std::size_t ind=0) const ;
+	const node* nth_node_on_stack(std::size_t ind) const ;
 
 	void pop(const node* n);
 	void push(const node* n);

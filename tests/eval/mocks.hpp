@@ -10,6 +10,8 @@
 
 #include "eval/eval.hpp"
 #include "evtree/nodes/callable.hpp"
+#include "evtree/exenv/context.hpp"
+#include "evtree/exenv/callstack.hpp"
 
 namespace mocks {
 
@@ -35,6 +37,58 @@ MOCK_BASE_CLASS( callable_node, cppjinja::evtnodes::callable )
 	MOCK_METHOD( is_leaf, 0 )
 	MOCK_METHOD( render, 1 )
 	MOCK_METHOD( param, 2, std::optional<cppjinja::ast::value_term>(const cppjinja::evt::callstack& ctx,const cppjinja::ast::var_name& name) )
+};
+
+MOCK_BASE_CLASS( context, cppjinja::evt::context )
+{
+	MOCK_METHOD(current_node, 1)
+	MOCK_METHOD(nth_node_on_stack, 1)
+
+	MOCK_METHOD(pop, 1)
+	MOCK_METHOD(push, 1)
+	MOCK_METHOD(maker, 0)
+
+	MOCK_METHOD(inject, 1)
+	MOCK_METHOD(takeout, 1)
+	MOCK_METHOD(injections, 0)
+
+	MOCK_METHOD(solve_var, 1)
+};
+
+MOCK_BASE_CLASS( callstack, cppjinja::evt::callstack )
+{
+	using cppjinja::evt::callstack::call_params;
+	MOCK_METHOD( pop, 1 )
+	MOCK_METHOD( push, 2 )
+	MOCK_METHOD( caller, 0 )
+	MOCK_METHOD( calling_stack, 0 )
+	// get_params
+	MOCK_METHOD( call_params, 0, std::vector<cppjinja::ast::function_call_parameter>(), get_params )
+	// set_params
+	MOCK_METHOD( call_params, 1, void (std::vector<cppjinja::ast::function_call_parameter> params), set_params )
+};
+
+MOCK_BASE_CLASS( exenv, cppjinja::evt::exenv )
+{
+	MOCK_METHOD(tmpl, 0)
+	MOCK_METHOD(children, 1)
+
+	MOCK_METHOD(data, 0)
+	MOCK_METHOD(out, 0)
+
+	using cppjinja::evt::exenv::ctx;
+	MOCK_CONST_METHOD( ctx, 0, const context&(), get_cctx )
+	MOCK_NON_CONST_METHOD( ctx, 0, context&(), get_ctx )
+
+	MOCK_METHOD( current_node, 1)
+
+	using cppjinja::evt::exenv::calls;
+	MOCK_NON_CONST_METHOD(calls, 0, callstack&(), calls)
+	MOCK_CONST_METHOD( calls, 0, const callstack&(), ccalls )
+
+	using cppjinja::evt::exenv::rinfo;
+	MOCK_CONST_METHOD(rinfo, 0, std::optional<cppjinja::evt::render_info>(), crinfo)
+	MOCK_NON_CONST_METHOD(rinfo, 1, void(std::optional<cppjinja::evt::render_info> ri), rinfo)
 };
 
 } // namespace mocks

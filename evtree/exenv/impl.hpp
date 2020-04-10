@@ -27,13 +27,14 @@ public:
 	exenv_impl(const data_provider* prov, const evtree* tmpl, std::ostream& out);
 
 	const evtree& tmpl() const override ;
+	std::vector<const node*> children(const node* selected ) const override ;
+
 	const data_provider* data() const override ;
 	std::ostream& out() override ;
 
 	context& ctx() override ;
 	const context& ctx() const override ;
 	void current_node(const node* n) override ;
-	const node* current_node(std::size_t ind=0) const override ;
 
 	callstack& calls() override ;
 	const callstack& calls() const override ;
