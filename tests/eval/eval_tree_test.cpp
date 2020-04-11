@@ -92,7 +92,6 @@ BOOST_AUTO_TEST_CASE(few_blocks)
 	auto a_children = tree.children(a_node);
 	BOOST_TEST_REQUIRE(a_children.size() == 2);
 	BOOST_TEST(a_children[0]->name() == "content");
-	BOOST_TEST_REQUIRE(6 < a_children[1]->name().size());
 	BOOST_TEST(a_children[1]->name().substr(0,6) == "op_out");
 }
 
@@ -163,6 +162,5 @@ BOOST_AUTO_TEST_CASE(tree_blocks)
 	BOOST_TEST( tree.children(bl).size()==1 );
 	auto children = tree.children(main);
 	BOOST_TEST_REQUIRE(children.size()==1);
-	BOOST_TEST_REQUIRE(6 < children[0]->name().size());
 	BOOST_TEST(children[0]->name().substr(0,6) == "op_out");
 }

@@ -12,11 +12,13 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/data/monomorphic.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
 
 #include "mocks.hpp"
+#include "parser/operators/single.hpp"
 #include "evtree/node.hpp"
 #include "evtree/nodes/tmpl.hpp"
+#include "evtree/nodes/op_set.hpp"
+#include "evtree/nodes/op_out.hpp"
 
 using namespace std::literals;
 namespace tdata = boost::unit_test::data;
@@ -24,19 +26,29 @@ namespace tdata = boost::unit_test::data;
 using evt_node = cppjinja::evt::node;
 namespace evtnodes = cppjinja::evtnodes;
 namespace ast = cppjinja::ast;
-
-boost::ptr_vector<evt_node> all_nodes()
-{
-	using namespace cppjinja::evtnodes;
-	return {
-	};
-}
+using ast::value_term;
 
 struct mock_exenv_fixture
 {
 	mocks::exenv env;
 	mocks::context ctx;
 	mocks::callstack calls;
+	std::stringstream out;
+	mocks::data_provider data;
+
+	void expect_env_usage()
+	{
+		MOCK_EXPECT(env.data).returns(&data);
+		MOCK_EXPECT(env.calls).returns(calls);
+		MOCK_EXPECT(env.get_ctx).returns(ctx);
+		MOCK_EXPECT(env.get_cctx).returns(ctx);
+	}
+
+	void expect_out(std::size_t count)
+	{
+		MOCK_EXPECT(env.out)
+		        .exactly(count).calls([this]()->std::ostream&{return out;});
+	}
 
 	void expect_calls(evt_node* caller, cppjinja::evtnodes::callable* calling)
 	{
@@ -105,4 +117,65 @@ BOOST_FIXTURE_TEST_CASE(rendered_only_empty_name, mock_exenv_fixture)
 	BOOST_CHECK_NO_THROW(tmpl.render(env));
 }
 BOOST_AUTO_TEST_SUITE_END() // tmpl
+BOOST_AUTO_TEST_SUITE(op_set)
+BOOST_AUTO_TEST_CASE(getters)
+{
+	ast::op_set ast_node{ {1,1}, "tname", value_term{42}, {{1,1},false}, {{1,1},true} };
+	evtnodes::op_set snode(ast_node);
+	BOOST_TEST(snode.name() == "tname");
+	BOOST_TEST(snode.rinfo().trim_left == false);
+	BOOST_TEST(snode.rinfo().trim_right == true);
+	BOOST_TEST(snode.is_leaf() == true);
+}
+BOOST_AUTO_TEST_CASE(value)
+{
+	ast::op_set ast_node{ {1,1}, "tname", value_term{42}, {{1,1},false}, {{1,1},true} };
+	evtnodes::op_set snode(ast_node);
+	BOOST_TEST(snode.value(ast::var_name{"tname"}) == value_term{42});
+	BOOST_CHECK_THROW(snode.value(ast::var_name{"wrong_name"}), std::exception);
+	BOOST_CHECK_THROW(snode.value(ast::var_name{}), std::exception);
+}
+BOOST_FIXTURE_TEST_CASE(render, mock_exenv_fixture)
+{
+	ast::op_set ast_node{ {1,1}, "tname", value_term{42}, {{1,1},false}, {{1,1},true} };
+	evtnodes::op_set snode(ast_node);
+	MOCK_EXPECT(env.current_node).once().with(&snode);
+	BOOST_CHECK_NO_THROW(snode.render(env));
+}
+BOOST_AUTO_TEST_SUITE_END() // op_set
+BOOST_AUTO_TEST_SUITE(op_out)
+BOOST_AUTO_TEST_CASE(getters)
+{
+	ast::op_out ast_out{ {1,1}, value_term{42}, {}, {{1,1},false}, {{1,1},true} };
+	evtnodes::op_out snode(ast_out);
+	BOOST_TEST(snode.name().substr(0,6) == "op_out");
+	BOOST_TEST(snode.rinfo().trim_left == false);
+	BOOST_TEST(snode.rinfo().trim_right == true);
+	BOOST_TEST(snode.is_leaf() == true);
+}
+BOOST_FIXTURE_TEST_CASE(render, mock_exenv_fixture)
+{
+	ast::op_out ast_out{ {1,1}, value_term{42}, {}, {{1,1},false}, {{1,1},true} };
+	evtnodes::op_out snode(ast_out);
+	expect_out(1);
+	MOCK_EXPECT(env.current_node).once().with(&snode);
+	BOOST_CHECK_NO_THROW(snode.render(env));
+}
+BOOST_FIXTURE_TEST_CASE(render_with_filters, mock_exenv_fixture)
+{
+	ast::op_out ast_out{ {1,1}, value_term{42}, {}, {{1,1},false}, {{1,1},true} };
+	ast_out.filters.push_back(ast::filter_call{ast::var_name{"a"}});
+	ast_out.filters.push_back(ast::filter_call{ast::function_call(ast::var_name{"fnc"}, {})});
+	evtnodes::op_out snode(ast_out);
+	expect_out(1);
+	expect_env_usage();
+	MOCK_EXPECT(env.current_node).once().with(&snode);
+	mock::sequence filter_seq;
+	MOCK_EXPECT(data.filter).once().in(filter_seq).returns("first");
+	MOCK_EXPECT(data.filter).once().in(filter_seq).returns("ok");
+	MOCK_EXPECT(calls.set_params).once().calls([](auto p){BOOST_CHECK(p.empty());});
+	BOOST_CHECK_NO_THROW(snode.render(env));
+	BOOST_TEST(out.str() == "ok");
+}
+BOOST_AUTO_TEST_SUITE_END() // op_out
 BOOST_AUTO_TEST_SUITE_END() // nodes
