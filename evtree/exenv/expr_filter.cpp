@@ -18,7 +18,7 @@ void cppjinja::evt::expr_filter::ilegal_operator() const
 	throw std::logic_error("cannot filter by such value");
 }
 
-cppjinja::evt::expr_filter::expr_filter(const exenv* ud, const east::value_term& b)
+cppjinja::evt::expr_filter::expr_filter(exenv* ud, const east::value_term& b)
     : base(b)
     , user_data(ud)
 {
@@ -27,13 +27,13 @@ cppjinja::evt::expr_filter::expr_filter(const exenv* ud, const east::value_term&
 }
 
 cppjinja::east::value_term cppjinja::evt::expr_filter::operator()(
-        const cppjinja::ast::value_term& val) const
+        const cppjinja::ast::value_term& val)
 {
 	return boost::apply_visitor(*this, val.var);
 }
 
 cppjinja::east::value_term cppjinja::evt::expr_filter::operator()(
-        const cppjinja::ast::var_name& obj) const
+        const cppjinja::ast::var_name& obj)
 {
 	east::function_call call;
 	call.ref = east_cvt::cvt(obj);
@@ -41,7 +41,7 @@ cppjinja::east::value_term cppjinja::evt::expr_filter::operator()(
 }
 
 cppjinja::east::value_term cppjinja::evt::expr_filter::operator()(
-        const cppjinja::ast::function_call& obj) const
+        const cppjinja::ast::function_call& obj)
 {
 	east::function_call call;
 	call.ref = east_cvt::cvt(obj.ref);

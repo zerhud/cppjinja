@@ -19,6 +19,7 @@
 #include "evtree/nodes/tmpl.hpp"
 #include "evtree/nodes/op_set.hpp"
 #include "evtree/nodes/op_out.hpp"
+#include "evtree/nodes/content_block.hpp"
 
 using namespace std::literals;
 namespace tdata = boost::unit_test::data;
@@ -178,4 +179,36 @@ BOOST_FIXTURE_TEST_CASE(render_with_filters, mock_exenv_fixture)
 	BOOST_TEST(out.str() == "ok");
 }
 BOOST_AUTO_TEST_SUITE_END() // op_out
+BOOST_AUTO_TEST_SUITE(content_block)
+BOOST_FIXTURE_TEST_CASE(getters, mock_exenv_fixture)
+{
+	evtnodes::content_block cnt_bl({false, true}, "test_name");
+	BOOST_TEST(cnt_bl.is_leaf() == false);
+	BOOST_TEST(cnt_bl.name() == "test_name");
+	BOOST_TEST(cnt_bl.rinfo().trim_left == false);
+	BOOST_TEST(cnt_bl.rinfo().trim_right == true);
+}
+BOOST_FIXTURE_TEST_CASE(render, mock_exenv_fixture)
+{
+	evtnodes::content_block cnt_bl({false, true}, "test_name");
+	expect_cxt_settings(&cnt_bl);
+	MOCK_EXPECT(env.crinfo).once().returns(cppjinja::evt::render_info{true, false});
+	MOCK_EXPECT(env.children).once().returns(std::vector<const evt_node*>{});
+	BOOST_CHECK_NO_THROW(cnt_bl.render(env));
+}
+BOOST_FIXTURE_TEST_CASE(render_two, mock_exenv_fixture)
+{
+	evtnodes::content_block cnt_bl({false, true}, "test_name");
+	mocks::node child1, child2;
+	expect_cxt_settings(&cnt_bl);
+	MOCK_EXPECT(env.crinfo).returns(cppjinja::evt::render_info{true, false});
+	MOCK_EXPECT(env.children).once().returns(std::vector<const evt_node*>{&child1, &child2});
+	MOCK_EXPECT(child1.render).once();
+	MOCK_EXPECT(child1.rinfo).once().returns(cppjinja::evt::render_info{false,false});
+	MOCK_EXPECT(child2.render).once();
+	MOCK_EXPECT(child2.rinfo).once().returns(cppjinja::evt::render_info{false,false});
+	MOCK_EXPECT(env.rinfo).exactly(2);
+	BOOST_CHECK_NO_THROW(cnt_bl.render(env));
+}
+BOOST_AUTO_TEST_SUITE_END() // content_block
 BOOST_AUTO_TEST_SUITE_END() // nodes

@@ -37,7 +37,7 @@ void cppjinja::evtnodes::content_block::render(evt::exenv& ctx) const
 {
 	auto def_ri = ctx.rinfo();
 	if(!def_ri) def_ri = rinfo();
-	auto children = ctx.tmpl().children(this, false);
+	auto children = ctx.children(this);
 	ctx.current_node(this);
 	evt::raii_push_ctx cm(this, &ctx.ctx());
 	render_children(children, ctx, *def_ri);

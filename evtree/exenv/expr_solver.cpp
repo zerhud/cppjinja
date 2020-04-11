@@ -17,20 +17,20 @@
 
 using namespace cppjinja::details;
 
-cppjinja::evt::expr_solver::expr_solver(const exenv* e)
+cppjinja::evt::expr_solver::expr_solver(exenv* e)
     : env(e)
 {
 	if(!env) throw std::runtime_error("cannot crate solver without environment");
 }
 
 cppjinja::evt::expr_solver::ret_t
-cppjinja::evt::expr_solver::operator()(const cppjinja::ast::value_term& val) const
+cppjinja::evt::expr_solver::operator()(const cppjinja::ast::value_term& val)
 {
 	return boost::apply_visitor(*this, val.var);
 }
 
 cppjinja::evt::expr_solver::ret_t
-cppjinja::evt::expr_solver::operator()(const cppjinja::ast::binary_op& op) const
+cppjinja::evt::expr_solver::operator()(const cppjinja::ast::binary_op& op)
 {
 	auto left = (*this)(op.left);
 	auto right = (*this)(op.right);
@@ -42,20 +42,15 @@ cppjinja::evt::expr_solver::operator()(const cppjinja::ast::binary_op& op) const
 }
 
 cppjinja::evt::expr_solver::ret_t
-cppjinja::evt::expr_solver::operator()(const cppjinja::ast::function_call& obj) const
+cppjinja::evt::expr_solver::operator()(const cppjinja::ast::function_call& obj)
 {
-	east::function_call call;
-	call.ref = east_cvt::cvt(obj.ref);
-	for(auto& src:obj.params)
-		call.params.emplace_back(
-		            east::function_parameter{
-		                src.name,
-		                (*this)(src.value.get())});
-	return env->data()->value(call);
+	if(!can_be_solved_in_tmpl(obj.ref)) return solve_in_data(obj);
+	auto tmpl_node = env->search_callable(obj.ref.back());
+	return tmpl_node ? solve_in_tmpl(obj, tmpl_node) : solve_in_data(obj);
 }
 
 cppjinja::evt::expr_solver::ret_t
-cppjinja::evt::expr_solver::operator()(const cppjinja::ast::var_name& obj) const
+cppjinja::evt::expr_solver::operator()(const cppjinja::ast::var_name& obj)
 {
 	auto param_val = search_in_params(obj);
 	if(param_val) return (*this)(*param_val);
@@ -65,13 +60,13 @@ cppjinja::evt::expr_solver::operator()(const cppjinja::ast::var_name& obj) const
 }
 
 cppjinja::evt::expr_solver::ret_t
-cppjinja::evt::expr_solver::operator()(const cppjinja::ast::array_v& obj) const
+cppjinja::evt::expr_solver::operator()(const cppjinja::ast::array_v& obj)
 {
 	return make_array(obj.fields);
 }
 
 cppjinja::evt::expr_solver::ret_t
-cppjinja::evt::expr_solver::operator()(const cppjinja::ast::tuple_v& obj) const
+cppjinja::evt::expr_solver::operator()(const cppjinja::ast::tuple_v& obj)
 {
 	return make_array(obj.fields);
 }
@@ -89,7 +84,7 @@ cppjinja::evt::expr_solver::operator()(const double& obj) const
 }
 
 cppjinja::east::value_term cppjinja::evt::expr_solver::make_array(
-        const std::vector<ast::forward_ast<cppjinja::ast::value_term> >& fields) const
+        const std::vector<ast::forward_ast<cppjinja::ast::value_term> >& fields)
 {
 	east::array_v ret;
 	for(auto& i:fields)
@@ -111,4 +106,35 @@ cppjinja::evt::expr_solver::search_in_params(const cppjinja::ast::var_name& var)
 			return cur_param;
 	}
 	throw std::runtime_error("no calling node in context");
+}
+
+cppjinja::east::value_term cppjinja::evt::expr_solver::solve_in_data(
+        const cppjinja::ast::function_call& obj)
+{
+	east::function_call call;
+	call.ref = east_cvt::cvt(obj.ref);
+	for(auto& src:obj.params)
+		call.params.emplace_back(
+		            east::function_parameter{
+		                src.name,
+		                (*this)(src.value.get())});
+	return env->data()->value(call);
+}
+
+cppjinja::east::value_term cppjinja::evt::expr_solver::solve_in_tmpl(
+          const cppjinja::ast::function_call& obj
+        , const evtnodes::callable* node)
+{
+	assert(env);
+	raii_push_callstack stack_maker(env->ctx().nth_node_on_stack(0), node, &env->calls());
+	env->calls().call_params(obj.params);
+	node->render(*env);
+	return east::nothing;
+}
+
+bool cppjinja::evt::expr_solver::can_be_solved_in_tmpl(const cppjinja::ast::var_name& name) const
+{
+	if(name.size() == 2 && name[0] == "self") return true;
+	if(name.size() == 1) return true;
+	return false;
 }

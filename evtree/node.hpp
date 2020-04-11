@@ -41,10 +41,6 @@ protected:
 	          evt::exenv& ctx
 	        , const ast::value_term& value
 	        ) const ;
-	void render_value(
-	          evt::exenv& ctx
-	        , const east::value_term& value
-	        ) const ;
 };
 
 }} // namespace cppjinja::evt

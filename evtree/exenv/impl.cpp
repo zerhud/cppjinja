@@ -39,6 +39,14 @@ cppjinja::evt::exenv_impl::children(const cppjinja::evt::node* selected) const
 	return compiled_template->children(selected);
 }
 
+const cppjinja::evtnodes::callable*
+cppjinja::evt::exenv_impl::search_callable(std::string_view name) const
+{
+	const node* found = compiled_template->search(
+	            ast::var_name{ast::string_t(name)}, exectx.nth_node_on_stack(0));
+	return dynamic_cast<const evtnodes::callable*>(found);
+}
+
 const cppjinja::data_provider* cppjinja::evt::exenv_impl::data() const
 {
 	assert(user_data);

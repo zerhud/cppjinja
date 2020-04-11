@@ -60,6 +60,6 @@ void cppjinja::evtnodes::op_out::render(evt::exenv& ctx) const
 		for(auto& filter:op.filters)
 			boost::apply_visitor(caller, filter.var);
 
-		render_value(ctx, caller.base);
+		ctx.out() << caller.base;
 	}
 }

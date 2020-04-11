@@ -77,56 +77,6 @@ void cppjinja::evt::node::render_value(
         , const cppjinja::ast::value_term& value
         ) const
 {
-	struct renderer {
-		exenv& ctx;
-		expr_solver solver;
-		const node* self;
-		renderer(exenv& c, const node* s) : ctx(c), solver(&c), self(s) {}
-
-		void operator()(const double& obj) { ctx.out() << obj; }
-		void operator()(const ast::string_t& obj) { ctx.out() << obj; }
-		void operator()(const ast::tuple_v&) { }
-		void operator()(const ast::array_v&) { }
-		void operator()(const ast::var_name& obj) {
-			auto val = solver(ast::value_term{obj});
-			self->render_value(ctx, val);
-		}
-		void operator()(const ast::function_call& obj) {
-			auto* node = ctx.tmpl().search(obj.ref, self);
-			if(!node) {
-				auto cv = solver(ast::value_term{obj});
-				self->render_value(ctx, cv);
-				return;
-			}
-
-			auto* canode = dynamic_cast<const evtnodes::callable*>(node);
-			if(!canode) throw std::runtime_error("cannot call not callable node");
-			raii_push_callstack cmaker(self, canode, &ctx.calls());
-			ctx.calls().call_params(obj.params);
-			node->render(ctx);
-		}
-		void operator()(const ast::binary_op& obj) {
-			ctx.out() << solver(obj); }
-	};
-
-	renderer rnd(ctx, this);
-	boost::apply_visitor(rnd, value.var);
-}
-
-
-void cppjinja::evt::node::render_value(
-          exenv& ctx
-        , const cppjinja::east::value_term& value
-        ) const
-{
-	struct {
-		exenv& ctx;
-		void operator()(const double& v) { ctx.out() << v ; }
-		void operator()(const east::string_t& v) { ctx.out() << v; }
-		void operator()(const east::array_v&) {}
-		void operator()(const east::map_v&) {}
-	} rnd{ctx};
-
-	const east::value_term_var& var_val = value;
-	std::visit(rnd, var_val);
+	auto print = [&ctx](auto& v){ctx.out() << expr_solver(&ctx)(v);};
+	boost::apply_visitor(print, value.var);
 }

@@ -28,6 +28,7 @@ public:
 
 	const evtree& tmpl() const override ;
 	std::vector<const node*> children(const node* selected ) const override ;
+	const evtnodes::callable* search_callable(std::string_view name) const override ;
 
 	const data_provider* data() const override ;
 	std::ostream& out() override ;

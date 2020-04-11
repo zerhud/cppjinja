@@ -77,7 +77,7 @@ BOOST_DATA_TEST_CASE(begin, tdata::random(-100, 100) ^ tdata::xrange(10), sign, 
 BOOST_DATA_TEST_CASE(end, tdata::random(-100, 100) ^ tdata::xrange(10), sign, ind)
 {
 	(void)ind;
-	std::string data = (0 < sign ? ('+' + std::to_string(sign)) : std::to_string(sign)) + "%>"s;
+	std::string data = (0 <= sign ? ('+' + std::to_string(sign)) : std::to_string(sign)) + "%>"s;
 	ast::block_term_end result;
 	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::block_term_end, data) );
 	BOOST_TEST( result.trim );

@@ -72,11 +72,11 @@ auto block_macro_data =
 auto rvterm_data = tdata::make(
             "data"sv, "<= 'data' =>"sv, "<= 42 =>"sv, "<= ['one', 'two'] =>"sv
             ) ^ tdata::make(
-            "data"sv, "data"sv,         "42"sv,       ""sv );
+            "data"sv, "data"sv,         "42"sv,       "one two "sv );
 BOOST_DATA_TEST_CASE_F(mock_data_provider_fixture, render_vterm
          , rvterm_data , code, result)
 {
-	BOOST_TEST(parse_single(code, *data) == result );
+	BOOST_TEST(parse_single(code, *data) == result);
 }
 
 BOOST_AUTO_TEST_SUITE(var_name)
