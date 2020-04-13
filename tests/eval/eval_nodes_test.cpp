@@ -14,7 +14,6 @@
 #include <boost/test/data/monomorphic.hpp>
 
 #include "mocks.hpp"
-#include "parser/operators/single.hpp"
 #include "evtree/node.hpp"
 #include "evtree/nodes/tmpl.hpp"
 #include "evtree/nodes/op_set.hpp"
@@ -28,51 +27,7 @@ using evt_node = cppjinja::evt::node;
 namespace evtnodes = cppjinja::evtnodes;
 namespace ast = cppjinja::ast;
 using ast::value_term;
-
-struct mock_exenv_fixture
-{
-	mocks::exenv env;
-	mocks::context ctx;
-	mocks::callstack calls;
-	std::stringstream out;
-	mocks::data_provider data;
-
-	void expect_env_usage()
-	{
-		MOCK_EXPECT(env.data).returns(&data);
-		MOCK_EXPECT(env.calls).returns(calls);
-		MOCK_EXPECT(env.get_ctx).returns(ctx);
-		MOCK_EXPECT(env.get_cctx).returns(ctx);
-	}
-
-	void expect_out(std::size_t count)
-	{
-		MOCK_EXPECT(env.out)
-		        .exactly(count).calls([this]()->std::ostream&{return out;});
-	}
-
-	void expect_calls(evt_node* caller, cppjinja::evtnodes::callable* calling)
-	{
-		mock::sequence seq;
-		MOCK_EXPECT(env.calls).once().in(seq).returns(calls);
-		MOCK_EXPECT(calls.push).once().in(seq).with(caller, calling);
-		MOCK_EXPECT(calls.pop).once().in(seq).with(caller);
-	}
-
-	void expect_cxt_settings(evt_node* maker)
-	{
-		mock::sequence seq;
-		MOCK_EXPECT(env.get_ctx).once().in(seq).returns(ctx);
-		MOCK_EXPECT(ctx.push).once().in(seq).with(maker);
-		MOCK_EXPECT(ctx.pop).once().in(seq).with(maker);
-		MOCK_EXPECT(env.current_node).once().with(maker);
-	}
-
-	void expect_children(std::vector<const evt_node*> children)
-	{
-		MOCK_EXPECT(env.children).once().returns(children);
-	}
-};
+using mocks::mock_exenv_fixture; // qtcreator cannot parse test with namespace
 
 template<typename Node, typename Ast>
 void test_name_equals(const Node& evtn, const Ast& astnode)
@@ -111,7 +66,7 @@ BOOST_FIXTURE_TEST_CASE(rendered_only_empty_name, mock_exenv_fixture)
 	expect_cxt_settings(&tmpl);
 	mocks::callable_node child_with_name, child_empty_name;
 	expect_children({&child_with_name, &child_empty_name});
-	expect_calls(&tmpl, &child_empty_name);
+	expect_call(&tmpl, &child_empty_name, {});
 	MOCK_EXPECT(child_empty_name.name).returns("");
 	MOCK_EXPECT(child_with_name.name).returns("tn");
 	MOCK_EXPECT(child_empty_name.render).once();
@@ -158,7 +113,6 @@ BOOST_FIXTURE_TEST_CASE(render, mock_exenv_fixture)
 {
 	ast::op_out ast_out{ {1,1}, value_term{42}, {}, {{1,1},false}, {{1,1},true} };
 	evtnodes::op_out snode(ast_out);
-	expect_out(1);
 	MOCK_EXPECT(env.current_node).once().with(&snode);
 	BOOST_CHECK_NO_THROW(snode.render(env));
 }
@@ -168,8 +122,6 @@ BOOST_FIXTURE_TEST_CASE(render_with_filters, mock_exenv_fixture)
 	ast_out.filters.push_back(ast::filter_call{ast::var_name{"a"}});
 	ast_out.filters.push_back(ast::filter_call{ast::function_call(ast::var_name{"fnc"}, {})});
 	evtnodes::op_out snode(ast_out);
-	expect_out(1);
-	expect_env_usage();
 	MOCK_EXPECT(env.current_node).once().with(&snode);
 	mock::sequence filter_seq;
 	MOCK_EXPECT(data.filter).once().in(filter_seq).returns("first");

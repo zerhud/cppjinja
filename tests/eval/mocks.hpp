@@ -12,6 +12,7 @@
 #include "evtree/nodes/callable.hpp"
 #include "evtree/exenv/context.hpp"
 #include "evtree/exenv/callstack.hpp"
+#include "parser/operators/single.hpp"
 
 namespace mocks {
 
@@ -90,6 +91,62 @@ MOCK_BASE_CLASS( exenv, cppjinja::evt::exenv )
 	using cppjinja::evt::exenv::rinfo;
 	MOCK_CONST_METHOD(rinfo, 0, std::optional<cppjinja::evt::render_info>(), crinfo)
 	MOCK_NON_CONST_METHOD(rinfo, 1, void(std::optional<cppjinja::evt::render_info> ri), rinfo)
+};
+
+struct mock_exenv_fixture
+{
+	mocks::exenv env;
+	mocks::context ctx;
+	mocks::callstack calls;
+	std::stringstream out;
+	mocks::data_provider data;
+
+	mock_exenv_fixture()
+	{
+		MOCK_EXPECT(env.data).returns(&data);
+		MOCK_EXPECT(env.get_ctx).returns(ctx);
+		MOCK_EXPECT(env.get_cctx).returns(ctx);
+		MOCK_EXPECT(env.calls).returns(calls);
+		MOCK_EXPECT(env.ccalls).returns(calls);
+		MOCK_EXPECT(env.out).calls([this]()->std::ostream&{return out;});
+	}
+
+	void expect_callings(std::vector<const cppjinja::evtnodes::callable*> stack)
+	{
+		MOCK_EXPECT(calls.calling_stack).once().returns(stack);
+	}
+
+	void expect_call(
+	        cppjinja::evt::node* caller,
+	        cppjinja::evtnodes::callable* calling,
+	        std::vector<cppjinja::ast::function_call_parameter> params)
+	{
+		auto check_params =
+		        [params](std::vector<cppjinja::ast::function_call_parameter> called_params){
+			BOOST_REQUIRE(called_params.size() == params.size());
+			BOOST_TEST( called_params == params );
+		};
+		mock::sequence seq;
+		MOCK_EXPECT(calls.push).once().in(seq).with(caller, calling);
+		MOCK_EXPECT(calls.set_params)
+		        .at_most(1)
+		        .at_least(params.empty() ? 0 : 1)
+		        .in(seq).calls(check_params);
+		MOCK_EXPECT(calls.pop).once().in(seq);
+	}
+
+	void expect_cxt_settings(cppjinja::evt::node* maker)
+	{
+		mock::sequence seq;
+		MOCK_EXPECT(ctx.push).once().in(seq).with(maker);
+		MOCK_EXPECT(ctx.pop).once().in(seq).with(maker);
+		MOCK_EXPECT(env.current_node).once().with(maker);
+	}
+
+	void expect_children(std::vector<const cppjinja::evt::node*> children)
+	{
+		MOCK_EXPECT(env.children).once().returns(children);
+	}
 };
 
 } // namespace mocks

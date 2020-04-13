@@ -30,6 +30,7 @@ using cppjinja::ast::comparator;
 using cppjinja::ast::value_term;
 using cppjinja::evt::expr_filter;
 using east_value_term = cppjinja::east::value_term;
+using mocks::mock_exenv_fixture; // qtcreator cannot parse test with namespace
 
 template<typename A>
 A make_container(const std::vector<value_term> vals)
@@ -39,6 +40,11 @@ A make_container(const std::vector<value_term> vals)
 	return A{{1,1}, favals};
 }
 
+struct mock_impls_fixture {
+	cppjinja::evt::callstack_impl calls;
+	cppjinja::evt::context_impl ctx;
+};
+
 struct mock_env_fixture
 {
 	mocks::data_provider data;
@@ -46,60 +52,27 @@ struct mock_env_fixture
 	std::stringstream out;
 };
 
-struct mock_exenv_fixture : mock_env_fixture
+struct impl_exenv_fixture : mock_env_fixture
 {
 	cppjinja::evt::exenv_impl env;
 	cppjinja::evt::context_impl& ctx;
 	cppjinja::evt::callstack_impl& calls;
-	mock_exenv_fixture()
+	impl_exenv_fixture()
 	    : env(&data, &compiled, out)
 	    , ctx(static_cast<cppjinja::evt::context_impl&>(env.ctx()))
 	    , calls(static_cast<cppjinja::evt::callstack_impl&>(env.calls()))
 	{}
 };
 
-struct mock_solver_fixture : mock_env_fixture
+struct mock_solver_fixture : mocks::mock_exenv_fixture
 {
-	mocks::exenv env;
-	mocks::context ctx;
-	mocks::callstack calls;
 	cppjinja::evt::expr_solver solver;
 	mock_solver_fixture() : solver(&env) {}
-	void expect_env_usage()
-	{
-		MOCK_EXPECT(env.data).returns(&data);
-		MOCK_EXPECT(env.get_ctx).returns(ctx);
-		MOCK_EXPECT(env.get_cctx).returns(ctx);
-		MOCK_EXPECT(env.calls).returns(calls);
-		MOCK_EXPECT(env.ccalls).returns(calls);
-		MOCK_EXPECT(env.out).calls([this]()->std::ostream&{return out;});
-	}
-
-	void expect_callings(std::vector<const cppjinja::evtnodes::callable*> stack)
-	{
-		MOCK_EXPECT(calls.calling_stack).once().returns(stack);
-	}
-
-	void expect_call(
-	        cppjinja::evt::node* caller,
-	        cppjinja::evtnodes::callable* calling,
-	        std::vector<cppjinja::ast::function_call_parameter> params)
-	{
-		auto check_params =
-		        [params](std::vector<cppjinja::ast::function_call_parameter> called_params){
-			BOOST_REQUIRE(called_params.size() == params.size());
-			BOOST_TEST( called_params == params );
-		};
-		mock::sequence seq;
-		MOCK_EXPECT(calls.push).once().in(seq).with(caller, calling);
-		MOCK_EXPECT(calls.set_params).once().in(seq).calls(check_params);
-		MOCK_EXPECT(calls.pop).once().in(seq);
-	}
 };
 
 
 BOOST_AUTO_TEST_SUITE(exenv)
-BOOST_FIXTURE_TEST_CASE(environment, mock_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(environment, impl_exenv_fixture)
 {
 	BOOST_TEST(&env.out() == &out);
 	BOOST_TEST(env.data() == &data);
@@ -107,7 +80,7 @@ BOOST_FIXTURE_TEST_CASE(environment, mock_exenv_fixture)
 	BOOST_CHECK_NO_THROW(env.ctx());
 	BOOST_CHECK_NO_THROW(env.calls());
 }
-BOOST_FIXTURE_TEST_CASE(rinfo, mock_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(rinfo, impl_exenv_fixture)
 {
 	using cppjinja::evt::render_info;
 	render_info ri{true, false};
@@ -120,14 +93,14 @@ BOOST_FIXTURE_TEST_CASE(rinfo, mock_exenv_fixture)
 	BOOST_TEST(ltrim == true);
 	BOOST_TEST(rtrim == false);
 }
-BOOST_FIXTURE_TEST_CASE(current_node, mock_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(current_node, impl_exenv_fixture)
 {
 	mocks::node fnode1, fnode2;
 	ctx.push(&fnode2);
 	BOOST_CHECK_NO_THROW( env.current_node(&fnode1) );
 	BOOST_TEST(ctx.nth_node_on_stack(0) == &fnode1);
 }
-BOOST_FIXTURE_TEST_CASE(children, mock_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(children, impl_exenv_fixture)
 {
 	// cannot normaly test: tree cannot be mocked
 	BOOST_TEST( env.children(nullptr).empty() );
@@ -135,7 +108,7 @@ BOOST_FIXTURE_TEST_CASE(children, mock_exenv_fixture)
 
 BOOST_AUTO_TEST_SUITE(context)
 
-BOOST_FIXTURE_TEST_CASE(current_node, mock_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(current_node, mock_impls_fixture)
 {
 	mocks::node fnode1, fnode2;
 
@@ -152,7 +125,7 @@ BOOST_FIXTURE_TEST_CASE(current_node, mock_exenv_fixture)
 
 	BOOST_CHECK_THROW(ctx.nth_node_on_stack(2), std::exception);
 }
-BOOST_FIXTURE_TEST_CASE(stack, mock_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(stack, mock_impls_fixture)
 {
 	mocks::node fnode1, fnode2;
 	BOOST_CHECK_THROW(ctx.maker(), std::exception);
@@ -162,7 +135,7 @@ BOOST_FIXTURE_TEST_CASE(stack, mock_exenv_fixture)
 	BOOST_TEST(ctx.maker() == &fnode1);
 	BOOST_CHECK_THROW(ctx.pop(&fnode2), std::exception);
 }
-BOOST_FIXTURE_TEST_CASE(injection, mock_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(injection, mock_impls_fixture)
 {
 	mocks::node node;
 	mocks::callable_node calling, wrong_calling;
@@ -188,7 +161,7 @@ BOOST_FIXTURE_TEST_CASE(injection, mock_exenv_fixture)
 }
 
 BOOST_AUTO_TEST_SUITE(solve_name)
-BOOST_FIXTURE_TEST_CASE(var_not_setted, mock_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(var_not_setted, mock_impls_fixture)
 {
 	cppjinja::ast::var_name vn{ "a" };
 	BOOST_CHECK_THROW(ctx.solve_var(vn), std::exception);
@@ -197,7 +170,7 @@ BOOST_FIXTURE_TEST_CASE(var_not_setted, mock_exenv_fixture)
 	ctx.push(&fnode1);
 	BOOST_TEST(!ctx.solve_var(vn).has_value());
 }
-BOOST_FIXTURE_TEST_CASE(setted_variable, mock_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(setted_variable, mock_impls_fixture)
 {
 	cppjinja::ast::op_set data;
 	data.name = "a";
@@ -251,7 +224,6 @@ BOOST_FIXTURE_TEST_CASE(from_user_data, mock_solver_fixture)
 	cppjinja::ast::function_call_parameter param1(value_term{1});
 	value_term call{cppjinja::ast::function_call{fnc_name, {param1}}};
 	MOCK_EXPECT(env.search_callable).once().returns(nullptr);
-	expect_env_usage();
 	MOCK_EXPECT(data.value_function_call).once().returns(east_value_term{42});
 	BOOST_TEST(solver(call) == east_value_term{42});
 }
@@ -259,7 +231,6 @@ BOOST_FIXTURE_TEST_CASE(only_single_name_searched_in_env, mock_solver_fixture)
 {
 	cppjinja::ast::var_name fnc_name{"a", "b"};
 	value_term call{cppjinja::ast::function_call{fnc_name, {}}};
-	expect_env_usage();
 	MOCK_EXPECT(data.value_function_call).once().returns(east_value_term{42});
 	BOOST_TEST(solver(call) == east_value_term{42});
 }
@@ -269,7 +240,6 @@ BOOST_FIXTURE_TEST_CASE(special_cases, mock_solver_fixture)
 	value_term call{cppjinja::ast::function_call{fnc_name, {}}};
 	mocks::node caller;
 	mocks::callable_node block;
-	expect_env_usage();
 	expect_call(&caller, &block, {});
 	MOCK_EXPECT(block.render).once();
 	MOCK_EXPECT(env.search_callable).once().returns(&block);
@@ -280,7 +250,6 @@ BOOST_FIXTURE_TEST_CASE(call_other_block, mock_solver_fixture)
 {
 	cppjinja::ast::var_name fnc_name{"a"};
 	value_term call{cppjinja::ast::function_call{fnc_name, {}}};
-	expect_env_usage();
 	mocks::node caller;
 	mocks::callable_node block;
 	MOCK_EXPECT(env.search_callable).once().returns(&block);
@@ -301,7 +270,6 @@ BOOST_DATA_TEST_CASE_F(mock_solver_fixture, binary_ops
 	using cppjinja::ast::binary_op;
 	binary_op bop{left, op, right};
 	BOOST_TEST(solver(value_term{bop}) == result);
-	expect_env_usage();
 	MOCK_EXPECT(env.search_callable).returns(nullptr);
 	MOCK_EXPECT(data.value_function_call).once().returns(solver(left));
 	bop.left = value_term{cppjinja::ast::function_call{var_name{"a"}, {}}};
@@ -312,7 +280,6 @@ BOOST_FIXTURE_TEST_CASE(by_name_from_data, mock_solver_fixture)
 	mocks::callable_node ctx_maker;
 	east_value_term result{42};
 	cppjinja::ast::var_name vn{ "a" };
-	expect_env_usage();
 	expect_callings({&ctx_maker});
 	MOCK_EXPECT(data.value_var_name).once().returns(result);
 	MOCK_EXPECT(ctx_maker.param).once().returns(std::nullopt);
@@ -323,7 +290,6 @@ BOOST_FIXTURE_TEST_CASE(by_name_from_data, mock_solver_fixture)
 BOOST_FIXTURE_TEST_CASE(by_name_from_setted, mock_solver_fixture)
 {
 	mocks::callable_node ctx_maker;
-	expect_env_usage();
 	expect_callings({&ctx_maker});
 	MOCK_EXPECT(ctx_maker.param).once().returns(std::nullopt);
 	MOCK_EXPECT(ctx.solve_var).once().returns(value_term{42});
@@ -336,7 +302,6 @@ BOOST_FIXTURE_TEST_CASE(in_params, mock_solver_fixture)
 {
 	mocks::callable_node maker, calling2;
 
-	expect_env_usage();
 	expect_callings({&maker, &calling2});
 	MOCK_EXPECT(maker.param).once().returns(value_term{42});
 
@@ -347,7 +312,6 @@ BOOST_FIXTURE_TEST_CASE(two_callers_one_maker, mock_solver_fixture)
 {
 	mocks::callable_node maker, calling2, calling3;
 
-	expect_env_usage();
 	expect_callings({&calling2, &maker, &calling3});
 	MOCK_EXPECT(ctx.maker).returns(&maker);
 	mock::sequence seq;
@@ -360,7 +324,6 @@ BOOST_FIXTURE_TEST_CASE(two_callers_one_maker, mock_solver_fixture)
 BOOST_FIXTURE_TEST_CASE(no_calling_in_ctx, mock_solver_fixture)
 {
 	mocks::callable_node calling, maker;
-	expect_env_usage();
 	expect_callings({&calling});
 	MOCK_EXPECT(calling.param).once().returns(std::nullopt);
 	MOCK_EXPECT(ctx.maker).once().returns(&maker);
@@ -422,7 +385,7 @@ BOOST_FIXTURE_TEST_CASE(by_wrong, mock_exenv_fixture)
 BOOST_AUTO_TEST_SUITE_END() // filter
 
 BOOST_AUTO_TEST_SUITE(callstack)
-BOOST_FIXTURE_TEST_CASE(cannot_push_nullptr, mock_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(cannot_push_nullptr, mock_impls_fixture)
 {
 	mocks::node caller;
 	mocks::callable_node calling;
@@ -430,7 +393,7 @@ BOOST_FIXTURE_TEST_CASE(cannot_push_nullptr, mock_exenv_fixture)
 	BOOST_CHECK_THROW(calls.push(&caller, nullptr), std::exception);
 	BOOST_CHECK_THROW(calls.push(nullptr, &calling), std::exception);
 }
-BOOST_FIXTURE_TEST_CASE(push_pop_caller, mock_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(push_pop_caller, mock_impls_fixture)
 {
 	mocks::node caller, caller2;
 	mocks::callable_node calling, calling2;
@@ -451,7 +414,7 @@ BOOST_FIXTURE_TEST_CASE(push_pop_caller, mock_exenv_fixture)
 	BOOST_TEST(calls.caller() == &caller);
 	BOOST_TEST(calls.calling_stack()[0] == &calling);
 }
-BOOST_FIXTURE_TEST_CASE(call_params, mock_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(call_params, mock_impls_fixture)
 {
 	mocks::node caller, caller2;
 	mocks::callable_node calling;
@@ -471,7 +434,7 @@ BOOST_FIXTURE_TEST_CASE(call_params, mock_exenv_fixture)
 	BOOST_TEST_REQUIRE(calls.call_params().size() == 1);
 	BOOST_TEST(calls.call_params()[0] == p1);
 }
-BOOST_FIXTURE_TEST_CASE(cannot_add_params_to_empty, mock_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(cannot_add_params_to_empty, mock_impls_fixture)
 {
 	cppjinja::ast::function_call_parameter p1;
 	BOOST_CHECK_THROW(calls.call_params({p1}), std::exception);
@@ -479,7 +442,7 @@ BOOST_FIXTURE_TEST_CASE(cannot_add_params_to_empty, mock_exenv_fixture)
 BOOST_AUTO_TEST_SUITE_END() // callstack
 
 BOOST_AUTO_TEST_SUITE(raii)
-BOOST_FIXTURE_TEST_CASE(push_ctx, mock_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(push_ctx, impl_exenv_fixture)
 {
 	mocks::node maker;
 	BOOST_CHECK_THROW(ctx.maker(), std::exception);
@@ -489,7 +452,7 @@ BOOST_FIXTURE_TEST_CASE(push_ctx, mock_exenv_fixture)
 	}
 	BOOST_CHECK_THROW(ctx.maker(), std::exception);
 }
-BOOST_FIXTURE_TEST_CASE(inject_to_ctx, mock_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(inject_to_ctx, impl_exenv_fixture)
 {
 	mocks::node maker;
 	mocks::callable_node in;
@@ -501,7 +464,7 @@ BOOST_FIXTURE_TEST_CASE(inject_to_ctx, mock_exenv_fixture)
 	}
 	BOOST_TEST(ctx.injections().size() == 0);
 }
-BOOST_FIXTURE_TEST_CASE(push_callstack, mock_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(push_callstack, impl_exenv_fixture)
 {
 	mocks::node caller;
 	mocks::callable_node calling;
