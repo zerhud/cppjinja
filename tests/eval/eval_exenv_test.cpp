@@ -49,7 +49,6 @@ struct mock_env_fixture
 {
 	mocks::data_provider data;
 	cppjinja::evtree compiled;
-	std::stringstream out;
 };
 
 struct impl_exenv_fixture : mock_env_fixture
@@ -58,7 +57,7 @@ struct impl_exenv_fixture : mock_env_fixture
 	cppjinja::evt::context_impl& ctx;
 	cppjinja::evt::callstack_impl& calls;
 	impl_exenv_fixture()
-	    : env(&data, &compiled, out)
+	    : env(&data, &compiled)
 	    , ctx(static_cast<cppjinja::evt::context_impl&>(env.ctx()))
 	    , calls(static_cast<cppjinja::evt::callstack_impl&>(env.calls()))
 	{}
@@ -74,7 +73,6 @@ struct mock_solver_fixture : mocks::mock_exenv_fixture
 BOOST_AUTO_TEST_SUITE(exenv)
 BOOST_FIXTURE_TEST_CASE(environment, impl_exenv_fixture)
 {
-	BOOST_TEST(&env.out() == &out);
 	BOOST_TEST(env.data() == &data);
 	BOOST_TEST(&env.tmpl() == &compiled);
 	BOOST_CHECK_NO_THROW(env.ctx());
@@ -105,6 +103,15 @@ BOOST_FIXTURE_TEST_CASE(children, impl_exenv_fixture)
 	// cannot normaly test: tree cannot be mocked
 	BOOST_TEST( env.children(nullptr).empty() );
 }
+BOOST_FIXTURE_TEST_CASE(result, impl_exenv_fixture)
+{
+	mocks::node ctxmaker;
+	ctx.push(&ctxmaker);
+	BOOST_TEST(&env.out() == &ctx.out());
+	BOOST_TEST(env.result() == "");
+	ctx.out() << "test";
+	BOOST_TEST(env.result() == "test");
+}
 
 BOOST_AUTO_TEST_SUITE(context)
 
@@ -134,6 +141,12 @@ BOOST_FIXTURE_TEST_CASE(stack, mock_impls_fixture)
 	ctx.push(&fnode1);
 	BOOST_TEST(ctx.maker() == &fnode1);
 	BOOST_CHECK_THROW(ctx.pop(&fnode2), std::exception);
+
+	ctx.push(&fnode2);
+	BOOST_TEST(ctx.maker() == &fnode2);
+
+	BOOST_CHECK_NO_THROW(ctx.pop(&fnode2));
+	BOOST_TEST(ctx.maker() == &fnode1);
 }
 BOOST_FIXTURE_TEST_CASE(injection, mock_impls_fixture)
 {
@@ -186,6 +199,26 @@ BOOST_FIXTURE_TEST_CASE(setted_variable, mock_impls_fixture)
 }
 BOOST_AUTO_TEST_SUITE_END() // solve_name
 
+BOOST_FIXTURE_TEST_CASE(out, mock_impls_fixture)
+{
+	mocks::node node1, node2;
+	BOOST_CHECK_THROW(ctx.out(), std::exception);
+	BOOST_CHECK_THROW(ctx.result(), std::exception);
+	ctx.push(&node1);
+	BOOST_REQUIRE_NO_THROW(ctx.out());
+	std::ostream* out1 = &ctx.out();
+	BOOST_TEST(ctx.result() == "");
+	ctx.out() << "test";
+	BOOST_TEST(ctx.result() == "test");
+	ctx.push(&node2);
+	BOOST_TEST(ctx.result() == "");
+	BOOST_TEST(&ctx.out() != out1);
+	ctx.pop(&node2);
+	BOOST_TEST(&ctx.out() == out1);
+	BOOST_TEST(ctx.result() == "test");
+	ctx.out() << "test";
+	BOOST_TEST(ctx.result() == "testtest");
+}
 BOOST_AUTO_TEST_SUITE_END() // context
 
 BOOST_AUTO_TEST_SUITE(solver)
@@ -241,10 +274,10 @@ BOOST_FIXTURE_TEST_CASE(special_cases, mock_solver_fixture)
 	mocks::node caller;
 	mocks::callable_node block;
 	expect_call(&caller, &block, {});
-	MOCK_EXPECT(block.render).once();
+	MOCK_EXPECT(block.evaluate).once().returns("result");
 	MOCK_EXPECT(env.search_callable).once().returns(&block);
 	MOCK_EXPECT(ctx.nth_node_on_stack).with(0).returns(&caller);
-	BOOST_TEST(solver(call) == cppjinja::east::nothing);
+	BOOST_TEST(solver(call) == east_value_term{"result"});
 }
 BOOST_FIXTURE_TEST_CASE(call_other_block, mock_solver_fixture)
 {
@@ -253,10 +286,10 @@ BOOST_FIXTURE_TEST_CASE(call_other_block, mock_solver_fixture)
 	mocks::node caller;
 	mocks::callable_node block;
 	MOCK_EXPECT(env.search_callable).once().returns(&block);
-	MOCK_EXPECT(block.render).once();
+	MOCK_EXPECT(block.evaluate).once().returns("result");
 	MOCK_EXPECT(ctx.nth_node_on_stack).with(0).returns(&caller);
 	expect_call(&caller, &block, {});
-	BOOST_TEST(solver(call) == cppjinja::east::nothing);
+	BOOST_TEST(solver(call) == east_value_term{"result"});
 }
 BOOST_AUTO_TEST_SUITE_END() // functions
 BOOST_DATA_TEST_CASE_F(mock_solver_fixture, binary_ops

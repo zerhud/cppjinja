@@ -300,6 +300,9 @@ void cppjinja::evtree::render(
 
 	if(!tnode) throw std::runtime_error("cannot find " + name);
 
-	evt::exenv_impl ctx(&data, this, to);
-	tnode->render(ctx);
+	auto* cb_tnode = dynamic_cast<evtnodes::callable*>(tnode);
+	assert(cb_tnode);
+
+	evt::exenv_impl env(&data, this);
+	to << cb_tnode->evaluate(env);
 }

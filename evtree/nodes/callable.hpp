@@ -19,6 +19,7 @@ protected:
 	        , const ast::var_name& name
 	        , const evt::callstack& ctx) const ;
 public:
+	virtual east::string_t evaluate( evt::exenv& env) const { (void)env; return ""; }
 	virtual std::optional<ast::value_term> param(
 	          const evt::callstack& ctx
 	        , const ast::var_name& name) const =0 ;

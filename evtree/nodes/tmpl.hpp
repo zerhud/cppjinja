@@ -8,11 +8,11 @@
 
 #pragma once
 
-#include "../node.hpp"
+#include "callable.hpp"
 
 namespace cppjinja::evtnodes {
 
-class tmpl : public evt::node {
+class tmpl : public callable {
 	ast::tmpl itmpl_;
 public:
 	tmpl(ast::tmpl t);
@@ -22,6 +22,11 @@ public:
 	ast::string_t name() const override ;
 	bool is_leaf() const override ;
 	void render(evt::exenv& ctx) const override ;
+	east::string_t evaluate(evt::exenv& env) const override ;
+
+	std::optional<ast::value_term> param(
+	          const evt::callstack& ctx
+	        , const ast::var_name& name) const override ;
 };
 
 }  // namespace cppjinja::evtnodes

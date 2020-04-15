@@ -15,14 +15,24 @@
 #include "exenv/expr_solver.hpp"
 #include "exenv/expr_filter.hpp"
 
+std::ostream& cppjinja::evt::operator << (std::ostream& out, const render_info& ri)
+{
+	out << '{' << ri.trim_left << ',' << ri.trim_right << '}';
+	return out;
+}
+
+bool cppjinja::evt::operator == (const render_info& left, const render_info& right)
+{
+	return std::tie(left.trim_left, left.trim_right)
+	        == std::tie(right.trim_left, right.trim_right);
+}
+
 cppjinja::evt::exenv_impl::exenv_impl(
           const cppjinja::data_provider* prov
         , const cppjinja::evtree* tree
-        , std::ostream& out
         )
     : compiled_template(tree)
     , user_data(prov)
-    , ostream(out)
 {
 }
 
@@ -55,7 +65,12 @@ const cppjinja::data_provider* cppjinja::evt::exenv_impl::data() const
 
 std::ostream& cppjinja::evt::exenv_impl::out()
 {
-	return ostream;
+	return ctx().out();
+}
+
+cppjinja::east::string_t cppjinja::evt::exenv_impl::result() const
+{
+	return ctx().result();
 }
 
 cppjinja::evt::context& cppjinja::evt::exenv_impl::ctx()

@@ -13,14 +13,17 @@
 namespace cppjinja::evtnodes {
 
 class block_named : public callable {
-	ast::block_named block;
 	using callable::param;
+	ast::block_named block;
+	bool has_nondefaulted_params() const ;
 public:
 	block_named(ast::block_named nb);
 	evt::render_info rinfo() const override ;
 	ast::string_t name() const override ;
 	bool is_leaf() const override ;
-	void render(evt::exenv& ctx) const override ;
+	void render(evt::exenv& env) const override ;
+
+	east::string_t evaluate( evt::exenv& env) const override ;
 
 	std::optional<ast::value_term> param(
 	          const evt::callstack& ctx

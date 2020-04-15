@@ -32,6 +32,7 @@ public:
 
 	virtual const data_provider* data() const =0 ;
 	virtual std::ostream& out() =0 ;
+	virtual east::string_t result() const =0 ;
 
 	virtual context& ctx() =0 ;
 	virtual const context& ctx() const =0 ;
@@ -44,5 +45,8 @@ public:
 	virtual std::optional<render_info> rinfo() const =0 ;
 	virtual void rinfo(std::optional<render_info> ri) =0 ;
 };
+
+bool operator == (const render_info& left, const render_info& right);
+std::ostream& operator << (std::ostream& out, const render_info& ri);
 
 } // namespace cppjinja::evt

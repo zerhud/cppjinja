@@ -19,6 +19,9 @@
 #include "evtree/nodes/op_set.hpp"
 #include "evtree/nodes/op_out.hpp"
 #include "evtree/nodes/content_block.hpp"
+#include "evtree/nodes/content.hpp"
+#include "evtree/nodes/block_named.hpp"
+#include "evtree/nodes/block_macro.hpp"
 
 using namespace std::literals;
 namespace tdata = boost::unit_test::data;
@@ -29,16 +32,63 @@ namespace ast = cppjinja::ast;
 using ast::value_term;
 using mocks::mock_exenv_fixture; // qtcreator cannot parse test with namespace
 
+struct mock_callable_fixture : mock_exenv_fixture {
+	mocks::node child1, child2;
+
+	template<typename Ast>
+	void prepare_ast_for_params(Ast& ast_bl)
+	{
+		ast_bl.params.emplace_back(ast::macro_parameter{"p1", value_term{41}});
+		ast_bl.params.emplace_back(ast::macro_parameter{"p2", value_term{42}});
+		ast_bl.params.emplace_back(ast::macro_parameter{"p3", std::nullopt});
+	}
+	template<typename B>
+	void check_params_not_in_stack(B& bl)
+	{
+		MOCK_EXPECT(calls.get_params).returns(std::vector<ast::function_call_parameter>{});
+		BOOST_REQUIRE(bl.param(calls, ast::var_name{"p1"}).has_value());
+		BOOST_TEST(*bl.param(calls, ast::var_name{"p1"}) == value_term{41});
+		BOOST_REQUIRE(bl.param(calls, ast::var_name{"p2"}).has_value());
+		BOOST_TEST(*bl.param(calls, ast::var_name{"p2"}) == value_term{42});
+		BOOST_CHECK_THROW(bl.param(calls, ast::var_name{"p3"}), std::exception);
+	}
+
+	template<typename Ast>
+	void prepare_for_render_two_childrend(Ast& ast_bl)
+	{
+		ast_bl.left_close.trim = true;
+		ast_bl.right_open.trim = true;
+	}
+
+	template<typename B, typename Ast>
+	void check_getters(B& bl, const Ast& ast_bl)
+	{
+		BOOST_TEST(bl.is_leaf() == false);
+		BOOST_TEST(bl.name() == ast_bl.name);
+		BOOST_TEST(bl.rinfo().trim_left == ast_bl.left_open.trim);
+		BOOST_TEST(bl.rinfo().trim_right == ast_bl.right_close.trim);
+		BOOST_CHECK(!bl.param(calls, ast::var_name{"a"}).has_value());
+	}
+
+	void prepare_for_render_two_childrend()
+	{
+		expect_children({&child1, &child2});
+		cppjinja::evt::render_info rinfo1{true,false};
+		cppjinja::evt::render_info rinfo2{false,true};
+		mock::sequence render_seq;
+		MOCK_EXPECT(env.rinfo).once().in(render_seq).with(rinfo1);
+		MOCK_EXPECT(child1.render).once().in(render_seq);
+		MOCK_EXPECT(env.rinfo).once().in(render_seq).with(rinfo2);
+		MOCK_EXPECT(child2.render).once().in(render_seq);
+		MOCK_EXPECT(child1.rinfo).once().returns(cppjinja::evt::render_info{false,false});
+		MOCK_EXPECT(child2.rinfo).once().returns(cppjinja::evt::render_info{false,false});
+	}
+};
+
 template<typename Node, typename Ast>
 void test_name_equals(const Node& evtn, const Ast& astnode)
 {
 	BOOST_TEST( evtn.name() == astnode.name );
-}
-
-template<typename Node, typename Ast>
-void test_block_nodes_rinfo(const Node& evtn, const Ast& astnode)
-{
-	//evtn.rinfo();
 }
 
 BOOST_AUTO_TEST_SUITE(nodes)
@@ -57,20 +107,30 @@ BOOST_FIXTURE_TEST_CASE(no_children_no_render, mock_exenv_fixture)
 {
 	expect_children({});
 	evtnodes::tmpl tmpl(ast::tmpl{});
-	expect_cxt_settings(&tmpl);
-	BOOST_CHECK_NO_THROW(tmpl.render(env));
+	mock::sequence ctx_seq;
+	MOCK_EXPECT(ctx.push).once().in(ctx_seq).with(&tmpl);
+	MOCK_EXPECT(env.current_node).once().in(ctx_seq).with(&tmpl);
+	MOCK_EXPECT(ctx.pop).once().in(ctx_seq).with(&tmpl);
+	MOCK_EXPECT(env.result).once().returns("result");
+	BOOST_TEST(tmpl.evaluate(env) == "result"s);
+	BOOST_TEST(out.str() == "");
 }
 BOOST_FIXTURE_TEST_CASE(rendered_only_empty_name, mock_exenv_fixture)
 {
 	evtnodes::tmpl tmpl(ast::tmpl{});
-	expect_cxt_settings(&tmpl);
+	mock::sequence ctx_seq;
+	MOCK_EXPECT(ctx.push).once().in(ctx_seq).with(&tmpl);
+	MOCK_EXPECT(env.current_node).once().in(ctx_seq).with(&tmpl);
+	MOCK_EXPECT(ctx.pop).once().in(ctx_seq).with(&tmpl);
 	mocks::callable_node child_with_name, child_empty_name;
 	expect_children({&child_with_name, &child_empty_name});
 	expect_call(&tmpl, &child_empty_name, {});
-	MOCK_EXPECT(child_empty_name.name).returns("");
-	MOCK_EXPECT(child_with_name.name).returns("tn");
-	MOCK_EXPECT(child_empty_name.render).once();
-	BOOST_CHECK_NO_THROW(tmpl.render(env));
+	MOCK_EXPECT(child_empty_name.name).at_least(1).returns("");
+	MOCK_EXPECT(child_with_name.name).at_least(1).returns("tn");
+	MOCK_EXPECT(child_empty_name.evaluate).once().returns("test");
+	MOCK_EXPECT(env.result).once().returns("result");
+	BOOST_TEST(tmpl.evaluate(env) == "result"s);
+	BOOST_TEST(out.str() == "test");
 }
 BOOST_AUTO_TEST_SUITE_END() // tmpl
 BOOST_AUTO_TEST_SUITE(op_set)
@@ -143,24 +203,163 @@ BOOST_FIXTURE_TEST_CASE(getters, mock_exenv_fixture)
 BOOST_FIXTURE_TEST_CASE(render, mock_exenv_fixture)
 {
 	evtnodes::content_block cnt_bl({false, true}, "test_name");
-	expect_cxt_settings(&cnt_bl);
+	expect_children({});
 	MOCK_EXPECT(env.crinfo).once().returns(cppjinja::evt::render_info{true, false});
-	MOCK_EXPECT(env.children).once().returns(std::vector<const evt_node*>{});
+	MOCK_EXPECT(env.current_node).once().with(&cnt_bl);
 	BOOST_CHECK_NO_THROW(cnt_bl.render(env));
+	BOOST_TEST(out.str() == "");
 }
 BOOST_FIXTURE_TEST_CASE(render_two, mock_exenv_fixture)
 {
 	evtnodes::content_block cnt_bl({false, true}, "test_name");
 	mocks::node child1, child2;
-	expect_cxt_settings(&cnt_bl);
+	expect_children({&child1, &child2});
 	MOCK_EXPECT(env.crinfo).returns(cppjinja::evt::render_info{true, false});
-	MOCK_EXPECT(env.children).once().returns(std::vector<const evt_node*>{&child1, &child2});
+	MOCK_EXPECT(env.rinfo).exactly(2);
+	MOCK_EXPECT(env.current_node).once().with(&cnt_bl);
 	MOCK_EXPECT(child1.render).once();
 	MOCK_EXPECT(child1.rinfo).once().returns(cppjinja::evt::render_info{false,false});
 	MOCK_EXPECT(child2.render).once();
 	MOCK_EXPECT(child2.rinfo).once().returns(cppjinja::evt::render_info{false,false});
-	MOCK_EXPECT(env.rinfo).exactly(2);
 	BOOST_CHECK_NO_THROW(cnt_bl.render(env));
+	BOOST_TEST(out.str() == "");
 }
 BOOST_AUTO_TEST_SUITE_END() // content_block
+BOOST_AUTO_TEST_SUITE(content)
+BOOST_FIXTURE_TEST_CASE(getters, mock_exenv_fixture)
+{
+	evtnodes::content cnt("test_content");
+	BOOST_TEST(cnt.is_leaf() == true);
+	BOOST_TEST(cnt.name() == "content");
+	BOOST_TEST(cnt.rinfo().trim_left == false);
+	BOOST_TEST(cnt.rinfo().trim_right == false);
+}
+BOOST_FIXTURE_TEST_CASE(render, mock_exenv_fixture)
+{
+	evtnodes::content cnt("test_content");
+	MOCK_EXPECT(env.current_node).once().with(&cnt);
+	MOCK_EXPECT(env.crinfo).once().returns(cppjinja::evt::render_info{false,false});
+	BOOST_CHECK_NO_THROW(cnt.render(env));
+	BOOST_TEST(out.str() == "test_content");
+}
+BOOST_DATA_TEST_CASE_F(mock_exenv_fixture, trims_leftright,
+           tdata::make(
+                cppjinja::evt::render_info{true, false},
+                cppjinja::evt::render_info{false, true},
+                cppjinja::evt::render_info{true, true})
+         ^ tdata::make("rst  "s, "  rst"s, "rst"s)
+         * tdata::monomorphic::singleton("  rst  "s)
+         , rinfo, result, src)
+{
+	evtnodes::content cnt(src);
+	MOCK_EXPECT(env.current_node).with(&cnt);
+	MOCK_EXPECT(env.crinfo).once().returns(rinfo);
+	cnt.render(env);
+	BOOST_TEST(out.str() == result);
+}
+BOOST_AUTO_TEST_SUITE_END() // content
+BOOST_AUTO_TEST_SUITE(block_named)
+BOOST_FIXTURE_TEST_CASE(render_no_children, mock_exenv_fixture)
+{
+	ast::block_named ast_bl;
+	evtnodes::block_named cnt(ast_bl);
+	expect_children({});
+	expect_cxt_settings(&cnt);
+	MOCK_EXPECT(env.result).once().returns("result");
+	BOOST_CHECK_NO_THROW(cnt.render(env));
+	BOOST_TEST(out.str() == "result");
+}
+BOOST_FIXTURE_TEST_CASE(render_no_params, mock_callable_fixture)
+{
+	ast::block_named ast_bl;
+	ast_bl.params.emplace_back(ast::macro_parameter{"a", std::nullopt});
+	evtnodes::block_named cnt(ast_bl);
+	MOCK_EXPECT(env.current_node).once().with(&cnt);
+	BOOST_CHECK_NO_THROW(cnt.render(env));
+	BOOST_TEST(out.str() == "");
+}
+BOOST_FIXTURE_TEST_CASE(render_two_children, mock_callable_fixture)
+{
+	ast::block_named ast_bl;
+	prepare_for_render_two_childrend(ast_bl);
+	evtnodes::block_named cnt(ast_bl);
+	expect_cxt_settings(&cnt);
+	prepare_for_render_two_childrend();
+	MOCK_EXPECT(env.result).once().returns("result");
+	BOOST_CHECK_NO_THROW(cnt.render(env));
+	BOOST_TEST(out.str() == "result");
+}
+BOOST_FIXTURE_TEST_CASE(evaluate_two_children, mock_callable_fixture)
+{
+	ast::block_named ast_bl;
+	prepare_for_render_two_childrend(ast_bl);
+	ast_bl.params.emplace_back(ast::macro_parameter{"a", std::nullopt});
+	evtnodes::block_named cnt(ast_bl);
+	expect_cxt_settings(&cnt);
+	prepare_for_render_two_childrend();
+	MOCK_EXPECT(env.result).once().returns("result");
+	BOOST_TEST(cnt.evaluate(env) == "result");
+}
+BOOST_AUTO_TEST_SUITE_END() // block_named
+BOOST_AUTO_TEST_SUITE(block_macro)
+BOOST_FIXTURE_TEST_CASE(render_do_nothing, mock_callable_fixture)
+{
+	ast::block_macro ast_bl;
+	evtnodes::block_macro cnt(ast_bl);
+	MOCK_EXPECT(env.current_node).with(&cnt);
+	BOOST_CHECK_NO_THROW(cnt.render(env));
+	BOOST_TEST(out.str() == "");
+}
+BOOST_FIXTURE_TEST_CASE(evaluate_two_children, mock_callable_fixture)
+{
+	ast::block_macro ast_bl;
+	prepare_for_render_two_childrend(ast_bl);
+	ast_bl.params.emplace_back(ast::macro_parameter{"a", std::nullopt});
+	evtnodes::block_macro cnt(ast_bl);
+	prepare_for_render_two_childrend();
+	mock::sequence ctx_seq;
+	MOCK_EXPECT(env.current_node).once().with(&cnt).in(ctx_seq);
+	MOCK_EXPECT(ctx.inject).once().with(&cnt).in(ctx_seq);
+	MOCK_EXPECT(ctx.takeout).once().with(&cnt).in(ctx_seq);
+	BOOST_TEST(cnt.evaluate(env) == "");
+}
+BOOST_AUTO_TEST_SUITE_END() // block_macro
+BOOST_AUTO_TEST_SUITE(callables)
+typedef std::tuple<
+  std::tuple<ast::block_named, evtnodes::block_named>
+, std::tuple<ast::block_macro, evtnodes::block_macro>
+> callable_list;
+BOOST_FIXTURE_TEST_CASE_TEMPLATE(my_test, T, callable_list, mock_callable_fixture)
+{
+	std::tuple_element_t<0, T> ast_bl;
+	ast_bl.name = "test_name";
+	prepare_for_render_two_childrend(ast_bl);
+	std::tuple_element_t<1, T> bl(ast_bl);
+	check_getters(bl, ast_bl);
+}
+BOOST_FIXTURE_TEST_CASE_TEMPLATE(position_param_with_values, T, callable_list, mock_callable_fixture)
+{
+	std::tuple_element_t<0,T> ast_bl;
+	prepare_ast_for_params(ast_bl);
+	std::tuple_element_t<1,T> cnt(ast_bl);
+	check_params_not_in_stack(cnt);
+}
+BOOST_FIXTURE_TEST_CASE_TEMPLATE(position_param_calls, T, callable_list, mock_callable_fixture)
+{
+	std::tuple_element_t<0,T> ast_bl;
+	ast_bl.name = "test_name";
+	prepare_ast_for_params(ast_bl);
+	std::vector<cppjinja::ast::function_call_parameter> call_params;
+	call_params.emplace_back(ast::function_call_parameter(value_term{51}));
+	call_params.emplace_back(ast::function_call_parameter("p3", value_term{52}));
+	std::tuple_element_t<1,T> cnt(ast_bl);
+	MOCK_EXPECT(calls.get_params).returns(call_params);
+	BOOST_REQUIRE(cnt.param(calls, ast::var_name{"p1"}).has_value());
+	BOOST_TEST(*cnt.param(calls, ast::var_name{"p1"}) == value_term{51});
+	BOOST_REQUIRE(cnt.param(calls, ast::var_name{"p2"}).has_value());
+	BOOST_TEST(*cnt.param(calls, ast::var_name{"p2"}) == value_term{42});
+	BOOST_REQUIRE(cnt.param(calls, ast::var_name{"p3"}).has_value());
+	BOOST_TEST(*cnt.param(calls, ast::var_name{"p3"}) == value_term{52});
+}
+BOOST_AUTO_TEST_SUITE_END() // callables
 BOOST_AUTO_TEST_SUITE_END() // nodes

@@ -19,12 +19,11 @@ namespace cppjinja::evt {
 class exenv_impl final : public exenv {
 	const evtree* compiled_template;
 	const data_provider* user_data;
-	std::ostream& ostream;
 	context_impl exectx;
 	callstack_impl execalls;
 	std::optional<render_info> cur_rinfo;
 public:
-	exenv_impl(const data_provider* prov, const evtree* tmpl, std::ostream& out);
+	exenv_impl(const data_provider* prov, const evtree* tmpl);
 
 	const evtree& tmpl() const override ;
 	std::vector<const node*> children(const node* selected ) const override ;
@@ -32,6 +31,7 @@ public:
 
 	const data_provider* data() const override ;
 	std::ostream& out() override ;
+	east::string_t result() const override;
 
 	context& ctx() override ;
 	const context& ctx() const override ;

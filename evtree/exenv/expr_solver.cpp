@@ -128,8 +128,7 @@ cppjinja::east::value_term cppjinja::evt::expr_solver::solve_in_tmpl(
 	assert(env);
 	raii_push_callstack stack_maker(env->ctx().nth_node_on_stack(0), node, &env->calls());
 	env->calls().call_params(obj.params);
-	node->render(*env);
-	return east::nothing;
+	return node->evaluate(*env);
 }
 
 bool cppjinja::evt::expr_solver::can_be_solved_in_tmpl(const cppjinja::ast::var_name& name) const

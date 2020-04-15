@@ -37,6 +37,7 @@ MOCK_BASE_CLASS( callable_node, cppjinja::evtnodes::callable )
 	MOCK_METHOD( name, 0 )
 	MOCK_METHOD( is_leaf, 0 )
 	MOCK_METHOD( render, 1 )
+	MOCK_METHOD( evaluate, 1 )
 	MOCK_METHOD( param, 2, std::optional<cppjinja::ast::value_term>(const cppjinja::evt::callstack& ctx,const cppjinja::ast::var_name& name) )
 };
 
@@ -48,6 +49,9 @@ MOCK_BASE_CLASS( context, cppjinja::evt::context )
 	MOCK_METHOD(pop, 1)
 	MOCK_METHOD(push, 1)
 	MOCK_METHOD(maker, 0)
+
+	MOCK_METHOD(out, 0)
+	MOCK_METHOD(result, 0)
 
 	MOCK_METHOD(inject, 1)
 	MOCK_METHOD(takeout, 1)
@@ -77,6 +81,7 @@ MOCK_BASE_CLASS( exenv, cppjinja::evt::exenv )
 
 	MOCK_METHOD(data, 0)
 	MOCK_METHOD(out, 0)
+	MOCK_METHOD(result, 0)
 
 	using cppjinja::evt::exenv::ctx;
 	MOCK_CONST_METHOD( ctx, 0, const context&(), get_cctx )
@@ -138,9 +143,9 @@ struct mock_exenv_fixture
 	void expect_cxt_settings(cppjinja::evt::node* maker)
 	{
 		mock::sequence seq;
+		MOCK_EXPECT(env.current_node).once().in(seq).with(maker);
 		MOCK_EXPECT(ctx.push).once().in(seq).with(maker);
 		MOCK_EXPECT(ctx.pop).once().in(seq).with(maker);
-		MOCK_EXPECT(env.current_node).once().with(maker);
 	}
 
 	void expect_children(std::vector<const cppjinja::evt::node*> children)

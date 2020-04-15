@@ -20,7 +20,9 @@ public:
 	evt::render_info rinfo() const override ;
 	ast::string_t name() const override ;
 	bool is_leaf() const override ;
-	void render(evt::exenv& ctx) const override ;
+	void render(evt::exenv& env) const override ;
+
+	east::string_t evaluate( evt::exenv& env) const override ;
 
 	std::optional<ast::value_term> param(
 	          const evt::callstack& ctx

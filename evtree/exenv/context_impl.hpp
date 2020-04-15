@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <vector>
+#include <list>
 
 #include "context.hpp"
 
@@ -20,8 +20,9 @@ class context_impl final : public context {
 		const node* maker;
 		std::vector<const evtnodes::callable*> injections;
 		std::vector<const node*> node_stack;
+		std::stringstream out;
 	};
-	std::vector<frame> ctx;
+	std::list<frame> ctx;
 
 	void require_not_empty() const ;
 	std::optional<ast::value_term> search_in_setts(
@@ -29,19 +30,22 @@ class context_impl final : public context {
 public:
 	context_impl();
 
-	void current_node(const node* n) ;
-	const node* nth_node_on_stack(std::size_t ind) const ;
+	void current_node(const node* n) override ;
+	const node* nth_node_on_stack(std::size_t ind) const override ;
 
-	void pop(const node* n);
-	void push(const node* n);
-	const node* maker() const ;
+	void pop(const node* n)override ;
+	void push(const node* n)override ;
+	const node* maker() const override ;
 
-	void inject(const evtnodes::callable* n);
-	void takeout(const evtnodes::callable* n);
-	std::vector<const evtnodes::callable*> injections() const ;
+	std::ostream& out() override ;
+	std::string result() const override ;
+
+	void inject(const evtnodes::callable* n)override ;
+	void takeout(const evtnodes::callable* n)override ;
+	std::vector<const evtnodes::callable*> injections() const override ;
 
 	std::optional<ast::value_term> solve_var(
-	        const cppjinja::ast::var_name& var) const;
+	        const cppjinja::ast::var_name& var) const override ;
 };
 
 } // namespace cppjinja::evt

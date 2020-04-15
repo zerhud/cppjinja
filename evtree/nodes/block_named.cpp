@@ -10,6 +10,12 @@
 #include "parser/helpers.hpp"
 #include "../evtree.hpp"
 
+bool cppjinja::evtnodes::block_named::has_nondefaulted_params() const
+{
+	for(auto& p:block.params) if(!p.value.has_value()) return true;
+	return false;
+}
+
 cppjinja::evtnodes::block_named::block_named(cppjinja::ast::block_named nb)
     : block(std::move(nb))
 {
@@ -36,11 +42,20 @@ std::optional<cppjinja::ast::value_term> cppjinja::evtnodes::block_named::param(
 	return param(block.params, name, ctx);
 }
 
-void cppjinja::evtnodes::block_named::render(evt::exenv& ctx) const
+void cppjinja::evtnodes::block_named::render(evt::exenv& env) const
 {
+	if(has_nondefaulted_params())
+		env.current_node(this);
+	else
+		env.out() << evaluate(env);
+}
+
+cppjinja::east::string_t cppjinja::evtnodes::block_named::evaluate(cppjinja::evt::exenv& env) const
+{
+	env.current_node(this);
+	evt::raii_push_ctx ctx_maker(this, &env.ctx());
 	evt::render_info ri{ block.left_close.trim, block.right_open.trim };
-	auto children = ctx.tmpl().children(this, false);
-	ctx.current_node(this);
-	evt::raii_push_ctx ctx_maker(this, &ctx.ctx());
-	render_children(children, ctx, ri);
+	auto children = env.children(this);
+	render_children(children, env, ri);
+	return env.result();
 }

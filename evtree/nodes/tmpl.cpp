@@ -43,3 +43,31 @@ void cppjinja::evtnodes::tmpl::render(evt::exenv& ctx) const
 			child->render(ctx);
 		}
 }
+
+cppjinja::east::string_t
+cppjinja::evtnodes::tmpl::evaluate(cppjinja::evt::exenv& env) const
+{
+	evt::raii_push_ctx ctx_maker(this, &env.ctx());
+	env.current_node(this);
+
+	auto children = env.children(this);
+	for(auto&& child:children)
+		if(child->name().empty())
+		{
+			auto* cb_child = dynamic_cast<const callable*>(child);
+			evt::raii_push_callstack calls_maker(this, cb_child, &env.calls());
+			env.out() << cb_child->evaluate(env);
+		}
+
+	return env.result();
+}
+
+std::optional<cppjinja::ast::value_term> cppjinja::evtnodes::tmpl::param(
+          const cppjinja::evt::callstack& ctx
+        , const cppjinja::ast::var_name& name
+        ) const
+{
+	(void)ctx;
+	(void)name;
+	return std::nullopt;
+}

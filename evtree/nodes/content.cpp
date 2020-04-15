@@ -17,14 +17,6 @@ cppjinja::evtnodes::content::content(cppjinja::ast::string_t c)
 {
 }
 
-void cppjinja::evtnodes::content::trim_left()
-{
-}
-
-void cppjinja::evtnodes::content::trim_right()
-{
-}
-
 cppjinja::evt::render_info cppjinja::evtnodes::content::rinfo() const
 {
 	return {false, false};
@@ -40,15 +32,15 @@ bool cppjinja::evtnodes::content::is_leaf() const
 	return true;
 }
 
-void cppjinja::evtnodes::content::render(evt::exenv& ctx) const
+void cppjinja::evtnodes::content::render(evt::exenv& env) const
 {
-	ctx.current_node(this);
-	auto ri = ctx.rinfo();
-	if(!ri) ctx.out() << cnt;
+	env.current_node(this);
+	auto ri = env.rinfo();
+	if(!ri) env.out() << cnt;
 	else {
 		auto trimmed = cnt;
 		if(ri->trim_left) boost::trim_left(trimmed);
 		if(ri->trim_right) boost::trim_right(trimmed);
-		ctx.out() << trimmed;
+		env.out() << trimmed;
 	}
 }

@@ -58,13 +58,25 @@ void cppjinja::evt::context_impl::pop(const cppjinja::evt::node* n)
 
 void cppjinja::evt::context_impl::push(const cppjinja::evt::node* n)
 {
-	ctx.emplace_back(frame{n, {}, {}});
+	ctx.emplace_back(frame{n, {}, {}, std::stringstream{}});
 }
 
 const cppjinja::evt::node* cppjinja::evt::context_impl::maker() const
 {
 	require_not_empty();
 	return ctx.back().maker;
+}
+
+std::ostream& cppjinja::evt::context_impl::out()
+{
+	require_not_empty();
+	return ctx.back().out;
+}
+
+std::string cppjinja::evt::context_impl::result() const
+{
+	require_not_empty();
+	return ctx.back().out.str();
 }
 
 void cppjinja::evt::context_impl::inject(const cppjinja::evtnodes::callable* n)

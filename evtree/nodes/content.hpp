@@ -14,16 +14,13 @@ namespace cppjinja::evtnodes {
 
 class content : public evt::node {
 	ast::string_t cnt;
-
-	void trim_left();
-	void trim_right();
 public:
 	content(ast::string_t c);
 
 	evt::render_info rinfo() const override ;
 	ast::string_t name() const override ;
 	bool is_leaf() const override ;
-	void render(evt::exenv& ctx) const override ;
+	void render(evt::exenv& env) const override ;
 
 };
 

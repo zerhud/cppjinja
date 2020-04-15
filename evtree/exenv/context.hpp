@@ -25,6 +25,9 @@ public:
 	virtual void push(const node* n)=0 ;
 	virtual const node* maker() const =0 ;
 
+	virtual std::ostream& out() =0 ;
+	virtual std::string result() const =0 ;
+
 	virtual void inject(const evtnodes::callable* n)=0 ;
 	virtual void takeout(const evtnodes::callable* n)=0 ;
 	virtual std::vector<const evtnodes::callable*> injections() const =0 ;

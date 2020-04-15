@@ -35,12 +35,19 @@ bool cppjinja::evtnodes::block_macro::is_leaf() const
 	return false;
 }
 
-void cppjinja::evtnodes::block_macro::render(evt::exenv& ctx) const
+void cppjinja::evtnodes::block_macro::render(evt::exenv& env) const
 {
-	ctx.current_node(this);
-	auto children = ctx.tmpl().children(this, false);
-	evt::raii_inject injection(this, &ctx.ctx());
-	render_children(children, ctx, inner_ri());
+	env.current_node(this);
+}
+
+cppjinja::east::string_t
+cppjinja::evtnodes::block_macro::evaluate(cppjinja::evt::exenv& env) const
+{
+	env.current_node(this);
+	auto children = env.children(this);
+	evt::raii_inject injection(this, &env.ctx());
+	render_children(children, env, inner_ri());
+	return east::string_t();
 }
 
 std::optional<cppjinja::ast::value_term>
