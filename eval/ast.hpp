@@ -19,7 +19,6 @@ namespace cppjinja::east {
 
 typedef std::string string_t;
 
-struct nothing_t {} ;
 struct value_term;
 struct array_v final {
 	array_v(array_v&&) noexcept =default ;
@@ -46,7 +45,6 @@ using value_term_var = std::variant<
 , string_t
 , array_v
 , map_v
-, nothing_t
 >;
 
 extern struct value_term : value_term_var
@@ -66,8 +64,6 @@ struct function_call {
 
 bool operator == (const map_v& left, const map_v& right);
 bool operator == (const array_v& left, const array_v& right);
-bool operator == (const nothing_t& left, const nothing_t& right);
 std::ostream& operator << (std::ostream& out, const value_term& val);
-std::ostream& operator << (std::ostream& out, const nothing_t& val);
 
 } // namespace cppjinja::east

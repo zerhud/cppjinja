@@ -16,7 +16,6 @@ namespace cppjinja::evtnodes {
 //TODO: add tests
 class binary_op_helper {
 	ast::comparator cmp_;
-	[[noreturn]] void throw_compare_to_nothing() const ;
 	template<typename L>
 	bool default_in(const L& l, const east::array_v& r) const
 	{
@@ -56,17 +55,6 @@ public:
 	bool operator()(const east::string_t& v) const ;
 	bool operator()(const east::array_v& v) const ;
 	bool operator()(const east::map_v& v) const ;
-	bool operator()(const east::nothing_t&) const ;
-
-	bool operator()(const east::nothing_t&,const east::nothing_t&) const ;
-	template<typename V> bool operator()(const V&, const east::nothing_t&) const
-	{
-		throw_compare_to_nothing();
-	}
-	template<typename V> bool operator()(const east::nothing_t&, const V&) const
-	{
-		throw_compare_to_nothing();
-	}
 
 	bool operator()(const bool& l, const bool& r) const ;
 	bool operator()(const bool& l, const double& r) const ;

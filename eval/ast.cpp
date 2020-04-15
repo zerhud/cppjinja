@@ -11,8 +11,6 @@
 #include <iomanip>
 #include "ast.hpp"
 
-cppjinja::east::value_term cppjinja::east::nothing{ cppjinja::east::nothing_t{} };
-
 cppjinja::east::array_v::array_v(const cppjinja::east::array_v& other)
 {
 	for(auto& i:other.items)
@@ -66,7 +64,6 @@ std::ostream& cppjinja::east::operator << (
 		std::ostream& out;
 		void operator()(const double& v){out << v;}
 		void operator()(const string_t& v){out << v;}
-		void operator()(const nothing_t&) {}
 		void operator()(const array_v& v){
 			for(auto& i:v.items) out << *i << " ";
 		}
@@ -80,17 +77,5 @@ std::ostream& cppjinja::east::operator << (
 	} render{out};
 	const value_term_var& stdval = val;
 	std::visit(render, stdval);
-	return out;
-}
-
-bool cppjinja::east::operator ==(
-        const cppjinja::east::nothing_t&, const cppjinja::east::nothing_t&)
-{
-	return true;
-}
-
-std::ostream& cppjinja::east::operator <<(
-        std::ostream& out, const cppjinja::east::nothing_t& )
-{
 	return out;
 }

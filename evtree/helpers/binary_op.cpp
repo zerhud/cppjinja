@@ -11,20 +11,9 @@
 using namespace cppjinja::evtnodes;
 using cppjinja::ast::comparator;
 
-void binary_op_helper::throw_compare_to_nothing() const
-{
-	throw std::runtime_error("cannot compare bool and map");
-}
-
 binary_op_helper::binary_op_helper(ast::comparator op)
     : cmp_(op)
 {
-}
-
-bool binary_op_helper::operator()
-(const cppjinja::east::nothing_t&, const cppjinja::east::nothing_t&) const
-{
-	throw_compare_to_nothing();
 }
 
 bool binary_op_helper::operator()(const bool& v) const
@@ -48,11 +37,6 @@ bool binary_op_helper::operator()(const east::map_v& v) const
 	return !v.items.empty();
 }
 
-bool binary_op_helper::operator()(const cppjinja::east::nothing_t&) const
-{
-	throw std::runtime_error("cannot compare with nothin");
-}
-
 bool binary_op_helper::operator()(const bool& l, const bool& r) const
 {
 	return default_cmp(l,r);
@@ -72,7 +56,7 @@ bool binary_op_helper::operator()(const bool& l, const east::array_v& r) const
 }
 bool binary_op_helper::operator()(const bool&, const east::map_v&) const
 {
-	throw_compare_to_nothing();
+	throw std::runtime_error("cannot compare bool and map");
 }
 
 bool binary_op_helper::operator()(const double& l, const bool& r) const
