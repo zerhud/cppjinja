@@ -390,7 +390,34 @@ BOOST_FIXTURE_TEST_CASE(render_true, mock_callable_fixture)
 	ast_bl.condition = ast::binary_op(value_term{1}, ast::comparator::eq, value_term{1});
 	prepare_for_render_two_childrend(ast_bl);
 	evtnodes::block_if bl(ast_bl);
-	prepare_for_render_two_childrend();
+	expect_children({&child1, &child2});
+	MOCK_EXPECT(child1.render).once();
+	MOCK_EXPECT(env.rinfo).once();
+	MOCK_EXPECT(env.current_node).with(&bl);
+	BOOST_CHECK_NO_THROW(bl.render(env));
+	BOOST_TEST(out.str() == "");
+}
+BOOST_FIXTURE_TEST_CASE(render_false_we, mock_callable_fixture)
+{
+	ast::block_if ast_bl;
+	ast_bl.condition = ast::binary_op(value_term{2}, ast::comparator::eq, value_term{1});
+	prepare_for_render_two_childrend(ast_bl);
+	evtnodes::block_if bl(ast_bl);
+	expect_children({&child1});
+	MOCK_EXPECT(env.rinfo).once();
+	MOCK_EXPECT(env.current_node).with(&bl);
+	BOOST_CHECK_NO_THROW(bl.render(env));
+	BOOST_TEST(out.str() == "");
+}
+BOOST_FIXTURE_TEST_CASE(render_false, mock_callable_fixture)
+{
+	ast::block_if ast_bl;
+	ast_bl.condition = ast::binary_op(value_term{2}, ast::comparator::eq, value_term{1});
+	prepare_for_render_two_childrend(ast_bl);
+	evtnodes::block_if bl(ast_bl);
+	expect_children({&child1, &child2});
+	MOCK_EXPECT(child2.render).once();
+	MOCK_EXPECT(env.rinfo).once();
 	MOCK_EXPECT(env.current_node).with(&bl);
 	BOOST_CHECK_NO_THROW(bl.render(env));
 	BOOST_TEST(out.str() == "");
