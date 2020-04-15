@@ -22,6 +22,7 @@
 #include "evtree/nodes/content.hpp"
 #include "evtree/nodes/block_named.hpp"
 #include "evtree/nodes/block_macro.hpp"
+#include "evtree/nodes/block_if.hpp"
 
 using namespace std::literals;
 namespace tdata = boost::unit_test::data;
@@ -92,6 +93,7 @@ void test_name_equals(const Node& evtn, const Ast& astnode)
 }
 
 BOOST_AUTO_TEST_SUITE(nodes)
+
 BOOST_AUTO_TEST_SUITE(tmpl)
 BOOST_AUTO_TEST_CASE(getters)
 {
@@ -133,6 +135,7 @@ BOOST_FIXTURE_TEST_CASE(rendered_only_empty_name, mock_exenv_fixture)
 	BOOST_TEST(out.str() == "test");
 }
 BOOST_AUTO_TEST_SUITE_END() // tmpl
+
 BOOST_AUTO_TEST_SUITE(op_set)
 BOOST_AUTO_TEST_CASE(getters)
 {
@@ -159,6 +162,7 @@ BOOST_FIXTURE_TEST_CASE(render, mock_exenv_fixture)
 	BOOST_CHECK_NO_THROW(snode.render(env));
 }
 BOOST_AUTO_TEST_SUITE_END() // op_set
+
 BOOST_AUTO_TEST_SUITE(op_out)
 BOOST_AUTO_TEST_CASE(getters)
 {
@@ -191,6 +195,7 @@ BOOST_FIXTURE_TEST_CASE(render_with_filters, mock_exenv_fixture)
 	BOOST_TEST(out.str() == "ok");
 }
 BOOST_AUTO_TEST_SUITE_END() // op_out
+
 BOOST_AUTO_TEST_SUITE(content_block)
 BOOST_FIXTURE_TEST_CASE(getters, mock_exenv_fixture)
 {
@@ -225,6 +230,7 @@ BOOST_FIXTURE_TEST_CASE(render_two, mock_exenv_fixture)
 	BOOST_TEST(out.str() == "");
 }
 BOOST_AUTO_TEST_SUITE_END() // content_block
+
 BOOST_AUTO_TEST_SUITE(content)
 BOOST_FIXTURE_TEST_CASE(getters, mock_exenv_fixture)
 {
@@ -258,6 +264,7 @@ BOOST_DATA_TEST_CASE_F(mock_exenv_fixture, trims_leftright,
 	BOOST_TEST(out.str() == result);
 }
 BOOST_AUTO_TEST_SUITE_END() // content
+
 BOOST_AUTO_TEST_SUITE(block_named)
 BOOST_FIXTURE_TEST_CASE(render_no_children, mock_exenv_fixture)
 {
@@ -301,6 +308,7 @@ BOOST_FIXTURE_TEST_CASE(evaluate_two_children, mock_callable_fixture)
 	BOOST_TEST(cnt.evaluate(env) == "result");
 }
 BOOST_AUTO_TEST_SUITE_END() // block_named
+
 BOOST_AUTO_TEST_SUITE(block_macro)
 BOOST_FIXTURE_TEST_CASE(render_do_nothing, mock_callable_fixture)
 {
@@ -324,12 +332,13 @@ BOOST_FIXTURE_TEST_CASE(evaluate_two_children, mock_callable_fixture)
 	BOOST_TEST(cnt.evaluate(env) == "");
 }
 BOOST_AUTO_TEST_SUITE_END() // block_macro
+
 BOOST_AUTO_TEST_SUITE(callables)
 typedef std::tuple<
   std::tuple<ast::block_named, evtnodes::block_named>
 , std::tuple<ast::block_macro, evtnodes::block_macro>
 > callable_list;
-BOOST_FIXTURE_TEST_CASE_TEMPLATE(my_test, T, callable_list, mock_callable_fixture)
+BOOST_FIXTURE_TEST_CASE_TEMPLATE(getters, T, callable_list, mock_callable_fixture)
 {
 	std::tuple_element_t<0, T> ast_bl;
 	ast_bl.name = "test_name";
@@ -362,4 +371,30 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(position_param_calls, T, callable_list, mock_ca
 	BOOST_TEST(*cnt.param(calls, ast::var_name{"p3"}) == value_term{52});
 }
 BOOST_AUTO_TEST_SUITE_END() // callables
+
+BOOST_AUTO_TEST_SUITE(block_if)
+BOOST_FIXTURE_TEST_CASE(getters, mock_exenv_fixture)
+{
+	ast::block_if ast;
+	ast.left_open.trim = true;
+	ast.right_close.trim = true;
+	evtnodes::block_if bl(ast);
+	BOOST_TEST(bl.is_leaf() == false);
+	BOOST_TEST(bl.name() == "if"s);
+	BOOST_TEST(bl.rinfo().trim_left == ast.left_open.trim);
+	BOOST_TEST(bl.rinfo().trim_right == ast.right_close.trim);
+}
+BOOST_FIXTURE_TEST_CASE(render_true, mock_callable_fixture)
+{
+	ast::block_if ast_bl;
+	ast_bl.condition = ast::binary_op(value_term{1}, ast::comparator::eq, value_term{1});
+	prepare_for_render_two_childrend(ast_bl);
+	evtnodes::block_if bl(ast_bl);
+	prepare_for_render_two_childrend();
+	MOCK_EXPECT(env.current_node).with(&bl);
+	BOOST_CHECK_NO_THROW(bl.render(env));
+	BOOST_TEST(out.str() == "");
+}
+BOOST_AUTO_TEST_SUITE_END() // block_if
+
 BOOST_AUTO_TEST_SUITE_END() // nodes

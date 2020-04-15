@@ -42,7 +42,7 @@ void block_if::render(evt::exenv& ctx) const
 	ctx.current_node(this);
 	auto ifresult = evt::expr_solver(&ctx)(block.condition) == east::value_term{1};
 
-	auto children = ctx.tmpl().children(this);
+	auto children = ctx.children(this);
 	assert(!children.empty() && children.size() < 3);
 
 	ctx.rinfo(rinfo_for_children());
