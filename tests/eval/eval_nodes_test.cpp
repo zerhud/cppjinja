@@ -190,7 +190,6 @@ BOOST_FIXTURE_TEST_CASE(render_with_filters, mock_exenv_fixture)
 	mock::sequence filter_seq;
 	MOCK_EXPECT(data.filter).once().in(filter_seq).returns("first");
 	MOCK_EXPECT(data.filter).once().in(filter_seq).returns("ok");
-	MOCK_EXPECT(calls.set_params).once().calls([](auto p){BOOST_CHECK(p.empty());});
 	BOOST_CHECK_NO_THROW(snode.render(env));
 	BOOST_TEST(out.str() == "ok");
 }

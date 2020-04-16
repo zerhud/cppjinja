@@ -371,6 +371,7 @@ BOOST_AUTO_TEST_SUITE_END() // solver
 BOOST_AUTO_TEST_SUITE(filter)
 BOOST_FIXTURE_TEST_CASE(by_var, mock_exenv_fixture)
 {
+	using cppjinja::ast::filter_call;
 	cppjinja::ast::var_name vn{"a"};
 	auto check = [&vn](
 	          const cppjinja::east::function_call& fc
@@ -381,8 +382,9 @@ BOOST_FIXTURE_TEST_CASE(by_var, mock_exenv_fixture)
 		BOOST_CHECK(fc.params.empty());
 		return east_value_term{101};
 	};
-	MOCK_EXPECT(data.filter).once().calls(check);
+	MOCK_EXPECT(data.filter).exactly(2).calls(check);
 	BOOST_TEST(expr_filter(&env, 2)(vn) == east_value_term{101});
+	BOOST_TEST(expr_filter(&env, 2)(filter_call{vn}) == east_value_term{101});
 }
 BOOST_FIXTURE_TEST_CASE(by_fnc, mock_exenv_fixture)
 {
@@ -414,6 +416,31 @@ BOOST_FIXTURE_TEST_CASE(by_wrong, mock_exenv_fixture)
 	BOOST_CHECK_THROW(expr_filter(&env, 42)(tuple_v{}), std::exception);
 	BOOST_CHECK_THROW(expr_filter(&env, 42)(array_v{}), std::exception);
 	BOOST_CHECK_THROW(expr_filter(&env, 42)(binary_op{}), std::exception);
+}
+BOOST_FIXTURE_TEST_CASE(few_times, mock_exenv_fixture)
+{
+	using cppjinja::ast::var_name;
+	using cppjinja::ast::function_call;
+	int calls_num = 40;
+	auto check = [&calls_num](
+	          const cppjinja::east::function_call&
+	        , const east_value_term& base){
+		BOOST_TEST(base == east_value_term{calls_num});
+		return east_value_term{calls_num + 1};
+	};
+
+	MOCK_EXPECT(data.filter).calls(check);
+	expr_filter flt(&env, 40);
+	for(;calls_num < 45;++calls_num)
+		BOOST_TEST(flt(var_name{"a"}) == east_value_term{calls_num+1});
+	for(;calls_num < 50;++calls_num)
+		BOOST_TEST(flt(function_call{}) == east_value_term{calls_num+1});
+}
+BOOST_FIXTURE_TEST_CASE(print, mock_exenv_fixture)
+{
+	std::stringstream out;
+	out << expr_filter(&env, 40);
+	BOOST_TEST(out.str() == "40");
 }
 BOOST_AUTO_TEST_SUITE_END() // filter
 

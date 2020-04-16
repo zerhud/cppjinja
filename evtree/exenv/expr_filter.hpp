@@ -15,13 +15,15 @@
 namespace cppjinja::evt {
 
 class expr_filter final {
-	const cppjinja::east::value_term& base;
+	cppjinja::east::value_term base;
 	exenv* user_data;
 	[[noreturn]] void ilegal_operator() const ;
+	friend std::ostream& operator << (std::ostream& out, const expr_filter& obj);
 public:
-	expr_filter(exenv* ud, const cppjinja::east::value_term& b);
+	expr_filter(exenv* ud, cppjinja::east::value_term b);
 
 	east::value_term operator()(const ast::value_term& val) ;
+	east::value_term operator()(const ast::filter_call& val) ;
 
 	east::value_term operator()(const ast::var_name& obj) ;
 	east::value_term operator()(const ast::function_call& obj) ;
@@ -32,5 +34,7 @@ public:
 	[[noreturn]] east::value_term operator()(const ast::array_v& obj) const ;
 	[[noreturn]] east::value_term operator()(const ast::binary_op& op) const ;
 };
+
+std::ostream& operator << (std::ostream& out, const expr_filter& obj);
 
 } // namespace cppjinja::evt

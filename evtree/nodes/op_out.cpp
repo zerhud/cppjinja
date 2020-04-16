@@ -34,32 +34,10 @@ bool cppjinja::evtnodes::op_out::is_leaf() const
 	return true;
 }
 
-void cppjinja::evtnodes::op_out::render(evt::exenv& ctx) const
+void cppjinja::evtnodes::op_out::render(evt::exenv& env) const
 {
-	using evt::expr_filter;
-	ctx.current_node(this);
-
-	if(op.filters.empty()) render_value(ctx, op.value);
-	else {
-		struct {
-			evt::exenv& ctx;
-			east::value_term base;
-			void operator()(const ast::var_name& var)
-			{
-				base = expr_filter(&ctx, base)(var);
-			}
-			void operator()(const ast::function_call& fnc)
-			{
-				ctx.calls().call_params(fnc.params);
-				base = expr_filter(&ctx, base)(fnc);
-			}
-
-		} caller { ctx, evt::expr_solver(&ctx)(op.value) };
-
-
-		for(auto& filter:op.filters)
-			boost::apply_visitor(caller, filter.var);
-
-		ctx.out() << caller.base;
-	}
+	env.current_node(this);
+	evt::expr_filter flt(&env, evt::expr_solver(&env)(op.value));
+	for(auto& f:op.filters) flt(f);
+	env.out() << flt;
 }
