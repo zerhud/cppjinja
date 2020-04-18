@@ -209,6 +209,7 @@ const cppjinja::evt::node* cppjinja::evtree::search(
 	else if(name.size()==1)
 	{
 		auto pars = ctx->parents();
+		if(pars.empty()) return search_child(name[0], ctx);
 		for(auto& p:pars)
 			if(auto found = search_child(name[0], p); found)
 				return found;
