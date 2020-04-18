@@ -39,14 +39,7 @@ cppjinja::evtree build_tree(std::string_view ptxt)
 BOOST_AUTO_TEST_CASE(main_fnc)
 {
 	cppjinja::evtree tree = build_tree("simple text"sv);
-	auto nodes = tree.all_tree();
-
-	BOOST_TEST_REQUIRE( nodes.size() == 3);
-	BOOST_TEST( nodes[0]->name().empty() );
-	BOOST_TEST( nodes[1]->name().empty() );
-	BOOST_TEST( nodes[1]->is_parent(nodes[0]) );
-	BOOST_TEST( nodes[2]->name() == "content" );
-	BOOST_TEST( nodes[2]->is_parent(nodes[1]) );
+	BOOST_TEST(tree.print_subtree() == "''[''['content'[]]]");
 	BOOST_TEST( tree.search(ast::var_name{"nex"}, nullptr) == nullptr );
 }
 
@@ -54,6 +47,7 @@ BOOST_AUTO_TEST_CASE(few_blocks)
 {
 	cppjinja::evtree tree = build_tree(
 	            "cnt<% block a %>in<%block b%>bin<%endblock%><%endblock%>"sv);
+	std::cout << tree.print_subtree() << std::endl;
 	auto nodes = tree.all_tree();
 
 	BOOST_TEST_REQUIRE( nodes.size() == 9 );

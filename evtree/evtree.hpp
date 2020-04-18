@@ -46,7 +46,7 @@ public:
 	        , bool add_subs=false) const ;
 
 	/// debug function
-	void print_subtree(const evt::node* par=nullptr, std::string prefix="") const ;
+	std::string print_subtree(const evt::node* par=nullptr) const ;
 
 	evtree& add_tmpl(ast::tmpl& tmpl) override ;
 	void render(

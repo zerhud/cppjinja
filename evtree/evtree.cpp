@@ -258,23 +258,15 @@ std::vector<const cppjinja::evt::node*> cppjinja::evtree::children(
 	return ret;
 }
 
-void cppjinja::evtree::print_subtree(
-		const cppjinja::evt::node* par, std::string prefix) const
+std::string cppjinja::evtree::print_subtree(const cppjinja::evt::node* par) const
 {
-	std::vector<const evt::node*> pars;
-	if(par!=nullptr) pars.emplace_back(par);
-	else for(auto& n:nodes)
-		if(n->parents().empty()) pars.emplace_back(n.get());
+	if(!par) for(auto& n:nodes) if(n->parents().empty()) par = n.get();
 
-	for(auto& p:pars)
-	{
-		auto name = p->name();
-		if(name.empty()) name = "[empty]";
-		std::cout << prefix << name << std::endl;
-
-		for(auto&& c:children(p))
-			print_subtree(c, prefix + "\t");
-	}
+	auto clist = children(par);
+	std::string ret = '\'' + par->name() + "\'[";
+	for(auto& c:clist) ret += print_subtree(c);
+	ret += "]";
+	return ret;
 }
 
 void cppjinja::evtree::render(
