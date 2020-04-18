@@ -26,7 +26,7 @@ cppjinja::evt::render_info cppjinja::evtnodes::op_out::rinfo() const
 
 cppjinja::ast::string_t cppjinja::evtnodes::op_out::name() const
 {
-	return "op_out ("s + std::to_string((std::size_t)this) + ')';
+	return "op_out";
 }
 
 bool cppjinja::evtnodes::op_out::is_leaf() const
