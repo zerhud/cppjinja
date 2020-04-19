@@ -29,6 +29,7 @@ set(tests_eval
 	eval_completeness
 	eval_exenv
 	eval_nodes
+	eval_tmpl_compiler
 	)
 foreach(tname ${tests_eval})
 	add_unit_test(${tname} "tests/eval/" "evaluator;parser2")
