@@ -10,16 +10,22 @@
 
 #include "declarations.hpp"
 #include "evtree/node.hpp"
+#include "nodes/tmpl.hpp"
+#include "nodes/callable.hpp"
 #include "parser/ast/tmpls.hpp"
 #include <iostream>
 
 namespace cppjinja::evt {
 
+template<typename Node>
 struct edge {
-	edge(node* p, node* c) : parent(p), child(c) {}
-	node* parent;
-	node* child;
+	edge(Node* p, Node* c) : parent(p), child(c) {}
+	Node* parent;
+	Node* child;
 };
+
+typedef edge<node> node_edge;
+typedef edge<evtnodes::callable> callable_edge;
 
 struct compiled_tmpl final {
 	compiled_tmpl(const compiled_tmpl&) =delete ;
@@ -31,14 +37,23 @@ struct compiled_tmpl final {
 
 	std::string tmpl_name;
 	std::vector<std::unique_ptr<node>> nodes;
-	std::vector<edge> lrnd;
-	std::vector<edge> lctx;
+	std::vector<evtnodes::callable*> roots;
+	std::vector<node_edge> lrnd;
+	std::vector<node_edge> lctx;
+
+	evtnodes::tmpl* tmpl_node() ;
+	evtnodes::callable* main_block();
 };
 
 class tmpl_compiler final {
 	compiled_tmpl result;
 	std::vector<node*> ctx_stack;
 	std::vector<node*> rnd_stack;
+	ast::tmpl cur_tmpl;
+
+	void compile_template_content();
+	void make_main_nodes();
+	evtnodes::callable* add_block(ast::block_named obj);
 public:
 	compiled_tmpl operator()(ast::tmpl t) ;
 
@@ -51,6 +66,10 @@ public:
 	void operator()(ast::forward_ast<ast::block_named>& obj);
 };
 
-bool operator == (const edge& l, const edge& r) noexcept ;
+template<typename L, typename R>
+bool operator == (const edge<L>& l, const edge<R>& r) noexcept
+{
+	return l.parent == r.parent && l.child == r.child;
+}
 
 } // namespace cppjinja::evt
