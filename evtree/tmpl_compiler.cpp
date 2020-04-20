@@ -48,6 +48,7 @@ void cppjinja::evt::tmpl_compiler::compile_template_content()
 void cppjinja::evt::tmpl_compiler::make_main_nodes()
 {
 	result.nodes.emplace_back(std::make_unique<evtnodes::tmpl>(cur_tmpl));
+	rnd_stack.emplace_back(result.tmpl_node());
 	add_block(ast::block_named{});
 	result.lctx.emplace_back(result.tmpl_node(), result.main_block());
 }
@@ -55,18 +56,43 @@ void cppjinja::evt::tmpl_compiler::make_main_nodes()
 cppjinja::evtnodes::callable*
 cppjinja::evt::tmpl_compiler::add_block(ast::block_named obj)
 {
+	assert(!rnd_stack.empty());
+
 	auto bl = std::make_unique<evtnodes::block_named>(obj);
 	evtnodes::callable* ret = bl.get();
-	result.roots.emplace_back(bl.get());
 	result.nodes.emplace_back(std::move(bl));
-	ctx_stack.emplace_back(result.nodes.back().get());
-	rnd_stack.emplace_back(result.nodes.back().get());
 
-	//ast::op_out out;
-	//result.nodes.emplace_back(std::make_unique<evtnodes::op_out>(out));
+	add_op_out(make_block_call(obj.name));
+
+	result.roots.emplace_back(ret);
+	ctx_stack.emplace_back(ret);
+	rnd_stack.emplace_back(ret);
 
 	for(auto& c:obj.content) boost::apply_visitor(*this, c.var);
 	return ret;
+}
+
+void cppjinja::evt::tmpl_compiler::add_op_out(cppjinja::ast::op_out obj)
+{
+	assert(!rnd_stack.empty());
+	auto out_node = std::make_unique<evtnodes::op_out>(std::move(obj));
+	result.lrnd.emplace_back(rnd_stack.back(), out_node.get());
+	result.nodes.emplace_back(std::move(out_node));
+}
+
+cppjinja::ast::op_out cppjinja::evt::tmpl_compiler::make_block_call(
+        cppjinja::ast::string_t name) const
+{
+	ast::function_call bl_call;
+	bl_call.ref = ast::var_name{name};
+	ast::op_out out;
+	out.value = bl_call;
+	return out;
+}
+
+void cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::op_out& obj)
+{
+	add_op_out(std::move(obj));
 }
 
 cppjinja::evtnodes::tmpl* cppjinja::evt::compiled_tmpl::tmpl_node()

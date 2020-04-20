@@ -54,6 +54,8 @@ class tmpl_compiler final {
 	void compile_template_content();
 	void make_main_nodes();
 	evtnodes::callable* add_block(ast::block_named obj);
+	void add_op_out(ast::op_out obj);
+	ast::op_out make_block_call(ast::string_t name) const ;
 public:
 	compiled_tmpl operator()(ast::tmpl t) ;
 
@@ -63,6 +65,7 @@ public:
 		std::cout << "here " << std::endl;
 	}
 	void operator()(ast::string_t& cnt);
+	void operator()(ast::op_out& obj);
 	void operator()(ast::forward_ast<ast::block_named>& obj);
 };
 

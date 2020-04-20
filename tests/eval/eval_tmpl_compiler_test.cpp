@@ -113,7 +113,7 @@ void check_main(compiled_tmpl& t, std::string name, std::size_t blocks, int cnt)
 	BOOST_TEST(t.tmpl_name == name);
 	BOOST_TEST(dynamic_cast<nodes::tmpl*>(t.tmpl_node()) != nullptr);
 	BOOST_TEST(dynamic_cast<nodes::block_named*>(t.main_block()) != nullptr);
-	BOOST_TEST(make_node_types_str(make_node_seq(t.tmpl_node(), t.lrnd)) == "tmpl.");
+	BOOST_TEST(make_node_types_str(make_node_seq(t.tmpl_node(), t.lrnd)) == "tmpl,op_out.");
 	BOOST_CHECK(check_link(t.lctx, t.tmpl_node(), t.main_block()));
 	BOOST_TEST(make_node_types_str(make_node_seq(t.tmpl_node(), t.lctx)) == "tmpl,block_named.");
 	BOOST_TEST(t.roots.size() == blocks );
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(empty_tmpl)
 	cppjinja::ast::tmpl tmpl;
 	compiled_tmpl tree = cppjinja::evt::tmpl_compiler()(tmpl);
 	check_main(tree, "", 1, 0);
-	BOOST_TEST(tree.lrnd.size() == 0);
+	BOOST_TEST(tree.lrnd.size() == 1);
 }
 
 BOOST_FIXTURE_TEST_CASE(single_string, mock_exenv_fixture)
@@ -148,7 +148,9 @@ BOOST_FIXTURE_TEST_CASE(single_string, mock_exenv_fixture)
 
 	MOCK_EXPECT(env.current_node).once();
 	MOCK_EXPECT(env.crinfo).returns(cppjinja::evt::render_info{false,false});
-	BOOST_CHECK_NO_THROW(tree.nodes[2]->render(env));
+	BOOST_REQUIRE(tree.lrnd.size() == 2);
+	BOOST_REQUIRE(dynamic_cast<nodes::block_named*>(tree.lrnd[1].parent) != nullptr);
+	BOOST_CHECK_NO_THROW(tree.lrnd[1].child->render(env));
 	BOOST_TEST(out.str() == cnt);
 
 }
@@ -162,8 +164,34 @@ BOOST_FIXTURE_TEST_CASE(inner_block, mock_exenv_fixture)
 	nodes::callable* anode = nullptr;
 	for(auto& r:tree.roots) if(r->name() == "a") anode = r;
 	BOOST_REQUIRE(anode);
+	auto mbrnd = make_node_seq(tree.main_block(), tree.lrnd);
+	BOOST_TEST(make_node_types_str(mbrnd) == "block_named,op_out.");
 	BOOST_TEST(make_node_types_str(make_node_seq(anode, tree.lrnd)) == "block_named,content.");
-	BOOST_TEST(make_node_types_str(make_node_seq(tree.main_block(), tree.lrnd)) == "block_named,op_out.");
+	BOOST_TEST(make_node_types_str(make_node_seq(anode, tree.lctx)) == "block_named.");
+}
+
+BOOST_FIXTURE_TEST_CASE(op_out, mock_exenv_fixture)
+{
+	auto data = "<= a =>";
+	compiled_tmpl tree = build_tree(data);
+	check_main(tree, "", 1, 0);
+	auto mbrnd = make_node_seq(tree.main_block(), tree.lrnd);
+	BOOST_TEST(make_node_types_str(mbrnd) == "block_named,op_out.");
+
+	mocks::callable_node caller;
+	expect_callings({&caller});
+	MOCK_EXPECT(env.current_node).with(mbrnd[1]);
+	MOCK_EXPECT(caller.param).calls(
+	[](const cppjinja::evt::callstack&,const ast::var_name& n) {
+		BOOST_TEST(n.size()==1);
+		BOOST_TEST(n[0] == "a");
+		return ast::value_term{""s};
+	});
+	mbrnd[1]->render(env);
+}
+
+BOOST_FIXTURE_TEST_CASE(op_set, mock_exenv_fixture)
+{
 }
 
 BOOST_AUTO_TEST_SUITE_END() // tmpl_compiler
