@@ -12,6 +12,8 @@
 #include "nodes/content.hpp"
 #include "nodes/block_named.hpp"
 #include "nodes/op_out.hpp"
+#include "nodes/op_set.hpp"
+#include "nodes/block_macro.hpp"
 
 typedef std::unique_ptr<cppjinja::evt::node> node_ptr;
 typedef std::vector<node_ptr> vec_type;
@@ -88,6 +90,26 @@ cppjinja::ast::op_out cppjinja::evt::tmpl_compiler::make_block_call(
 	ast::op_out out;
 	out.value = bl_call;
 	return out;
+}
+
+void cppjinja::evt::tmpl_compiler::operator()(ast::forward_ast<cppjinja::ast::block_macro>& obj)
+{
+	auto mcr = std::make_unique<evtnodes::block_macro>(std::move(obj));
+	rnd_stack.emplace_back(mcr.get());
+	ctx_stack.emplace_back(mcr.get());
+	result.roots.emplace_back(mcr.get());
+	result.nodes.emplace_back(std::move(mcr));
+
+	for(auto& c:obj.get().content) boost::apply_visitor(*this, c.var);
+}
+
+void cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::op_set& obj)
+{
+	assert(1 <= ctx_stack.size());
+	assert(dynamic_cast<evtnodes::callable*>(ctx_stack[0]) != nullptr);
+	auto set_node = std::make_unique<evtnodes::op_set>(std::move(obj));
+	result.lctx.emplace_back(ctx_stack.back(), set_node.get());
+	result.nodes.emplace_back(std::move(set_node));
 }
 
 void cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::op_out& obj)

@@ -192,6 +192,26 @@ BOOST_FIXTURE_TEST_CASE(op_out, mock_exenv_fixture)
 
 BOOST_FIXTURE_TEST_CASE(op_set, mock_exenv_fixture)
 {
+	auto data = "<% set a = 'a' %>";
+	compiled_tmpl tree = build_tree(data);
+	auto mb_rnd = make_node_seq(tree.main_block(), tree.lrnd);
+	BOOST_TEST(make_node_types_str(mb_rnd) == "block_named.");
+	auto tmpl_ctx = make_node_seq(tree.tmpl_node(), tree.lctx);
+	BOOST_TEST(make_node_types_str(tmpl_ctx) == "tmpl,block_named,op_set.");
+}
+
+BOOST_FIXTURE_TEST_CASE(block_macro, mock_exenv_fixture)
+{
+	compiled_tmpl tree = build_tree("cnt<% macro a %>in<%set a='a'%><% endmacro %>");
+	auto mb_rnd = make_node_seq(tree.main_block(), tree.lrnd);
+	BOOST_TEST(make_node_types_str(mb_rnd) == "block_named,content.");
+	BOOST_TEST(tree.roots.size() == 2);
+
+	nodes::callable* macro = nullptr;
+	for(auto& r:tree.roots) if(r->name()=="a") macro = r;
+	BOOST_REQUIRE(macro);
+	BOOST_TEST(make_node_types_str(make_node_seq(macro, tree.lctx)) == "block_macro,op_set.");
+	BOOST_TEST(make_node_types_str(make_node_seq(macro, tree.lrnd)) == "block_macro,content.");
 }
 
 BOOST_AUTO_TEST_SUITE_END() // tmpl_compiler

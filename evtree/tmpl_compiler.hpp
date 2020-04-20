@@ -66,6 +66,8 @@ public:
 	}
 	void operator()(ast::string_t& cnt);
 	void operator()(ast::op_out& obj);
+	void operator()(ast::op_set& obj);
+	void operator()(ast::forward_ast<ast::block_macro>& obj);
 	void operator()(ast::forward_ast<ast::block_named>& obj);
 };
 
