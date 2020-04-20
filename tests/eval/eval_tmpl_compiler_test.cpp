@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(empty_tmpl)
 	BOOST_TEST(tree.lrnd.size() == 1);
 }
 
-BOOST_FIXTURE_TEST_CASE(single_string, mock_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(content, mock_exenv_fixture)
 {
 	auto cnt = random_content();
 	compiled_tmpl tree = build_tree(cnt);
