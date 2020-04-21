@@ -24,6 +24,8 @@ cppjinja::evt::compiled_tmpl
 cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::tmpl t)
 {
 	cur_tmpl = std::move(t);
+	result.tmpl_name = cur_tmpl.name;
+	result.extends = std::move(cur_tmpl.extends);
 	make_main_nodes();
 	return std::move(result);
 }

@@ -242,4 +242,14 @@ BOOST_FIXTURE_TEST_CASE(if_else, mock_exenv_fixture)
 	BOOST_TEST(mb_rnd[3]->rinfo().trim_right == false);
 }
 
+BOOST_AUTO_TEST_CASE(tmpl_name)
+{
+	compiled_tmpl tree = build_tree("<% template kuku %>c<%endtemplate%>");
+	BOOST_TEST(tree.tmpl_name == "kuku");
+	tree = build_tree("<% template kuku extends base%>c<%endtemplate%>");
+	BOOST_REQUIRE(tree.extends.size() == 1);
+	BOOST_REQUIRE(tree.extends[0].tmpl_name);
+	BOOST_TEST(*tree.extends[0].tmpl_name == "base");
+}
+
 BOOST_AUTO_TEST_SUITE_END() // tmpl_compiler

@@ -10,6 +10,8 @@
 
 #include <vector>
 
+#include "tmpl_compiler.hpp"
+
 #include "eval/eval.hpp"
 #include "parser/ast/tmpls.hpp"
 
@@ -25,6 +27,7 @@
 namespace cppjinja {
 
 class evtree : public evaluator {
+	std::vector<evt::compiled_tmpl> templates;
 	std::vector<std::unique_ptr<evt::node>> nodes;
 
 	void tbuild_blocks(evt::node* p, ast::tmpl& t);

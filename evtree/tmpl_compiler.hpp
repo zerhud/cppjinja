@@ -36,6 +36,7 @@ struct compiled_tmpl final {
 	~compiled_tmpl() noexcept =default ;
 
 	std::string tmpl_name;
+	std::vector<ast::extend_st> extends;
 	std::vector<std::unique_ptr<node>> nodes;
 	std::vector<evtnodes::callable*> roots;
 	std::vector<node_edge> lrnd;
