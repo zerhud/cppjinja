@@ -94,8 +94,3 @@ BOOST_AUTO_TEST_CASE(extends)
 	BOOST_TEST( child_ca->name() == "ca"s );
 }
 
-BOOST_AUTO_TEST_CASE(tree_blocks)
-{
-	cppjinja::evtree tree = build_tree("<%block bl%>cnt<%endblock%>");
-	BOOST_TEST(tree.print_subtree() == "''[''['op_out'[]]'bl'['content'[]]]");
-}
