@@ -51,11 +51,15 @@ class tmpl_compiler final {
 	std::vector<node*> rnd_stack;
 	ast::tmpl cur_tmpl;
 
-	void compile_template_content();
+	ast::block_named create_ast_main_block();
 	void make_main_nodes();
 	evtnodes::callable* add_block(ast::block_named obj);
 	void add_op_out(ast::op_out obj);
 	ast::op_out make_block_call(ast::string_t name) const ;
+	void make_content_block(
+	        evt::render_info ri, std::vector<ast::block_content> children);
+	template<typename N, typename ... Args>
+	N* create_node(Args... args);
 public:
 	compiled_tmpl operator()(ast::tmpl t) ;
 
@@ -69,6 +73,7 @@ public:
 	void operator()(ast::op_set& obj);
 	void operator()(ast::forward_ast<ast::block_macro>& obj);
 	void operator()(ast::forward_ast<ast::block_named>& obj);
+	void operator()(ast::forward_ast<ast::block_if>& obj);
 };
 
 template<typename L, typename R>
