@@ -58,6 +58,7 @@ class tmpl_compiler final {
 	evtnodes::callable* add_block(ast::block_named obj);
 	void add_op_out(ast::op_out obj);
 	ast::op_out make_block_call(ast::string_t name) const ;
+	bool can_render_in_place(const ast::block_named& obj) const ;
 	void make_content_block(
 	        evt::render_info ri, std::vector<ast::block_content> children);
 	template<typename N, typename ... Args>

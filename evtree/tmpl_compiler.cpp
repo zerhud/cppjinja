@@ -116,8 +116,17 @@ void cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::string_t& cnt)
 
 void cppjinja::evt::tmpl_compiler::operator()(ast::forward_ast<ast::block_named>& obj)
 {
+	const bool render_in_place = can_render_in_place(obj.get());
 	auto bl = add_block(obj.get());
-	result.lrnd.emplace_back(rnd_stack.back(), bl);
+	if(render_in_place) result.lrnd.emplace_back(rnd_stack.back(), bl);
+}
+
+bool cppjinja::evt::tmpl_compiler::can_render_in_place(
+        const cppjinja::ast::block_named& obj) const
+{
+	if(obj.params.empty()) return true;
+	for(auto&p:obj.params) if(!p.value.has_value()) return false;
+	return true;
 }
 
 void cppjinja::evt::tmpl_compiler::operator()(

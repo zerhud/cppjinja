@@ -189,8 +189,9 @@ BOOST_FIXTURE_TEST_CASE(inner_block, mock_exenv_fixture)
 BOOST_AUTO_TEST_CASE(named_with_params)
 {
 	compiled_tmpl tree = build_tree("<%block a(p)%>cnt<%endblock%>");
-	BOOST_TEST(make_node_seq_str(tree.main_block(), tree.lrnd) ==
-	           "block_named,block_named,content...");
+	BOOST_TEST(make_node_seq_str(tree.main_block(), tree.lrnd) == "block_named.");
+	tree = build_tree("<%block a(p=1)%>cnt<%endblock%>");
+	BOOST_TEST(make_node_seq_str(tree.main_block(), tree.lrnd) == "block_named,block_named,content...");
 }
 
 BOOST_FIXTURE_TEST_CASE(op_out, mock_exenv_fixture)
