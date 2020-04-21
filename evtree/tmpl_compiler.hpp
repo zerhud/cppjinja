@@ -43,6 +43,7 @@ struct compiled_tmpl final {
 	std::vector<node_edge> lctx;
 
 	evtnodes::tmpl* tmpl_node() ;
+	const evtnodes::tmpl* tmpl_node() const ;
 	evtnodes::callable* main_block();
 };
 
@@ -75,6 +76,7 @@ public:
 	void operator()(ast::forward_ast<ast::block_macro>& obj);
 	void operator()(ast::forward_ast<ast::block_named>& obj);
 	void operator()(ast::forward_ast<ast::block_if>& obj);
+	void operator()(ast::forward_ast<ast::block_raw>& obj);
 };
 
 template<typename L, typename R>

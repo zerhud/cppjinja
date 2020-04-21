@@ -35,7 +35,7 @@ void cppjinja::evt::tmpl_compiler::make_main_nodes()
 	result.nodes.emplace_back(std::make_unique<evtnodes::tmpl>(cur_tmpl));
 	rnd_stack.emplace_back(result.tmpl_node());
 	add_block(create_ast_main_block());
-	result.lctx.emplace_back(result.tmpl_node(), result.main_block());
+	result.lrnd.emplace_back(result.tmpl_node(), result.main_block());
 }
 
 cppjinja::ast::block_named cppjinja::evt::tmpl_compiler::create_ast_main_block()
@@ -53,8 +53,7 @@ cppjinja::evt::tmpl_compiler::add_block(ast::block_named obj)
 	auto bl = std::make_unique<evtnodes::block_named>(obj);
 	evtnodes::callable* ret = bl.get();
 	result.nodes.emplace_back(std::move(bl));
-
-	add_op_out(make_block_call(obj.name));
+	result.lctx.emplace_back(result.tmpl_node(), ret);
 
 	result.roots.emplace_back(ret);
 	ctx_stack.emplace_back(ret);
@@ -100,6 +99,8 @@ void cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::string_t& cnt)
 
 void cppjinja::evt::tmpl_compiler::operator()(ast::forward_ast<ast::block_named>& obj)
 {
+	if(obj.get().params.empty())
+		add_op_out(make_block_call(obj.get().name));
 	add_block(obj.get());
 }
 
@@ -139,9 +140,18 @@ void cppjinja::evt::tmpl_compiler::make_content_block(
 }
 
 void cppjinja::evt::tmpl_compiler::operator()(
+            ast::forward_ast<cppjinja::ast::block_raw>& obj)
+{
+	assert(!ctx_stack.empty());
+	assert(!rnd_stack.empty());
+	create_node<evtnodes::content>(std::move(obj.get().value));
+}
+
+void cppjinja::evt::tmpl_compiler::operator()(
         ast::forward_ast<cppjinja::ast::block_macro>& obj)
 {
 	auto mcr = std::make_unique<evtnodes::block_macro>(std::move(obj));
+	result.lctx.emplace_back(result.tmpl_node(), mcr.get());
 	rnd_stack.emplace_back(mcr.get());
 	ctx_stack.emplace_back(mcr.get());
 	result.roots.emplace_back(mcr.get());
@@ -171,6 +181,11 @@ cppjinja::evtnodes::tmpl* cppjinja::evt::compiled_tmpl::tmpl_node()
 	auto ret = dynamic_cast<evtnodes::tmpl*>(nodes[0].get());
 	assert(ret);
 	return ret;
+}
+
+const cppjinja::evtnodes::tmpl* cppjinja::evt::compiled_tmpl::tmpl_node() const
+{
+	return const_cast<compiled_tmpl*>(this)->tmpl_node();
 }
 
 cppjinja::evtnodes::callable* cppjinja::evt::compiled_tmpl::main_block()

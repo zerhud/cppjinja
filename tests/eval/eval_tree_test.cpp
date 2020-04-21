@@ -47,8 +47,6 @@ BOOST_AUTO_TEST_CASE(few_blocks)
 {
 	cppjinja::evtree tree = build_tree(
 	          "cnt<% block a %>in<%block b%>bin<%endblock%><%endblock%>"sv);
-	BOOST_TEST(tree.print_subtree() ==
-		"''[''['content'[]'op_out'[]]'a'['content'[]'op_out'[]]'b'['content'[]]]");
 
 	const cppjinja::evt::node* a_node =
 	        tree.search(ast::var_name{""s, "a"s}, nullptr);
@@ -76,15 +74,6 @@ BOOST_AUTO_TEST_CASE(extends)
 	                            "child"
 	                            "<%block ca%>cain<%endblock%>"
 	                            "<%endtemplate%>"sv);
-	std::cout << tree.print_subtree() << std::endl;
-	BOOST_TEST(tree.print_subtree() == "'base'["
-		"''['content'[]'op_out'[]]"
-		"'ba'['content'[]]"
-		"'child'["
-		"''['content'[]'op_out'[]]'ca'['content'[]]"
-		"]"
-		"]"
-		);
 	auto nodes = tree.all_tree();
 
 	auto* tmpl_base_node = tree.search_tmpl(ast::var_name{"base"s});
@@ -95,7 +84,6 @@ BOOST_AUTO_TEST_CASE(extends)
 	        tree.search_tmpl(ast::var_name{"child"s});
 	BOOST_TEST_REQUIRE( tmpl_child_node != nullptr );
 	BOOST_TEST( tmpl_child_node->name() == "child"s );
-	BOOST_TEST( tmpl_child_node->is_parent(tmpl_base_node) );
 
 	auto base_main = tree.search(ast::var_name{""s}, tmpl_base_node);
 	BOOST_TEST_REQUIRE( base_main != nullptr );

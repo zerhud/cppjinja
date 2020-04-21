@@ -13,175 +13,42 @@
 
 using namespace std::literals;
 
-namespace cppjinja::details {
-
-template<typename Block, typename... Args>
-evt::node* create_node(
-          std::vector<std::unique_ptr<evt::node>>& dest
-        , evt::node* parent
-        , Args&&... args)
-{
-	evt::node* block = dest.emplace_back(
-	            std::make_unique<Block>(std::forward<Args>(args)...)
-	            ).get();
-	block->add_parent(parent);
-	return block;
-}
-
-template<typename Src>
-static void insert_content(
-          std::vector<std::unique_ptr<evt::node>>& dest
-        , evt::node* parent
-        , Src& src
-        , evt::node* def
-        )
-{
-	overloaded insterter {
-		[&dest,parent,def](ast::forward_ast<ast::block_named>& nb)
-		{
-			evt::node* tnode = create_node<evtnodes::block_named>(
-			            dest, parent, nb.get());
-			insert_content(dest, parent, nb.get(), tnode);
-
-			if(!nb.get().params.empty()) return;
-
-			ast::op_out print_this_block;
-			print_this_block.value = ast::function_call{{tnode->name()}, {}};
-			print_this_block.open.trim = nb.get().left_open.trim;
-			print_this_block.close.trim = nb.get().right_close.trim;
-			create_node<evtnodes::op_out>(dest, def, print_this_block);
-		},
-		[&dest,parent](ast::forward_ast<ast::block_macro>& mb)
-		{
-			// macro cannot be declared inside a block
-			evt::node* tnode =
-			        create_node<evtnodes::block_macro>(dest, parent, mb.get());
-			insert_content(dest, parent, mb.get(), tnode);
-		},
-		[&dest,&def](ast::string_t& str)
-		{
-			create_node<evtnodes::content>(dest, def, str);
-		},
-		[&dest,&def](ast::op_out& obj)
-		{
-			create_node<evtnodes::op_out>(dest, def, obj);
-		},
-		[&dest,&def](ast::op_set& obj)
-		{
-			create_node<evtnodes::op_set>(dest, def, obj);
-		},
-		[&dest,&def](ast::forward_ast<ast::block_raw>& obj)
-		{
-			create_node<evtnodes::content>(
-					dest, def, obj.get().value);
-		},
-		[&dest,parent,&def](ast::forward_ast<ast::block_if>& obj)
-		{
-			ast::block_if& oif = obj.get();
-			auto* bl_if = create_node<evtnodes::block_if>
-					( dest
-					, def
-					, oif
-					);
-			evt::render_info ri{
-				oif.left_close.trim, oif.right_open.trim};
-			auto* cnt_if   = create_node<evtnodes::content_block>(
-					dest, bl_if, ri, "if"s
-					);
-			auto* cnt_else = create_node<evtnodes::content_block>(
-					dest, bl_if, ri, "else"s
-					);
-			insert_content(dest, parent, oif, cnt_if);
-			if(oif.else_block)
-				insert_content(
-					dest, parent,
-					*oif.else_block, cnt_else);
-		},
-		[](auto&)//[&def](auto& cnt)
-		{
-			//def.content.emplace_back(std::move(cnt));
-		}
-	};
-
-	decltype(src.content) tmp_cnt;
-	tmp_cnt.swap(src.content);
-	for(auto& cnt:tmp_cnt)  boost::apply_visitor(insterter, cnt.var);
-}
-
-} // namespace cppjinja::details
-
-
 cppjinja::evtree& cppjinja::evtree::add_tmpl(ast::tmpl& tmpl)
 {
-	std::vector<evt::node*> cur_parents;
-	for(auto& ex:tmpl.extends)
-	{
-		ast::string_t exname = ex.file_name;
-		if(ex.tmpl_name) exname = *ex.tmpl_name;
-
-		for(auto&& n:nodes)
-			if(is_tmpl(*n) && n->name() == exname)
-				cur_parents.emplace_back(n.get());
-	}
-
-	if(cur_parents.size() != tmpl.extends.size())
-		throw std::runtime_error("cannot find all parents");
-
-	evt::node* tnode = nodes.emplace_back(
-	            std::make_unique<evtnodes::tmpl>(tmpl)).get();
-	assert( tnode );
-
-	for(auto&& p:cur_parents) tnode->add_parent(p);
-	tbuild_blocks(tnode, tmpl);
-
+	templates.emplace_back(evt::tmpl_compiler()(tmpl));
 	return *this;
-}
-
-void cppjinja::evtree::tbuild_blocks(cppjinja::evt::node* p, ast::tmpl& t)
-{
-	ast::block_named main;
-	main.name = ""s;
-
-	evt::node* mnode = nodes.emplace_back(
-	            std::make_unique<evtnodes::block_named>(std::move(main))
-	            ).get();
-	mnode->add_parent(p);
-
-	details::insert_content(nodes, p, t, mnode);
-
 }
 
 const cppjinja::evt::node* cppjinja::evtree::search_child(
           const cppjinja::ast::string_t& name
         , const cppjinja::evt::node* par
+        , const std::vector<cppjinja::evt::node_edge>& graph
         ) const
 {
-	for(auto& n:nodes)
+	for(auto& edge:graph)
 	{
-		if(n->name() == name && n->is_parent(par))
-			return n.get();
+		if(edge.parent == par && edge.child->name() == name)
+			return edge.child;
 	}
-
-	auto ppars = par->parents();
-	for(auto&& p:ppars)
-		if(auto found = search_child(name, p); found)
-			return found;
-
 	return nullptr;
 }
 
-bool cppjinja::evtree::is_tmpl(const cppjinja::evt::node& n) const
+const cppjinja::evt::compiled_tmpl& cppjinja::evtree::tmpl_by_node(const cppjinja::evt::node* n) const
 {
-	return dynamic_cast<const evtnodes::tmpl*>(&n) != nullptr;
+	for(auto& t:templates) {
+		auto pos = std::find_if(std::begin(t.nodes), std::end(t.nodes),
+		                        [n](const auto& tn){return tn.get()==n;});
+		if(pos != std::end(t.nodes)) return t;
+	}
+	throw std::runtime_error("no such node in tree");
 }
 
 const cppjinja::evtnodes::tmpl* cppjinja::evtree::search_tmpl(
         const cppjinja::ast::var_name& name) const
 {
 	if(name.size()!=1) return nullptr;
-	for(auto& n:nodes)
-		if(is_tmpl(*n) && n->name()==name[0])
-			return dynamic_cast<const evtnodes::tmpl*>(n.get());
+	for(auto& t:templates)
+		if(t.tmpl_node()->name() == name[0]) return t.tmpl_node();
 	return nullptr;
 }
 
@@ -196,23 +63,35 @@ const cppjinja::evt::node* cppjinja::evtree::search(
 	{
 		// absolute path (tmpl.callable)
 		if(2<name.size()) return nullptr;
-		for(auto& n:nodes)
+		for(auto& tmpl:templates)
 		{
-			if(is_tmpl(*n) && n->name()==name[0])
+			if(tmpl.tmpl_name == name[0])
 			{
-				if(name.size() == 1)
-					throw std::runtime_error(name[0] + " is a template"s);
-				return search_child(name[1], n.get());
+				auto c = search_child(name[1], tmpl.tmpl_node(), tmpl.lctx);
+				if(c) return c;
 			}
 		}
 	}
 	else if(name.size()==1)
 	{
-		auto pars = ctx->parents();
-		if(pars.empty()) return search_child(name[0], ctx);
-		for(auto& p:pars)
-			if(auto found = search_child(name[0], p); found)
-				return found;
+		const evt::compiled_tmpl& tmpl = tmpl_by_node(ctx);
+		for(auto& edge:tmpl.lrnd)
+		{
+			if(edge.parent == ctx)
+			{
+				auto c = search_child(name[0], ctx, tmpl.lrnd);
+				if(c) return c;
+			}
+		}
+		for(auto& edge:tmpl.lrnd)
+		{
+			if(edge.child == ctx)
+			{
+				auto c = search_child(name[0], edge.parent, tmpl.lrnd);
+				if(c) return c;
+			}
+		}
+		return search_child(name[0], tmpl.tmpl_node(), tmpl.lctx);
 	}
 	else if(name[0]=="self")
 	{
@@ -227,12 +106,8 @@ const cppjinja::evt::node* cppjinja::evtree::search(
 std::vector<const cppjinja::evt::node*> cppjinja::evtree::all_tree() const
 {
 	std::vector<const cppjinja::evt::node*> ret;
-	ret.reserve(nodes.size());
-	for(auto& n:nodes) ret.emplace_back(n.get());
-
-	assert( std::find(std::begin(ret), std::end(ret), nullptr)
-			== std::end(ret));
-
+	for(auto& t:templates) for(auto& n:t.nodes) ret.emplace_back(n.get());
+	assert(std::find(std::begin(ret), std::end(ret), nullptr) == std::end(ret));
 	return ret;
 }
 
@@ -241,7 +116,10 @@ std::vector<const cppjinja::evt::node*> cppjinja::evtree::children(
         , bool add_subs) const
 {
 	std::vector<const cppjinja::evt::node*> ret;
-	for(auto& n:nodes) if(n->is_parent(selected)) ret.emplace_back(n.get());
+	if(!selected) return ret;
+
+	const evt::compiled_tmpl& tmpl = tmpl_by_node(selected);
+	for(auto& edge:tmpl.lrnd) if(edge.parent == selected) ret.emplace_back(edge.child);
 
 	if(!add_subs) return ret;
 
@@ -254,14 +132,14 @@ std::vector<const cppjinja::evt::node*> cppjinja::evtree::children(
 
 	for(auto& n:subs) ret.emplace_back(n);
 
-	assert( std::find(std::begin(ret), std::end(ret), nullptr)
-			== std::end(ret));
+	assert(std::find(std::begin(ret), std::end(ret), nullptr) == std::end(ret));
 	return ret;
 }
 
 std::string cppjinja::evtree::print_subtree(const cppjinja::evt::node* par) const
 {
-	if(!par) for(auto& n:nodes) if(n->parents().empty()) par = n.get();
+	if(templates.empty()) return "";
+	if(!par) par = templates[0].tmpl_node();
 
 	auto clist = children(par);
 	std::string ret = '\'' + par->name() + "\'[";
@@ -271,31 +149,15 @@ std::string cppjinja::evtree::print_subtree(const cppjinja::evt::node* par) cons
 }
 
 void cppjinja::evtree::render(
-          std::ostream &to
-        , const data_provider &data
-        , const ast::string_t &name
+          std::ostream& to
+        , const data_provider& data
+        , const ast::string_t& name
         ) const
 {
-	evt::node* tnode = nullptr;
-	if(name.empty())
-		for(auto& n:nodes) { if(is_tmpl(*n)) { tnode = n.get(); break; } }
-	else
-	{
-		for(auto& n:nodes)
-		{
-			if(is_tmpl(*n) && n->name() == name)
-			{
-				tnode = n.get();
-				break;
-			}
-		}
-	}
-
-	if(!tnode) throw std::runtime_error("cannot find " + name);
-
-	auto* cb_tnode = dynamic_cast<evtnodes::callable*>(tnode);
-	assert(cb_tnode);
+	if(templates.empty()) throw std::runtime_error("cannot render empty tree");
+	const evtnodes::tmpl* tnode = search_tmpl(ast::var_name{name});
+	if(!tnode) tnode = templates[0].tmpl_node();
 
 	evt::exenv_impl env(&data, this);
-	to << cb_tnode->evaluate(env);
+	to << tnode->evaluate(env);
 }

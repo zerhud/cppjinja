@@ -27,6 +27,7 @@
 namespace ast = cppjinja::ast;
 namespace txt = cppjinja::text;
 namespace nodes = cppjinja::evtnodes;
+namespace tdata = boost::unit_test::data;
 using namespace std::literals;
 using mocks::mock_exenv_fixture;
 
@@ -117,7 +118,7 @@ void check_main(compiled_tmpl& t, std::string name, std::size_t blocks, int cnt)
 	BOOST_TEST(t.tmpl_name == name);
 	BOOST_TEST(dynamic_cast<nodes::tmpl*>(t.tmpl_node()) != nullptr);
 	BOOST_TEST(dynamic_cast<nodes::block_named*>(t.main_block()) != nullptr);
-	BOOST_TEST(make_node_seq_str(t.tmpl_node(), t.lrnd) == "tmpl,op_out..");
+	BOOST_TEST(make_node_seq_str(t.tmpl_node(), t.lrnd).substr(0,16) == "tmpl,block_named");
 	BOOST_CHECK(check_link(t.lctx, t.tmpl_node(), t.main_block()));
 	BOOST_TEST(make_node_seq_str(t.tmpl_node(), t.lctx) == "tmpl,block_named..");
 	BOOST_TEST(t.roots.size() == blocks );
@@ -143,20 +144,25 @@ BOOST_AUTO_TEST_CASE(empty_tmpl)
 	BOOST_TEST(tree.lrnd.size() == 1);
 }
 
-BOOST_FIXTURE_TEST_CASE(content, mock_exenv_fixture)
+BOOST_DATA_TEST_CASE_F(
+          mock_exenv_fixture, content
+        , tdata::make(""s, "<%raw%>"s)
+        ^ tdata::make(""s, "<%endraw%>"s)
+        ^ tdata::make(random_content(), "<= 'a' =>"s)
+        , begin, end, cnt)
 {
-	auto cnt = random_content();
-	compiled_tmpl tree = build_tree(cnt);
+	compiled_tmpl tree = build_tree(begin + cnt + end);
 	check_main(tree, "", 1, 1);
 	BOOST_TEST(make_node_seq_str(tree.main_block(), tree.lrnd) == "block_named,content..");
 
+	nodes::content* cntn = nullptr;
+	for(auto& n:tree.nodes)
+		if((cntn = dynamic_cast<nodes::content*>(n.get()))) break;
+	BOOST_REQUIRE(cntn != nullptr);
 	MOCK_EXPECT(env.current_node).once();
 	MOCK_EXPECT(env.crinfo).returns(cppjinja::evt::render_info{false,false});
-	BOOST_REQUIRE(tree.lrnd.size() == 2);
-	BOOST_REQUIRE(dynamic_cast<nodes::block_named*>(tree.lrnd[1].parent) != nullptr);
-	BOOST_CHECK_NO_THROW(tree.lrnd[1].child->render(env));
+	BOOST_CHECK_NO_THROW(cntn->render(env));
 	BOOST_TEST(out.str() == cnt);
-
 }
 
 BOOST_FIXTURE_TEST_CASE(inner_block, mock_exenv_fixture)
@@ -164,7 +170,9 @@ BOOST_FIXTURE_TEST_CASE(inner_block, mock_exenv_fixture)
 	auto cnt = random_content();
 	auto data = "<% block a %>" + cnt + "<% endblock %><%block b%>b<%endblock%>";
 	compiled_tmpl tree = build_tree(data);
-	check_main(tree, "", 3, 2);
+	BOOST_TEST(make_node_seq_str(tree.tmpl_node(), tree.lctx) ==
+	           "tmpl,block_named.,block_named.,block_named..");
+	check_main_nodes(tree.nodes, 3, 2);
 	nodes::callable* anode = nullptr;
 	nodes::callable* bnode = nullptr;
 	for(auto& r:tree.roots) if(r->name() == "a") anode = r;
@@ -175,6 +183,12 @@ BOOST_FIXTURE_TEST_CASE(inner_block, mock_exenv_fixture)
 	BOOST_TEST(make_node_seq_str(anode, tree.lrnd) == "block_named,content..");
 	BOOST_TEST(make_node_seq_str(anode, tree.lctx) == "block_named.");
 	BOOST_TEST(make_node_seq_str(bnode, tree.lrnd) == "block_named,content..");
+}
+
+BOOST_AUTO_TEST_CASE(named_with_params)
+{
+	compiled_tmpl tree = build_tree("<%block a(p)%>cnt<%endblock%>");
+	BOOST_TEST(make_node_seq_str(tree.main_block(), tree.lrnd) == "block_named.");
 }
 
 BOOST_FIXTURE_TEST_CASE(op_out, mock_exenv_fixture)
@@ -210,6 +224,7 @@ BOOST_FIXTURE_TEST_CASE(block_macro, mock_exenv_fixture)
 {
 	compiled_tmpl tree = build_tree("cnt<% macro a %>in<%set a='a'%><% endmacro %>c");
 	BOOST_TEST(make_node_seq_str(tree.main_block(), tree.lrnd) == "block_named,content.,content..");
+	BOOST_TEST(make_node_seq_str(tree.tmpl_node(), tree.lctx) == "tmpl,block_named.,block_macro,op_set...");
 	BOOST_TEST(tree.roots.size() == 2);
 
 	nodes::callable* macro = nullptr;

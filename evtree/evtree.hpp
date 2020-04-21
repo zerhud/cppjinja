@@ -28,14 +28,13 @@ namespace cppjinja {
 
 class evtree : public evaluator {
 	std::vector<evt::compiled_tmpl> templates;
-	std::vector<std::unique_ptr<evt::node>> nodes;
 
-	void tbuild_blocks(evt::node* p, ast::tmpl& t);
 	const evt::node* search_child(
 	          const ast::string_t& name
 	        , const evt::node* par
+	        , const std::vector<evt::node_edge>& graph
 	        ) const ;
-	bool is_tmpl(const evt::node& n) const ;
+	const evt::compiled_tmpl& tmpl_by_node(const evt::node* n) const ;
 public:
 	/// debug function
 	const evtnodes::tmpl* search_tmpl(const ast::var_name& name) const ;
