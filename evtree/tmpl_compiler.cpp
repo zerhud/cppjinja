@@ -20,6 +20,24 @@
 typedef std::unique_ptr<cppjinja::evt::node> node_ptr;
 typedef std::vector<node_ptr> vec_type;
 
+namespace cppjinja::evt::details {
+
+template<typename Cont, typename Value>
+class push_pop_raii {
+	Cont& cont;
+public:
+	push_pop_raii(Cont& c, Value* v) : cont(c)
+	{
+		cont.push_back(v);
+	}
+	~push_pop_raii() noexcept
+	{
+		cont.pop_back();
+	}
+};
+
+} // namespace cppjinja::evt::details
+
 cppjinja::evt::compiled_tmpl
 cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::tmpl t)
 {
@@ -33,7 +51,7 @@ cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::tmpl t)
 void cppjinja::evt::tmpl_compiler::make_main_nodes()
 {
 	result.nodes.emplace_back(std::make_unique<evtnodes::tmpl>(cur_tmpl));
-	rnd_stack.emplace_back(result.tmpl_node());
+	details::push_pop_raii rnd_raii(rnd_stack, result.tmpl_node());
 	add_block(create_ast_main_block());
 	result.lrnd.emplace_back(result.tmpl_node(), result.main_block());
 }
@@ -56,11 +74,10 @@ cppjinja::evt::tmpl_compiler::add_block(ast::block_named obj)
 	result.lctx.emplace_back(result.tmpl_node(), ret);
 
 	result.roots.emplace_back(ret);
-	ctx_stack.emplace_back(ret);
-	rnd_stack.emplace_back(ret);
+	details::push_pop_raii ctx_raii(ctx_stack, ret);
+	details::push_pop_raii rnd_raii(rnd_stack, ret);
 
 	for(auto& c:obj.content) boost::apply_visitor(*this, c.var);
-	rnd_stack.pop_back();
 	return ret;
 }
 
@@ -108,7 +125,8 @@ void cppjinja::evt::tmpl_compiler::operator()(
         ast::forward_ast<cppjinja::ast::block_if>& obj)
 {
 	assert(!rnd_stack.empty());
-	rnd_stack.emplace_back(create_node<evtnodes::block_if>(obj));
+	details::push_pop_raii rnd_raii(
+	            rnd_stack, create_node<evtnodes::block_if>(obj));
 
 	evt::render_info ri{
 		obj.get().left_close.trim,
@@ -117,16 +135,11 @@ void cppjinja::evt::tmpl_compiler::operator()(
 		            obj.get().right_open.trim};
 	make_content_block(ri, std::move(obj.get().content));
 
-	if(!obj.get().else_block){
-		rnd_stack.pop_back();
-		return;
-	}
+	if(!obj.get().else_block) return;
 
 	ri.trim_left = obj.get().else_block->left_close.trim;
 	ri.trim_right = obj.get().right_open.trim;
 	make_content_block(ri, std::move(obj.get().else_block->content));
-
-	rnd_stack.pop_back();
 }
 
 void cppjinja::evt::tmpl_compiler::make_content_block(
@@ -134,9 +147,9 @@ void cppjinja::evt::tmpl_compiler::make_content_block(
         , std::vector<cppjinja::ast::block_content> children)
 {
 	assert(2 <= rnd_stack.size());
-	rnd_stack.emplace_back(create_node<evtnodes::content_block>(ri, ""));
+	details::push_pop_raii rnd_raii(
+	            rnd_stack, create_node<evtnodes::content_block>(ri, ""));
 	for(auto& c:children) boost::apply_visitor(*this, c.var);
-	rnd_stack.pop_back();
 }
 
 void cppjinja::evt::tmpl_compiler::operator()(
@@ -152,13 +165,12 @@ void cppjinja::evt::tmpl_compiler::operator()(
 {
 	auto mcr = std::make_unique<evtnodes::block_macro>(std::move(obj));
 	result.lctx.emplace_back(result.tmpl_node(), mcr.get());
-	rnd_stack.emplace_back(mcr.get());
-	ctx_stack.emplace_back(mcr.get());
+	details::push_pop_raii rnd_raii(rnd_stack, mcr.get());
+	details::push_pop_raii ctx_raii(ctx_stack, mcr.get());
 	result.roots.emplace_back(mcr.get());
 	result.nodes.emplace_back(std::move(mcr));
 
 	for(auto& c:obj.get().content) boost::apply_visitor(*this, c.var);
-	rnd_stack.pop_back();
 }
 
 void cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::op_set& obj)
