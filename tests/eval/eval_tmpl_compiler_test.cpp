@@ -179,7 +179,8 @@ BOOST_FIXTURE_TEST_CASE(inner_block, mock_exenv_fixture)
 	for(auto& r:tree.roots) if(r->name() == "b") bnode = r;
 	BOOST_REQUIRE(anode);
 	auto mbrnd = make_node_seq_str(tree.main_block(), tree.lrnd);
-	BOOST_TEST(mbrnd == "block_named,op_out.,op_out..");
+	BOOST_TEST(mbrnd ==
+	           "block_named,block_named,content..,block_named,content...");
 	BOOST_TEST(make_node_seq_str(anode, tree.lrnd) == "block_named,content..");
 	BOOST_TEST(make_node_seq_str(anode, tree.lctx) == "block_named.");
 	BOOST_TEST(make_node_seq_str(bnode, tree.lrnd) == "block_named,content..");
@@ -188,7 +189,8 @@ BOOST_FIXTURE_TEST_CASE(inner_block, mock_exenv_fixture)
 BOOST_AUTO_TEST_CASE(named_with_params)
 {
 	compiled_tmpl tree = build_tree("<%block a(p)%>cnt<%endblock%>");
-	BOOST_TEST(make_node_seq_str(tree.main_block(), tree.lrnd) == "block_named.");
+	BOOST_TEST(make_node_seq_str(tree.main_block(), tree.lrnd) ==
+	           "block_named,block_named,content...");
 }
 
 BOOST_FIXTURE_TEST_CASE(op_out, mock_exenv_fixture)

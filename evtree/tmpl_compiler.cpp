@@ -116,9 +116,8 @@ void cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::string_t& cnt)
 
 void cppjinja::evt::tmpl_compiler::operator()(ast::forward_ast<ast::block_named>& obj)
 {
-	if(obj.get().params.empty())
-		add_op_out(make_block_call(obj.get().name));
-	add_block(obj.get());
+	auto bl = add_block(obj.get());
+	result.lrnd.emplace_back(rnd_stack.back(), bl);
 }
 
 void cppjinja::evt::tmpl_compiler::operator()(
