@@ -27,8 +27,6 @@ class context_impl final : public context {
 	std::list<frame> ctx;
 
 	void require_not_empty() const ;
-	std::optional<ast::value_term> search_in_setts(
-	        const cppjinja::ast::var_name& var) const;
 public:
 	context_impl();
 

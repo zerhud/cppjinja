@@ -8,7 +8,6 @@
 
 #include "context_impl.hpp"
 #include "eval/ast_cvt.hpp"
-#include "nodes/op_set.hpp"
 #include "nodes/callable.hpp"
 
 using namespace cppjinja::details;
@@ -16,18 +15,6 @@ using namespace cppjinja::details;
 void cppjinja::evt::context_impl::require_not_empty() const
 {
 	if(ctx.empty()) throw std::runtime_error("context is mepty");
-}
-
-std::optional<cppjinja::ast::value_term>
-cppjinja::evt::context_impl::search_in_setts(
-        const cppjinja::ast::var_name& var) const
-{
-	assert(!ctx.empty());
-	for(auto& ctx_node:ctx.back().node_stack)
-		if(auto set = dynamic_cast<const evtnodes::op_set*>(ctx_node);
-		        ctx_node->name() == var[0] && set)
-			return set->value(var);
-	return std::nullopt;
 }
 
 cppjinja::evt::context_impl::context_impl()
@@ -58,7 +45,7 @@ void cppjinja::evt::context_impl::pop(const cppjinja::evt::node* n)
 
 void cppjinja::evt::context_impl::push(const cppjinja::evt::node* n)
 {
-	ctx.emplace_back(frame{n, {}, {}, std::stringstream{}});
+	ctx.emplace_back(frame{n, {}, {}, std::stringstream{}, {}, {}});
 }
 
 const cppjinja::evt::node* cppjinja::evt::context_impl::maker() const
@@ -112,7 +99,7 @@ cppjinja::evt::context_impl::solve_var(const cppjinja::ast::var_name& var) const
 		call_name.erase(call_name.begin());
 		return pos->second(call_name);
 	}
-	return search_in_setts(var);
+	return std::nullopt;
 }
 
 std::optional<cppjinja::ast::value_term> cppjinja::evt::context_impl::solve_call(

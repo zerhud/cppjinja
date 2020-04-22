@@ -183,21 +183,15 @@ BOOST_FIXTURE_TEST_CASE(var_not_setted, mock_impls_fixture)
 	ctx.push(&fnode1);
 	BOOST_TEST(!ctx.solve_var(vn).has_value());
 }
-BOOST_FIXTURE_TEST_CASE(setted_variable, mock_impls_fixture)
+BOOST_FIXTURE_TEST_CASE(setted_variable, impl_exenv_fixture)
 {
 	cppjinja::ast::op_set data;
 	data.name = "a";
 	data.value = 42;
-
 	cppjinja::evtnodes::op_set snode(std::move(data));
 
 	mocks::node fnode1;
 	ctx.push(&fnode1);
-
-	mocks::exenv env;
-	MOCK_EXPECT(env.current_node).calls([this](const cppjinja::evt::node* n){
-		ctx.current_node(n);
-	});
 	snode.render(env);
 
 	cppjinja::ast::var_name vn{ "a" };
