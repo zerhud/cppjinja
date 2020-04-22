@@ -407,7 +407,7 @@ BOOST_FIXTURE_TEST_CASE(two_callers_one_maker, mock_solver_fixture)
 	cppjinja::ast::var_name vn{ "a" };
 	BOOST_TEST(solver(value_term{vn}) == east_value_term{42});
 }
-BOOST_FIXTURE_TEST_CASE(no_calling_in_ctx, mock_solver_fixture)
+BOOST_FIXTURE_TEST_CASE(if_no_calling_use_ctx, mock_solver_fixture)
 {
 	mocks::callable_node calling, maker;
 	expect_callings({&calling});
