@@ -70,14 +70,12 @@ cppjinja::evt::tmpl_compiler::add_block(ast::block_named obj)
 
 	auto bl = std::make_unique<evtnodes::block_named>(obj);
 	evtnodes::callable* ret = bl.get();
-	result.nodes.emplace_back(std::move(bl));
-	result.lctx.emplace_back(result.tmpl_node(), ret);
-
 	result.roots.emplace_back(ret);
-	details::push_pop_raii ctx_raii(ctx_stack, ret);
-	details::push_pop_raii rnd_raii(rnd_stack, ret);
+	result.lctx.emplace_back(result.tmpl_node(), ret);
+	result.nodes.emplace_back(std::move(bl));
 
-	for(auto& c:obj.content) boost::apply_visitor(*this, c.var);
+	compile_content(ret, obj.content);
+
 	return ret;
 }
 
@@ -89,6 +87,15 @@ cppjinja::ast::op_out cppjinja::evt::tmpl_compiler::make_block_call(
 	ast::op_out out;
 	out.value = bl_call;
 	return out;
+}
+
+
+template<typename Cnt, typename Node>
+void cppjinja::evt::tmpl_compiler::compile_content(Node* node, Cnt& cnt)
+{
+	details::push_pop_raii ctx_raii(ctx_stack, node);
+	details::push_pop_raii rnd_raii(rnd_stack, node);
+	for(auto& c:cnt) boost::apply_visitor(*this, c.var);
 }
 
 void cppjinja::evt::tmpl_compiler::add_op_out(cppjinja::ast::op_out obj)
@@ -134,7 +141,7 @@ void cppjinja::evt::tmpl_compiler::operator()(
 {
 	assert(!rnd_stack.empty());
 	details::push_pop_raii rnd_raii(
-	            rnd_stack, create_node<evtnodes::block_if>(obj));
+	            rnd_stack, create_node<evtnodes::block_if>(obj.get()));
 
 	evt::render_info ri{
 		obj.get().left_close.trim,
@@ -173,12 +180,9 @@ void cppjinja::evt::tmpl_compiler::operator()(
 {
 	auto mcr = std::make_unique<evtnodes::block_macro>(std::move(obj));
 	result.lctx.emplace_back(result.tmpl_node(), mcr.get());
-	details::push_pop_raii rnd_raii(rnd_stack, mcr.get());
-	details::push_pop_raii ctx_raii(ctx_stack, mcr.get());
 	result.roots.emplace_back(mcr.get());
+	compile_content(mcr.get(), obj.get().content);
 	result.nodes.emplace_back(std::move(mcr));
-
-	for(auto& c:obj.get().content) boost::apply_visitor(*this, c.var);
 }
 
 void cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::op_set& obj)

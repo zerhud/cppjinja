@@ -188,14 +188,73 @@ BOOST_FIXTURE_TEST_CASE(setted_variable, mock_impls_fixture)
 	cppjinja::ast::op_set data;
 	data.name = "a";
 	data.value = 42;
-	cppjinja::evtnodes::op_set snode(std::move(data));
-	mocks::node fnode1;
 
+	cppjinja::evtnodes::op_set snode(std::move(data));
+
+	mocks::node fnode1;
 	ctx.push(&fnode1);
-	ctx.current_node(&snode);
+
+	mocks::exenv env;
+	MOCK_EXPECT(env.current_node).calls([this](const cppjinja::evt::node* n){
+		ctx.current_node(n);
+	});
+	snode.render(env);
 
 	cppjinja::ast::var_name vn{ "a" };
 	BOOST_TEST(ctx.solve_var(vn) == cppjinja::ast::value_term{42});
+}
+BOOST_FIXTURE_TEST_CASE(inject_variable, mock_impls_fixture)
+{
+	using cppjinja::ast::var_name;
+	std::size_t ncnt = 0;
+	std::size_t call_count = 0;
+	auto var_gen = [&ncnt,&call_count](var_name n) {
+		++call_count;
+		BOOST_TEST(n.size() == ncnt);
+		return value_term{"a"s};
+	};
+	BOOST_CHECK_THROW(ctx.inject_variable("b"s, var_gen), std::exception);
+
+	mocks::node fnode1;
+	ctx.push(&fnode1);
+	ctx.inject_variable("b"s, var_gen);
+	BOOST_TEST(ctx.solve_var(var_name{"b"}) == value_term{"a"});
+	BOOST_TEST(call_count == 1);
+
+	++ncnt;
+	BOOST_TEST(ctx.solve_var(var_name{"b","a"}) == value_term{"a"});
+	BOOST_TEST(call_count == 2);
+}
+BOOST_FIXTURE_TEST_CASE(inject_function, mock_impls_fixture)
+{
+	using cppjinja::ast::function_call;
+	std::size_t ncnt = 0;
+	std::size_t call_count = 0;
+	auto var_gen = [&ncnt,&call_count](function_call c) {
+		++call_count;
+		BOOST_TEST(c.ref.size() == ncnt);
+		return value_term{"a"s};
+	};
+	BOOST_CHECK_THROW(ctx.inject_function("b"s, var_gen), std::exception);
+	BOOST_CHECK_THROW(ctx.solve_call(function_call{}), std::exception);
+
+	mocks::node fnode1;
+	ctx.push(&fnode1);
+	ctx.inject_function("b"s, var_gen);
+
+	function_call call;
+	call.ref.emplace_back("b");
+	BOOST_TEST(ctx.solve_call(call) == value_term{"a"s});
+	BOOST_TEST(call_count == 1);
+
+	++ncnt;
+	call.ref.emplace_back("b");
+	BOOST_TEST(ctx.solve_call(call) == value_term{"a"s});
+	BOOST_TEST(call_count == 2);
+
+	call.ref = cppjinja::ast::var_name{"not_found"s};
+	BOOST_TEST(ctx.solve_call(call).has_value() == false);
+	BOOST_TEST(call_count == 2);
 }
 BOOST_AUTO_TEST_SUITE_END() // solve_name
 

@@ -21,6 +21,8 @@ class context_impl final : public context {
 		std::vector<const evtnodes::callable*> injections;
 		std::vector<const node*> node_stack;
 		std::stringstream out;
+		std::unordered_map<ast::string_t, std::function<ast::value_term(ast::var_name)>> vars;
+		std::unordered_map<ast::string_t, std::function<ast::value_term(ast::function_call)>> funcs;
 	};
 	std::list<frame> ctx;
 
@@ -46,6 +48,14 @@ public:
 
 	std::optional<ast::value_term> solve_var(
 	        const cppjinja::ast::var_name& var) const override ;
+	std::optional<ast::value_term> solve_call(
+	        const ast::function_call& call) const override ;
+	void inject_variable(
+	          const ast::string_t& n
+	        , std::function<ast::value_term(ast::var_name)> g) override ;
+	void inject_function(
+	          const ast::string_t& n
+	        , std::function<ast::value_term(ast::function_call)> g)  override ;
 };
 
 } // namespace cppjinja::evt

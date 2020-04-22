@@ -106,5 +106,38 @@ std::optional<cppjinja::ast::value_term>
 cppjinja::evt::context_impl::solve_var(const cppjinja::ast::var_name& var) const
 {
 	require_not_empty();
+	auto pos = ctx.back().vars.find(var[0]);
+	if(pos!=ctx.back().vars.end()){
+		ast::var_name call_name = var;
+		call_name.erase(call_name.begin());
+		return pos->second(call_name);
+	}
 	return search_in_setts(var);
+}
+
+std::optional<cppjinja::ast::value_term> cppjinja::evt::context_impl::solve_call(
+        const cppjinja::ast::function_call& call) const
+{
+	require_not_empty();
+	auto pos = ctx.back().funcs.find(call.ref[0]);
+	if(pos!=ctx.back().funcs.end()){
+		ast::function_call call_name = call;
+		call_name.ref.erase(call_name.ref.begin());
+		return pos->second(call_name);
+	}
+	return std::nullopt;
+}
+
+void cppjinja::evt::context_impl::inject_variable(const ast::string_t& n
+        , std::function<cppjinja::ast::value_term (ast::var_name)> g)
+{
+	require_not_empty();
+	ctx.back().vars[n] = std::move(g);
+}
+
+void cppjinja::evt::context_impl::inject_function(const ast::string_t& n
+        , std::function<cppjinja::ast::value_term(cppjinja::ast::function_call)> g)
+{
+	require_not_empty();
+	ctx.back().funcs[n] = std::move(g);
 }

@@ -58,6 +58,9 @@ MOCK_BASE_CLASS( context, cppjinja::evt::context )
 	MOCK_METHOD(injections, 0)
 
 	MOCK_METHOD(solve_var, 1)
+	MOCK_METHOD(solve_call, 1)
+	MOCK_METHOD(inject_variable, 2)
+	MOCK_METHOD(inject_function, 2)
 };
 
 MOCK_BASE_CLASS( callstack, cppjinja::evt::callstack )

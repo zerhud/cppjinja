@@ -63,6 +63,8 @@ class tmpl_compiler final {
 	        evt::render_info ri, std::vector<ast::block_content> children);
 	template<typename N, typename ... Args>
 	N* create_node(Args... args);
+	template<typename Cnt, typename Node>
+	void compile_content(Node* node, Cnt& cnt);
 public:
 	compiled_tmpl operator()(ast::tmpl t) ;
 
