@@ -29,6 +29,14 @@ public:
 	~raii_inject() ;
 };
 
+class raii_inject_obj final {
+	context* ctx;
+	std::string name;
+public:
+	raii_inject_obj(std::string n, std::unique_ptr<ctx_object> obj, context* c);
+	~raii_inject_obj() ;
+};
+
 class raii_push_callstack {
 	callstack* ctx;
 	const node* maker;

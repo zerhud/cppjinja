@@ -9,6 +9,7 @@
 #include "raii.hpp"
 #include "context.hpp"
 #include "callstack.hpp"
+#include "ctx_object.hpp"
 
 cppjinja::evt::raii_push_ctx::raii_push_ctx(
         const cppjinja::evt::node* n, cppjinja::evt::context* c)
@@ -50,4 +51,19 @@ cppjinja::evt::raii_push_callstack::raii_push_callstack(
 cppjinja::evt::raii_push_callstack::~raii_push_callstack()
 {
 	ctx->pop(maker);
+}
+
+cppjinja::evt::raii_inject_obj::raii_inject_obj(
+          std::string n
+        , std::unique_ptr<cppjinja::evt::ctx_object> obj
+        , cppjinja::evt::context* c)
+   : ctx(c)
+   , name(std::move(n))
+{
+	ctx->inject_obj(name, std::move(obj));
+}
+
+cppjinja::evt::raii_inject_obj::~raii_inject_obj()
+{
+	ctx->takeout_obj(name);
 }

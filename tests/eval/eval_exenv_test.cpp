@@ -21,6 +21,7 @@
 #include "evtree/exenv/callstack_impl.hpp"
 #include "evtree/exenv/expr_solver.hpp"
 #include "evtree/exenv/expr_filter.hpp"
+#include "evtree/exenv/ctx_object.hpp"
 #include "parser/operators/common.hpp"
 
 using namespace std::literals;
@@ -183,72 +184,45 @@ BOOST_FIXTURE_TEST_CASE(var_not_setted, mock_impls_fixture)
 	ctx.push(&fnode1);
 	BOOST_TEST(!ctx.solve_var(vn).has_value());
 }
-BOOST_FIXTURE_TEST_CASE(setted_variable, impl_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(inject_object, mock_impls_fixture)
 {
-	cppjinja::ast::op_set data;
-	data.name = "a";
-	data.value = 42;
-	cppjinja::evtnodes::op_set snode(std::move(data));
-
-	mocks::node fnode1;
-	ctx.push(&fnode1);
-	snode.render(env);
-
-	cppjinja::ast::var_name vn{ "a" };
-	BOOST_TEST(ctx.solve_var(vn) == cppjinja::ast::value_term{42});
+	mocks::node node;
+	auto make_obj = [](){return std::make_unique<mocks::ctx_object>();};
+	BOOST_CHECK_THROW(ctx.inject_obj("n", make_obj()), std::exception);
+	BOOST_CHECK_THROW(ctx.takeout_obj("n"), std::exception);
+	ctx.push(&node);
+	BOOST_CHECK_THROW(ctx.takeout_obj(""), std::exception);
+	BOOST_CHECK_NO_THROW(ctx.inject_obj("n", make_obj()));
+	BOOST_CHECK_NO_THROW(ctx.takeout_obj("n"));
+	BOOST_CHECK_THROW(ctx.takeout_obj("n"), std::exception);
 }
-BOOST_FIXTURE_TEST_CASE(inject_variable, mock_impls_fixture)
+BOOST_FIXTURE_TEST_CASE(inject_object_solves, mock_impls_fixture)
 {
-	using cppjinja::ast::var_name;
-	std::size_t ncnt = 0;
-	std::size_t call_count = 0;
-	auto var_gen = [&ncnt,&call_count](var_name n) {
-		++call_count;
-		BOOST_TEST(n.size() == ncnt);
-		return value_term{"a"s};
-	};
-	BOOST_CHECK_THROW(ctx.inject_variable("b"s, var_gen), std::exception);
-
-	mocks::node fnode1;
-	ctx.push(&fnode1);
-	ctx.inject_variable("b"s, var_gen);
-	BOOST_TEST(ctx.solve_var(var_name{"b"}) == value_term{"a"});
-	BOOST_TEST(call_count == 1);
-
-	++ncnt;
-	BOOST_TEST(ctx.solve_var(var_name{"b","a"}) == value_term{"a"});
-	BOOST_TEST(call_count == 2);
+	using namespace cppjinja::ast;
+	mocks::node node;
+	auto obj = std::make_unique<mocks::ctx_object>();
+	MOCK_EXPECT(obj->solve).exactly(2).returns(value_term{"ok"s});
+	ctx.push(&node);
+	BOOST_CHECK_NO_THROW(ctx.inject_obj("n", std::move(obj)));
+	BOOST_TEST(ctx.solve_var(var_name{"n"s}) == value_term{"ok"});
+	BOOST_TEST(ctx.solve_var(var_name{"n"s, "a"s}) == value_term{"ok"});
 }
-BOOST_FIXTURE_TEST_CASE(inject_function, mock_impls_fixture)
+BOOST_FIXTURE_TEST_CASE(inject_object_calls, mock_impls_fixture)
 {
-	using cppjinja::ast::function_call;
-	std::size_t ncnt = 0;
-	std::size_t call_count = 0;
-	auto var_gen = [&ncnt,&call_count](function_call c) {
-		++call_count;
-		BOOST_TEST(c.ref.size() == ncnt);
-		return value_term{"a"s};
-	};
-	BOOST_CHECK_THROW(ctx.inject_function("b"s, var_gen), std::exception);
-	BOOST_CHECK_THROW(ctx.solve_call(function_call{}), std::exception);
-
-	mocks::node fnode1;
-	ctx.push(&fnode1);
-	ctx.inject_function("b"s, var_gen);
-
+	using namespace cppjinja::ast;
+	mocks::node node;
+	ctx.push(&node);
+	auto obj1 = std::make_unique<mocks::ctx_object>();
+	auto obj2 = std::make_unique<mocks::ctx_object>();
+	MOCK_EXPECT(obj1->call).once().returns(value_term{"ok1"s});
+	MOCK_EXPECT(obj2->call).once().returns(value_term{"ok2"s});
+	BOOST_CHECK_NO_THROW(ctx.inject_obj("n", std::move(obj1)));
+	BOOST_CHECK_NO_THROW(ctx.inject_obj("self", std::move(obj2)));
 	function_call call;
-	call.ref.emplace_back("b");
-	BOOST_TEST(ctx.solve_call(call) == value_term{"a"s});
-	BOOST_TEST(call_count == 1);
-
-	++ncnt;
-	call.ref.emplace_back("b");
-	BOOST_TEST(ctx.solve_call(call) == value_term{"a"s});
-	BOOST_TEST(call_count == 2);
-
-	call.ref = cppjinja::ast::var_name{"not_found"s};
-	BOOST_TEST(ctx.solve_call(call).has_value() == false);
-	BOOST_TEST(call_count == 2);
+	call.ref = {"n"s};
+	BOOST_TEST(ctx.solve_call(call) == value_term{"ok1"});
+	call.ref = {"self"s};
+	BOOST_TEST(ctx.solve_call(call) == value_term{"ok2"});
 }
 BOOST_AUTO_TEST_SUITE_END() // solve_name
 
@@ -589,6 +563,29 @@ BOOST_FIXTURE_TEST_CASE(push_callstack, impl_exenv_fixture)
 	}
 	BOOST_CHECK_THROW(calls.caller(), std::exception);
 }
+BOOST_FIXTURE_TEST_CASE(inject_obj, mock_exenv_fixture)
+{
+	mock::sequence seq;
+	MOCK_EXPECT(ctx.inject_obj).once().in(seq);
+	MOCK_EXPECT(ctx.takeout_obj).once().in(seq).with("n");
+	cppjinja::evt::raii_inject_obj("n"s, std::make_unique<mocks::ctx_object>(), &ctx);
+}
 BOOST_AUTO_TEST_SUITE_END() // raii
+
+BOOST_AUTO_TEST_SUITE(ctx_objects)
+BOOST_FIXTURE_TEST_CASE(delay_solver, mock_exenv_fixture)
+{
+	using namespace cppjinja::ast;
+	value_term val{"ok"s};
+	cppjinja::evt::delay_solver ds(&env, &val);
+	function_call fc;
+	fc.ref.emplace_back("a"s);
+	BOOST_CHECK_THROW(ds.call(fc), std::exception);
+	BOOST_CHECK_THROW(ds.solve(var_name{"a"s}), std::exception);
+	fc.ref.clear();
+	BOOST_TEST(ds.call(fc) == value_term{"ok"});
+	BOOST_TEST(ds.solve(var_name{}) == value_term{"ok"});
+}
+BOOST_AUTO_TEST_SUITE_END() // ctx_objects
 
 BOOST_AUTO_TEST_SUITE_END() // exenv

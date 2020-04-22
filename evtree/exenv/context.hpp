@@ -32,16 +32,13 @@ public:
 	virtual void takeout(const evtnodes::callable* n)=0 ;
 	virtual std::vector<const evtnodes::callable*> injections() const =0 ;
 
+	virtual void inject_obj(ast::string_t name, std::unique_ptr<ctx_object> obj) =0 ;
+	virtual void takeout_obj(const ast::string_t& name) =0 ;
+
 	virtual std::optional<ast::value_term> solve_var(
 	        const ast::var_name& var) const=0 ;
 	virtual std::optional<ast::value_term> solve_call(
 	        const ast::function_call& call) const=0 ;
-	virtual void inject_variable(
-	          const ast::string_t& n
-	        , std::function<ast::value_term(ast::var_name)> g) =0 ;
-	virtual void inject_function(
-	          const ast::string_t& n
-	        , std::function<ast::value_term(ast::function_call)> g) =0 ;
 };
 
 } // namespace cppjinja::evt

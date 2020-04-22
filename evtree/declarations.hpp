@@ -24,6 +24,7 @@ class node;
 class exenv;
 class context;
 class callstack;
+class ctx_object;
 
 class factory {
 public:

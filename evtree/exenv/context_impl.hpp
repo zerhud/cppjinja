@@ -21,14 +21,14 @@ class context_impl final : public context {
 		std::vector<const evtnodes::callable*> injections;
 		std::vector<const node*> node_stack;
 		std::stringstream out;
-		std::unordered_map<ast::string_t, std::function<ast::value_term(ast::var_name)>> vars;
-		std::unordered_map<ast::string_t, std::function<ast::value_term(ast::function_call)>> funcs;
+		std::unordered_map<ast::string_t, std::unique_ptr<ctx_object>> objects;
 	};
 	std::list<frame> ctx;
 
 	void require_not_empty() const ;
 public:
 	context_impl();
+	~context_impl() noexcept ;
 
 	void current_node(const node* n) override ;
 	const node* nth_node_on_stack(std::size_t ind) const override ;
@@ -44,16 +44,13 @@ public:
 	void takeout(const evtnodes::callable* n)override ;
 	std::vector<const evtnodes::callable*> injections() const override ;
 
+	void inject_obj(ast::string_t name, std::unique_ptr<ctx_object> obj) override ;
+	void takeout_obj(const ast::string_t& name) override ;
+
 	std::optional<ast::value_term> solve_var(
 	        const cppjinja::ast::var_name& var) const override ;
 	std::optional<ast::value_term> solve_call(
 	        const ast::function_call& call) const override ;
-	void inject_variable(
-	          const ast::string_t& n
-	        , std::function<ast::value_term(ast::var_name)> g) override ;
-	void inject_function(
-	          const ast::string_t& n
-	        , std::function<ast::value_term(ast::function_call)> g)  override ;
 };
 
 } // namespace cppjinja::evt

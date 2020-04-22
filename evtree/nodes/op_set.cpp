@@ -9,6 +9,7 @@
 #include "op_set.hpp"
 #include "exenv.hpp"
 #include "evtree/exenv/context.hpp"
+#include "evtree/exenv/ctx_object.hpp"
 
 using namespace cppjinja::evtnodes;
 using namespace std::literals;
@@ -35,7 +36,8 @@ bool op_set::is_leaf() const
 void op_set::render(evt::exenv& env ) const
 {
 	env.current_node(this);
-	env.ctx().inject_variable(op.name, [this](const ast::var_name&){return op.value;});
+	auto obj = std::make_unique<evt::delay_solver>(&env, &op.value);
+	env.ctx().inject_obj(op.name, std::move(obj));
 }
 
 cppjinja::ast::value_term op_set::value(

@@ -159,7 +159,13 @@ BOOST_FIXTURE_TEST_CASE(render, mock_exenv_fixture)
 	ast::op_set ast_node{ {1,1}, "tname", value_term{42}, {{1,1},false}, {{1,1},true} };
 	evtnodes::op_set snode(ast_node);
 	MOCK_EXPECT(env.current_node).once().with(&snode);
-	MOCK_EXPECT(ctx.inject_variable).once();
+	MOCK_EXPECT(ctx.inject_obj).once().calls(
+	[](const std::string& n, std::unique_ptr<cppjinja::evt::ctx_object> obj){
+		BOOST_TEST(n == "tname");
+		BOOST_TEST(dynamic_cast<cppjinja::evt::ctx_object*>(obj.get()) != nullptr);
+		BOOST_TEST(obj->solve(ast::var_name{}) == value_term{42});
+		return value_term{"ok"};
+	});
 	BOOST_CHECK_NO_THROW(snode.render(env));
 }
 BOOST_AUTO_TEST_SUITE_END() // op_set

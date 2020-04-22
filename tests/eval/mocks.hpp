@@ -12,6 +12,7 @@
 #include "evtree/nodes/callable.hpp"
 #include "evtree/exenv/context.hpp"
 #include "evtree/exenv/callstack.hpp"
+#include "evtree/exenv/ctx_object.hpp"
 #include "parser/operators/single.hpp"
 
 namespace mocks {
@@ -57,10 +58,17 @@ MOCK_BASE_CLASS( context, cppjinja::evt::context )
 	MOCK_METHOD(takeout, 1)
 	MOCK_METHOD(injections, 0)
 
+	MOCK_METHOD(inject_obj, 2)
+	MOCK_METHOD(takeout_obj, 1)
+
 	MOCK_METHOD(solve_var, 1)
 	MOCK_METHOD(solve_call, 1)
-	MOCK_METHOD(inject_variable, 2)
-	MOCK_METHOD(inject_function, 2)
+};
+
+MOCK_BASE_CLASS(ctx_object, cppjinja::evt::ctx_object)
+{
+	MOCK_METHOD(call, 1)
+	MOCK_METHOD(solve, 1)
 };
 
 MOCK_BASE_CLASS( callstack, cppjinja::evt::callstack )

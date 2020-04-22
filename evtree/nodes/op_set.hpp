@@ -9,6 +9,7 @@
 #pragma once
 
 #include "../node.hpp"
+#include "evtree/exenv/ctx_object.hpp"
 
 namespace cppjinja::evtnodes {
 

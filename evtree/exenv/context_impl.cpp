@@ -9,6 +9,7 @@
 #include "context_impl.hpp"
 #include "eval/ast_cvt.hpp"
 #include "nodes/callable.hpp"
+#include "ctx_object.hpp"
 
 using namespace cppjinja::details;
 
@@ -18,6 +19,10 @@ void cppjinja::evt::context_impl::require_not_empty() const
 }
 
 cppjinja::evt::context_impl::context_impl()
+{
+}
+
+cppjinja::evt::context_impl::~context_impl() noexcept
 {
 }
 
@@ -45,7 +50,7 @@ void cppjinja::evt::context_impl::pop(const cppjinja::evt::node* n)
 
 void cppjinja::evt::context_impl::push(const cppjinja::evt::node* n)
 {
-	ctx.emplace_back(frame{n, {}, {}, std::stringstream{}, {}, {}});
+	ctx.emplace_back(frame{n, {}, {}, std::stringstream{}, {}});
 }
 
 const cppjinja::evt::node* cppjinja::evt::context_impl::maker() const
@@ -89,15 +94,32 @@ cppjinja::evt::context_impl::injections() const
 	return ctx.back().injections;
 }
 
+void cppjinja::evt::context_impl::inject_obj(
+          cppjinja::ast::string_t name
+        , std::unique_ptr<cppjinja::evt::ctx_object> obj)
+{
+	require_not_empty();
+	ctx.back().objects[name] = std::move(obj);
+}
+
+void cppjinja::evt::context_impl::takeout_obj(const ast::string_t& name)
+{
+	require_not_empty();
+	auto& objs = ctx.back().objects;
+	auto pos = objs.find(name);
+	if(pos==objs.end()) throw std::runtime_error("ctx_object not found");
+	objs.erase(pos);
+}
+
 std::optional<cppjinja::ast::value_term>
 cppjinja::evt::context_impl::solve_var(const cppjinja::ast::var_name& var) const
 {
 	require_not_empty();
-	auto pos = ctx.back().vars.find(var[0]);
-	if(pos!=ctx.back().vars.end()){
+	auto pos = ctx.back().objects.find(var[0]);
+	if(pos!=ctx.back().objects.end()){
 		ast::var_name call_name = var;
 		call_name.erase(call_name.begin());
-		return pos->second(call_name);
+		return pos->second->solve(call_name);
 	}
 	return std::nullopt;
 }
@@ -106,25 +128,11 @@ std::optional<cppjinja::ast::value_term> cppjinja::evt::context_impl::solve_call
         const cppjinja::ast::function_call& call) const
 {
 	require_not_empty();
-	auto pos = ctx.back().funcs.find(call.ref[0]);
-	if(pos!=ctx.back().funcs.end()){
+	auto pos = ctx.back().objects.find(call.ref[0]);
+	if(pos!=ctx.back().objects.end()){
 		ast::function_call call_name = call;
 		call_name.ref.erase(call_name.ref.begin());
-		return pos->second(call_name);
+		return pos->second->call(call_name);
 	}
 	return std::nullopt;
-}
-
-void cppjinja::evt::context_impl::inject_variable(const ast::string_t& n
-        , std::function<cppjinja::ast::value_term (ast::var_name)> g)
-{
-	require_not_empty();
-	ctx.back().vars[n] = std::move(g);
-}
-
-void cppjinja::evt::context_impl::inject_function(const ast::string_t& n
-        , std::function<cppjinja::ast::value_term(cppjinja::ast::function_call)> g)
-{
-	require_not_empty();
-	ctx.back().funcs[n] = std::move(g);
 }
