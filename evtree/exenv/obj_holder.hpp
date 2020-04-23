@@ -17,7 +17,10 @@ namespace cppjinja::evt {
 class obj_holder final {
 	std::unordered_map<ast::string_t, std::unique_ptr<ctx_object>> map;
 public:
+	obj_holder(obj_holder&& other) =default ;
+	obj_holder() =default ;
 	~obj_holder() noexcept ;
+
 	void add(ast::string_t n, std::unique_ptr<ctx_object> o);
 	void rem(const ast::string_t& n);
 	std::optional<ast::value_term> call(ast::function_call fnc) const ;

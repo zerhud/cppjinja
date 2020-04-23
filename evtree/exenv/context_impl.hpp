@@ -11,6 +11,7 @@
 #include <list>
 
 #include "context.hpp"
+#include "obj_holder.hpp"
 
 namespace cppjinja::evt {
 
@@ -20,7 +21,7 @@ class context_impl final : public context {
 		const node* maker;
 		std::vector<const node*> node_stack;
 		std::stringstream out;
-		std::unordered_map<ast::string_t, std::unique_ptr<ctx_object>> objects;
+		obj_holder ns;
 	};
 	std::list<frame> ctx;
 

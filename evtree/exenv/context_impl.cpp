@@ -50,7 +50,7 @@ void cppjinja::evt::context_impl::pop(const cppjinja::evt::node* n)
 
 void cppjinja::evt::context_impl::push(const cppjinja::evt::node* n)
 {
-	ctx.emplace_back(frame{n, {}, std::stringstream{}, {}});
+	ctx.emplace_back(frame{n, {}, std::stringstream{}, obj_holder()});
 }
 
 const cppjinja::evt::node* cppjinja::evt::context_impl::maker() const
@@ -76,40 +76,25 @@ void cppjinja::evt::context_impl::inject_obj(
         , std::unique_ptr<cppjinja::evt::ctx_object> obj)
 {
 	require_not_empty();
-	ctx.back().objects[name] = std::move(obj);
+	ctx.back().ns.add(name, std::move(obj));
 }
 
 void cppjinja::evt::context_impl::takeout_obj(const ast::string_t& name)
 {
 	require_not_empty();
-	auto& objs = ctx.back().objects;
-	auto pos = objs.find(name);
-	if(pos==objs.end()) throw std::runtime_error("ctx_object not found");
-	objs.erase(pos);
+	ctx.back().ns.rem(name);
 }
 
 std::optional<cppjinja::ast::value_term>
 cppjinja::evt::context_impl::solve_var(const cppjinja::ast::var_name& var) const
 {
 	require_not_empty();
-	auto pos = ctx.back().objects.find(var[0]);
-	if(pos!=ctx.back().objects.end()){
-		ast::var_name call_name = var;
-		call_name.erase(call_name.begin());
-		return pos->second->solve(call_name);
-	}
-	return std::nullopt;
+	return ctx.back().ns.solve(var);
 }
 
 std::optional<cppjinja::ast::value_term> cppjinja::evt::context_impl::solve_call(
         const cppjinja::ast::function_call& call) const
 {
 	require_not_empty();
-	auto pos = ctx.back().objects.find(call.ref[0]);
-	if(pos!=ctx.back().objects.end()){
-		ast::function_call call_name = call;
-		call_name.ref.erase(call_name.ref.begin());
-		return pos->second->call(call_name);
-	}
-	return std::nullopt;
+	return ctx.back().ns.call(call);
 }
