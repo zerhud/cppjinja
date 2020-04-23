@@ -278,6 +278,7 @@ BOOST_FIXTURE_TEST_CASE(render_no_children, mock_exenv_fixture)
 	evtnodes::block_named cnt(ast_bl);
 	expect_children({});
 	expect_cxt_settings(&cnt);
+	expect_call(&cnt, &cnt, {});
 	MOCK_EXPECT(env.result).once().returns("result");
 	BOOST_CHECK_NO_THROW(cnt.render(env));
 	BOOST_TEST(out.str() == "result");
@@ -297,6 +298,7 @@ BOOST_FIXTURE_TEST_CASE(render_two_children, mock_callable_fixture)
 	prepare_for_render_two_childrend(ast_bl);
 	evtnodes::block_named cnt(ast_bl);
 	expect_cxt_settings(&cnt);
+	expect_call(&cnt, &cnt, {});
 	prepare_for_render_two_childrend();
 	MOCK_EXPECT(env.result).once().returns("result");
 	BOOST_CHECK_NO_THROW(cnt.render(env));

@@ -46,8 +46,10 @@ void cppjinja::evtnodes::block_named::render(evt::exenv& env) const
 {
 	if(has_nondefaulted_params())
 		env.current_node(this);
-	else
+	else {
+		evt::raii_push_callstack call(this, this, &env.calls());
 		env.out() << evaluate(env);
+	}
 }
 
 cppjinja::east::string_t cppjinja::evtnodes::block_named::evaluate(cppjinja::evt::exenv& env) const
