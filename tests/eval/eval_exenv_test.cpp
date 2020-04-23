@@ -22,6 +22,7 @@
 #include "evtree/exenv/expr_solver.hpp"
 #include "evtree/exenv/expr_filter.hpp"
 #include "evtree/exenv/ctx_object.hpp"
+#include "evtree/exenv/obj_holder.hpp"
 #include "parser/operators/common.hpp"
 
 using namespace std::literals;
@@ -537,6 +538,66 @@ BOOST_FIXTURE_TEST_CASE(inject_obj, mock_exenv_fixture)
 BOOST_AUTO_TEST_SUITE_END() // raii
 
 BOOST_AUTO_TEST_SUITE(ctx_objects)
+BOOST_AUTO_TEST_SUITE(holder)
+using cppjinja::evt::obj_holder;
+using namespace cppjinja::ast;
+BOOST_FIXTURE_TEST_CASE(add, mock_exenv_fixture)
+{
+	obj_holder ns;
+	auto make_obj = [](){return std::make_unique<mocks::ctx_object>();};
+	BOOST_CHECK_THROW(ns.rem("n"), std::exception);
+	BOOST_CHECK_NO_THROW(ns.add("n", make_obj()));
+	BOOST_CHECK_NO_THROW(ns.rem("n"));
+	BOOST_CHECK_THROW(ns.rem("n"), std::exception);
+}
+BOOST_AUTO_TEST_CASE(call)
+{
+	obj_holder ns;
+	auto obj_ = std::make_unique<mocks::ctx_object>();
+	mocks::ctx_object* obj = obj_.get();
+	ns.add("a", std::move(obj_));
+	function_call call;
+	call.ref.emplace_back("n");
+	BOOST_TEST(ns.call(call).has_value() == false);
+	call.ref.clear();
+
+	MOCK_EXPECT(obj->call).once().calls([](function_call c){
+		BOOST_TEST(c.ref.empty() == true);
+		return value_term{"ok"s};
+	});
+	call.ref.emplace_back("a");
+	BOOST_TEST(ns.call(call) == value_term{"ok"});
+
+	MOCK_EXPECT(obj->call).once().calls([](function_call c){
+		BOOST_TEST(c.ref.size() == 1);
+		BOOST_TEST(c.ref[0] == "b");
+		return value_term{"ok"s};
+	});
+	call.ref.emplace_back("b");
+	BOOST_TEST(ns.call(call) == value_term{"ok"});
+}
+BOOST_AUTO_TEST_CASE(solve)
+{
+	obj_holder ns;
+	auto obj_ = std::make_unique<mocks::ctx_object>();
+	mocks::ctx_object* obj = obj_.get();
+	ns.add("a", std::move(obj_));
+	BOOST_TEST(ns.solve(var_name{"b"s}).has_value() == false);
+
+	MOCK_EXPECT(obj->solve).once().calls([](var_name n){
+		BOOST_TEST(n.size() == 0);
+		return value_term{"ok"s};
+	});
+	BOOST_TEST(ns.solve(var_name{"a"}) == value_term{"ok"s});
+
+	MOCK_EXPECT(obj->solve).once().calls([](var_name n){
+		BOOST_TEST(n.size() == 1);
+		BOOST_TEST(n[0] == "b"s);
+		return value_term{"ok"s};
+	});
+	BOOST_TEST(ns.solve(var_name{"a", "b"}) == value_term{"ok"s});
+}
+BOOST_AUTO_TEST_SUITE_END() // holder
 BOOST_FIXTURE_TEST_CASE(delay_solver, mock_exenv_fixture)
 {
 	using namespace cppjinja::ast;
