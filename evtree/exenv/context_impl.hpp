@@ -40,6 +40,7 @@ public:
 	std::ostream& out() override ;
 	std::string result() const override ;
 
+	obj_holder& cur_namespace() override ;
 	void inject_obj(ast::string_t name, std::unique_ptr<ctx_object> obj) override ;
 	void takeout_obj(const ast::string_t& name) override ;
 

@@ -56,6 +56,7 @@ MOCK_BASE_CLASS( context, cppjinja::evt::context )
 
 	MOCK_METHOD(inject_obj, 2)
 	MOCK_METHOD(takeout_obj, 1)
+	MOCK_METHOD(cur_namespace, 0)
 
 	MOCK_METHOD(solve_var, 1)
 	MOCK_METHOD(solve_call, 1)
@@ -95,9 +96,8 @@ MOCK_BASE_CLASS( exenv, cppjinja::evt::exenv )
 	MOCK_NON_CONST_METHOD( ctx, 0, context&(), get_ctx )
 
 	MOCK_METHOD( current_node, 1)
-
-	MOCK_METHOD(solve_var, 1)
-	MOCK_METHOD(solve_call, 1)
+	MOCK_METHOD( locals, 0)
+	MOCK_METHOD( globals, 0)
 
 	using cppjinja::evt::exenv::calls;
 	MOCK_NON_CONST_METHOD(calls, 0, callstack&(), calls)

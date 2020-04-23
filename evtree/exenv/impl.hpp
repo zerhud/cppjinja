@@ -13,6 +13,7 @@
 
 #include "context_impl.hpp"
 #include "callstack_impl.hpp"
+#include "obj_holder.hpp"
 
 namespace cppjinja::evt {
 
@@ -22,6 +23,7 @@ class exenv_impl final : public exenv {
 	context_impl exectx;
 	callstack_impl execalls;
 	std::optional<render_info> cur_rinfo;
+	obj_holder global_namespace;
 public:
 	exenv_impl(const data_provider* prov, const evtree* tmpl);
 
@@ -37,11 +39,8 @@ public:
 	const context& ctx() const override ;
 	void current_node(const node* n) override ;
 
-	std::optional<ast::value_term> solve_var(
-	        const ast::var_name& var) const override ;
-	std::optional<ast::value_term> solve_call(
-	        const ast::function_call& call) const override ;
-
+	obj_holder& locals() override ;
+	obj_holder& globals() override ;
 
 	callstack& calls() override ;
 	const callstack& calls() const override ;

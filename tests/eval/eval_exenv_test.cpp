@@ -114,7 +114,18 @@ BOOST_FIXTURE_TEST_CASE(result, impl_exenv_fixture)
 	ctx.out() << "test";
 	BOOST_TEST(env.result() == "test");
 }
-
+BOOST_FIXTURE_TEST_CASE(globals, impl_exenv_fixture)
+{
+	BOOST_CHECK_NO_THROW(env.globals());
+	BOOST_TEST(&env.globals() == &env.globals());
+}
+BOOST_FIXTURE_TEST_CASE(locals, impl_exenv_fixture)
+{
+	BOOST_CHECK_THROW(env.locals(), std::exception);
+	mocks::node maker;
+	ctx.push(&maker);
+	BOOST_CHECK_NO_THROW(env.locals());
+}
 BOOST_AUTO_TEST_SUITE(context)
 
 BOOST_FIXTURE_TEST_CASE(current_node, mock_impls_fixture)
@@ -149,6 +160,15 @@ BOOST_FIXTURE_TEST_CASE(stack, mock_impls_fixture)
 
 	BOOST_CHECK_NO_THROW(ctx.pop(&fnode2));
 	BOOST_TEST(ctx.maker() == &fnode1);
+}
+BOOST_FIXTURE_TEST_CASE(cur_namespace, mock_impls_fixture)
+{
+	BOOST_CHECK_THROW(ctx.cur_namespace(), std::exception);
+	mocks::node maker;
+	ctx.push(&maker);
+	BOOST_CHECK_NO_THROW(ctx.cur_namespace());
+	ctx.inject_obj("n", std::make_unique<mocks::ctx_object>());
+	BOOST_CHECK_NO_THROW(ctx.cur_namespace().rem("n"));
 }
 
 BOOST_AUTO_TEST_SUITE(solve_name)
@@ -314,6 +334,7 @@ BOOST_DATA_TEST_CASE_F(mock_solver_fixture, binary_ops
 }
 BOOST_FIXTURE_TEST_CASE(by_name_from_data, mock_solver_fixture)
 {
+	cppjinja::evt::obj_holder locals, globals;
 	mocks::callable_node ctx_maker;
 	east_value_term result{42};
 	cppjinja::ast::var_name vn{ "a" };

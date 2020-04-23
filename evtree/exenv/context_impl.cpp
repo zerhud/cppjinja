@@ -71,6 +71,12 @@ std::string cppjinja::evt::context_impl::result() const
 	return ctx.back().out.str();
 }
 
+cppjinja::evt::obj_holder& cppjinja::evt::context_impl::cur_namespace()
+{
+	require_not_empty();
+	return ctx.back().ns;
+}
+
 void cppjinja::evt::context_impl::inject_obj(
           cppjinja::ast::string_t name
         , std::unique_ptr<cppjinja::evt::ctx_object> obj)

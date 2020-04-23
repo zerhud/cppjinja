@@ -38,10 +38,8 @@ public:
 	virtual const context& ctx() const =0 ;
 	virtual void current_node(const node* n) =0 ;
 
-	virtual std::optional<ast::value_term> solve_var(
-	        const ast::var_name& var) const=0 ;
-	virtual std::optional<ast::value_term> solve_call(
-	        const ast::function_call& call) const=0 ;
+	virtual obj_holder& locals() =0 ;
+	virtual obj_holder& globals() =0 ;
 
 	virtual callstack& calls() =0 ;
 	virtual const callstack& calls() const =0 ;

@@ -25,6 +25,7 @@ class exenv;
 class context;
 class callstack;
 class ctx_object;
+class obj_holder; ///< aka namespace, but it's a keyword
 
 class factory {
 public:
