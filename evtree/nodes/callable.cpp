@@ -37,3 +37,59 @@ cppjinja::evtnodes::callable::param(
 
 	return std::nullopt;
 }
+
+cppjinja::evtnodes::callable_solver::callable_solver(cppjinja::evt::exenv* e, const cppjinja::evtnodes::callable* b)
+    : env(e)
+    , block(b)
+{
+}
+
+cppjinja::evtnodes::callable_solver::~callable_solver() noexcept
+{
+}
+
+cppjinja::ast::value_term
+cppjinja::evtnodes::callable_solver::call(cppjinja::ast::function_call fnc)
+{
+	if(!fnc.ref.empty())
+		throw std::runtime_error("no such function");
+	return ast::value_term{block->evaluate(*env)};
+}
+
+cppjinja::ast::value_term
+cppjinja::evtnodes::callable_solver::solve(cppjinja::ast::var_name)
+{
+	throw std::runtime_error("cannot solve callable block");
+}
+
+cppjinja::evtnodes::callable_multisolver::callable_multisolver(cppjinja::evt::exenv* e)
+    : env(e)
+{
+}
+
+cppjinja::evtnodes::callable_multisolver::~callable_multisolver() noexcept
+{
+}
+
+void cppjinja::evtnodes::callable_multisolver::add(
+          cppjinja::ast::string_t n
+        , const callable* o)
+{
+	objs[n] = o;
+}
+
+cppjinja::ast::value_term
+cppjinja::evtnodes::callable_multisolver::call(cppjinja::ast::function_call fnc)
+{
+	if(fnc.ref.size()!=1) throw std::runtime_error("no such function");
+	auto pos = objs.find(fnc.ref[0]);
+	if(pos == objs.end()) throw std::runtime_error("no such function");
+	return ast::value_term{pos->second->evaluate(*env)};
+}
+
+cppjinja::ast::value_term
+cppjinja::evtnodes::callable_multisolver::solve(cppjinja::ast::var_name var)
+{
+	(void)var;
+	throw std::runtime_error("cannot solve variable in callable solver");
+}

@@ -23,6 +23,7 @@
 #include "evtree/nodes/block_named.hpp"
 #include "evtree/nodes/block_macro.hpp"
 #include "evtree/nodes/block_if.hpp"
+#include "evtree/exenv/obj_holder.hpp"
 
 using namespace std::literals;
 namespace tdata = boost::unit_test::data;
@@ -119,11 +120,11 @@ BOOST_FIXTURE_TEST_CASE(no_children_no_render, mock_exenv_fixture)
 }
 BOOST_FIXTURE_TEST_CASE(rendered_only_empty_name, mock_exenv_fixture)
 {
+	using cppjinja::evt::obj_holder;
+	obj_holder globals;
 	evtnodes::tmpl tmpl(ast::tmpl{});
 	mock::sequence ctx_seq;
-	MOCK_EXPECT(ctx.push).once().in(ctx_seq).with(&tmpl);
-	MOCK_EXPECT(env.current_node).once().in(ctx_seq).with(&tmpl);
-	MOCK_EXPECT(ctx.pop).once().in(ctx_seq).with(&tmpl);
+	expect_tmpl_cxt_settings(&tmpl);
 	mocks::callable_node child_with_name, child_empty_name;
 	expect_children({&child_with_name, &child_empty_name});
 	expect_call(&tmpl, &child_empty_name, {});
@@ -131,8 +132,33 @@ BOOST_FIXTURE_TEST_CASE(rendered_only_empty_name, mock_exenv_fixture)
 	MOCK_EXPECT(child_with_name.name).at_least(1).returns("tn");
 	MOCK_EXPECT(child_empty_name.evaluate).once().returns("test");
 	MOCK_EXPECT(env.result).once().returns("result");
+	MOCK_EXPECT(env.globals).calls([&globals]()->obj_holder&{return globals;});
 	BOOST_TEST(tmpl.evaluate(env) == "result"s);
 	BOOST_TEST(out.str() == "test");
+}
+BOOST_FIXTURE_TEST_CASE(creates_self, mock_exenv_fixture)
+{
+	using cppjinja::evt::obj_holder;
+	obj_holder globals;
+	evtnodes::tmpl tmpl(ast::tmpl{});
+	mocks::callable_node child1, child2;
+	expect_tmpl_cxt_settings(&tmpl);
+	expect_children({&child1, &child2});
+	MOCK_EXPECT(child1.name).at_least(1).returns("ch1");
+	MOCK_EXPECT(child2.name).at_least(1).returns("ch2");
+	MOCK_EXPECT(child1.evaluate).returns("ok_ch1");
+	MOCK_EXPECT(child2.evaluate).returns("ok_ch2");
+	MOCK_EXPECT(env.globals).calls([&globals]()->obj_holder&{return globals;});
+	MOCK_EXPECT(env.result).once().returns("result");
+	BOOST_TEST(tmpl.evaluate(env) == "result"s);
+
+	cppjinja::ast::function_call call;
+	call.ref.emplace_back("ch1");
+	BOOST_TEST(globals.call(call) == value_term{"ok_ch1"});
+	call.ref = {"self", "ch1"};
+	BOOST_TEST(globals.call(call) == value_term{"ok_ch1"});
+	call.ref.back() = "ch2";
+	BOOST_TEST(globals.call(call) == value_term{"ok_ch2"});
 }
 BOOST_AUTO_TEST_SUITE_END() // tmpl
 

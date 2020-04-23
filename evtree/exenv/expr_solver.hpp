@@ -25,7 +25,6 @@ class expr_solver final {
 	east::value_term solve_in_tmpl(
 	          const cppjinja::ast::function_call& obj
 	        , const evtnodes::callable* node) ;
-	bool can_be_solved_in_tmpl(const ast::var_name& name) const ;
 public:
 	typedef east::value_term ret_t;
 

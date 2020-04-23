@@ -7,7 +7,8 @@
  *************************************************************************/
 
 #include "tmpl.hpp"
-#include "../evtree.hpp"
+#include "evtree/evtree.hpp"
+#include "evtree/exenv/obj_holder.hpp"
 
 cppjinja::evtnodes::tmpl::tmpl(cppjinja::ast::tmpl t)
     : itmpl_(std::move(t))
@@ -49,6 +50,7 @@ cppjinja::evtnodes::tmpl::evaluate(cppjinja::evt::exenv& env) const
 {
 	evt::raii_push_ctx ctx_maker(this, &env.ctx());
 	env.current_node(this);
+	create_self_obj(&env);
 
 	auto children = env.children(this);
 	for(auto&& child:children)
@@ -60,6 +62,20 @@ cppjinja::evtnodes::tmpl::evaluate(cppjinja::evt::exenv& env) const
 		}
 
 	return env.result();
+}
+
+void cppjinja::evtnodes::tmpl::create_self_obj(cppjinja::evt::exenv* env) const
+{
+	auto children = env->children(this);
+	auto self = std::make_shared<callable_multisolver>(env);
+	for(auto& _child:children) {
+		const callable* child = dynamic_cast<const callable*>(_child);
+		auto child_obj = std::make_unique<callable_solver>(env, child);
+		self->add(child->name(), child);
+		env->globals().add(child->name(), std::move(child_obj));
+	}
+	if(!children.empty())
+		env->globals().add("self", std::move(self));
 }
 
 std::optional<cppjinja::ast::value_term> cppjinja::evtnodes::tmpl::param(

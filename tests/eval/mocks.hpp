@@ -168,7 +168,7 @@ struct mock_exenv_fixture
 
 	void expect_children(std::vector<const cppjinja::evt::node*> children)
 	{
-		MOCK_EXPECT(env.children).once().returns(children);
+		MOCK_EXPECT(env.children).at_least(1).returns(children);
 	}
 };
 

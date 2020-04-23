@@ -17,7 +17,7 @@ cppjinja::evt::obj_holder::~obj_holder() noexcept
 {
 }
 
-void cppjinja::evt::obj_holder::add(cppjinja::ast::string_t n, std::unique_ptr<cppjinja::evt::ctx_object> o)
+void cppjinja::evt::obj_holder::add(cppjinja::ast::string_t n, std::shared_ptr<cppjinja::evt::ctx_object> o)
 {
 	map[n] = std::move(o);
 }

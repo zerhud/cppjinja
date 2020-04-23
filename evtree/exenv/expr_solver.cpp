@@ -14,6 +14,7 @@
 #include "eval/ast_cvt.hpp"
 #include "evtree/helpers/binary_op.hpp"
 #include "evtree/nodes/callable.hpp"
+#include "obj_holder.hpp"
 
 using namespace cppjinja::details;
 
@@ -44,9 +45,11 @@ cppjinja::evt::expr_solver::operator()(const cppjinja::ast::binary_op& op)
 cppjinja::evt::expr_solver::ret_t
 cppjinja::evt::expr_solver::operator()(const cppjinja::ast::function_call& obj)
 {
-	if(!can_be_solved_in_tmpl(obj.ref)) return solve_in_data(obj);
-	auto tmpl_node = env->search_callable(obj.ref.back());
-	return tmpl_node ? solve_in_tmpl(obj, tmpl_node) : solve_in_data(obj);
+	auto ctx_val = env->ctx().solve_call(obj);
+	if(ctx_val) return (*this)(*ctx_val);
+	auto glob_val = env->globals().call(obj);
+	if(glob_val) return (*this)(*glob_val);
+	return solve_in_data(obj);
 }
 
 cppjinja::evt::expr_solver::ret_t
@@ -56,6 +59,8 @@ cppjinja::evt::expr_solver::operator()(const cppjinja::ast::var_name& obj)
 	if(param_val) return (*this)(*param_val);
 	auto ctx_val = env->ctx().solve_var(obj);
 	if(ctx_val) return (*this)(*ctx_val);
+	auto glob_val = env->globals().solve(obj);
+	if(glob_val) return (*this)(*glob_val);
 	return env->data()->value(east_cvt::cvt(obj));
 }
 
@@ -129,11 +134,4 @@ cppjinja::east::value_term cppjinja::evt::expr_solver::solve_in_tmpl(
 	raii_push_callstack stack_maker(env->ctx().nth_node_on_stack(0), node, &env->calls());
 	env->calls().call_params(obj.params);
 	return node->evaluate(*env);
-}
-
-bool cppjinja::evt::expr_solver::can_be_solved_in_tmpl(const cppjinja::ast::var_name& name) const
-{
-	if(name.size() == 2 && name[0] == "self") return true;
-	if(name.size() == 1) return true;
-	return false;
 }

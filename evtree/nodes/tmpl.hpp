@@ -14,6 +14,7 @@ namespace cppjinja::evtnodes {
 
 class tmpl : public callable {
 	ast::tmpl itmpl_;
+	void create_self_obj(evt::exenv* env) const ;
 public:
 	tmpl(ast::tmpl t);
 
