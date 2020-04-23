@@ -328,15 +328,23 @@ BOOST_FIXTURE_TEST_CASE(render_do_nothing, mock_callable_fixture)
 }
 BOOST_FIXTURE_TEST_CASE(evaluate_two_children, mock_callable_fixture)
 {
+	using cppjinja::evt::ctx_object;
+	using cppjinja::evt::delay_solver;
 	ast::block_macro ast_bl;
 	prepare_for_render_two_childrend(ast_bl);
 	ast_bl.params.emplace_back(ast::macro_parameter{"a", std::nullopt});
 	evtnodes::block_macro cnt(ast_bl);
 	prepare_for_render_two_childrend();
 	mock::sequence ctx_seq;
+	MOCK_EXPECT(calls.get_params).once().returns(
+	            std::vector<ast::function_call_parameter>{value_term{42}});
 	MOCK_EXPECT(env.current_node).once().with(&cnt).in(ctx_seq);
-	MOCK_EXPECT(ctx.inject).once().with(&cnt).in(ctx_seq);
-	MOCK_EXPECT(ctx.takeout).once().with(&cnt).in(ctx_seq);
+	MOCK_EXPECT(ctx.inject_obj).once().in(ctx_seq).calls(
+	[](ast::string_t n, std::unique_ptr<ctx_object> o){
+		BOOST_TEST(n == "a");
+		BOOST_TEST(dynamic_cast<delay_solver*>(o.get()) != nullptr);
+	});
+	MOCK_EXPECT(ctx.takeout_obj).once().with("a").in(ctx_seq);
 	BOOST_TEST(cnt.evaluate(env) == "");
 }
 BOOST_AUTO_TEST_SUITE_END() // block_macro

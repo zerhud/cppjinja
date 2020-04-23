@@ -18,7 +18,6 @@ class context_impl final : public context {
 	struct frame
 	{
 		const node* maker;
-		std::vector<const evtnodes::callable*> injections;
 		std::vector<const node*> node_stack;
 		std::stringstream out;
 		std::unordered_map<ast::string_t, std::unique_ptr<ctx_object>> objects;
@@ -39,10 +38,6 @@ public:
 
 	std::ostream& out() override ;
 	std::string result() const override ;
-
-	void inject(const evtnodes::callable* n)override ;
-	void takeout(const evtnodes::callable* n)override ;
-	std::vector<const evtnodes::callable*> injections() const override ;
 
 	void inject_obj(ast::string_t name, std::unique_ptr<ctx_object> obj) override ;
 	void takeout_obj(const ast::string_t& name) override ;

@@ -50,7 +50,7 @@ void cppjinja::evt::context_impl::pop(const cppjinja::evt::node* n)
 
 void cppjinja::evt::context_impl::push(const cppjinja::evt::node* n)
 {
-	ctx.emplace_back(frame{n, {}, {}, std::stringstream{}, {}});
+	ctx.emplace_back(frame{n, {}, std::stringstream{}, {}});
 }
 
 const cppjinja::evt::node* cppjinja::evt::context_impl::maker() const
@@ -69,29 +69,6 @@ std::string cppjinja::evt::context_impl::result() const
 {
 	require_not_empty();
 	return ctx.back().out.str();
-}
-
-void cppjinja::evt::context_impl::inject(const cppjinja::evtnodes::callable* n)
-{
-	require_not_empty();
-	if(n==nullptr) throw std::runtime_error("cannot inject nullptr");
-	ctx.back().injections.emplace_back(n);
-}
-
-void cppjinja::evt::context_impl::takeout(const cppjinja::evtnodes::callable* n)
-{
-	require_not_empty();
-	auto& ins = ctx.back().injections;
-	auto pos = std::find(ins.begin(), ins.end(), n);
-	if(pos!=ins.end()) ins.erase(pos);
-	else throw std::runtime_error("cannot takeout that wasn't inject");
-}
-
-std::vector<const cppjinja::evtnodes::callable*>
-cppjinja::evt::context_impl::injections() const
-{
-	require_not_empty();
-	return ctx.back().injections;
 }
 
 void cppjinja::evt::context_impl::inject_obj(

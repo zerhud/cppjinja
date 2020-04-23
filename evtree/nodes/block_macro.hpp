@@ -9,12 +9,15 @@
 #pragma once
 
 #include "callable.hpp"
+#include "evtree/exenv/raii.hpp"
 
 namespace cppjinja::evtnodes {
 
 class block_macro : public callable {
 	ast::block_macro block;
 	evt::render_info inner_ri() const ;
+	[[nodiscard]] std::vector<evt::raii_inject_obj>
+	make_injections(evt::exenv& env) const ;
 public:
 	block_macro(ast::block_macro nb);
 	evt::render_info rinfo() const override ;

@@ -12,6 +12,15 @@
 #include "ctx_object.hpp"
 
 cppjinja::evt::raii_push_ctx::raii_push_ctx(
+        cppjinja::evt::raii_push_ctx&& other) noexcept
+    : ctx(other.ctx)
+    , maker(other.maker)
+{
+	other.ctx = nullptr;
+	other.maker = nullptr;
+}
+
+cppjinja::evt::raii_push_ctx::raii_push_ctx(
         const cppjinja::evt::node* n, cppjinja::evt::context* c)
     : ctx(c)
     , maker(n)
@@ -21,20 +30,15 @@ cppjinja::evt::raii_push_ctx::raii_push_ctx(
 
 cppjinja::evt::raii_push_ctx::~raii_push_ctx()
 {
-	ctx->pop(maker);
+	if(ctx) ctx->pop(maker);
 }
 
-cppjinja::evt::raii_inject::raii_inject(
-        const evtnodes::callable* n, cppjinja::evt::context* c)
-    : ctx(c)
-    , maker(n)
+cppjinja::evt::raii_push_callstack::raii_push_callstack(
+        cppjinja::evt::raii_push_callstack&& other) noexcept
+    : ctx(other.ctx)
+    , maker(other.maker)
 {
-	ctx->inject(maker);
-}
-
-cppjinja::evt::raii_inject::~raii_inject()
-{
-	ctx->takeout(maker);
+	other.ctx = nullptr;
 }
 
 cppjinja::evt::raii_push_callstack::raii_push_callstack(
@@ -50,7 +54,15 @@ cppjinja::evt::raii_push_callstack::raii_push_callstack(
 
 cppjinja::evt::raii_push_callstack::~raii_push_callstack()
 {
-	ctx->pop(maker);
+	if(ctx) ctx->pop(maker);
+}
+
+cppjinja::evt::raii_inject_obj::raii_inject_obj(
+        cppjinja::evt::raii_inject_obj&& other) noexcept
+    : ctx(other.ctx)
+    , name(std::move(other.name))
+{
+	other.ctx = nullptr;
 }
 
 cppjinja::evt::raii_inject_obj::raii_inject_obj(
@@ -65,5 +77,5 @@ cppjinja::evt::raii_inject_obj::raii_inject_obj(
 
 cppjinja::evt::raii_inject_obj::~raii_inject_obj()
 {
-	ctx->takeout_obj(name);
+	if(ctx) ctx->takeout_obj(name);
 }

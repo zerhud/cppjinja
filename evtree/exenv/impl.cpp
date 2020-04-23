@@ -88,6 +88,16 @@ void cppjinja::evt::exenv_impl::current_node(const cppjinja::evt::node* n)
 	ctx().current_node(n);
 }
 
+std::optional<cppjinja::ast::value_term> cppjinja::evt::exenv_impl::solve_var(const cppjinja::ast::var_name& var) const
+{
+	return std::nullopt;
+}
+
+std::optional<cppjinja::ast::value_term> cppjinja::evt::exenv_impl::solve_call(const cppjinja::ast::function_call& call) const
+{
+	return std::nullopt;
+}
+
 cppjinja::evt::callstack& cppjinja::evt::exenv_impl::calls()
 {
 	return execalls;

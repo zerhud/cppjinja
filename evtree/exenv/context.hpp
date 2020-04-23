@@ -28,10 +28,6 @@ public:
 	virtual std::ostream& out() =0 ;
 	virtual std::string result() const =0 ;
 
-	virtual void inject(const evtnodes::callable* n)=0 ;
-	virtual void takeout(const evtnodes::callable* n)=0 ;
-	virtual std::vector<const evtnodes::callable*> injections() const =0 ;
-
 	virtual void inject_obj(ast::string_t name, std::unique_ptr<ctx_object> obj) =0 ;
 	virtual void takeout_obj(const ast::string_t& name) =0 ;
 

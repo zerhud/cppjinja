@@ -9,10 +9,24 @@
 #include <istream>
 #include "block_macro.hpp"
 #include "../evtree.hpp"
+#include "evtree/exenv/ctx_object.hpp"
 
 cppjinja::evt::render_info cppjinja::evtnodes::block_macro::inner_ri() const
 {
 	return evt::render_info{ block.left_close.trim, block.right_open.trim };
+}
+
+std::vector<cppjinja::evt::raii_inject_obj>
+cppjinja::evtnodes::block_macro::make_injections(evt::exenv& env) const
+{
+	std::vector<cppjinja::evt::raii_inject_obj> ret;
+	for(auto& p:block.params) {
+		auto val = param(env.calls(), ast::var_name{p.name});
+		assert(val.has_value());
+		auto obj = std::make_unique<evt::delay_solver>(&env, &val.value());
+		ret.emplace_back(p.name, std::move(obj), &env.ctx());
+	}
+	return ret;
 }
 
 cppjinja::evtnodes::block_macro::block_macro(cppjinja::ast::block_macro nb)
@@ -45,7 +59,7 @@ cppjinja::evtnodes::block_macro::evaluate(cppjinja::evt::exenv& env) const
 {
 	env.current_node(this);
 	auto children = env.children(this);
-	evt::raii_inject injection(this, &env.ctx());
+	auto raii_injections = make_injections(env);
 	render_children(children, env, inner_ri());
 	return east::string_t();
 }

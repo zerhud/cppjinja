@@ -149,30 +149,6 @@ BOOST_FIXTURE_TEST_CASE(stack, mock_impls_fixture)
 	BOOST_CHECK_NO_THROW(ctx.pop(&fnode2));
 	BOOST_TEST(ctx.maker() == &fnode1);
 }
-BOOST_FIXTURE_TEST_CASE(injection, mock_impls_fixture)
-{
-	mocks::node node;
-	mocks::callable_node calling, wrong_calling;
-
-	BOOST_CHECK_THROW(ctx.inject(nullptr), std::exception);
-	BOOST_CHECK_THROW(ctx.takeout(nullptr), std::exception);
-	BOOST_CHECK_THROW(ctx.injections(), std::exception);
-	ctx.push(&node);
-
-	BOOST_CHECK_THROW(ctx.inject(nullptr), std::exception);
-	BOOST_TEST(ctx.injections().size() == 0);
-	BOOST_CHECK_NO_THROW(ctx.inject(&calling));
-	BOOST_TEST_REQUIRE(ctx.injections().size() == 1);
-	BOOST_TEST(ctx.injections()[0] == &calling);
-
-	BOOST_CHECK_THROW(ctx.takeout(&wrong_calling), std::exception);
-	BOOST_TEST_REQUIRE(ctx.injections().size() == 1);
-	BOOST_CHECK_NO_THROW(ctx.takeout(&calling));
-	BOOST_TEST_REQUIRE(ctx.injections().size() == 0);
-
-	ctx.pop(&node);
-	BOOST_CHECK_THROW(ctx.injections(), std::exception);
-}
 
 BOOST_AUTO_TEST_SUITE(solve_name)
 BOOST_FIXTURE_TEST_CASE(var_not_setted, mock_impls_fixture)
@@ -538,18 +514,6 @@ BOOST_FIXTURE_TEST_CASE(push_ctx, impl_exenv_fixture)
 		BOOST_TEST(ctx.maker() == &maker);
 	}
 	BOOST_CHECK_THROW(ctx.maker(), std::exception);
-}
-BOOST_FIXTURE_TEST_CASE(inject_to_ctx, impl_exenv_fixture)
-{
-	mocks::node maker;
-	mocks::callable_node in;
-	ctx.push(&maker);
-	BOOST_TEST(ctx.injections().size() == 0);
-	{
-		cppjinja::evt::raii_inject injection(&in, &ctx);
-		BOOST_TEST(ctx.injections().size() == 1);
-	}
-	BOOST_TEST(ctx.injections().size() == 0);
 }
 BOOST_FIXTURE_TEST_CASE(push_callstack, impl_exenv_fixture)
 {

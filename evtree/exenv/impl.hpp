@@ -37,6 +37,12 @@ public:
 	const context& ctx() const override ;
 	void current_node(const node* n) override ;
 
+	std::optional<ast::value_term> solve_var(
+	        const ast::var_name& var) const override ;
+	std::optional<ast::value_term> solve_call(
+	        const ast::function_call& call) const override ;
+
+
 	callstack& calls() override ;
 	const callstack& calls() const override ;
 
