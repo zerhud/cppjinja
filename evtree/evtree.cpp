@@ -19,20 +19,6 @@ cppjinja::evtree& cppjinja::evtree::add_tmpl(ast::tmpl& tmpl)
 	return *this;
 }
 
-const cppjinja::evt::node* cppjinja::evtree::search_child(
-          const cppjinja::ast::string_t& name
-        , const cppjinja::evt::node* par
-        , const std::vector<cppjinja::evt::node_edge>& graph
-        ) const
-{
-	for(auto& edge:graph)
-	{
-		if(edge.parent == par && edge.child->name() == name)
-			return edge.child;
-	}
-	return nullptr;
-}
-
 const cppjinja::evt::compiled_tmpl& cppjinja::evtree::tmpl_by_node(
         const cppjinja::evt::node* n) const
 {
@@ -49,57 +35,6 @@ cppjinja::evtree::search_tmpl(const ast::string_t& name) const
 {
 	for(auto& t:templates)
 		if(t.tmpl_node()->name() == name) return t.tmpl_node();
-	return nullptr;
-}
-
-const cppjinja::evt::node* cppjinja::evtree::search(
-          const cppjinja::ast::var_name& name
-        , const cppjinja::evt::node* ctx
-        ) const
-{
-	if(name.empty()) return nullptr;
-
-	if(ctx == nullptr)
-	{
-		// absolute path (tmpl.callable)
-		if(2<name.size()) return nullptr;
-		for(auto& tmpl:templates)
-		{
-			if(tmpl.tmpl_name == name[0])
-			{
-				auto c = search_child(name[1], tmpl.tmpl_node(), tmpl.lctx);
-				if(c) return c;
-			}
-		}
-	}
-	else if(name.size()==1)
-	{
-		const evt::compiled_tmpl& tmpl = tmpl_by_node(ctx);
-		for(auto& edge:tmpl.lrnd)
-		{
-			if(edge.parent == ctx)
-			{
-				auto c = search_child(name[0], ctx, tmpl.lrnd);
-				if(c) return c;
-			}
-		}
-		for(auto& edge:tmpl.lrnd)
-		{
-			if(edge.child == ctx)
-			{
-				auto c = search_child(name[0], edge.parent, tmpl.lrnd);
-				if(c) return c;
-			}
-		}
-		return search_child(name[0], tmpl.tmpl_node(), tmpl.lctx);
-	}
-	else if(name[0]=="self")
-	{
-		ast::var_name self_name = name;
-		self_name.erase(self_name.begin());
-		return search(self_name, ctx);
-	}
-
 	return nullptr;
 }
 

@@ -38,22 +38,20 @@ cppjinja::evtree build_tree(std::string_view ptxt)
 
 BOOST_AUTO_TEST_SUITE(evaltree)
 
-BOOST_AUTO_TEST_CASE(main_fnc)
-{
-	cppjinja::evtree tree = build_tree("simple text"sv);
-	BOOST_TEST(tree.print_subtree() == "''[''['content'[]]]");
-	BOOST_TEST( tree.search(ast::var_name{"nex"}, nullptr) == nullptr );
-}
 
 BOOST_AUTO_TEST_CASE(few_blocks)
 {
 	cppjinja::evtree tree = build_tree(
 	          "cnt<% block a %>in<%block b%>bin<%endblock%><%endblock%>"sv);
 
-	const cppjinja::evt::node* a_node =
-	        tree.search(ast::var_name{""s, "a"s}, nullptr);
-	const cppjinja::evt::node* b_node =
-	        tree.search(ast::var_name{""s, "b"s}, nullptr);
+	const cppjinja::evt::node* a_node;
+	const cppjinja::evt::node* b_node;
+	auto roots = tree.roots(tree.search_tmpl(""));
+	for(auto& r:roots) {
+		if(r->name() == "a") a_node = r;
+		else if(r->name() == "b") b_node = r;
+	}
+
 	BOOST_TEST_REQUIRE(a_node);
 	BOOST_TEST_REQUIRE(b_node);
 	BOOST_TEST( a_node->name() == "a"s );
@@ -87,7 +85,6 @@ BOOST_AUTO_TEST_CASE(extends)
 	                            "child"
 	                            "<%block ca%>cain<%endblock%>"
 	                            "<%endtemplate%>"sv);
-	auto nodes = tree.all_tree();
 
 	auto* tmpl_base_node = tree.search_tmpl("base"s);
 	BOOST_REQUIRE( tmpl_base_node );
@@ -98,13 +95,15 @@ BOOST_AUTO_TEST_CASE(extends)
 	BOOST_TEST_REQUIRE( tmpl_child_node != nullptr );
 	BOOST_TEST( tmpl_child_node->name() == "child"s );
 
-	auto base_main = tree.search(ast::var_name{""s}, tmpl_base_node);
-	BOOST_TEST_REQUIRE( base_main != nullptr );
-	BOOST_TEST( base_main->name().empty() );
+	auto roots = tree.roots(tree.search_tmpl("base"));
+	BOOST_TEST(roots.size() == 2);
+	for(auto& r:roots)
+		BOOST_CHECK(r->name() == "" || r->name() == "ba");
 
-	auto child_ca = tree.search(ast::var_name{"child"s, "ca"s});
-	BOOST_TEST_REQUIRE( child_ca != nullptr );
-	BOOST_TEST( child_ca->name() == "ca"s );
+	roots = tree.roots(tree.search_tmpl("child"));
+	BOOST_TEST(roots.size() == 2);
+	for(auto& r:roots)
+		BOOST_CHECK(r->name() == "" || r->name() == "ca");
 }
 
 BOOST_AUTO_TEST_SUITE_END() // evaltree

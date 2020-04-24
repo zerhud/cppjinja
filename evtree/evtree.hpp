@@ -29,19 +29,10 @@ namespace cppjinja {
 class evtree : public evaluator {
 	std::vector<evt::compiled_tmpl> templates;
 
-	const evt::node* search_child(
-	          const ast::string_t& name
-	        , const evt::node* par
-	        , const std::vector<evt::node_edge>& graph
-	        ) const ;
 	const evt::compiled_tmpl& tmpl_by_node(const evt::node* n) const ;
 public:
 	/// debug function
 	const evtnodes::tmpl* search_tmpl(const ast::string_t& name) const ;
-	const evt::node* search(
-	          const ast::var_name& name
-	        , const evt::node* ctx=nullptr
-	        ) const ;
 	std::vector<const evt::node*> all_tree() const ;
 	std::vector<const evt::node*> children(
 	          const evt::node* selected
