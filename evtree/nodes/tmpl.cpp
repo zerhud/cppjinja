@@ -32,17 +32,7 @@ bool cppjinja::evtnodes::tmpl::is_leaf() const
 
 void cppjinja::evtnodes::tmpl::render(evt::exenv& ctx) const
 {
-	evt::raii_push_ctx ctx_maker(this, &ctx.ctx());
-	ctx.current_node(this);
-
-	auto children = ctx.children(this);
-	for(auto&& child:children)
-		if(child->name().empty())
-		{
-			auto* cb_child = dynamic_cast<const callable*>(child);
-			evt::raii_push_callstack calls_maker(this, cb_child, &ctx.calls());
-			child->render(ctx);
-		}
+	ctx.out() << evaluate(ctx);
 }
 
 cppjinja::east::string_t

@@ -8,7 +8,6 @@
 
 #include "callable.hpp"
 #include "exenv/callstack.hpp"
-#include "exenv/context.hpp"
 #include "exenv/raii.hpp"
 
 std::optional<cppjinja::ast::value_term>
@@ -55,7 +54,7 @@ cppjinja::evtnodes::callable_solver::call(cppjinja::ast::function_call fnc)
 {
 	if(!fnc.ref.empty())
 		throw std::runtime_error("no such function");
-	evt::raii_push_callstack stack_maker(env->ctx().nth_node_on_stack(0), block, &env->calls());
+	evt::raii_push_callstack stack_maker(&env->calls(), &env->ctx(), block);
 	env->calls().call_params(std::move(fnc.params));
 	return ast::value_term{block->evaluate(*env)};
 }
@@ -89,7 +88,7 @@ cppjinja::evtnodes::callable_multisolver::call(cppjinja::ast::function_call fnc)
 	auto pos = objs.find(fnc.ref[0]);
 	if(pos == objs.end()) throw std::runtime_error("no such function");
 
-	evt::raii_push_callstack stack_maker(env->ctx().nth_node_on_stack(0), pos->second, &env->calls());
+	evt::raii_push_callstack stack_maker(&env->calls(), &env->ctx(), pos->second);
 	if(!fnc.params.empty())
 		env->calls().call_params(std::move(fnc.params));
 	return ast::value_term{pos->second->evaluate(*env)};

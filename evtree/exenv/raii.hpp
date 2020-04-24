@@ -40,6 +40,7 @@ public:
 	raii_push_callstack(raii_push_callstack&&) noexcept ;
 	raii_push_callstack(const raii_push_callstack&) =delete ;
 	raii_push_callstack(const node* n, const evtnodes::callable* c, callstack* m);
+	raii_push_callstack(callstack* m, context* ctx, const evtnodes::callable* c);
 	~raii_push_callstack() ;
 };
 

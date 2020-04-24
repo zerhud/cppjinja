@@ -553,6 +553,14 @@ BOOST_FIXTURE_TEST_CASE(push_callstack, impl_exenv_fixture)
 		BOOST_TEST(calls.calling_stack()[0] == &calling);
 	}
 	BOOST_CHECK_THROW(calls.caller(), std::exception);
+	{
+		mocks::context ctx;
+		MOCK_EXPECT(ctx.nth_node_on_stack).once().with(0).returns(&caller);
+		cppjinja::evt::raii_push_callstack pusher(&calls, &ctx, &calling);
+		BOOST_TEST(calls.caller() == &caller);
+		BOOST_TEST(calls.calling_stack()[0] == &calling);
+	}
+	BOOST_CHECK_THROW(calls.caller(), std::exception);
 }
 BOOST_FIXTURE_TEST_CASE(inject_obj, mock_exenv_fixture)
 {

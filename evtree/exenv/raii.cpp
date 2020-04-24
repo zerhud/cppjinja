@@ -52,6 +52,14 @@ cppjinja::evt::raii_push_callstack::raii_push_callstack(
 	ctx->push(maker, c);
 }
 
+cppjinja::evt::raii_push_callstack::raii_push_callstack(
+          cppjinja::evt::callstack* m
+        , cppjinja::evt::context* ctx
+        , const cppjinja::evtnodes::callable* c)
+    : raii_push_callstack(ctx->nth_node_on_stack(0), c, m)
+{
+}
+
 cppjinja::evt::raii_push_callstack::~raii_push_callstack()
 {
 	if(ctx) ctx->pop(maker);
