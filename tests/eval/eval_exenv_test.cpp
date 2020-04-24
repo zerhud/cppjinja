@@ -541,6 +541,12 @@ BOOST_FIXTURE_TEST_CASE(push_ctx, impl_exenv_fixture)
 		BOOST_TEST(ctx.maker() == &maker);
 	}
 	BOOST_CHECK_THROW(ctx.maker(), std::exception);
+	{
+		cppjinja::evt::raii_push_ctx pusher(&maker, &ctx);
+		cppjinja::evt::raii_push_ctx pusher2(std::move(pusher));
+		BOOST_TEST(ctx.maker() == &maker);
+	}
+	BOOST_CHECK_THROW(ctx.maker(), std::exception);
 }
 BOOST_FIXTURE_TEST_CASE(push_callstack, impl_exenv_fixture)
 {
@@ -549,6 +555,14 @@ BOOST_FIXTURE_TEST_CASE(push_callstack, impl_exenv_fixture)
 	BOOST_CHECK_THROW(calls.caller(), std::exception);
 	{
 		cppjinja::evt::raii_push_callstack pusher(&caller, &calling, &calls);
+		BOOST_TEST(calls.caller() == &caller);
+		BOOST_TEST(calls.calling_stack()[0] == &calling);
+	}
+	BOOST_CHECK_THROW(calls.caller(), std::exception);
+	BOOST_CHECK_THROW(calls.caller(), std::exception);
+	{
+		cppjinja::evt::raii_push_callstack pusher(&caller, &calling, &calls);
+		cppjinja::evt::raii_push_callstack pusher2(std::move(pusher));
 		BOOST_TEST(calls.caller() == &caller);
 		BOOST_TEST(calls.calling_stack()[0] == &calling);
 	}
@@ -567,7 +581,15 @@ BOOST_FIXTURE_TEST_CASE(inject_obj, mock_exenv_fixture)
 	mock::sequence seq;
 	MOCK_EXPECT(ctx.inject_obj).once().in(seq);
 	MOCK_EXPECT(ctx.takeout_obj).once().in(seq).with("n");
-	cppjinja::evt::raii_inject_obj("n"s, std::make_unique<mocks::ctx_object>(), &ctx);
+	MOCK_EXPECT(ctx.inject_obj).once().in(seq);
+	MOCK_EXPECT(ctx.takeout_obj).once().in(seq).with("n");
+
+	cppjinja::evt::raii_inject_obj(
+	            "n"s, std::make_unique<mocks::ctx_object>(), &ctx);
+
+	cppjinja::evt::raii_inject_obj r1(
+	            "n"s, std::make_unique<mocks::ctx_object>(), &ctx);
+	cppjinja::evt::raii_inject_obj r2(std::move(r1));
 }
 BOOST_AUTO_TEST_SUITE_END() // raii
 
