@@ -38,9 +38,6 @@ public:
 	        , bool add_subs=false) const ;
 	std::vector<const evtnodes::callable*> roots(const evtnodes::tmpl* tmpl) const ;
 
-	/// debug function
-	std::string print_subtree(const evt::node* par=nullptr) const ;
-
 	evtree& add_tmpl(ast::tmpl& tmpl) override ;
 	void render(
 	          std::ostream& to

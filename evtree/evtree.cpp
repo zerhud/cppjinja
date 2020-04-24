@@ -73,18 +73,6 @@ cppjinja::evtree::roots(const evtnodes::tmpl* tmpl) const
 	return ret;
 }
 
-std::string cppjinja::evtree::print_subtree(const cppjinja::evt::node* par) const
-{
-	if(templates.empty()) return "";
-	if(!par) par = templates[0].tmpl_node();
-
-	auto clist = children(par);
-	std::string ret = '\'' + par->name() + "\'[";
-	for(auto& c:clist) ret += print_subtree(c);
-	ret += "]";
-	return ret;
-}
-
 void cppjinja::evtree::render(
           std::ostream& to
         , const data_provider& data
