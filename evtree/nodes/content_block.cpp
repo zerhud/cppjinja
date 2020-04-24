@@ -23,11 +23,6 @@ cppjinja::evtnodes::content_block::rinfo() const
 	return rinfo_;
 }
 
-cppjinja::ast::string_t cppjinja::evtnodes::content_block::name() const
-{
-	return name_;
-}
-
 bool cppjinja::evtnodes::content_block::is_leaf() const
 {
 	return false;

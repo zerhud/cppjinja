@@ -12,7 +12,7 @@
 
 namespace cppjinja::evtnodes {
 
-class tmpl : public evt::node {
+class tmpl : public evt::named_node {
 	ast::tmpl itmpl_;
 	ast::string_t render_resutl;
 	void create_self_obj(evt::exenv* env) const ;

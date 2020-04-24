@@ -24,11 +24,6 @@ cppjinja::evt::render_info cppjinja::evtnodes::op_out::rinfo() const
 	return {op.open.trim, op.close.trim};
 }
 
-cppjinja::ast::string_t cppjinja::evtnodes::op_out::name() const
-{
-	return "op_out";
-}
-
 bool cppjinja::evtnodes::op_out::is_leaf() const
 {
 	return true;

@@ -169,7 +169,6 @@ BOOST_AUTO_TEST_CASE(getters)
 {
 	ast::op_set ast_node{ {1,1}, "tname", value_term{42}, {{1,1},false}, {{1,1},true} };
 	evtnodes::op_set snode(ast_node);
-	BOOST_TEST(snode.name() == "tname");
 	BOOST_TEST(snode.rinfo().trim_left == false);
 	BOOST_TEST(snode.rinfo().trim_right == true);
 	BOOST_TEST(snode.is_leaf() == true);
@@ -215,7 +214,6 @@ BOOST_AUTO_TEST_CASE(getters)
 {
 	ast::op_out ast_out{ {1,1}, value_term{42}, {}, {{1,1},false}, {{1,1},true} };
 	evtnodes::op_out snode(ast_out);
-	BOOST_TEST(snode.name().substr(0,6) == "op_out");
 	BOOST_TEST(snode.rinfo().trim_left == false);
 	BOOST_TEST(snode.rinfo().trim_right == true);
 	BOOST_TEST(snode.is_leaf() == true);
@@ -247,7 +245,6 @@ BOOST_FIXTURE_TEST_CASE(getters, mock_exenv_fixture)
 {
 	evtnodes::content_block cnt_bl({false, true}, "test_name");
 	BOOST_TEST(cnt_bl.is_leaf() == false);
-	BOOST_TEST(cnt_bl.name() == "test_name");
 	BOOST_TEST(cnt_bl.rinfo().trim_left == false);
 	BOOST_TEST(cnt_bl.rinfo().trim_right == true);
 }
@@ -282,7 +279,6 @@ BOOST_FIXTURE_TEST_CASE(getters, mock_exenv_fixture)
 {
 	evtnodes::content cnt("test_content");
 	BOOST_TEST(cnt.is_leaf() == true);
-	BOOST_TEST(cnt.name() == "content");
 	BOOST_TEST(cnt.rinfo().trim_left == false);
 	BOOST_TEST(cnt.rinfo().trim_right == false);
 }
@@ -436,7 +432,6 @@ BOOST_FIXTURE_TEST_CASE(getters, mock_exenv_fixture)
 	ast.right_close.trim = true;
 	evtnodes::block_if bl(ast);
 	BOOST_TEST(bl.is_leaf() == false);
-	BOOST_TEST(bl.name() == "if"s);
 	BOOST_TEST(bl.rinfo().trim_left == ast.left_open.trim);
 	BOOST_TEST(bl.rinfo().trim_right == ast.right_close.trim);
 }

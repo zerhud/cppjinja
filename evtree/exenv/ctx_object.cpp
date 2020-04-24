@@ -9,11 +9,8 @@
 #include "ctx_object.hpp"
 #include "expr_solver.hpp"
 
-cppjinja::evt::delay_solver::delay_solver(
-          cppjinja::evt::exenv* e
-        , const ast::value_term* v)
-    : env(e)
-    , val(v)
+cppjinja::evt::delay_solver::delay_solver(const ast::value_term* v)
+    : val(v)
 {
 }
 

@@ -27,7 +27,6 @@ MOCK_BASE_CLASS( data_provider, cppjinja::data_provider)
 MOCK_BASE_CLASS( node, cppjinja::evt::node )
 {
 	MOCK_METHOD( rinfo, 0 )
-	MOCK_METHOD( name, 0 )
 	MOCK_METHOD( is_leaf, 0 )
 	MOCK_METHOD( render, 1 )
 };

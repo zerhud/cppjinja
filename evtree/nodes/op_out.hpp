@@ -18,7 +18,6 @@ public:
 	op_out(ast::op_out o);
 
 	evt::render_info rinfo() const override ;
-	ast::string_t name() const override ;
 	bool is_leaf() const override ;
 	void render( evt::exenv& env ) const override ;
 };

@@ -27,11 +27,6 @@ cppjinja::evt::render_info block_if::rinfo() const
 	return {block.left_open.trim, block.right_close.trim};
 }
 
-cppjinja::ast::string_t block_if::name() const
-{
-	return "if"s;
-}
-
 bool block_if::is_leaf() const
 {
 	return false;

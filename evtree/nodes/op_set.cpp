@@ -24,11 +24,6 @@ cppjinja::evt::render_info op_set::rinfo() const
 	return {op.open.trim, op.close.trim};
 }
 
-cppjinja::ast::string_t op_set::name() const
-{
-	return op.name;
-}
-
 bool op_set::is_leaf() const
 {
 	return true;
@@ -44,7 +39,7 @@ void op_set::render(evt::exenv& env) const
 
 void op_set::inject_value(cppjinja::evt::exenv& env) const
 {
-	auto obj = std::make_unique<evt::delay_solver>(&env, &op.value);
+	auto obj = std::make_unique<evt::delay_solver>(&op.value);
 	env.ctx().inject_obj(op.name, std::move(obj));
 }
 

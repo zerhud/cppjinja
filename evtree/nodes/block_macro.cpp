@@ -23,7 +23,7 @@ cppjinja::evtnodes::block_macro::make_injections(evt::exenv& env) const
 	for(auto& p:block.params) {
 		auto val = param(env.calls(), ast::var_name{p.name});
 		assert(val.has_value());
-		auto obj = std::make_unique<evt::delay_solver>(&env, &val.value());
+		auto obj = std::make_unique<evt::delay_solver>(&val.value());
 		ret.emplace_back(p.name, std::move(obj), &env.ctx());
 	}
 	return ret;

@@ -24,7 +24,6 @@ public:
 
 	virtual render_info rinfo() const =0 ;
 
-	virtual ast::string_t name() const =0 ;
 	virtual bool is_leaf() const =0 ;
 	virtual void render( evt::exenv& ctx ) const =0 ;
 protected:
@@ -35,6 +34,7 @@ protected:
 
 class named_node : virtual public node {
 public:
+	virtual ast::string_t name() const =0 ;
 };
 
 }} // namespace cppjinja::evt

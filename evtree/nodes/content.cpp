@@ -22,11 +22,6 @@ cppjinja::evt::render_info cppjinja::evtnodes::content::rinfo() const
 	return {false, false};
 }
 
-cppjinja::ast::string_t cppjinja::evtnodes::content::name() const
-{
-	return "content"s;
-}
-
 bool cppjinja::evtnodes::content::is_leaf() const
 {
 	return true;

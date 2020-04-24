@@ -666,7 +666,7 @@ BOOST_FIXTURE_TEST_CASE(delay_solver, mock_exenv_fixture)
 {
 	using namespace cppjinja::ast;
 	value_term val{"ok"s};
-	cppjinja::evt::delay_solver ds(&env, &val);
+	cppjinja::evt::delay_solver ds(&val);
 	function_call fc;
 	fc.ref.emplace_back("a"s);
 	BOOST_CHECK_THROW(ds.call(fc), std::exception);
