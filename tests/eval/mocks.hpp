@@ -99,9 +99,7 @@ MOCK_BASE_CLASS( exenv, cppjinja::evt::exenv )
 	MOCK_METHOD( locals, 0)
 	MOCK_METHOD( globals, 0)
 
-	using cppjinja::evt::exenv::calls;
 	MOCK_NON_CONST_METHOD(calls, 0, callstack&(), calls)
-	MOCK_CONST_METHOD( calls, 0, const callstack&(), ccalls )
 
 	using cppjinja::evt::exenv::rinfo;
 	MOCK_CONST_METHOD(rinfo, 0, std::optional<cppjinja::evt::render_info>(), crinfo)
@@ -122,7 +120,6 @@ struct mock_exenv_fixture
 		MOCK_EXPECT(env.get_ctx).returns(ctx);
 		MOCK_EXPECT(env.get_cctx).returns(ctx);
 		MOCK_EXPECT(env.calls).returns(calls);
-		MOCK_EXPECT(env.ccalls).returns(calls);
 		MOCK_EXPECT(env.out).calls([this]()->std::ostream&{return out;});
 	}
 

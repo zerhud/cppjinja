@@ -44,7 +44,6 @@ public:
 	obj_holder& globals() override ;
 
 	callstack& calls() override ;
-	const callstack& calls() const override ;
 
 	std::optional<render_info> rinfo() const override ;
 	void rinfo(std::optional<render_info> ri) override ;

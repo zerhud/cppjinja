@@ -42,7 +42,6 @@ public:
 	virtual obj_holder& globals() =0 ;
 
 	virtual callstack& calls() =0 ;
-	virtual const callstack& calls() const =0 ;
 
 	virtual std::optional<render_info> rinfo() const =0 ;
 	virtual void rinfo(std::optional<render_info> ri) =0 ;

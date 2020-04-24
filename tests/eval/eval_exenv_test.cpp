@@ -75,6 +75,15 @@ struct mock_solver_fixture : mocks::mock_exenv_fixture
 
 
 BOOST_AUTO_TEST_SUITE(exenv)
+BOOST_AUTO_TEST_CASE(rinfo_ops)
+{
+	std::stringstream out;
+	cppjinja::evt::render_info ri{false, true};
+	cppjinja::evt::render_info ri2{false, true};
+	out << ri;
+	BOOST_TEST(out.str() == "{0,1}");
+	BOOST_TEST(ri == ri2);
+}
 BOOST_FIXTURE_TEST_CASE(environment, impl_exenv_fixture)
 {
 	BOOST_TEST(env.data() == &data);

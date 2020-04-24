@@ -101,11 +101,6 @@ cppjinja::evt::callstack& cppjinja::evt::exenv_impl::calls()
 	return execalls;
 }
 
-const cppjinja::evt::callstack& cppjinja::evt::exenv_impl::calls() const
-{
-	return execalls;
-}
-
 std::optional<cppjinja::evt::render_info> cppjinja::evt::exenv_impl::rinfo() const
 {
 	return cur_rinfo;
