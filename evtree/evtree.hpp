@@ -33,9 +33,7 @@ class evtree : public evaluator {
 public:
 	/// debug function
 	const evtnodes::tmpl* search_tmpl(const ast::string_t& name) const ;
-	std::vector<const evt::node*> children(
-	          const evt::node* selected
-	        , bool add_subs=false) const ;
+	std::vector<const evt::node*> children(const evt::node* selected) const ;
 	std::vector<const evtnodes::callable*> roots(const evtnodes::tmpl* tmpl) const ;
 
 	evtree& add_tmpl(ast::tmpl& tmpl) override ;

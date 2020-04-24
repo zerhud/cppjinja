@@ -39,27 +39,13 @@ cppjinja::evtree::search_tmpl(const ast::string_t& name) const
 }
 
 std::vector<const cppjinja::evt::node*> cppjinja::evtree::children(
-          const cppjinja::evt::node* selected
-        , bool add_subs) const
+          const cppjinja::evt::node* selected) const
 {
 	std::vector<const cppjinja::evt::node*> ret;
-	if(!selected) return ret;
-
-	const evt::compiled_tmpl& tmpl = tmpl_by_node(selected);
-	for(auto& edge:tmpl.lrnd) if(edge.parent == selected) ret.emplace_back(edge.child);
-
-	if(!add_subs) return ret;
-
-	std::vector<const cppjinja::evt::node*> subs;
-	for(auto& n:ret)
-	{
-		auto isubs = children(n);
-		for(auto& n:isubs) subs.emplace_back(n);
+	if(selected) {
+		for(auto& edge:tmpl_by_node(selected).lrnd)
+			if(edge.parent == selected) ret.emplace_back(edge.child);
 	}
-
-	for(auto& n:subs) ret.emplace_back(n);
-
-	assert(std::find(std::begin(ret), std::end(ret), nullptr) == std::end(ret));
 	return ret;
 }
 
