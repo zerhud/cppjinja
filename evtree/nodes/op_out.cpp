@@ -24,11 +24,6 @@ cppjinja::evt::render_info cppjinja::evtnodes::op_out::rinfo() const
 	return {op.open.trim, op.close.trim};
 }
 
-bool cppjinja::evtnodes::op_out::is_leaf() const
-{
-	return true;
-}
-
 void cppjinja::evtnodes::op_out::render(evt::exenv& env) const
 {
 	env.current_node(this);

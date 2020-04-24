@@ -66,7 +66,6 @@ struct mock_callable_fixture : mock_exenv_fixture {
 	template<typename B, typename Ast>
 	void check_getters(B& bl, const Ast& ast_bl)
 	{
-		BOOST_TEST(bl.is_leaf() == false);
 		BOOST_TEST(bl.name() == ast_bl.name);
 		BOOST_TEST(bl.rinfo().trim_left == ast_bl.left_open.trim);
 		BOOST_TEST(bl.rinfo().trim_right == ast_bl.right_close.trim);
@@ -104,7 +103,6 @@ BOOST_AUTO_TEST_CASE(getters)
 	evtnodes::tmpl tmpl(t);
 	BOOST_CHECK( !tmpl.rinfo().trim_left );
 	BOOST_CHECK( !tmpl.rinfo().trim_right );
-	BOOST_CHECK( !tmpl.is_leaf() );
 	test_name_equals( tmpl, t );
 }
 BOOST_FIXTURE_TEST_CASE(no_children_no_render, mock_exenv_fixture)
@@ -171,7 +169,6 @@ BOOST_AUTO_TEST_CASE(getters)
 	evtnodes::op_set snode(ast_node);
 	BOOST_TEST(snode.rinfo().trim_left == false);
 	BOOST_TEST(snode.rinfo().trim_right == true);
-	BOOST_TEST(snode.is_leaf() == true);
 }
 BOOST_AUTO_TEST_SUITE(render)
 BOOST_FIXTURE_TEST_CASE(value, mock_exenv_fixture)
@@ -216,7 +213,6 @@ BOOST_AUTO_TEST_CASE(getters)
 	evtnodes::op_out snode(ast_out);
 	BOOST_TEST(snode.rinfo().trim_left == false);
 	BOOST_TEST(snode.rinfo().trim_right == true);
-	BOOST_TEST(snode.is_leaf() == true);
 }
 BOOST_FIXTURE_TEST_CASE(render, mock_exenv_fixture)
 {
@@ -244,7 +240,6 @@ BOOST_AUTO_TEST_SUITE(content_block)
 BOOST_FIXTURE_TEST_CASE(getters, mock_exenv_fixture)
 {
 	evtnodes::content_block cnt_bl({false, true});
-	BOOST_TEST(cnt_bl.is_leaf() == false);
 	BOOST_TEST(cnt_bl.rinfo().trim_left == false);
 	BOOST_TEST(cnt_bl.rinfo().trim_right == true);
 }
@@ -278,7 +273,6 @@ BOOST_AUTO_TEST_SUITE(content)
 BOOST_FIXTURE_TEST_CASE(getters, mock_exenv_fixture)
 {
 	evtnodes::content cnt("test_content");
-	BOOST_TEST(cnt.is_leaf() == true);
 	BOOST_TEST(cnt.rinfo().trim_left == false);
 	BOOST_TEST(cnt.rinfo().trim_right == false);
 }
@@ -431,7 +425,6 @@ BOOST_FIXTURE_TEST_CASE(getters, mock_exenv_fixture)
 	ast.left_open.trim = true;
 	ast.right_close.trim = true;
 	evtnodes::block_if bl(ast);
-	BOOST_TEST(bl.is_leaf() == false);
 	BOOST_TEST(bl.rinfo().trim_left == ast.left_open.trim);
 	BOOST_TEST(bl.rinfo().trim_right == ast.right_close.trim);
 }

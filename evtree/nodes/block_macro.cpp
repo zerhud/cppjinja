@@ -44,11 +44,6 @@ cppjinja::ast::string_t cppjinja::evtnodes::block_macro::name() const
 	return block.name;
 }
 
-bool cppjinja::evtnodes::block_macro::is_leaf() const
-{
-	return false;
-}
-
 void cppjinja::evtnodes::block_macro::render(evt::exenv& env) const
 {
 	env.current_node(this);

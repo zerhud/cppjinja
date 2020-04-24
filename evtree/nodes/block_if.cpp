@@ -27,11 +27,6 @@ cppjinja::evt::render_info block_if::rinfo() const
 	return {block.left_open.trim, block.right_close.trim};
 }
 
-bool block_if::is_leaf() const
-{
-	return false;
-}
-
 void block_if::render(evt::exenv& ctx) const
 {
 	ctx.current_node(this);

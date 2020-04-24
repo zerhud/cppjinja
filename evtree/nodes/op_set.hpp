@@ -21,8 +21,6 @@ public:
 	op_set(ast::op_set o);
 
 	evt::render_info rinfo() const override ;
-
-	bool is_leaf() const override ;
 	void render( evt::exenv& env ) const override ;
 };
 

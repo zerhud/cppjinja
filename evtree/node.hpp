@@ -23,8 +23,6 @@ public:
 	virtual ~node() noexcept =default ;
 
 	virtual render_info rinfo() const =0 ;
-
-	virtual bool is_leaf() const =0 ;
 	virtual void render( evt::exenv& ctx ) const =0 ;
 protected:
 	void render_children(

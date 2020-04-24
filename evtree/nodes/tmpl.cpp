@@ -25,11 +25,6 @@ cppjinja::ast::string_t cppjinja::evtnodes::tmpl::name() const
 	return itmpl_.name;
 }
 
-bool cppjinja::evtnodes::tmpl::is_leaf() const
-{
-	return false;
-}
-
 void cppjinja::evtnodes::tmpl::render(evt::exenv& env) const
 {
 	env.current_node(this);

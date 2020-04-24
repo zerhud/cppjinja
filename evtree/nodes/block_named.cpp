@@ -31,11 +31,6 @@ cppjinja::ast::string_t cppjinja::evtnodes::block_named::name() const
 	return block.name;
 }
 
-bool cppjinja::evtnodes::block_named::is_leaf() const
-{
-	return false;
-}
-
 std::optional<cppjinja::ast::value_term> cppjinja::evtnodes::block_named::param(
         const evt::callstack& ctx, const cppjinja::ast::var_name& name) const
 {

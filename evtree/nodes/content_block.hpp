@@ -17,7 +17,6 @@ class content_block : public evt::node {
 public:
 	content_block(evt::render_info ri);
 	evt::render_info rinfo() const override ;
-	bool is_leaf() const override ;
 	void render(evt::exenv& ctx) const override ;
 };
 

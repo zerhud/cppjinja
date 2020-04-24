@@ -21,11 +21,6 @@ cppjinja::evtnodes::content_block::rinfo() const
 	return rinfo_;
 }
 
-bool cppjinja::evtnodes::content_block::is_leaf() const
-{
-	return false;
-}
-
 void cppjinja::evtnodes::content_block::render(evt::exenv& ctx) const
 {
 	auto def_ri = ctx.rinfo();

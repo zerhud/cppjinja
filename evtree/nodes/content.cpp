@@ -22,10 +22,6 @@ cppjinja::evt::render_info cppjinja::evtnodes::content::rinfo() const
 	return {false, false};
 }
 
-bool cppjinja::evtnodes::content::is_leaf() const
-{
-	return true;
-}
 
 void cppjinja::evtnodes::content::render(evt::exenv& env) const
 {

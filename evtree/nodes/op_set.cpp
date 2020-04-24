@@ -24,11 +24,6 @@ cppjinja::evt::render_info op_set::rinfo() const
 	return {op.open.trim, op.close.trim};
 }
 
-bool op_set::is_leaf() const
-{
-	return true;
-}
-
 void op_set::render(evt::exenv& env) const
 {
 	env.current_node(this);
