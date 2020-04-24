@@ -584,6 +584,14 @@ BOOST_FIXTURE_TEST_CASE(add, mock_exenv_fixture)
 	BOOST_CHECK_NO_THROW(ns.rem("n"));
 	BOOST_CHECK_THROW(ns.rem("n"), std::exception);
 }
+BOOST_FIXTURE_TEST_CASE(find, mock_exenv_fixture)
+{
+	obj_holder ns;
+	auto obj = std::make_shared<mocks::ctx_object>();
+	ns.add("n", obj);
+	BOOST_TEST(ns.find("n") == obj);
+	BOOST_CHECK_THROW(ns.find("no"), std::exception);
+}
 BOOST_AUTO_TEST_CASE(call)
 {
 	obj_holder ns;

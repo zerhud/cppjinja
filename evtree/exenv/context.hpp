@@ -29,7 +29,7 @@ public:
 	virtual std::string result() const =0 ;
 
 	virtual obj_holder& cur_namespace() =0 ;
-	virtual void inject_obj(ast::string_t name, std::unique_ptr<ctx_object> obj) =0 ;
+	virtual void inject_obj(ast::string_t name, std::shared_ptr<ctx_object> obj) =0 ;
 	virtual void takeout_obj(const ast::string_t& name) =0 ;
 
 	virtual std::optional<ast::value_term> solve_var(

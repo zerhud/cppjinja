@@ -15,6 +15,8 @@ namespace cppjinja::evtnodes {
 
 class op_set : public evt::node {
 	ast::op_set op;
+	void inject_value(evt::exenv& env) const ;
+	void inject_object(evt::exenv& env) const ;
 public:
 	op_set(ast::op_set o);
 
@@ -23,8 +25,6 @@ public:
 	ast::string_t name() const override ;
 	bool is_leaf() const override ;
 	void render( evt::exenv& env ) const override ;
-
-	ast::value_term value(const ast::var_name& name) const ;
 };
 
 } // namespace cppjinja::evtnodes

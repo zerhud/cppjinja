@@ -23,6 +23,8 @@ public:
 
 	void add(ast::string_t n, std::shared_ptr<ctx_object> o);
 	void rem(const ast::string_t& n);
+	std::shared_ptr<ctx_object> find(const ast::string_t& n) const ;
+
 	std::optional<ast::value_term> call(ast::function_call fnc) const ;
 	std::optional<ast::value_term> solve(ast::var_name var) const ;
 };

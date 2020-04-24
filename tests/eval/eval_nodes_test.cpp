@@ -177,28 +177,40 @@ BOOST_AUTO_TEST_CASE(getters)
 	BOOST_TEST(snode.rinfo().trim_right == true);
 	BOOST_TEST(snode.is_leaf() == true);
 }
-BOOST_AUTO_TEST_CASE(value)
-{
-	ast::op_set ast_node{ {1,1}, "tname", value_term{42}, {{1,1},false}, {{1,1},true} };
-	evtnodes::op_set snode(ast_node);
-	BOOST_TEST(snode.value(ast::var_name{"tname"}) == value_term{42});
-	BOOST_CHECK_THROW(snode.value(ast::var_name{"wrong_name"}), std::exception);
-	BOOST_CHECK_THROW(snode.value(ast::var_name{}), std::exception);
-}
-BOOST_FIXTURE_TEST_CASE(render, mock_exenv_fixture)
+BOOST_AUTO_TEST_SUITE(render)
+BOOST_FIXTURE_TEST_CASE(value, mock_exenv_fixture)
 {
 	ast::op_set ast_node{ {1,1}, "tname", value_term{42}, {{1,1},false}, {{1,1},true} };
 	evtnodes::op_set snode(ast_node);
 	MOCK_EXPECT(env.current_node).once().with(&snode);
 	MOCK_EXPECT(ctx.inject_obj).once().calls(
-	[](const std::string& n, std::unique_ptr<cppjinja::evt::ctx_object> obj){
+	[](const std::string& n, std::shared_ptr<cppjinja::evt::ctx_object> obj){
 		BOOST_TEST(n == "tname");
 		BOOST_TEST(dynamic_cast<cppjinja::evt::ctx_object*>(obj.get()) != nullptr);
 		BOOST_TEST(obj->solve(ast::var_name{}) == value_term{42});
-		return value_term{"ok"};
 	});
 	BOOST_CHECK_NO_THROW(snode.render(env));
 }
+BOOST_FIXTURE_TEST_CASE(name, mock_exenv_fixture)
+{
+	using namespace cppjinja::ast;
+	using cppjinja::evt::obj_holder;
+
+	obj_holder locals;
+	ast::op_set ast_node{ {1,1}, "tname", value_term{var_name{"a", "b"}}, {{1,1},false}, {{1,1},true} };
+	evtnodes::op_set snode(ast_node);
+	auto obj = std::make_shared<mocks::ctx_object>();
+	locals.add("a", obj);
+	MOCK_EXPECT(env.current_node).once().with(&snode);
+	MOCK_EXPECT(env.locals).calls([&locals]()->obj_holder&{return locals;});
+	MOCK_EXPECT(ctx.inject_obj).once().calls(
+	[&obj](const std::string& n, std::shared_ptr<cppjinja::evt::ctx_object> in){
+		BOOST_TEST(n == "tname");
+		BOOST_TEST(obj == in);
+	});
+	snode.render(env);
+}
+BOOST_AUTO_TEST_SUITE_END() // render
 BOOST_AUTO_TEST_SUITE_END() // op_set
 
 BOOST_AUTO_TEST_SUITE(op_out)
@@ -371,7 +383,7 @@ BOOST_FIXTURE_TEST_CASE(evaluate_two_children, mock_callable_fixture)
 	            std::vector<ast::function_call_parameter>{value_term{42}});
 	MOCK_EXPECT(env.current_node).once().with(&cnt).in(ctx_seq);
 	MOCK_EXPECT(ctx.inject_obj).once().in(ctx_seq).calls(
-	[](ast::string_t n, std::unique_ptr<ctx_object> o){
+	[](ast::string_t n, std::shared_ptr<ctx_object> o){
 		BOOST_TEST(n == "a");
 		BOOST_TEST(dynamic_cast<delay_solver*>(o.get()) != nullptr);
 	});

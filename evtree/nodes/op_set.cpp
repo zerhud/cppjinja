@@ -10,6 +10,7 @@
 #include "exenv.hpp"
 #include "evtree/exenv/context.hpp"
 #include "evtree/exenv/ctx_object.hpp"
+#include "evtree/exenv/obj_holder.hpp"
 
 using namespace cppjinja::evtnodes;
 using namespace std::literals;
@@ -33,25 +34,24 @@ bool op_set::is_leaf() const
 	return true;
 }
 
-void op_set::render(evt::exenv& env ) const
+void op_set::render(evt::exenv& env) const
 {
 	env.current_node(this);
+	if(op.value.var.type() == typeid(ast::var_name))
+		inject_object(env);
+	else inject_value(env);
+}
+
+void op_set::inject_value(cppjinja::evt::exenv& env) const
+{
 	auto obj = std::make_unique<evt::delay_solver>(&env, &op.value);
 	env.ctx().inject_obj(op.name, std::move(obj));
 }
 
-cppjinja::ast::value_term op_set::value(
-        const cppjinja::ast::var_name& name) const
+void op_set::inject_object(cppjinja::evt::exenv& env) const
 {
-	if(name.empty()) throw std::runtime_error("var name is empty");
-	if(name.back()!=op.name)
-	{
-		auto message = "var name is "s;
-		for(auto& n:name) message += n + '.';
-		message.back() = ' ';
-		message += "but called "s + op.name;
-		throw std::runtime_error(message);
-	}
-
-	return op.value;
+	ast::var_name name = boost::get<ast::var_name>(op.value.var);
+	assert(!name.empty());
+	auto obj = env.locals().find(name[0]);
+	env.ctx().inject_obj(op.name, obj);
 }

@@ -30,6 +30,15 @@ void cppjinja::evt::obj_holder::rem(const cppjinja::ast::string_t& n)
 	map.erase(pos);
 }
 
+std::shared_ptr<cppjinja::evt::ctx_object> cppjinja::evt::obj_holder::find(
+        const cppjinja::ast::string_t& n) const
+{
+	auto pos = map.find(n);
+	if(pos == map.end())
+		throw std::runtime_error("cannot find such object " + n);
+	return pos->second;
+}
+
 std::optional<cppjinja::ast::value_term>
 cppjinja::evt::obj_holder::call(cppjinja::ast::function_call fnc) const
 {

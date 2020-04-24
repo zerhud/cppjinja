@@ -79,7 +79,7 @@ cppjinja::evt::obj_holder& cppjinja::evt::context_impl::cur_namespace()
 
 void cppjinja::evt::context_impl::inject_obj(
           cppjinja::ast::string_t name
-        , std::unique_ptr<cppjinja::evt::ctx_object> obj)
+        , std::shared_ptr<ctx_object> obj)
 {
 	require_not_empty();
 	ctx.back().ns.add(name, std::move(obj));
