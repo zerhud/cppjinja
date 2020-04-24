@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(render)
 	BOOST_CHECK_THROW(tree.render(out, data, ""), std::exception);
 
 	tree = build_tree("cnt");
-	BOOST_CHECK_NO_THROW(tree.render(out, data, ""));
+	tree.render(out, data, "");
 	BOOST_TEST(out.str() == "cnt");
 
 	BOOST_CHECK_THROW(tree.render(out, data, "no"), std::exception);

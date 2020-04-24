@@ -70,5 +70,7 @@ void cppjinja::evtree::render(
 	if(!tnode) throw std::runtime_error("no such template: " + name);
 
 	evt::exenv_impl env(&data, this);
-	to << tnode->evaluate(env);
+	evt::raii_push_ctx ctx_maker(tnode, &env.ctx());
+	tnode->render(env);
+	to << env.result();
 }

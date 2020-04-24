@@ -30,15 +30,8 @@ bool cppjinja::evtnodes::tmpl::is_leaf() const
 	return false;
 }
 
-void cppjinja::evtnodes::tmpl::render(evt::exenv& ctx) const
+void cppjinja::evtnodes::tmpl::render(evt::exenv& env) const
 {
-	ctx.out() << evaluate(ctx);
-}
-
-cppjinja::east::string_t
-cppjinja::evtnodes::tmpl::evaluate(cppjinja::evt::exenv& env) const
-{
-	evt::raii_push_ctx ctx_maker(this, &env.ctx());
 	env.current_node(this);
 	create_self_obj(&env);
 
@@ -50,8 +43,6 @@ cppjinja::evtnodes::tmpl::evaluate(cppjinja::evt::exenv& env) const
 			evt::raii_push_callstack calls_maker(this, cb_child, &env.calls());
 			env.out() << cb_child->evaluate(env);
 		}
-
-	return env.result();
 }
 
 void cppjinja::evtnodes::tmpl::create_self_obj(cppjinja::evt::exenv* env) const
@@ -65,14 +56,4 @@ void cppjinja::evtnodes::tmpl::create_self_obj(cppjinja::evt::exenv* env) const
 	}
 	if(!children.empty())
 		env->globals().add("self", std::move(self));
-}
-
-std::optional<cppjinja::ast::value_term> cppjinja::evtnodes::tmpl::param(
-          const cppjinja::evt::callstack& ctx
-        , const cppjinja::ast::var_name& name
-        ) const
-{
-	(void)ctx;
-	(void)name;
-	return std::nullopt;
 }
