@@ -71,7 +71,6 @@ cppjinja::evt::tmpl_compiler::add_block(ast::block_named obj)
 	auto bl = std::make_unique<evtnodes::block_named>(obj);
 	evtnodes::callable* ret = bl.get();
 	result.roots.emplace_back(ret);
-	result.lctx.emplace_back(result.tmpl_node(), ret);
 	result.nodes.emplace_back(std::move(bl));
 
 	compile_content(ret, obj.content);
@@ -179,7 +178,6 @@ void cppjinja::evt::tmpl_compiler::operator()(
         ast::forward_ast<cppjinja::ast::block_macro>& obj)
 {
 	auto mcr = std::make_unique<evtnodes::block_macro>(std::move(obj));
-	result.lctx.emplace_back(result.tmpl_node(), mcr.get());
 	result.roots.emplace_back(mcr.get());
 	compile_content(mcr.get(), obj.get().content);
 	result.nodes.emplace_back(std::move(mcr));
@@ -190,8 +188,7 @@ void cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::op_set& obj)
 	assert(!rnd_stack.empty());
 	assert(1 <= ctx_stack.size());
 	assert(dynamic_cast<evtnodes::callable*>(ctx_stack[0]) != nullptr);
-	auto* set_node = create_node<evtnodes::op_set>(std::move(obj));
-	result.lctx.emplace_back(ctx_stack.back(), set_node);
+	create_node<evtnodes::op_set>(std::move(obj));
 }
 
 void cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::op_out& obj)

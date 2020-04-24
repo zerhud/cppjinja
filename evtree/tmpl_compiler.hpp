@@ -40,7 +40,6 @@ struct compiled_tmpl final {
 	std::vector<std::unique_ptr<node>> nodes;
 	std::vector<evtnodes::callable*> roots;
 	std::vector<node_edge> lrnd;
-	std::vector<node_edge> lctx;
 
 	evtnodes::tmpl* tmpl_node() ;
 	const evtnodes::tmpl* tmpl_node() const ;
