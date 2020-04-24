@@ -110,7 +110,6 @@ BOOST_AUTO_TEST_CASE(getters)
 BOOST_FIXTURE_TEST_CASE(no_children_no_render, mock_exenv_fixture)
 {
 	expect_roots({});
-	expect_children({});
 	evtnodes::tmpl tmpl(ast::tmpl{});
 	mock::sequence ctx_seq;
 	MOCK_EXPECT(env.current_node).once().in(ctx_seq).with(&tmpl);
@@ -123,8 +122,7 @@ BOOST_FIXTURE_TEST_CASE(rendered_only_empty_name, mock_exenv_fixture)
 	evtnodes::tmpl tmpl(ast::tmpl{});
 	mock::sequence ctx_seq;
 	mocks::callable_node child_with_name, child_empty_name;
-	expect_children({&child_with_name, &child_empty_name});
-	expect_roots({});
+	expect_roots({&child_with_name, &child_empty_name});
 	expect_call(&tmpl, &child_empty_name, {});
 	MOCK_EXPECT(env.current_node).with(&tmpl);
 	MOCK_EXPECT(child_empty_name.name).at_least(1).returns("");
@@ -141,7 +139,6 @@ BOOST_FIXTURE_TEST_CASE(creates_self, mock_exenv_fixture)
 	evtnodes::tmpl tmpl(ast::tmpl{});
 	mocks::callable_node child1, child2;
 	expect_roots({&child1, &child2});
-	expect_children({&child1, &child2});
 	MOCK_EXPECT(env.current_node).with(&tmpl);
 	MOCK_EXPECT(child1.name).at_least(1).returns("ch1");
 	MOCK_EXPECT(child2.name).at_least(1).returns("ch2");

@@ -13,7 +13,7 @@
 
 namespace cppjinja::evtnodes {
 
-class callable : virtual public evt::node {
+class callable : virtual public evt::named_node {
 protected:
 	std::optional<ast::value_term> param(
 	          const std::vector<ast::macro_parameter>& params

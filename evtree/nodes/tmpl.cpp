@@ -35,7 +35,7 @@ void cppjinja::evtnodes::tmpl::render(evt::exenv& env) const
 	env.current_node(this);
 	create_self_obj(&env);
 
-	auto children = env.children(this);
+	auto children = env.roots(this);
 	for(auto&& child:children)
 		if(child->name().empty())
 		{

@@ -33,4 +33,8 @@ protected:
 	    exenv& ctx, render_info default_ri) const ;
 };
 
+class named_node : virtual public node {
+public:
+};
+
 }} // namespace cppjinja::evt
