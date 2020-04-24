@@ -31,10 +31,6 @@ protected:
 	void render_children(
 	    const std::vector<const node*>& children,
 	    exenv& ctx, render_info default_ri) const ;
-	void render_value(
-	          evt::exenv& ctx
-	        , const ast::value_term& value
-	        ) const ;
 };
 
 }} // namespace cppjinja::evt

@@ -32,12 +32,3 @@ void cppjinja::evt::node::render_children(
 	};
 	evtnodes::loop_by_three(children, rnd);
 }
-
-void cppjinja::evt::node::render_value(
-          exenv& ctx
-        , const cppjinja::ast::value_term& value
-        ) const
-{
-	auto print = [&ctx](auto& v){ctx.out() << expr_solver(&ctx)(v);};
-	boost::apply_visitor(print, value.var);
-}
