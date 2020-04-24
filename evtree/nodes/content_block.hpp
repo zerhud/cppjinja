@@ -14,9 +14,8 @@ namespace cppjinja::evtnodes {
 
 class content_block : public evt::node {
 	evt::render_info rinfo_;
-	ast::string_t name_;
 public:
-	content_block(evt::render_info ri, ast::string_t n);
+	content_block(evt::render_info ri);
 	evt::render_info rinfo() const override ;
 	bool is_leaf() const override ;
 	void render(evt::exenv& ctx) const override ;

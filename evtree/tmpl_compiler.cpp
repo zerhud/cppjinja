@@ -151,8 +151,8 @@ void cppjinja::evt::tmpl_compiler::make_content_block(
         , std::vector<cppjinja::ast::block_content> children)
 {
 	assert(2 <= rnd_stack.size());
-	details::push_pop_raii rnd_raii(
-	            rnd_stack, create_rendered_node<evtnodes::content_block>(ri, ""));
+	details::push_pop_raii rnd_raii( rnd_stack,
+	            create_rendered_node<evtnodes::content_block>(ri) );
 	for(auto& c:children) boost::apply_visitor(*this, c.var);
 }
 

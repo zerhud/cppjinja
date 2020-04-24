@@ -10,10 +10,8 @@
 #include "parser/helpers.hpp"
 #include "../evtree.hpp"
 
-cppjinja::evtnodes::content_block::content_block(
-        evt::render_info ri, ast::string_t n)
+cppjinja::evtnodes::content_block::content_block(evt::render_info ri)
     : rinfo_(std::move(ri))
-    , name_(std::move(n))
 {
 }
 

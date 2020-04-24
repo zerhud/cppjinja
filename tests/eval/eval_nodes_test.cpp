@@ -243,14 +243,14 @@ BOOST_AUTO_TEST_SUITE_END() // op_out
 BOOST_AUTO_TEST_SUITE(content_block)
 BOOST_FIXTURE_TEST_CASE(getters, mock_exenv_fixture)
 {
-	evtnodes::content_block cnt_bl({false, true}, "test_name");
+	evtnodes::content_block cnt_bl({false, true});
 	BOOST_TEST(cnt_bl.is_leaf() == false);
 	BOOST_TEST(cnt_bl.rinfo().trim_left == false);
 	BOOST_TEST(cnt_bl.rinfo().trim_right == true);
 }
 BOOST_FIXTURE_TEST_CASE(render, mock_exenv_fixture)
 {
-	evtnodes::content_block cnt_bl({false, true}, "test_name");
+	evtnodes::content_block cnt_bl({false, true});
 	expect_children({});
 	MOCK_EXPECT(env.crinfo).once().returns(cppjinja::evt::render_info{true, false});
 	MOCK_EXPECT(env.current_node).once().with(&cnt_bl);
@@ -259,7 +259,7 @@ BOOST_FIXTURE_TEST_CASE(render, mock_exenv_fixture)
 }
 BOOST_FIXTURE_TEST_CASE(render_two, mock_exenv_fixture)
 {
-	evtnodes::content_block cnt_bl({false, true}, "test_name");
+	evtnodes::content_block cnt_bl({false, true});
 	mocks::node child1, child2;
 	expect_children({&child1, &child2});
 	MOCK_EXPECT(env.crinfo).returns(cppjinja::evt::render_info{true, false});
