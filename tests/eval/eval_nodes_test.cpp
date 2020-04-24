@@ -24,6 +24,7 @@
 #include "evtree/nodes/block_macro.hpp"
 #include "evtree/nodes/block_if.hpp"
 #include "evtree/exenv/obj_holder.hpp"
+#include "evtree/evtree.hpp"
 
 using namespace std::literals;
 namespace tdata = boost::unit_test::data;
@@ -108,6 +109,7 @@ BOOST_AUTO_TEST_CASE(getters)
 }
 BOOST_FIXTURE_TEST_CASE(no_children_no_render, mock_exenv_fixture)
 {
+	expect_roots({});
 	expect_children({});
 	evtnodes::tmpl tmpl(ast::tmpl{});
 	mock::sequence ctx_seq;
@@ -127,6 +129,7 @@ BOOST_FIXTURE_TEST_CASE(rendered_only_empty_name, mock_exenv_fixture)
 	expect_tmpl_cxt_settings(&tmpl);
 	mocks::callable_node child_with_name, child_empty_name;
 	expect_children({&child_with_name, &child_empty_name});
+	expect_roots({});
 	expect_call(&tmpl, &child_empty_name, {});
 	MOCK_EXPECT(child_empty_name.name).at_least(1).returns("");
 	MOCK_EXPECT(child_with_name.name).at_least(1).returns("tn");
@@ -143,6 +146,7 @@ BOOST_FIXTURE_TEST_CASE(creates_self, mock_exenv_fixture)
 	evtnodes::tmpl tmpl(ast::tmpl{});
 	mocks::callable_node child1, child2;
 	expect_tmpl_cxt_settings(&tmpl);
+	expect_roots({&child1, &child2});
 	expect_children({&child1, &child2});
 	MOCK_EXPECT(child1.name).at_least(1).returns("ch1");
 	MOCK_EXPECT(child2.name).at_least(1).returns("ch2");
@@ -152,12 +156,19 @@ BOOST_FIXTURE_TEST_CASE(creates_self, mock_exenv_fixture)
 	MOCK_EXPECT(env.result).once().returns("result");
 	BOOST_TEST(tmpl.evaluate(env) == "result"s);
 
+	mocks::node caller;
 	cppjinja::ast::function_call call;
 	call.ref.emplace_back("ch1");
+	expect_call(&caller, &child1, {});
+	MOCK_EXPECT(ctx.nth_node_on_stack).with(0).returns(&caller);
 	BOOST_TEST(globals.call(call) == value_term{"ok_ch1"});
 	call.ref = {"self", "ch1"};
+	expect_call(&caller, &child1, {});
+	MOCK_EXPECT(ctx.nth_node_on_stack).with(0).returns(&caller);
 	BOOST_TEST(globals.call(call) == value_term{"ok_ch1"});
 	call.ref.back() = "ch2";
+	expect_call(&caller, &child2, {});
+	MOCK_EXPECT(ctx.nth_node_on_stack).with(0).returns(&caller);
 	BOOST_TEST(globals.call(call) == value_term{"ok_ch2"});
 }
 BOOST_AUTO_TEST_SUITE_END() // tmpl

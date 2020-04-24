@@ -24,6 +24,8 @@
 #include "evtree/exenv/ctx_object.hpp"
 #include "evtree/exenv/obj_holder.hpp"
 #include "parser/operators/common.hpp"
+#include "parser/grammar/tmpls.hpp"
+#include "parser/parse.hpp"
 
 using namespace std::literals;
 namespace tdata = boost::unit_test::data;
@@ -102,8 +104,14 @@ BOOST_FIXTURE_TEST_CASE(current_node, impl_exenv_fixture)
 }
 BOOST_FIXTURE_TEST_CASE(children, impl_exenv_fixture)
 {
-	// cannot normaly test: tree cannot be mocked
+	using namespace cppjinja::ast;
+	auto data = "<%block a%>a<%endblock%>"sv;
+	auto parsed = cppjinja::text::parse(cppjinja::text::tmpl, data);
+	compiled.add_tmpl(parsed);
+	const cppjinja::evtnodes::tmpl* tmpl = compiled.search_tmpl("");
 	BOOST_TEST( env.children(nullptr).empty() );
+	BOOST_TEST( env.children(tmpl).size() == 1 );
+	BOOST_TEST( env.roots(tmpl) == compiled.roots(tmpl) );
 }
 BOOST_FIXTURE_TEST_CASE(result, impl_exenv_fixture)
 {
@@ -624,11 +632,14 @@ BOOST_FIXTURE_TEST_CASE(callable_solver, mock_exenv_fixture)
 {
 	using namespace cppjinja::ast;
 	using cppjinja::evtnodes::callable_solver;
+	mocks::node caller;
 	mocks::callable_node node;
 	callable_solver sl(&env, &node);
 	BOOST_CHECK_THROW(sl.solve(var_name{"a"}), std::exception);
 	function_call call;
 	call.params.emplace_back("p1", value_term{"val1"});
+	expect_call(&caller, &node, call.params);
+	MOCK_EXPECT(ctx.nth_node_on_stack).with(0).returns(&caller);
 	MOCK_EXPECT(node.evaluate).once().returns("ok");
 	BOOST_TEST(sl.call(call) == value_term{"ok"});
 
@@ -639,6 +650,7 @@ BOOST_FIXTURE_TEST_CASE(callable_multisolver, mock_exenv_fixture)
 {
 	using namespace cppjinja::ast;
 	cppjinja::evtnodes::callable_multisolver sl(&env);
+	mocks::node caller;
 	mocks::callable_node block_a, block_b;
 
 	function_call call;
@@ -646,11 +658,16 @@ BOOST_FIXTURE_TEST_CASE(callable_multisolver, mock_exenv_fixture)
 	BOOST_CHECK_THROW(sl.solve(var_name{"a"}), std::exception);
 	BOOST_CHECK_THROW(sl.call(call), std::exception);
 
+	MOCK_EXPECT(ctx.nth_node_on_stack).with(0).returns(&caller);
+
 	sl.add("a", &block_a);
 	sl.add("b", &block_b);
+	expect_call(&caller, &block_a, call.params);
 	MOCK_EXPECT(block_a.evaluate).once().returns("block_a");
 	BOOST_TEST(sl.call(call) == value_term{"block_a"});
+
 	call.ref = {"b"s};
+	expect_call(&caller, &block_b, call.params);
 	MOCK_EXPECT(block_b.evaluate).once().returns("block_b");
 	BOOST_TEST(sl.call(call) == value_term{"block_b"});
 

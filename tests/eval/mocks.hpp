@@ -86,6 +86,7 @@ MOCK_BASE_CLASS( exenv, cppjinja::evt::exenv )
 	MOCK_METHOD(tmpl, 0)
 	MOCK_METHOD(children, 1)
 	MOCK_METHOD(search_callable, 1)
+	MOCK_METHOD(roots, 1)
 
 	MOCK_METHOD(data, 0)
 	MOCK_METHOD(out, 0)
@@ -169,6 +170,11 @@ struct mock_exenv_fixture
 	void expect_children(std::vector<const cppjinja::evt::node*> children)
 	{
 		MOCK_EXPECT(env.children).at_least(1).returns(children);
+	}
+
+	void expect_roots(std::vector<const cppjinja::evtnodes::callable*> roots)
+	{
+		MOCK_EXPECT(env.roots).at_least(1).returns(roots);
 	}
 };
 

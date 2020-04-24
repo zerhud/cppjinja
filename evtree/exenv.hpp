@@ -29,6 +29,8 @@ public:
 		const node* selected ) const =0 ;
 	virtual const evtnodes::callable* search_callable(
 	        std::string_view name) const =0 ;
+	virtual std::vector<const evtnodes::callable*> roots(
+	        const evtnodes::tmpl* tmpl) const =0 ;
 
 	virtual const data_provider* data() const =0 ;
 	virtual std::ostream& out() =0 ;

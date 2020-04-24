@@ -66,10 +66,9 @@ cppjinja::evtnodes::tmpl::evaluate(cppjinja::evt::exenv& env) const
 
 void cppjinja::evtnodes::tmpl::create_self_obj(cppjinja::evt::exenv* env) const
 {
-	auto children = env->children(this);
+	auto children = env->roots(this);
 	auto self = std::make_shared<callable_multisolver>(env);
-	for(auto& _child:children) {
-		const callable* child = dynamic_cast<const callable*>(_child);
+	for(auto& child:children) {
 		auto child_obj = std::make_unique<callable_solver>(env, child);
 		self->add(child->name(), child);
 		env->globals().add(child->name(), std::move(child_obj));

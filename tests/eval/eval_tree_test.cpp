@@ -36,6 +36,8 @@ cppjinja::evtree build_tree(std::string_view ptxt)
 	return tree;
 }
 
+BOOST_AUTO_TEST_SUITE(evaltree)
+
 BOOST_AUTO_TEST_CASE(main_fnc)
 {
 	cppjinja::evtree tree = build_tree("simple text"sv);
@@ -64,6 +66,17 @@ BOOST_AUTO_TEST_CASE(few_blocks)
 	BOOST_TEST(a_children[1]->name() == "b");
 }
 
+BOOST_AUTO_TEST_CASE(roots)
+{
+	cppjinja::evtree tree = build_tree(
+	          "cnt<% block a %>in<%block b%>bin<%endblock%><%endblock%>"sv);
+	const cppjinja::evtnodes::tmpl* tmpl = tree.search_tmpl("");
+	BOOST_TEST(tree.roots(nullptr).size() == 0);
+	BOOST_TEST(tree.roots(tmpl).size() == 3);
+	for(auto& r:tree.roots(tmpl))
+		BOOST_CHECK(r->name().empty() || r->name() == "a" || r->name() == "b");
+}
+
 BOOST_AUTO_TEST_CASE(extends)
 {
 	cppjinja::evtree tree = build_tree(
@@ -76,12 +89,12 @@ BOOST_AUTO_TEST_CASE(extends)
 	                            "<%endtemplate%>"sv);
 	auto nodes = tree.all_tree();
 
-	auto* tmpl_base_node = tree.search_tmpl(ast::var_name{"base"s});
+	auto* tmpl_base_node = tree.search_tmpl("base"s);
 	BOOST_REQUIRE( tmpl_base_node );
 	BOOST_TEST( tmpl_base_node->name() == "base" );
 
 	const cppjinja::evt::node* tmpl_child_node =
-	        tree.search_tmpl(ast::var_name{"child"s});
+	        tree.search_tmpl("child"s);
 	BOOST_TEST_REQUIRE( tmpl_child_node != nullptr );
 	BOOST_TEST( tmpl_child_node->name() == "child"s );
 
@@ -94,3 +107,4 @@ BOOST_AUTO_TEST_CASE(extends)
 	BOOST_TEST( child_ca->name() == "ca"s );
 }
 
+BOOST_AUTO_TEST_SUITE_END() // evaltree

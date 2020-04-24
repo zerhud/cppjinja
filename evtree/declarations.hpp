@@ -37,6 +37,7 @@ public:
 
 namespace evtnodes {
 
+class tmpl;
 /// a callable node: block, macro..
 class callable;
 

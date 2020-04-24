@@ -57,6 +57,12 @@ cppjinja::evt::exenv_impl::search_callable(std::string_view name) const
 	return dynamic_cast<const evtnodes::callable*>(found);
 }
 
+std::vector<const cppjinja::evtnodes::callable*>
+cppjinja::evt::exenv_impl::roots(const cppjinja::evtnodes::tmpl* tmpl) const
+{
+	return compiled_template->roots(tmpl);
+}
+
 const cppjinja::data_provider* cppjinja::evt::exenv_impl::data() const
 {
 	assert(user_data);

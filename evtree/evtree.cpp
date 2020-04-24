@@ -33,7 +33,8 @@ const cppjinja::evt::node* cppjinja::evtree::search_child(
 	return nullptr;
 }
 
-const cppjinja::evt::compiled_tmpl& cppjinja::evtree::tmpl_by_node(const cppjinja::evt::node* n) const
+const cppjinja::evt::compiled_tmpl& cppjinja::evtree::tmpl_by_node(
+        const cppjinja::evt::node* n) const
 {
 	for(auto& t:templates) {
 		auto pos = std::find_if(std::begin(t.nodes), std::end(t.nodes),
@@ -43,12 +44,11 @@ const cppjinja::evt::compiled_tmpl& cppjinja::evtree::tmpl_by_node(const cppjinj
 	throw std::runtime_error("no such node in tree");
 }
 
-const cppjinja::evtnodes::tmpl* cppjinja::evtree::search_tmpl(
-        const cppjinja::ast::var_name& name) const
+const cppjinja::evtnodes::tmpl*
+cppjinja::evtree::search_tmpl(const ast::string_t& name) const
 {
-	if(name.size()!=1) return nullptr;
 	for(auto& t:templates)
-		if(t.tmpl_node()->name() == name[0]) return t.tmpl_node();
+		if(t.tmpl_node()->name() == name) return t.tmpl_node();
 	return nullptr;
 }
 
@@ -136,6 +136,16 @@ std::vector<const cppjinja::evt::node*> cppjinja::evtree::children(
 	return ret;
 }
 
+std::vector<const cppjinja::evtnodes::callable*>
+cppjinja::evtree::roots(const evtnodes::tmpl* tmpl) const
+{
+	std::vector<const cppjinja::evtnodes::callable*> ret;
+	for(auto& ct:templates) if(ct.tmpl_node() == tmpl) {
+		for(auto& r:ct.roots) ret.emplace_back(r);
+	}
+	return ret;
+}
+
 std::string cppjinja::evtree::print_subtree(const cppjinja::evt::node* par) const
 {
 	if(templates.empty()) return "";
@@ -155,7 +165,7 @@ void cppjinja::evtree::render(
         ) const
 {
 	if(templates.empty()) throw std::runtime_error("cannot render empty tree");
-	const evtnodes::tmpl* tnode = search_tmpl(ast::var_name{name});
+	const evtnodes::tmpl* tnode = search_tmpl(name);
 	if(!tnode) tnode = templates[0].tmpl_node();
 
 	evt::exenv_impl env(&data, this);

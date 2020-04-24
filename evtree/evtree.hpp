@@ -37,7 +37,7 @@ class evtree : public evaluator {
 	const evt::compiled_tmpl& tmpl_by_node(const evt::node* n) const ;
 public:
 	/// debug function
-	const evtnodes::tmpl* search_tmpl(const ast::var_name& name) const ;
+	const evtnodes::tmpl* search_tmpl(const ast::string_t& name) const ;
 	const evt::node* search(
 	          const ast::var_name& name
 	        , const evt::node* ctx=nullptr
@@ -46,6 +46,7 @@ public:
 	std::vector<const evt::node*> children(
 	          const evt::node* selected
 	        , bool add_subs=false) const ;
+	std::vector<const evtnodes::callable*> roots(const evtnodes::tmpl* tmpl) const ;
 
 	/// debug function
 	std::string print_subtree(const evt::node* par=nullptr) const ;
