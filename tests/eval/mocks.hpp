@@ -85,7 +85,6 @@ MOCK_BASE_CLASS( exenv, cppjinja::evt::exenv )
 {
 	MOCK_METHOD(tmpl, 0)
 	MOCK_METHOD(children, 1)
-	MOCK_METHOD(search_callable, 1)
 	MOCK_METHOD(roots, 1)
 
 	MOCK_METHOD(data, 0)
