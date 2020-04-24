@@ -38,14 +38,6 @@ cppjinja::evtree::search_tmpl(const ast::string_t& name) const
 	return nullptr;
 }
 
-std::vector<const cppjinja::evt::node*> cppjinja::evtree::all_tree() const
-{
-	std::vector<const cppjinja::evt::node*> ret;
-	for(auto& t:templates) for(auto& n:t.nodes) ret.emplace_back(n.get());
-	assert(std::find(std::begin(ret), std::end(ret), nullptr) == std::end(ret));
-	return ret;
-}
-
 std::vector<const cppjinja::evt::node*> cppjinja::evtree::children(
           const cppjinja::evt::node* selected
         , bool add_subs) const
