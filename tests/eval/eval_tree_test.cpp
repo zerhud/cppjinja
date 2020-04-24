@@ -106,4 +106,40 @@ BOOST_AUTO_TEST_CASE(extends)
 		BOOST_CHECK(r->name() == "" || r->name() == "ca");
 }
 
+BOOST_AUTO_TEST_CASE(search_tmpl)
+{
+	cppjinja::evtree tree = build_tree(
+	                            "<% template base %>main<%endtemplate%>"
+	                            "<%template child extends base%>child"
+	                            "<%endtemplate%>"sv);
+	BOOST_TEST(tree.search_tmpl("base")->name() == "base");
+	BOOST_TEST(tree.search_tmpl("child")->name() == "child");
+	BOOST_TEST(tree.search_tmpl("") == nullptr);
+	tree = build_tree("cnt");
+	BOOST_TEST(tree.search_tmpl("")->name() == "");
+}
+
+BOOST_AUTO_TEST_CASE(children)
+{
+	auto tree = build_tree("cnt");
+	auto main = tree.roots(tree.search_tmpl(""))[0];
+	BOOST_TEST(tree.children(main).size() == 1);
+	mocks::node nonexisting;
+	BOOST_CHECK_THROW(tree.children(&nonexisting), std::exception);
+}
+
+BOOST_AUTO_TEST_CASE(render)
+{
+	std::stringstream out;
+	cppjinja::evtree tree;
+	mocks::data_provider data;
+	BOOST_CHECK_THROW(tree.render(out, data, ""), std::exception);
+
+	tree = build_tree("cnt");
+	BOOST_CHECK_NO_THROW(tree.render(out, data, ""));
+	BOOST_TEST(out.str() == "cnt");
+
+	BOOST_CHECK_THROW(tree.render(out, data, "no"), std::exception);
+}
+
 BOOST_AUTO_TEST_SUITE_END() // evaltree

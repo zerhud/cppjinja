@@ -67,7 +67,7 @@ void cppjinja::evtree::render(
 {
 	if(templates.empty()) throw std::runtime_error("cannot render empty tree");
 	const evtnodes::tmpl* tnode = search_tmpl(name);
-	if(!tnode) tnode = templates[0].tmpl_node();
+	if(!tnode) throw std::runtime_error("no such template: " + name);
 
 	evt::exenv_impl env(&data, this);
 	to << tnode->evaluate(env);
