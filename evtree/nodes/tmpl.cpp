@@ -35,7 +35,7 @@ void cppjinja::evtnodes::tmpl::render(evt::exenv& env) const
 		if(child->name().empty())
 		{
 			auto* cb_child = dynamic_cast<const callable*>(child);
-			evt::raii_push_callstack calls_maker(this, cb_child, &env.calls());
+			evt::raii_push_callstack calls_maker(cb_child, &env.calls());
 			env.out() << cb_child->evaluate(env);
 		}
 }

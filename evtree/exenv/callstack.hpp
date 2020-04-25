@@ -25,9 +25,8 @@ class callstack {
 public:
 	virtual ~callstack() noexcept =default ;
 
-	virtual void pop(const node* caller) =0 ;
-	virtual void push(const node* caller, const evtnodes::callable* calling_stack) =0 ;
-	virtual const node* caller() const  =0 ;
+	virtual void pop() =0 ;
+	virtual void push(const evtnodes::callable* calling_stack) =0 ;
 	virtual std::vector<const evtnodes::callable*> calling_stack() const  =0 ;
 	virtual std::shared_ptr<evtnodes::callable_multisolver> make_params(
 	        exenv* env,

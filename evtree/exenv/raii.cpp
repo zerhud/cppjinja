@@ -36,33 +36,22 @@ cppjinja::evt::raii_push_ctx::~raii_push_ctx()
 cppjinja::evt::raii_push_callstack::raii_push_callstack(
         cppjinja::evt::raii_push_callstack&& other) noexcept
     : ctx(other.ctx)
-    , maker(other.maker)
 {
 	other.ctx = nullptr;
 }
 
 cppjinja::evt::raii_push_callstack::raii_push_callstack(
-          const cppjinja::evt::node* n
-        , const evtnodes::callable* c
+          const evtnodes::callable* c
         , cppjinja::evt::callstack* m
         )
     : ctx(m)
-    , maker(n)
 {
-	ctx->push(maker, c);
-}
-
-cppjinja::evt::raii_push_callstack::raii_push_callstack(
-          cppjinja::evt::callstack* m
-        , cppjinja::evt::context* ctx
-        , const cppjinja::evtnodes::callable* c)
-    : raii_push_callstack(ctx->nth_node_on_stack(0), c, m)
-{
+	ctx->push(c);
 }
 
 cppjinja::evt::raii_push_callstack::~raii_push_callstack()
 {
-	if(ctx) ctx->pop(maker);
+	if(ctx) ctx->pop();
 }
 
 cppjinja::evt::raii_inject_obj::raii_inject_obj(

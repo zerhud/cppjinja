@@ -478,31 +478,22 @@ BOOST_AUTO_TEST_SUITE_END() // filter
 BOOST_AUTO_TEST_SUITE(callstack)
 BOOST_FIXTURE_TEST_CASE(cannot_push_nullptr, mock_impls_fixture)
 {
-	mocks::node caller;
-	mocks::callable_node calling;
-	BOOST_CHECK_THROW(calls.push(nullptr, nullptr), std::exception);
-	BOOST_CHECK_THROW(calls.push(&caller, nullptr), std::exception);
-	BOOST_CHECK_THROW(calls.push(nullptr, &calling), std::exception);
+	BOOST_CHECK_THROW(calls.push(nullptr), std::exception);
 }
 BOOST_FIXTURE_TEST_CASE(push_pop_caller, mock_impls_fixture)
 {
 	mocks::node caller, caller2;
 	mocks::callable_node calling, calling2;
-	BOOST_CHECK_THROW(calls.caller(), std::exception);
 	BOOST_CHECK_THROW(calls.calling_stack(), std::exception);
-	BOOST_CHECK_THROW(calls.pop(&caller), std::exception);
+	BOOST_CHECK_THROW(calls.pop(), std::exception);
 
-	BOOST_CHECK_NO_THROW(calls.push(&caller, &calling));
-	BOOST_TEST(calls.caller() == &caller);
+	BOOST_CHECK_NO_THROW(calls.push(&calling));
 	BOOST_TEST_REQUIRE(calls.calling_stack().size()==1);
 	BOOST_TEST(calls.calling_stack()[0] == &calling);
 
-	BOOST_CHECK_NO_THROW(calls.push(&caller2, &calling2));
-	BOOST_TEST(calls.caller() == &caller2);
+	BOOST_CHECK_NO_THROW(calls.push(&calling2));
 	BOOST_TEST(calls.calling_stack()[0] == &calling2);
-	BOOST_CHECK_THROW(calls.pop(&caller), std::exception);
-	BOOST_CHECK_NO_THROW(calls.pop(&caller2));
-	BOOST_TEST(calls.caller() == &caller);
+	BOOST_CHECK_NO_THROW(calls.pop());
 	BOOST_TEST(calls.calling_stack()[0] == &calling);
 }
 BOOST_FIXTURE_TEST_CASE(call_params, mock_impls_fixture)
@@ -510,7 +501,7 @@ BOOST_FIXTURE_TEST_CASE(call_params, mock_impls_fixture)
 	mocks::node caller, caller2;
 	mocks::callable_node calling;
 	BOOST_CHECK_THROW(calls.call_params(), std::exception);
-	BOOST_CHECK_NO_THROW(calls.push(&caller, &calling));
+	BOOST_CHECK_NO_THROW(calls.push(&calling));
 	BOOST_CHECK(calls.call_params().empty());
 
 	cppjinja::ast::function_call_parameter p1;
@@ -518,10 +509,10 @@ BOOST_FIXTURE_TEST_CASE(call_params, mock_impls_fixture)
 	BOOST_TEST_REQUIRE(calls.call_params().size() == 1);
 	BOOST_TEST(calls.call_params()[0] == p1);
 
-	BOOST_CHECK_NO_THROW(calls.push(&caller2, &calling));
+	BOOST_CHECK_NO_THROW(calls.push(&calling));
 	BOOST_TEST(calls.calling_stack().size() == 2);
 	BOOST_CHECK(calls.call_params().empty());
-	BOOST_CHECK_NO_THROW(calls.pop(&caller2));
+	BOOST_CHECK_NO_THROW(calls.pop());
 	BOOST_TEST_REQUIRE(calls.call_params().size() == 1);
 	BOOST_TEST(calls.call_params()[0] == p1);
 }
@@ -536,7 +527,7 @@ BOOST_FIXTURE_TEST_CASE(create_params, mock_impls_fixture)
 	mocks::exenv env;
 	mocks::node caller;
 	mocks::callable_node calling;
-	calls.push(&caller, &calling);
+	calls.push(&calling);
 	function_call_parameter p1(value_term{41});
 	function_call_parameter p2("p2", value_term{42});
 	function_call_parameter p3("p3", value_term{43});
@@ -573,31 +564,16 @@ BOOST_FIXTURE_TEST_CASE(push_ctx, impl_exenv_fixture)
 }
 BOOST_FIXTURE_TEST_CASE(push_callstack, impl_exenv_fixture)
 {
-	mocks::node caller;
 	mocks::callable_node calling;
-	BOOST_CHECK_THROW(calls.caller(), std::exception);
 	{
-		cppjinja::evt::raii_push_callstack pusher(&caller, &calling, &calls);
-		BOOST_TEST(calls.caller() == &caller);
+		cppjinja::evt::raii_push_callstack pusher(&calling, &calls);
 		BOOST_TEST(calls.calling_stack()[0] == &calling);
 	}
-	BOOST_CHECK_THROW(calls.caller(), std::exception);
-	BOOST_CHECK_THROW(calls.caller(), std::exception);
 	{
-		cppjinja::evt::raii_push_callstack pusher(&caller, &calling, &calls);
+		cppjinja::evt::raii_push_callstack pusher(&calling, &calls);
 		cppjinja::evt::raii_push_callstack pusher2(std::move(pusher));
-		BOOST_TEST(calls.caller() == &caller);
 		BOOST_TEST(calls.calling_stack()[0] == &calling);
 	}
-	BOOST_CHECK_THROW(calls.caller(), std::exception);
-	{
-		mocks::context ctx;
-		MOCK_EXPECT(ctx.nth_node_on_stack).once().with(0).returns(&caller);
-		cppjinja::evt::raii_push_callstack pusher(&calls, &ctx, &calling);
-		BOOST_TEST(calls.caller() == &caller);
-		BOOST_TEST(calls.calling_stack()[0] == &calling);
-	}
-	BOOST_CHECK_THROW(calls.caller(), std::exception);
 }
 BOOST_FIXTURE_TEST_CASE(inject_obj, mock_exenv_fixture)
 {

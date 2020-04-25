@@ -54,7 +54,7 @@ cppjinja::evtnodes::callable_solver::call(cppjinja::ast::function_call fnc)
 {
 	if(!fnc.ref.empty())
 		throw std::runtime_error("no such function");
-	evt::raii_push_callstack stack_maker(&env->calls(), &env->ctx(), block);
+	evt::raii_push_callstack stack_maker(block, &env->calls());
 	env->calls().call_params(std::move(fnc.params));
 	return ast::value_term{block->evaluate(*env)};
 }
@@ -94,7 +94,7 @@ cppjinja::evtnodes::callable_multisolver::call(cppjinja::ast::function_call fnc)
 	auto pos = objs.find(fnc.ref[0]);
 	if(pos == objs.end()) throw std::runtime_error("no such function");
 
-	evt::raii_push_callstack stack_maker(&env->calls(), &env->ctx(), pos->second);
+	evt::raii_push_callstack stack_maker(pos->second, &env->calls());
 	if(!fnc.params.empty())
 		env->calls().call_params(std::move(fnc.params));
 	return ast::value_term{pos->second->evaluate(*env)};

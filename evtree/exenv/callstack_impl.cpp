@@ -28,27 +28,16 @@ cppjinja::evt::callstack_impl::position_param(
 	return std::nullopt;
 }
 
-void cppjinja::evt::callstack_impl::pop(const cppjinja::evt::node* caller)
+void cppjinja::evt::callstack_impl::pop()
 {
 	require_stack_is_not_empty();
-	if(stack.back().caller != caller)
-		throw std::runtime_error("stack back and pop argument are missmatch");
 	stack.pop_back();
 }
 
-void cppjinja::evt::callstack_impl::push(
-          const cppjinja::evt::node* caller
-        , const evtnodes::callable* calling)
+void cppjinja::evt::callstack_impl::push(const evtnodes::callable* calling)
 {
-	if(caller == nullptr) throw std::runtime_error("cannot push nullptr caller");
 	if(calling == nullptr) throw std::runtime_error("cannot push nullptr calling");
-	stack.emplace_back(frame{caller, calling, {}});
-}
-
-const cppjinja::evt::node* cppjinja::evt::callstack_impl::caller() const
-{
-	require_stack_is_not_empty();
-	return stack.back().caller;
+	stack.emplace_back(frame{calling, {}});
 }
 
 std::vector<const cppjinja::evtnodes::callable*>

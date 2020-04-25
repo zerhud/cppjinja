@@ -15,7 +15,6 @@ namespace cppjinja::evt {
 
 class callstack_impl final : public callstack {
 	struct frame {
-		const node* caller;
 		const evtnodes::callable* calling;
 		std::vector<ast::function_call_parameter> cparams;
 	};
@@ -25,9 +24,8 @@ class callstack_impl final : public callstack {
 	        const std::vector<ast::function_call_parameter>& params,
 	        std::size_t ind) const ;
 public:
-	void pop(const node* caller) override ;
-	void push(const node* caller, const evtnodes::callable* calling_stack) override ;
-	const node* caller() const  override ;
+	void pop() override ;
+	void push(const evtnodes::callable* calling_stack) override ;
 	std::vector<const evtnodes::callable*> calling_stack() const  override ;
 	std::shared_ptr<evtnodes::callable_multisolver> make_params(exenv* env,
 	        const std::vector<ast::function_call_parameter>& params) const override ;

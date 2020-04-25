@@ -69,9 +69,8 @@ MOCK_BASE_CLASS(ctx_object, cppjinja::evt::ctx_object)
 MOCK_BASE_CLASS( callstack, cppjinja::evt::callstack )
 {
 	using cppjinja::evt::callstack::call_params;
-	MOCK_METHOD( pop, 1 )
-	MOCK_METHOD( push, 2 )
-	MOCK_METHOD( caller, 0 )
+	MOCK_METHOD( pop, 0 )
+	MOCK_METHOD( push, 1 )
 	MOCK_METHOD( calling_stack, 0 )
 	MOCK_METHOD( make_params, 2 )
 	// get_params
@@ -138,7 +137,7 @@ struct mock_exenv_fixture
 			BOOST_TEST( called_params == params );
 		};
 		mock::sequence seq;
-		MOCK_EXPECT(calls.push).once().in(seq).with(caller, calling);
+		MOCK_EXPECT(calls.push).once().in(seq).with(calling);
 		MOCK_EXPECT(calls.set_params)
 		        .at_most(1)
 		        .at_least(params.empty() ? 0 : 1)
