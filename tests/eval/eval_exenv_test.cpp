@@ -543,6 +543,24 @@ BOOST_FIXTURE_TEST_CASE(create_params, mock_impls_fixture)
 	BOOST_TEST(params->solve(var_name{"p3"}) == value_term{43});
 	BOOST_TEST(params->solve(var_name{"p4"}) == value_term{44});
 }
+BOOST_FIXTURE_TEST_CASE(call_block, mock_impls_fixture)
+{
+	using namespace cppjinja::ast;
+
+	mocks::exenv env;
+	mocks::callable_node calling;
+	MOCK_EXPECT(calling.evaluate).once().calls(
+	[this,&env](cppjinja::evt::exenv& ienv){
+		BOOST_TEST(&ienv == &env);
+		BOOST_TEST_REQUIRE(calls.call_params().size() == 1);
+		BOOST_REQUIRE(calls.call_params()[0].name.has_value());
+		BOOST_TEST(*calls.call_params()[0].name == "p1");
+		return "ok"s;
+	});
+	function_call_parameter p1("p1", value_term{42});
+	BOOST_TEST(calls.call(&env, &calling, {p1}) == "ok");
+	BOOST_CHECK_THROW(calls.calling_stack(), std::exception);
+}
 BOOST_AUTO_TEST_SUITE_END() // callstack
 
 BOOST_AUTO_TEST_SUITE(raii)

@@ -26,12 +26,15 @@ class callstack_impl final : public callstack {
 public:
 	void pop() override ;
 	void push(const evtnodes::callable* calling_stack) override ;
-	void call(const evtnodes::callable* calling_stack) override ;
+	void call_params(std::vector<ast::function_call_parameter> params) override ;
+	east::string_t call(exenv* env,
+	        const evtnodes::callable* calling,
+	        std::vector<ast::function_call_parameter> params) override ;
+
 	std::vector<const evtnodes::callable*> calling_stack() const  override ;
 	std::shared_ptr<evtnodes::callable_multisolver> make_params(exenv* env,
 	        const std::vector<ast::function_call_parameter>& params) const override ;
 	std::vector<ast::function_call_parameter> call_params() const  override ;
-	void call_params(std::vector<ast::function_call_parameter> params) override ;
 
 };
 

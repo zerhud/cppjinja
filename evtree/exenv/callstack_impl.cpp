@@ -40,10 +40,25 @@ void cppjinja::evt::callstack_impl::push(const evtnodes::callable* calling)
 	stack.emplace_back(frame{calling, {}});
 }
 
-void cppjinja::evt::callstack_impl::call(
-        const cppjinja::evtnodes::callable* calling_stack)
+cppjinja::east::string_t cppjinja::evt::callstack_impl::call(exenv* env,
+        const cppjinja::evtnodes::callable* calling,
+        std::vector<cppjinja::ast::function_call_parameter> params)
 {
-	;
+	struct pushpoper {
+		callstack_impl* self;
+		pushpoper(callstack_impl* s, const evtnodes::callable* c)
+		    : self(s)
+		{
+			self->push(c);
+		}
+		~pushpoper()
+		{
+			self->pop();
+		}
+	} raii(this, calling);
+	call_params(std::move(params));
+	auto ret = calling->evaluate(*env);
+	return ret;
 }
 
 std::vector<const cppjinja::evtnodes::callable*>

@@ -11,12 +11,12 @@
 #include <vector>
 #include "evtree/declarations.hpp"
 #include "parser/ast/common.hpp"
+#include "eval/ast.hpp"
 
 namespace cppjinja::evt {
 
 class callstack {
 	struct frame {
-		const node* caller;
 		const evtnodes::callable* calling;
 		std::vector<ast::function_call_parameter> cparams;
 	};
@@ -27,14 +27,17 @@ public:
 
 	virtual void pop() =0 ;
 	virtual void push(const evtnodes::callable* calling_stack) =0 ;
-	virtual void call(const evtnodes::callable* calling_stack) =0 ;
+	virtual void call_params(std::vector<ast::function_call_parameter> params) =0 ;
+	virtual east::string_t call(exenv* env,
+	        const evtnodes::callable* calling,
+	        std::vector<ast::function_call_parameter> params) =0 ;
+
 	virtual std::vector<const evtnodes::callable*> calling_stack() const  =0 ;
 	virtual std::shared_ptr<evtnodes::callable_multisolver> make_params(
 	        exenv* env,
 	        const std::vector<ast::function_call_parameter>& params) const =0 ;
 
 	virtual std::vector<ast::function_call_parameter> call_params() const  =0 ;
-	virtual void call_params(std::vector<ast::function_call_parameter> params) =0 ;
 
 };
 
