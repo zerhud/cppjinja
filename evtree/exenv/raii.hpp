@@ -33,13 +33,4 @@ public:
 	~raii_inject_obj() ;
 };
 
-class raii_push_callstack {
-	callstack* ctx;
-public:
-	raii_push_callstack(raii_push_callstack&&) noexcept ;
-	raii_push_callstack(const raii_push_callstack&) =delete ;
-	raii_push_callstack(const evtnodes::callable* c, callstack* m);
-	~raii_push_callstack() ;
-};
-
 } // namespace cppjinja::evt

@@ -69,15 +69,11 @@ MOCK_BASE_CLASS(ctx_object, cppjinja::evt::ctx_object)
 MOCK_BASE_CLASS( callstack, cppjinja::evt::callstack )
 {
 	using cppjinja::evt::callstack::call_params;
-	MOCK_METHOD( pop, 0 )
-	MOCK_METHOD( push, 1 )
 	MOCK_METHOD( call, 3 )
 	MOCK_METHOD( calling_stack, 0 )
 	MOCK_METHOD( make_params, 2 )
 	// get_params
 	MOCK_METHOD( call_params, 0, std::vector<cppjinja::ast::function_call_parameter>(), get_params )
-	// set_params
-	MOCK_METHOD( call_params, 1, void (std::vector<cppjinja::ast::function_call_parameter> params), set_params )
 };
 
 MOCK_BASE_CLASS( exenv, cppjinja::evt::exenv )
@@ -136,13 +132,14 @@ struct mock_exenv_fixture
 			BOOST_REQUIRE(called_params.size() == params.size());
 			BOOST_TEST( called_params == params );
 		};
-		mock::sequence seq;
-		MOCK_EXPECT(calls.push).once().in(seq).with(calling);
-		MOCK_EXPECT(calls.set_params)
-		        .at_most(1)
-		        .at_least(params.empty() ? 0 : 1)
-		        .in(seq).calls(check_params);
-		MOCK_EXPECT(calls.pop).once().in(seq);
+		MOCK_EXPECT(calls.call).once().calls(
+		            [check_params,calling](cppjinja::evt::exenv* env,
+		            const cppjinja::evtnodes::callable* icalling,
+		            std::vector<cppjinja::ast::function_call_parameter> params){
+			check_params(params);
+			BOOST_TEST(calling == icalling);
+			return calling->evaluate(*env);
+		});
 	}
 
 	void expect_cxt_settings(cppjinja::evt::node* maker)

@@ -44,6 +44,7 @@ cppjinja::east::string_t cppjinja::evt::callstack_impl::call(exenv* env,
         const cppjinja::evtnodes::callable* calling,
         std::vector<cppjinja::ast::function_call_parameter> params)
 {
+	if(!env || !calling) throw std::runtime_error("cannot call with nullptrs");
 	struct pushpoper {
 		callstack_impl* self;
 		pushpoper(callstack_impl* s, const evtnodes::callable* c)

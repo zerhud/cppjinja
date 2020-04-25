@@ -9,6 +9,7 @@
 #include "block_named.hpp"
 #include "parser/helpers.hpp"
 #include "../evtree.hpp"
+#include "evtree/exenv/callstack.hpp"
 
 bool cppjinja::evtnodes::block_named::has_nondefaulted_params() const
 {
@@ -45,12 +46,8 @@ cppjinja::evtnodes::block_named::params() const
 
 void cppjinja::evtnodes::block_named::render(evt::exenv& env) const
 {
-	if(has_nondefaulted_params())
-		env.current_node(this);
-	else {
-		evt::raii_push_callstack call(this, &env.calls());
-		env.out() << evaluate(env);
-	}
+	if(has_nondefaulted_params()) env.current_node(this);
+	else  env.out() << env.calls().call(&env, this, {});
 }
 
 cppjinja::east::string_t cppjinja::evtnodes::block_named::evaluate(cppjinja::evt::exenv& env) const

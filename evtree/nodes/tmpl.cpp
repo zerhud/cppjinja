@@ -9,6 +9,7 @@
 #include "tmpl.hpp"
 #include "evtree/evtree.hpp"
 #include "evtree/exenv/obj_holder.hpp"
+#include "evtree/exenv/callstack.hpp"
 
 cppjinja::evtnodes::tmpl::tmpl(cppjinja::ast::tmpl t)
     : itmpl_(std::move(t))
@@ -33,11 +34,7 @@ void cppjinja::evtnodes::tmpl::render(evt::exenv& env) const
 	auto children = env.roots(this);
 	for(auto&& child:children)
 		if(child->name().empty())
-		{
-			auto* cb_child = dynamic_cast<const callable*>(child);
-			evt::raii_push_callstack calls_maker(cb_child, &env.calls());
-			env.out() << cb_child->evaluate(env);
-		}
+			env.out() << env.calls().call(&env, child, {});
 }
 
 void cppjinja::evtnodes::tmpl::create_self_obj(cppjinja::evt::exenv* env) const

@@ -131,7 +131,5 @@ cppjinja::east::value_term cppjinja::evt::expr_solver::solve_in_tmpl(
         , const evtnodes::callable* node)
 {
 	assert(env);
-	raii_push_callstack stack_maker(node, &env->calls());
-	env->calls().call_params(obj.params);
-	return node->evaluate(*env);
+	return env->calls().call(env, node, obj.params);
 }

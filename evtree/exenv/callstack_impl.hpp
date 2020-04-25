@@ -23,10 +23,11 @@ class callstack_impl final : public callstack {
 	std::optional<ast::value_term> position_param(
 	        const std::vector<ast::function_call_parameter>& params,
 	        std::size_t ind) const ;
+
+	void pop() ;
+	void push(const evtnodes::callable* calling_stack) ;
+	void call_params(std::vector<ast::function_call_parameter> params) ;
 public:
-	void pop() override ;
-	void push(const evtnodes::callable* calling_stack) override ;
-	void call_params(std::vector<ast::function_call_parameter> params) override ;
 	east::string_t call(exenv* env,
 	        const evtnodes::callable* calling,
 	        std::vector<ast::function_call_parameter> params) override ;

@@ -25,9 +25,6 @@ class callstack {
 public:
 	virtual ~callstack() noexcept =default ;
 
-	virtual void pop() =0 ;
-	virtual void push(const evtnodes::callable* calling_stack) =0 ;
-	virtual void call_params(std::vector<ast::function_call_parameter> params) =0 ;
 	virtual east::string_t call(exenv* env,
 	        const evtnodes::callable* calling,
 	        std::vector<ast::function_call_parameter> params) =0 ;
