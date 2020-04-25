@@ -71,6 +71,7 @@ MOCK_BASE_CLASS( callstack, cppjinja::evt::callstack )
 	using cppjinja::evt::callstack::call_params;
 	MOCK_METHOD( pop, 0 )
 	MOCK_METHOD( push, 1 )
+	MOCK_METHOD( call, 1 )
 	MOCK_METHOD( calling_stack, 0 )
 	MOCK_METHOD( make_params, 2 )
 	// get_params
@@ -127,7 +128,6 @@ struct mock_exenv_fixture
 	}
 
 	void expect_call(
-	        cppjinja::evt::node* caller,
 	        cppjinja::evtnodes::callable* calling,
 	        std::vector<cppjinja::ast::function_call_parameter> params)
 	{

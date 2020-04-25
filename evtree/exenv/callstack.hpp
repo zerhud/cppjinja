@@ -27,6 +27,7 @@ public:
 
 	virtual void pop() =0 ;
 	virtual void push(const evtnodes::callable* calling_stack) =0 ;
+	virtual void call(const evtnodes::callable* calling_stack) =0 ;
 	virtual std::vector<const evtnodes::callable*> calling_stack() const  =0 ;
 	virtual std::shared_ptr<evtnodes::callable_multisolver> make_params(
 	        exenv* env,

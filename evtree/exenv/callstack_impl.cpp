@@ -40,6 +40,12 @@ void cppjinja::evt::callstack_impl::push(const evtnodes::callable* calling)
 	stack.emplace_back(frame{calling, {}});
 }
 
+void cppjinja::evt::callstack_impl::call(
+        const cppjinja::evtnodes::callable* calling_stack)
+{
+	;
+}
+
 std::vector<const cppjinja::evtnodes::callable*>
 cppjinja::evt::callstack_impl::calling_stack() const
 {

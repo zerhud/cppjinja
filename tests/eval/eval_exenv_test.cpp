@@ -678,14 +678,12 @@ BOOST_FIXTURE_TEST_CASE(callable_solver, mock_exenv_fixture)
 {
 	using namespace cppjinja::ast;
 	using cppjinja::evtnodes::callable_solver;
-	mocks::node caller;
 	mocks::callable_node node;
 	callable_solver sl(&env, &node);
 	BOOST_CHECK_THROW(sl.solve(var_name{"a"}), std::exception);
 	function_call call;
 	call.params.emplace_back("p1", value_term{"val1"});
-	expect_call(&caller, &node, call.params);
-	MOCK_EXPECT(ctx.nth_node_on_stack).with(0).returns(&caller);
+	expect_call(&node, call.params);
 	MOCK_EXPECT(node.evaluate).once().returns("ok");
 	BOOST_TEST(sl.call(call) == value_term{"ok"});
 
@@ -696,7 +694,6 @@ BOOST_FIXTURE_TEST_CASE(callable_multisolver, mock_exenv_fixture)
 {
 	using namespace cppjinja::ast;
 	cppjinja::evtnodes::callable_multisolver sl(&env);
-	mocks::node caller;
 	mocks::callable_node block_a, block_b;
 
 	function_call call;
@@ -704,12 +701,10 @@ BOOST_FIXTURE_TEST_CASE(callable_multisolver, mock_exenv_fixture)
 	BOOST_CHECK_THROW(sl.solve(var_name{"a"}), std::exception);
 	BOOST_CHECK_THROW(sl.call(call), std::exception);
 
-	MOCK_EXPECT(ctx.nth_node_on_stack).with(0).returns(&caller);
-
 	sl.add("a", &block_a);
 	sl.add("b", &block_b);
 	sl.add("c", value_term{42});
-	expect_call(&caller, &block_a, call.params);
+	expect_call(&block_a, call.params);
 	MOCK_EXPECT(block_a.evaluate).once().returns("block_a");
 	BOOST_TEST(sl.call(call) == value_term{"block_a"});
 
@@ -718,7 +713,7 @@ BOOST_FIXTURE_TEST_CASE(callable_multisolver, mock_exenv_fixture)
 	BOOST_TEST(sl.solve(var_name{"c"}) == value_term{42});
 
 	call.ref = {"b"s};
-	expect_call(&caller, &block_b, call.params);
+	expect_call(&block_b, call.params);
 	MOCK_EXPECT(block_b.evaluate).once().returns("block_b");
 	BOOST_TEST(sl.call(call) == value_term{"block_b"});
 

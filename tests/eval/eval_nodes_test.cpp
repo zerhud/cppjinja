@@ -122,7 +122,7 @@ BOOST_FIXTURE_TEST_CASE(rendered_only_empty_name, mock_exenv_fixture)
 	mock::sequence ctx_seq;
 	mocks::callable_node child_with_name, child_empty_name;
 	expect_roots({&child_with_name, &child_empty_name});
-	expect_call(&tmpl, &child_empty_name, {});
+	expect_call(&child_empty_name, {});
 	MOCK_EXPECT(env.current_node).with(&tmpl);
 	MOCK_EXPECT(child_empty_name.name).at_least(1).returns("");
 	MOCK_EXPECT(child_with_name.name).at_least(1).returns("tn");
@@ -146,19 +146,15 @@ BOOST_FIXTURE_TEST_CASE(creates_self, mock_exenv_fixture)
 	MOCK_EXPECT(env.globals).calls([&globals]()->obj_holder&{return globals;});
 	BOOST_CHECK_NO_THROW(tmpl.render(env));
 
-	mocks::node caller;
 	cppjinja::ast::function_call call;
 	call.ref.emplace_back("ch1");
-	expect_call(&caller, &child1, {});
-	MOCK_EXPECT(ctx.nth_node_on_stack).with(0).returns(&caller);
+	expect_call(&child1, {});
 	BOOST_TEST(globals.call(call) == value_term{"ok_ch1"});
 	call.ref = {"self", "ch1"};
-	expect_call(&caller, &child1, {});
-	MOCK_EXPECT(ctx.nth_node_on_stack).with(0).returns(&caller);
+	expect_call(&child1, {});
 	BOOST_TEST(globals.call(call) == value_term{"ok_ch1"});
 	call.ref.back() = "ch2";
-	expect_call(&caller, &child2, {});
-	MOCK_EXPECT(ctx.nth_node_on_stack).with(0).returns(&caller);
+	expect_call(&child2, {});
 	BOOST_TEST(globals.call(call) == value_term{"ok_ch2"});
 }
 BOOST_AUTO_TEST_SUITE_END() // tmpl
@@ -309,7 +305,7 @@ BOOST_FIXTURE_TEST_CASE(render_no_children, mock_exenv_fixture)
 	evtnodes::block_named cnt(ast_bl);
 	expect_children({});
 	expect_cxt_settings(&cnt);
-	expect_call(&cnt, &cnt, {});
+	expect_call(&cnt, {});
 	MOCK_EXPECT(env.result).once().returns("result");
 	BOOST_CHECK_NO_THROW(cnt.render(env));
 	BOOST_TEST(out.str() == "result");
@@ -329,7 +325,7 @@ BOOST_FIXTURE_TEST_CASE(render_two_children, mock_callable_fixture)
 	prepare_for_render_two_childrend(ast_bl);
 	evtnodes::block_named cnt(ast_bl);
 	expect_cxt_settings(&cnt);
-	expect_call(&cnt, &cnt, {});
+	expect_call(&cnt, {});
 	prepare_for_render_two_childrend();
 	MOCK_EXPECT(env.result).once().returns("result");
 	BOOST_CHECK_NO_THROW(cnt.render(env));
