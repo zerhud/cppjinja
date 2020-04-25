@@ -37,6 +37,7 @@ MOCK_BASE_CLASS( callable_node, cppjinja::evtnodes::callable )
 	MOCK_METHOD( render, 1 )
 	MOCK_METHOD( evaluate, 1 )
 	MOCK_METHOD( param, 2, std::optional<cppjinja::ast::value_term>(const cppjinja::evt::callstack& ctx,const cppjinja::ast::var_name& name) )
+	MOCK_METHOD( params, 0 )
 };
 
 MOCK_BASE_CLASS( context, cppjinja::evt::context )
@@ -72,6 +73,7 @@ MOCK_BASE_CLASS( callstack, cppjinja::evt::callstack )
 	MOCK_METHOD( push, 2 )
 	MOCK_METHOD( caller, 0 )
 	MOCK_METHOD( calling_stack, 0 )
+	MOCK_METHOD( make_params, 2 )
 	// get_params
 	MOCK_METHOD( call_params, 0, std::vector<cppjinja::ast::function_call_parameter>(), get_params )
 	// set_params

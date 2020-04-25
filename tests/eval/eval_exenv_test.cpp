@@ -23,6 +23,7 @@
 #include "evtree/exenv/expr_filter.hpp"
 #include "evtree/exenv/ctx_object.hpp"
 #include "evtree/exenv/obj_holder.hpp"
+#include "evtree/nodes/callable.hpp"
 #include "parser/operators/common.hpp"
 #include "parser/grammar/tmpls.hpp"
 #include "parser/parse.hpp"
@@ -529,6 +530,28 @@ BOOST_FIXTURE_TEST_CASE(cannot_add_params_to_empty, mock_impls_fixture)
 	cppjinja::ast::function_call_parameter p1;
 	BOOST_CHECK_THROW(calls.call_params({p1}), std::exception);
 }
+BOOST_FIXTURE_TEST_CASE(create_params, mock_impls_fixture)
+{
+	using namespace cppjinja::ast;
+	mocks::exenv env;
+	mocks::node caller;
+	mocks::callable_node calling;
+	calls.push(&caller, &calling);
+	function_call_parameter p1(value_term{41});
+	function_call_parameter p2("p2", value_term{42});
+	function_call_parameter p3("p3", value_term{43});
+	MOCK_EXPECT(calling.params).returns(std::vector<macro_parameter>{
+	                                       macro_parameter{"p1", std::nullopt},
+	                                       macro_parameter{"p2", std::nullopt},
+	                                       macro_parameter{"p4", value_term{44}}
+	                                    });
+	auto params = calls.make_params(&env, {p1, p2, p3});
+	BOOST_REQUIRE(params);
+	BOOST_TEST(params->solve(var_name{"p1"}) == value_term{41});
+	BOOST_TEST(params->solve(var_name{"p2"}) == value_term{42});
+	BOOST_TEST(params->solve(var_name{"p3"}) == value_term{43});
+	BOOST_TEST(params->solve(var_name{"p4"}) == value_term{44});
+}
 BOOST_AUTO_TEST_SUITE_END() // callstack
 
 BOOST_AUTO_TEST_SUITE(raii)
@@ -709,9 +732,14 @@ BOOST_FIXTURE_TEST_CASE(callable_multisolver, mock_exenv_fixture)
 
 	sl.add("a", &block_a);
 	sl.add("b", &block_b);
+	sl.add("c", value_term{42});
 	expect_call(&caller, &block_a, call.params);
 	MOCK_EXPECT(block_a.evaluate).once().returns("block_a");
 	BOOST_TEST(sl.call(call) == value_term{"block_a"});
+
+	BOOST_CHECK_THROW(sl.solve(var_name{"no"}), std::exception);
+	BOOST_CHECK_THROW(sl.solve(var_name{"c","c"}), std::exception);
+	BOOST_TEST(sl.solve(var_name{"c"}) == value_term{42});
 
 	call.ref = {"b"s};
 	expect_call(&caller, &block_b, call.params);

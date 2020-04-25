@@ -28,6 +28,7 @@ public:
 	          const evt::callstack& ctx
 	        , const ast::var_name& name
 	        ) const override ;
+	std::vector<ast::macro_parameter> params() const override ;
 };
 
 } // namespace cppjinja::evtnodes

@@ -81,6 +81,12 @@ void cppjinja::evtnodes::callable_multisolver::add(
 	objs[n] = o;
 }
 
+void cppjinja::evtnodes::callable_multisolver::add(
+        cppjinja::ast::string_t n, cppjinja::ast::value_term v)
+{
+	values[n] = std::move(v);
+}
+
 cppjinja::ast::value_term
 cppjinja::evtnodes::callable_multisolver::call(cppjinja::ast::function_call fnc)
 {
@@ -97,6 +103,8 @@ cppjinja::evtnodes::callable_multisolver::call(cppjinja::ast::function_call fnc)
 cppjinja::ast::value_term
 cppjinja::evtnodes::callable_multisolver::solve(cppjinja::ast::var_name var)
 {
-	(void)var;
-	throw std::runtime_error("cannot solve variable in callable solver");
+	if(var.size()!=1) throw std::runtime_error("no such variable");
+	auto pos = values.find(var[0]);
+	if(pos==values.end()) throw std::runtime_error("no such variable");
+	return pos->second;
 }

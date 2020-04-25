@@ -37,6 +37,12 @@ std::optional<cppjinja::ast::value_term> cppjinja::evtnodes::block_named::param(
 	return param(block.params, name, ctx);
 }
 
+std::vector<cppjinja::ast::macro_parameter>
+cppjinja::evtnodes::block_named::params() const
+{
+	return block.params;
+}
+
 void cppjinja::evtnodes::block_named::render(evt::exenv& env) const
 {
 	if(has_nondefaulted_params())

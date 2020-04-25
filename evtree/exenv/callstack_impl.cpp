@@ -8,11 +8,24 @@
 
 
 #include "callstack_impl.hpp"
+#include "evtree/nodes/callable.hpp"
 
 void cppjinja::evt::callstack_impl::require_stack_is_not_empty() const
 {
 	if(stack.empty())
 		throw std::runtime_error("stack is empty");
+}
+
+std::optional<cppjinja::ast::value_term>
+cppjinja::evt::callstack_impl::position_param(
+          const std::vector<cppjinja::ast::function_call_parameter>& params
+        , std::size_t ind) const
+{
+	for(std::size_t i=0;i<params.size();++i) {
+		if(params[i].name.has_value()) return std::nullopt;
+		if(i==ind) return params[i].value.get();
+	}
+	return std::nullopt;
 }
 
 void cppjinja::evt::callstack_impl::pop(const cppjinja::evt::node* caller)
@@ -45,6 +58,22 @@ cppjinja::evt::callstack_impl::calling_stack() const
 	std::vector<const cppjinja::evtnodes::callable*> ret;
 	for(auto item = stack.rbegin();item!=stack.rend();++item)
 		ret.emplace_back(item->calling);
+	return ret;
+}
+
+std::shared_ptr<cppjinja::evtnodes::callable_multisolver>
+cppjinja::evt::callstack_impl::make_params(exenv* env,
+        const std::vector<cppjinja::ast::function_call_parameter>& params) const
+{
+	require_stack_is_not_empty();
+	auto cparams = stack.back().calling->params();
+	auto ret = std::make_shared<evtnodes::callable_multisolver>(env);
+	for(auto& p:params) if(p.name.has_value()) ret->add(*p.name, p.value.get());
+	for(auto& p:cparams) if(p.value.has_value()) ret->add(p.name, *p.value);
+	for(std::size_t i=0;i<cparams.size();++i) {
+		auto val = position_param(params, i);
+		if(val) ret->add(cparams[i].name, *val);
+	}
 	return ret;
 }
 

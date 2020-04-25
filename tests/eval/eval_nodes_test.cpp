@@ -25,6 +25,7 @@
 #include "evtree/nodes/block_if.hpp"
 #include "evtree/exenv/obj_holder.hpp"
 #include "evtree/evtree.hpp"
+#include "parser/operators/blocks.hpp"
 
 using namespace std::literals;
 namespace tdata = boost::unit_test::data;
@@ -345,6 +346,15 @@ BOOST_FIXTURE_TEST_CASE(evaluate_two_children, mock_callable_fixture)
 	MOCK_EXPECT(env.result).once().returns("result");
 	BOOST_TEST(cnt.evaluate(env) == "result");
 }
+BOOST_AUTO_TEST_CASE(params)
+{
+	ast::block_named ast_bl;
+	BOOST_TEST(evtnodes::block_named(ast_bl).params() == ast_bl.params);
+	ast_bl.params.emplace_back(ast::macro_parameter{"name"s, std::nullopt});
+	BOOST_TEST(evtnodes::block_named(ast_bl).params() == ast_bl.params);
+	ast_bl.params.emplace_back(ast::macro_parameter{"name"s, value_term{42}});
+	BOOST_TEST(evtnodes::block_named(ast_bl).params() == ast_bl.params);
+}
 BOOST_AUTO_TEST_SUITE_END() // block_named
 
 BOOST_AUTO_TEST_SUITE(block_macro)
@@ -376,6 +386,15 @@ BOOST_FIXTURE_TEST_CASE(evaluate_two_children, mock_callable_fixture)
 	});
 	MOCK_EXPECT(ctx.takeout_obj).once().with("a").in(ctx_seq);
 	BOOST_TEST(cnt.evaluate(env) == "");
+}
+BOOST_AUTO_TEST_CASE(params)
+{
+	ast::block_macro ast_bl;
+	BOOST_TEST(evtnodes::block_macro(ast_bl).params() == ast_bl.params);
+	ast_bl.params.emplace_back(ast::macro_parameter{"name"s, std::nullopt});
+	BOOST_TEST(evtnodes::block_macro(ast_bl).params() == ast_bl.params);
+	ast_bl.params.emplace_back(ast::macro_parameter{"name"s, value_term{42}});
+	BOOST_TEST(evtnodes::block_macro(ast_bl).params() == ast_bl.params);
 }
 BOOST_AUTO_TEST_SUITE_END() // block_macro
 

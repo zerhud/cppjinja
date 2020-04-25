@@ -24,6 +24,7 @@ public:
 	virtual std::optional<ast::value_term> param(
 	          const evt::callstack& ctx
 	        , const ast::var_name& name) const =0 ;
+	virtual std::vector<ast::macro_parameter> params() const =0 ;
 };
 
 class callable_solver : public evt::ctx_object {
@@ -39,10 +40,12 @@ public:
 class callable_multisolver : public evt::ctx_object {
 	evt::exenv* env;
 	std::unordered_map<ast::string_t, const callable*> objs;
+	std::unordered_map<ast::string_t, ast::value_term> values;
 public:
 	explicit callable_multisolver(evt::exenv* e);
 	~callable_multisolver() noexcept ;
 	void add(ast::string_t n, const callable* o);
+	void add(ast::string_t n, ast::value_term v);
 	ast::value_term call(ast::function_call fnc) override ;
 	ast::value_term solve(ast::var_name var) override ;
 };

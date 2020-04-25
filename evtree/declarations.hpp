@@ -40,6 +40,7 @@ namespace evtnodes {
 class tmpl;
 /// a callable node: block, macro..
 class callable;
+class callable_multisolver;
 
 } // namespace evtnodes
 

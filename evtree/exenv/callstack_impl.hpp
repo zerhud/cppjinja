@@ -21,13 +21,18 @@ class callstack_impl final : public callstack {
 	};
 	std::vector<frame> stack;
 	void require_stack_is_not_empty() const ;
+	std::optional<ast::value_term> position_param(
+	        const std::vector<ast::function_call_parameter>& params,
+	        std::size_t ind) const ;
 public:
-	void pop(const node* caller);
-	void push(const node* caller, const evtnodes::callable* calling_stack);
-	const node* caller() const ;
-	std::vector<const evtnodes::callable*> calling_stack() const ;
-	std::vector<ast::function_call_parameter> call_params() const ;
-	void call_params(std::vector<ast::function_call_parameter> params);
+	void pop(const node* caller) override ;
+	void push(const node* caller, const evtnodes::callable* calling_stack) override ;
+	const node* caller() const  override ;
+	std::vector<const evtnodes::callable*> calling_stack() const  override ;
+	std::shared_ptr<evtnodes::callable_multisolver> make_params(exenv* env,
+	        const std::vector<ast::function_call_parameter>& params) const override ;
+	std::vector<ast::function_call_parameter> call_params() const  override ;
+	void call_params(std::vector<ast::function_call_parameter> params) override ;
 
 };
 

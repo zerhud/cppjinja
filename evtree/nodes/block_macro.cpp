@@ -66,3 +66,9 @@ cppjinja::evtnodes::block_macro::param(const evt::callstack& ctx
 {
 	return callable::param(block.params, name, ctx);
 }
+
+std::vector<cppjinja::ast::macro_parameter>
+cppjinja::evtnodes::block_macro::params() const
+{
+	return block.params;
+}
