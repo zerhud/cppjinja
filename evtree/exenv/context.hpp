@@ -32,8 +32,10 @@ public:
 	virtual void inject_obj(ast::string_t name, std::shared_ptr<ctx_object> obj) =0 ;
 	virtual void takeout_obj(const ast::string_t& name) =0 ;
 
+	[[deprecated("use cur_namespace and exenv::locals")]]
 	virtual std::optional<ast::value_term> solve_var(
 	        const ast::var_name& var) const=0 ;
+	[[deprecated("use cur_namespace and exenv::locals")]]
 	virtual std::optional<ast::value_term> solve_call(
 	        const ast::function_call& call) const=0 ;
 };

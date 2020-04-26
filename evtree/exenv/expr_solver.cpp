@@ -45,8 +45,10 @@ cppjinja::evt::expr_solver::operator()(const cppjinja::ast::binary_op& op)
 cppjinja::evt::expr_solver::ret_t
 cppjinja::evt::expr_solver::operator()(const cppjinja::ast::function_call& obj)
 {
-	auto pval = env->calls().params().call(obj);
-	if(pval) return (*this)(*pval);
+	for(auto& params:env->params()) {
+		auto val = params->call(obj);
+		if(val) return (*this)(*val);
+	}
 	auto ctx_val = env->ctx().solve_call(obj);
 	if(ctx_val) return (*this)(*ctx_val);
 	auto glob_val = env->globals().call(obj);
