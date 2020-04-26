@@ -69,6 +69,19 @@ const cppjinja::evt::obj_holder& cppjinja::evt::callstack_impl::params() const
 	return stack.back().params;
 }
 
+std::vector<const cppjinja::evt::obj_holder*>
+cppjinja::evt::callstack_impl::param_stack(const cppjinja::evt::node* last) const
+{
+	std::vector<const cppjinja::evt::obj_holder*> ret;
+	for(auto pos = stack.rbegin();pos!=stack.rend();++pos) {
+		ret.emplace_back(&pos->params);
+		if(pos->calling == last) return ret;
+	}
+	if(!stack.empty())
+		throw std::runtime_error("no last parameter found");
+	return ret;
+}
+
 std::vector<const cppjinja::evtnodes::callable*>
 cppjinja::evt::callstack_impl::calling_stack() const
 {

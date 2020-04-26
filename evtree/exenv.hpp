@@ -40,6 +40,7 @@ public:
 
 	virtual obj_holder& locals() =0 ;
 	virtual obj_holder& globals() =0 ;
+	virtual std::vector<const obj_holder*> params() const =0 ;
 
 	virtual callstack& calls() =0 ;
 

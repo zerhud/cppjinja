@@ -42,6 +42,7 @@ public:
 
 	obj_holder& locals() override ;
 	obj_holder& globals() override ;
+	std::vector<const obj_holder*> params() const override ;
 
 	callstack& calls() override ;
 

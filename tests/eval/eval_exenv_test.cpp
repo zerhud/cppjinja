@@ -152,6 +152,31 @@ BOOST_FIXTURE_TEST_CASE(locals, impl_exenv_fixture)
 	ctx.push(&maker);
 	BOOST_CHECK_NO_THROW(env.locals());
 }
+BOOST_FIXTURE_TEST_CASE(params, impl_exenv_fixture)
+{
+	using namespace cppjinja::ast;
+	mocks::callable_node calling1, calling2;
+	MOCK_EXPECT(calling1.params).calls([]()->std::vector<macro_parameter>{return {};});
+	MOCK_EXPECT(calling2.params).calls([]()->std::vector<macro_parameter>{
+	                                       return {macro_parameter{"p",value_term{42}}};
+	                                   });
+	MOCK_EXPECT(calling2.evaluate).once().calls([this](cppjinja::evt::exenv&){
+		BOOST_TEST(env.params().size() == 2);
+		BOOST_TEST(env.params().front()->solve(var_name{"p"}) == value_term{42});
+		BOOST_TEST(env.params().back()->solve(var_name{"p"}).has_value() == false);
+		return "calling2";
+	});
+	MOCK_EXPECT(calling1.evaluate).once().calls([this,&calling2](cppjinja::evt::exenv&){
+		BOOST_TEST(env.params().size() == 1);
+		calls.call(&env, &calling2, {});
+		BOOST_TEST(env.params().size() == 1);
+		return "calling1";
+	});
+	ctx.push(&calling1);
+	BOOST_TEST(env.params().size() == 0);
+	calls.call(&env, &calling1, {});
+	BOOST_TEST(env.params().size() == 0);
+}
 BOOST_AUTO_TEST_SUITE(context)
 
 BOOST_FIXTURE_TEST_CASE(current_node, mock_impls_fixture)
@@ -519,6 +544,35 @@ BOOST_FIXTURE_TEST_CASE(call_block, mock_impls_fixture)
 	function_call_parameter p3("p3", value_term{43});
 	BOOST_TEST(calls.call(&env, &calling, {p1,p2,p3}) == "ok");
 	BOOST_CHECK_THROW(calls.calling_stack(), std::exception);
+}
+BOOST_FIXTURE_TEST_CASE(param_stack, mock_impls_fixture)
+{
+	using namespace cppjinja::ast;
+
+	mocks::exenv env;
+	mocks::callable_node calling1, calling2;
+	MOCK_EXPECT(calling1.params).calls([]()->std::vector<macro_parameter>{return {};});
+	MOCK_EXPECT(calling2.params).calls([]()->std::vector<macro_parameter>{
+	                                       return {macro_parameter{"p",value_term{42}}};
+	                                   });
+	MOCK_EXPECT(calling1.evaluate).once().calls(
+	[this,&calling1,&env,&calling2](cppjinja::evt::exenv&){
+		BOOST_TEST(calls.param_stack(&calling1).size()==1);
+		calls.call(&env, &calling2, {});
+		BOOST_TEST(calls.param_stack(&calling1).size()==1);
+		return "c1";
+	});
+	MOCK_EXPECT(calling2.evaluate).once().calls(
+	[this,&calling1](cppjinja::evt::exenv&){
+		BOOST_TEST(calls.param_stack(&calling1).size()==2);
+		BOOST_TEST(calls.param_stack(&calling1)[1]->solve(var_name{"p"}).has_value() == false);
+		BOOST_TEST(calls.param_stack(&calling1)[0]->solve(var_name{"p"}) == value_term{42});
+		BOOST_CHECK_THROW(calls.param_stack(nullptr), std::exception);
+		return "c2";
+	});
+	BOOST_TEST(calls.param_stack(nullptr).size() == 0);
+	BOOST_TEST(calls.param_stack(&calling1).size() == 0);
+	calls.call(&env, &calling1, {});
 }
 BOOST_AUTO_TEST_SUITE_END() // callstack
 

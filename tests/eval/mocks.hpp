@@ -71,6 +71,7 @@ MOCK_BASE_CLASS( callstack, cppjinja::evt::callstack )
 	using cppjinja::evt::callstack::call_params;
 	MOCK_METHOD( call, 3 )
 	MOCK_METHOD( params, 0 )
+	MOCK_METHOD( param_stack, 1 )
 	MOCK_METHOD( calling_stack, 0 )
 	MOCK_METHOD( make_params, 2 )
 	// get_params
@@ -92,8 +93,9 @@ MOCK_BASE_CLASS( exenv, cppjinja::evt::exenv )
 	MOCK_NON_CONST_METHOD( ctx, 0, context&(), get_ctx )
 
 	MOCK_METHOD( current_node, 1)
-	MOCK_METHOD( locals, 0)
 	MOCK_METHOD( globals, 0)
+	MOCK_METHOD( locals, 0)
+	MOCK_METHOD( params, 0)
 
 	MOCK_NON_CONST_METHOD(calls, 0, callstack&(), calls)
 

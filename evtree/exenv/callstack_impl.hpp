@@ -35,6 +35,7 @@ public:
 	        const evtnodes::callable* calling,
 	        std::vector<ast::function_call_parameter> params) override ;
 	const obj_holder& params() const override ;
+	std::vector<const obj_holder*> param_stack(const node* last) const override ;
 
 	std::vector<const evtnodes::callable*> calling_stack() const  override ;
 	std::shared_ptr<evtnodes::callable_multisolver> make_params(exenv* env,

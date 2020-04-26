@@ -96,6 +96,11 @@ cppjinja::evt::obj_holder& cppjinja::evt::exenv_impl::globals()
 	return global_namespace;
 }
 
+std::vector<const cppjinja::evt::obj_holder*> cppjinja::evt::exenv_impl::params() const
+{
+	return execalls.param_stack(exectx.maker());
+}
+
 cppjinja::evt::callstack& cppjinja::evt::exenv_impl::calls()
 {
 	return execalls;
