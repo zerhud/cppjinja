@@ -70,8 +70,16 @@ struct impl_exenv_fixture : mock_env_fixture
 
 struct mock_solver_fixture : mocks::mock_exenv_fixture
 {
+	cppjinja::evt::obj_holder globals, locals, params;
 	cppjinja::evt::expr_solver solver;
 	mock_solver_fixture() : solver(&env) {}
+	void expect_glp(int gc, int lc, int pc)
+	{
+		using cppjinja::evt::obj_holder;
+		MOCK_EXPECT(calls.params).at_least(pc).calls([this]()->obj_holder&{return params;});
+		MOCK_EXPECT(env.locals).at_least(lc).calls([this]()->obj_holder&{return locals;});
+		MOCK_EXPECT(env.globals).at_least(gc).calls([this]()->obj_holder&{return globals;});
+	}
 };
 
 
@@ -295,15 +303,12 @@ BOOST_FIXTURE_TEST_CASE(simples, mock_solver_fixture)
 BOOST_AUTO_TEST_SUITE(functions)
 BOOST_FIXTURE_TEST_CASE(from_user_data, mock_solver_fixture)
 {
-	using cppjinja::evt::obj_holder;
-
 	cppjinja::ast::var_name fnc_name{"a"};
 	cppjinja::ast::function_call_parameter param1(value_term{1});
 	value_term call{cppjinja::ast::function_call{fnc_name, {param1}}};
 
-	obj_holder globals;
+	expect_glp(1, 0, 1);
 	MOCK_EXPECT(ctx.solve_call).once().returns(std::nullopt);
-	MOCK_EXPECT(env.globals).once().calls([&globals]()->obj_holder&{return globals;});
 	MOCK_EXPECT(data.value_function_call).once().returns(east_value_term{42});
 	BOOST_TEST(solver(call) == east_value_term{42});
 }
@@ -311,6 +316,7 @@ BOOST_FIXTURE_TEST_CASE(call_other_block, mock_solver_fixture)
 {
 	cppjinja::ast::var_name fnc_name{"a"};
 	value_term call{cppjinja::ast::function_call{fnc_name, {}}};
+	expect_glp(0, 0, 1);
 	MOCK_EXPECT(ctx.solve_call).once().returns(value_term{"result"});
 	BOOST_TEST(solver(call) == east_value_term{"result"});
 }
@@ -325,11 +331,10 @@ BOOST_DATA_TEST_CASE_F(mock_solver_fixture, binary_ops
 	using cppjinja::ast::var_name;
 	using cppjinja::ast::binary_op;
 	using cppjinja::evt::obj_holder;
-	obj_holder globals;
 	binary_op bop{left, op, right};
+	expect_glp(1, 0, 1);
 	BOOST_TEST(solver(value_term{bop}) == result);
 	MOCK_EXPECT(ctx.solve_call).returns(std::nullopt);
-	MOCK_EXPECT(env.globals).calls([&globals]()->obj_holder&{return globals;});
 	MOCK_EXPECT(data.value_function_call).once().returns(solver(left));
 	bop.left = value_term{cppjinja::ast::function_call{var_name{"a"}, {}}};
 	BOOST_TEST(solver(value_term{bop}) == result);
@@ -488,51 +493,32 @@ BOOST_FIXTURE_TEST_CASE(no_callparams_in_empty, mock_impls_fixture)
 {
 	BOOST_CHECK_THROW(calls.call_params(), std::exception);
 }
-BOOST_FIXTURE_TEST_CASE(create_params, mock_impls_fixture)
-{
-	using namespace cppjinja::ast;
-	mocks::exenv env;
-	mocks::callable_node calling;
-
-	MOCK_EXPECT(calling.params).returns(std::vector<macro_parameter>{
-	                                       macro_parameter{"p1", std::nullopt},
-	                                       macro_parameter{"p2", std::nullopt},
-	                                       macro_parameter{"p4", value_term{44}}
-	                                    });
-
-	MOCK_EXPECT(calling.evaluate).once().calls([this](cppjinja::evt::exenv& env){
-//		auto params = calls.make_params(&env, {p1, p2, p3});
-//		BOOST_REQUIRE(params);
-//		BOOST_TEST(params->solve(var_name{"p1"}) == value_term{41});
-//		BOOST_TEST(params->solve(var_name{"p2"}) == value_term{42});
-//		BOOST_TEST(params->solve(var_name{"p3"}) == value_term{43});
-//		BOOST_TEST(params->solve(var_name{"p4"}) == value_term{44});
-		return "OK";
-	});
-
-	function_call_parameter p1(value_term{41});
-	function_call_parameter p2("p2", value_term{42});
-	function_call_parameter p3("p3", value_term{43});
-	calls.call(&env, &calling, {p1, p2, p3});
-}
 BOOST_FIXTURE_TEST_CASE(call_block, mock_impls_fixture)
 {
 	using namespace cppjinja::ast;
 
 	mocks::exenv env;
 	mocks::callable_node calling;
+	MOCK_EXPECT(calling.params).returns(std::vector<macro_parameter>{
+	                                       macro_parameter{"p1", std::nullopt},
+	                                       macro_parameter{"p2", value_term{52}},
+	                                       macro_parameter{"p4", value_term{44}}
+	                                    });
 	MOCK_EXPECT(calling.evaluate).once().calls(
 	[this,&env](cppjinja::evt::exenv& ienv){
 		BOOST_TEST(&ienv == &env);
-		BOOST_TEST_REQUIRE(calls.call_params().size() == 1);
-		BOOST_REQUIRE(calls.call_params()[0].name.has_value());
-		BOOST_TEST(*calls.call_params()[0].name == "p1");
+		auto& params = calls.params();
+		BOOST_TEST(params.solve(var_name{"p1"}) == value_term{41});
+		BOOST_TEST(params.solve(var_name{"p2"}) == value_term{42});
+		BOOST_TEST(params.solve(var_name{"p3"}) == value_term{43});
+		BOOST_TEST(params.solve(var_name{"p4"}) == value_term{44});
 		return "ok"s;
 	});
-	function_call_parameter p1("p1", value_term{42});
-	BOOST_TEST(calls.call(&env, &calling, {p1}) == "ok");
+	function_call_parameter p1(value_term{41});
+	function_call_parameter p2("p2", value_term{42});
+	function_call_parameter p3("p3", value_term{43});
+	BOOST_TEST(calls.call(&env, &calling, {p1,p2,p3}) == "ok");
 	BOOST_CHECK_THROW(calls.calling_stack(), std::exception);
-	BOOST_CHECK_THROW(calls.call_params(), std::exception);
 }
 BOOST_AUTO_TEST_SUITE_END() // callstack
 

@@ -28,4 +28,12 @@ public:
 	ast::value_term solve(ast::var_name var) override ;
 };
 
+class var_solver : public ctx_object {
+	ast::value_term val;
+public:
+	var_solver(ast::value_term v);
+	ast::value_term call(ast::function_call fnc) override ;
+	ast::value_term solve(ast::var_name var) override ;
+};
+
 } // namespace cppjinja::evt

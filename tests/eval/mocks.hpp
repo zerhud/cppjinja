@@ -70,6 +70,7 @@ MOCK_BASE_CLASS( callstack, cppjinja::evt::callstack )
 {
 	using cppjinja::evt::callstack::call_params;
 	MOCK_METHOD( call, 3 )
+	MOCK_METHOD( params, 0 )
 	MOCK_METHOD( calling_stack, 0 )
 	MOCK_METHOD( make_params, 2 )
 	// get_params
