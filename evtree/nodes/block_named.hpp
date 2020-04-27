@@ -13,7 +13,6 @@
 namespace cppjinja::evtnodes {
 
 class block_named : public callable {
-	using callable::param;
 	ast::block_named block;
 	bool has_nondefaulted_params() const ;
 public:

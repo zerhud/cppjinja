@@ -14,11 +14,6 @@
 namespace cppjinja::evtnodes {
 
 class callable : virtual public evt::named_node {
-protected:
-	std::optional<ast::value_term> param(
-	          const std::vector<ast::macro_parameter>& params
-	        , const ast::var_name& name
-	        , const evt::callstack& ctx) const ;
 public:
 	virtual east::string_t evaluate( evt::exenv& env) const =0 ;
 	virtual std::vector<ast::macro_parameter> params() const =0 ;
