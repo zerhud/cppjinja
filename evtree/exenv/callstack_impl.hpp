@@ -35,10 +35,6 @@ public:
 	        const evtnodes::callable* calling,
 	        std::vector<ast::function_call_parameter> params) override ;
 	std::vector<const obj_holder*> param_stack(const node* last) const override ;
-
-	std::vector<const evtnodes::callable*> calling_stack() const  override ;
-	std::vector<ast::function_call_parameter> call_params() const  override ;
-
 };
 
 } // namespace cppjinja::evt

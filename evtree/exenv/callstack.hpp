@@ -30,10 +30,6 @@ public:
 	        std::vector<ast::function_call_parameter> params) =0 ;
 	virtual std::vector<const obj_holder*> param_stack(const node* last) const =0 ;
 
-	virtual std::vector<const evtnodes::callable*> calling_stack() const  =0 ;
-
-	virtual std::vector<ast::function_call_parameter> call_params() const  =0 ;
-
 };
 
 } // namespace cppjinja::evt

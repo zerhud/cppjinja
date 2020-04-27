@@ -76,17 +76,3 @@ cppjinja::evt::obj_holder& cppjinja::evt::context_impl::cur_namespace()
 	require_not_empty();
 	return ctx.back().ns;
 }
-
-void cppjinja::evt::context_impl::inject_obj(
-          cppjinja::ast::string_t name
-        , std::shared_ptr<ctx_object> obj)
-{
-	require_not_empty();
-	ctx.back().ns.add(name, std::move(obj));
-}
-
-void cppjinja::evt::context_impl::takeout_obj(const ast::string_t& name)
-{
-	require_not_empty();
-	ctx.back().ns.rem(name);
-}

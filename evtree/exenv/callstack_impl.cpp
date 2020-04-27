@@ -76,23 +76,6 @@ cppjinja::evt::callstack_impl::param_stack(const cppjinja::evt::node* last) cons
 	return ret;
 }
 
-std::vector<const cppjinja::evtnodes::callable*>
-cppjinja::evt::callstack_impl::calling_stack() const
-{
-	require_stack_is_not_empty();
-	std::vector<const cppjinja::evtnodes::callable*> ret;
-	for(auto item = stack.rbegin();item!=stack.rend();++item)
-		ret.emplace_back(item->calling);
-	return ret;
-}
-
-std::vector<cppjinja::ast::function_call_parameter>
-cppjinja::evt::callstack_impl::call_params() const
-{
-	require_stack_is_not_empty();
-	return stack.back().cparams;
-}
-
 void cppjinja::evt::callstack_impl::call_params(
         std::vector<cppjinja::ast::function_call_parameter> params)
 {

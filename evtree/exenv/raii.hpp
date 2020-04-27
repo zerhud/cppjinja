@@ -23,14 +23,4 @@ public:
 	~raii_push_ctx() ;
 };
 
-class raii_inject_obj final {
-	context* ctx;
-	std::string name;
-public:
-	raii_inject_obj(raii_inject_obj&&) noexcept ;
-	raii_inject_obj(const raii_inject_obj&) =delete ;
-	raii_inject_obj(std::string n, std::unique_ptr<ctx_object> obj, context* c);
-	~raii_inject_obj() ;
-};
-
 } // namespace cppjinja::evt

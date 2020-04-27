@@ -53,8 +53,6 @@ MOCK_BASE_CLASS( context, cppjinja::evt::context )
 	MOCK_METHOD(out, 0)
 	MOCK_METHOD(result, 0)
 
-	MOCK_METHOD(inject_obj, 2)
-	MOCK_METHOD(takeout_obj, 1)
 	MOCK_METHOD(cur_namespace, 0)
 };
 
@@ -66,12 +64,8 @@ MOCK_BASE_CLASS(ctx_object, cppjinja::evt::ctx_object)
 
 MOCK_BASE_CLASS( callstack, cppjinja::evt::callstack )
 {
-	using cppjinja::evt::callstack::call_params;
 	MOCK_METHOD( call, 3 )
 	MOCK_METHOD( param_stack, 1 )
-	MOCK_METHOD( calling_stack, 0 )
-	// get_params
-	MOCK_METHOD( call_params, 0, std::vector<cppjinja::ast::function_call_parameter>(), get_params )
 };
 
 MOCK_BASE_CLASS( exenv, cppjinja::evt::exenv )
@@ -126,11 +120,6 @@ struct mock_exenv_fixture
 		MOCK_EXPECT(env.params).at_least(pc).calls([this](){return params;});
 		MOCK_EXPECT(env.locals).at_least(lc).calls([this]()->obj_holder&{return locals;});
 		MOCK_EXPECT(env.globals).at_least(gc).calls([this]()->obj_holder&{return globals;});
-	}
-
-	void expect_callings(std::vector<const cppjinja::evtnodes::callable*> stack)
-	{
-		MOCK_EXPECT(calls.calling_stack).once().returns(stack);
 	}
 
 	void expect_call(

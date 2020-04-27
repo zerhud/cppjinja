@@ -8,7 +8,6 @@
 
 #include "op_set.hpp"
 #include "exenv.hpp"
-#include "evtree/exenv/context.hpp"
 #include "evtree/exenv/ctx_object.hpp"
 #include "evtree/exenv/obj_holder.hpp"
 

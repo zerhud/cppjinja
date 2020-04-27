@@ -32,26 +32,3 @@ cppjinja::evt::raii_push_ctx::~raii_push_ctx()
 {
 	if(ctx) ctx->pop(maker);
 }
-
-cppjinja::evt::raii_inject_obj::raii_inject_obj(
-        cppjinja::evt::raii_inject_obj&& other) noexcept
-    : ctx(other.ctx)
-    , name(std::move(other.name))
-{
-	other.ctx = nullptr;
-}
-
-cppjinja::evt::raii_inject_obj::raii_inject_obj(
-          std::string n
-        , std::unique_ptr<cppjinja::evt::ctx_object> obj
-        , cppjinja::evt::context* c)
-   : ctx(c)
-   , name(std::move(n))
-{
-	ctx->inject_obj(name, std::move(obj));
-}
-
-cppjinja::evt::raii_inject_obj::~raii_inject_obj()
-{
-	if(ctx) ctx->takeout_obj(name);
-}
