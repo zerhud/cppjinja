@@ -31,9 +31,6 @@ public:
 	virtual std::vector<const obj_holder*> param_stack(const node* last) const =0 ;
 
 	virtual std::vector<const evtnodes::callable*> calling_stack() const  =0 ;
-	virtual std::shared_ptr<evtnodes::callable_multisolver> make_params(
-	        exenv* env,
-	        const std::vector<ast::function_call_parameter>& params) const =0 ;
 
 	virtual std::vector<ast::function_call_parameter> call_params() const  =0 ;
 

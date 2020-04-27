@@ -86,23 +86,6 @@ cppjinja::evt::callstack_impl::calling_stack() const
 	return ret;
 }
 
-std::shared_ptr<cppjinja::evtnodes::callable_multisolver>
-cppjinja::evt::callstack_impl::make_params(exenv* env,
-        const std::vector<cppjinja::ast::function_call_parameter>& params) const
-{
-	require_stack_is_not_empty();
-	auto cparams = stack.back().calling->params();
-	auto ret = std::make_shared<evtnodes::callable_multisolver>(env);
-	for(auto& p:params) if(p.name.has_value()) ret->add(*p.name, p.value.get());
-	for(auto& p:cparams) if(p.value.has_value()) ret->add(p.name, *p.value);
-	for(std::size_t i=0;i<cparams.size();++i) {
-		auto val = position_param(params, i);
-		if(val) ret->add(cparams[i].name, *val);
-	}
-
-	return nullptr;
-}
-
 std::vector<cppjinja::ast::function_call_parameter>
 cppjinja::evt::callstack_impl::call_params() const
 {
