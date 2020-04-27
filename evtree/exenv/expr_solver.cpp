@@ -49,7 +49,7 @@ cppjinja::evt::expr_solver::operator()(const cppjinja::ast::function_call& obj)
 		auto val = params->call(obj);
 		if(val) return (*this)(*val);
 	}
-	auto ctx_val = env->ctx().solve_call(obj);
+	auto ctx_val = env->locals().call(obj);
 	if(ctx_val) return (*this)(*ctx_val);
 	auto glob_val = env->globals().call(obj);
 	if(glob_val) return (*this)(*glob_val);
@@ -59,9 +59,11 @@ cppjinja::evt::expr_solver::operator()(const cppjinja::ast::function_call& obj)
 cppjinja::evt::expr_solver::ret_t
 cppjinja::evt::expr_solver::operator()(const cppjinja::ast::var_name& obj)
 {
-	auto param_val = search_in_params(obj);
-	if(param_val) return (*this)(*param_val);
-	auto ctx_val = env->ctx().solve_var(obj);
+	for(auto& params:env->params()) {
+		auto val = params->solve(obj);
+		if(val) return (*this)(*val);
+	}
+	auto ctx_val = env->locals().solve(obj);
 	if(ctx_val) return (*this)(*ctx_val);
 	auto glob_val = env->globals().solve(obj);
 	if(glob_val) return (*this)(*glob_val);

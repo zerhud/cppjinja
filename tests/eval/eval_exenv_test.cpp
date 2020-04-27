@@ -21,8 +21,6 @@
 #include "evtree/exenv/callstack_impl.hpp"
 #include "evtree/exenv/expr_solver.hpp"
 #include "evtree/exenv/expr_filter.hpp"
-#include "evtree/exenv/ctx_object.hpp"
-#include "evtree/exenv/obj_holder.hpp"
 #include "evtree/nodes/callable.hpp"
 #include "parser/operators/common.hpp"
 #include "parser/grammar/tmpls.hpp"
@@ -71,16 +69,7 @@ struct impl_exenv_fixture : mock_env_fixture
 struct mock_solver_fixture : mocks::mock_exenv_fixture
 {
 	cppjinja::evt::expr_solver solver;
-	cppjinja::evt::obj_holder globals, locals;
-	std::vector<const cppjinja::evt::obj_holder*> params;
 	mock_solver_fixture() : solver(&env) {}
-	void expect_glp(int gc, int lc, int pc)
-	{
-		using cppjinja::evt::obj_holder;
-		MOCK_EXPECT(env.params).at_least(pc).calls([this](){return params;});
-		MOCK_EXPECT(env.locals).at_least(lc).calls([this]()->obj_holder&{return locals;});
-		MOCK_EXPECT(env.globals).at_least(gc).calls([this]()->obj_holder&{return globals;});
-	}
 };
 
 
@@ -333,8 +322,7 @@ BOOST_FIXTURE_TEST_CASE(from_user_data, mock_solver_fixture)
 	cppjinja::ast::function_call_parameter param1(value_term{1});
 	value_term call{cppjinja::ast::function_call{fnc_name, {param1}}};
 
-	expect_glp(1, 0, 1);
-	MOCK_EXPECT(ctx.solve_call).once().returns(std::nullopt);
+	expect_glp(1, 1, 1);
 	MOCK_EXPECT(data.value_function_call).once().returns(east_value_term{42});
 	BOOST_TEST(solver(call) == east_value_term{42});
 }
@@ -342,8 +330,8 @@ BOOST_FIXTURE_TEST_CASE(call_other_block, mock_solver_fixture)
 {
 	cppjinja::ast::var_name fnc_name{"a"};
 	value_term call{cppjinja::ast::function_call{fnc_name, {}}};
-	expect_glp(0, 0, 1);
-	MOCK_EXPECT(ctx.solve_call).once().returns(value_term{"result"});
+	locals.add("a", std::make_shared<cppjinja::evt::var_solver>(value_term{"result"}));
+	expect_glp(0, 1, 1);
 	BOOST_TEST(solver(call) == east_value_term{"result"});
 }
 BOOST_AUTO_TEST_SUITE_END() // functions
@@ -367,62 +355,28 @@ BOOST_DATA_TEST_CASE_F(mock_solver_fixture, binary_ops
 }
 BOOST_FIXTURE_TEST_CASE(by_name_from_data, mock_solver_fixture)
 {
-	using cppjinja::evt::obj_holder;
-	obj_holder locals, globals;
-	mocks::callable_node ctx_maker;
 	east_value_term result{42};
 	cppjinja::ast::var_name vn{ "a" };
-	expect_callings({&ctx_maker});
-	mock::sequence seq;
-	MOCK_EXPECT(ctx_maker.param).once().in(seq).returns(std::nullopt);
-	MOCK_EXPECT(ctx.maker).once().returns(&ctx_maker);
-	MOCK_EXPECT(ctx.solve_var).once().in(seq).returns(std::nullopt);
-	MOCK_EXPECT(env.globals)
-	        .once().in(seq).calls([&locals]()->obj_holder&{return locals;});
-	MOCK_EXPECT(data.value_var_name).once().in(seq).returns(result);
+	expect_glp(1, 1, 1);
+	MOCK_EXPECT(data.value_var_name).once().returns(result);
 	BOOST_TEST(solver({value_term{vn}}) == result);
 }
-BOOST_FIXTURE_TEST_CASE(by_name_from_setted, mock_solver_fixture)
+BOOST_FIXTURE_TEST_CASE(by_name_from_local, mock_solver_fixture)
 {
-	mocks::callable_node ctx_maker;
-	expect_callings({&ctx_maker});
-	MOCK_EXPECT(ctx_maker.param).once().returns(std::nullopt);
-	MOCK_EXPECT(ctx.solve_var).once().returns(value_term{42});
-	MOCK_EXPECT(ctx.maker).once().returns(&ctx_maker);
-
+	locals.add("a", std::make_shared<cppjinja::evt::var_solver>(value_term{42}));
+	expect_glp(0, 1, 1);
 	cppjinja::ast::var_name vn{ "a" };
 	BOOST_TEST(solver(value_term{vn}) == east_value_term{42});
 }
 BOOST_FIXTURE_TEST_CASE(in_params, mock_solver_fixture)
 {
-	mocks::callable_node maker, calling2;
-
-	expect_callings({&maker, &calling2});
-	MOCK_EXPECT(maker.param).once().returns(value_term{42});
-
-	cppjinja::ast::var_name vn{ "a" };
-	BOOST_TEST(solver(value_term{vn}) == east_value_term{42});
-}
-BOOST_FIXTURE_TEST_CASE(two_callers_one_maker, mock_solver_fixture)
-{
-	mocks::callable_node maker, calling2, calling3;
-
-	expect_callings({&calling2, &maker, &calling3});
-	MOCK_EXPECT(ctx.maker).returns(&maker);
-	mock::sequence seq;
-	MOCK_EXPECT(calling2.param).once().in(seq).returns(std::nullopt);
-	MOCK_EXPECT(maker.param).once().in(seq).returns(value_term{42});
+	cppjinja::evt::obj_holder params1;
+	params1.add("a", std::make_shared<cppjinja::evt::var_solver>(value_term{42}));
+	params.emplace_back(&params1);
+	expect_glp(0,0,1);
 
 	cppjinja::ast::var_name vn{ "a" };
 	BOOST_TEST(solver(value_term{vn}) == east_value_term{42});
-}
-BOOST_FIXTURE_TEST_CASE(if_no_calling_use_ctx, mock_solver_fixture)
-{
-	mocks::callable_node calling, maker;
-	expect_callings({&calling});
-	MOCK_EXPECT(calling.param).once().returns(std::nullopt);
-	MOCK_EXPECT(ctx.maker).once().returns(&maker);
-	BOOST_CHECK_THROW(solver(cppjinja::ast::var_name{"a"}), std::exception);
 }
 BOOST_AUTO_TEST_CASE(cannot_create_without_context)
 {

@@ -196,17 +196,10 @@ BOOST_FIXTURE_TEST_CASE(op_out, mock_exenv_fixture)
 	check_main(tree, "", 1, 0);
 	BOOST_TEST(make_node_seq_str(tree.main_block(), tree.lrnd) == "block_named,op_out..");
 
-	mocks::callable_node caller;
-	expect_callings({&caller});
-	auto mbrnd = make_node_seq(tree.main_block(), tree.lrnd);
-	MOCK_EXPECT(env.current_node).with(mbrnd[1]);
-	MOCK_EXPECT(caller.param).calls(
-	[](const cppjinja::evt::callstack&,const ast::var_name& n) {
-		BOOST_TEST(n.size()==1);
-		BOOST_TEST(n[0] == "a");
-		return ast::value_term{""s};
-	});
-	mbrnd[1]->render(env);
+	expect_glp(0, 1, 1);
+	locals.add("a", std::make_shared<cppjinja::evt::var_solver>(ast::value_term{""}));
+	MOCK_EXPECT(env.current_node);
+	make_node_seq(tree.main_block(), tree.lrnd)[1]->render(env);
 }
 
 BOOST_FIXTURE_TEST_CASE(op_set, mock_exenv_fixture)

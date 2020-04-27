@@ -13,6 +13,7 @@
 #include "evtree/exenv/context.hpp"
 #include "evtree/exenv/callstack.hpp"
 #include "evtree/exenv/ctx_object.hpp"
+#include "evtree/exenv/obj_holder.hpp"
 #include "parser/operators/single.hpp"
 
 namespace mocks {
@@ -112,6 +113,9 @@ struct mock_exenv_fixture
 	std::stringstream out;
 	mocks::data_provider data;
 
+	cppjinja::evt::obj_holder globals, locals;
+	std::vector<const cppjinja::evt::obj_holder*> params;
+
 	mock_exenv_fixture()
 	{
 		MOCK_EXPECT(env.data).returns(&data);
@@ -119,6 +123,14 @@ struct mock_exenv_fixture
 		MOCK_EXPECT(env.get_cctx).returns(ctx);
 		MOCK_EXPECT(env.calls).returns(calls);
 		MOCK_EXPECT(env.out).calls([this]()->std::ostream&{return out;});
+	}
+
+	void expect_glp(int gc, int lc, int pc)
+	{
+		using cppjinja::evt::obj_holder;
+		MOCK_EXPECT(env.params).at_least(pc).calls([this](){return params;});
+		MOCK_EXPECT(env.locals).at_least(lc).calls([this]()->obj_holder&{return locals;});
+		MOCK_EXPECT(env.globals).at_least(gc).calls([this]()->obj_holder&{return globals;});
 	}
 
 	void expect_callings(std::vector<const cppjinja::evtnodes::callable*> stack)
