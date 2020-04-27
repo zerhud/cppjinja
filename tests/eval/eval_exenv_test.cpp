@@ -475,13 +475,14 @@ BOOST_FIXTURE_TEST_CASE(call_block, mock_impls_fixture)
 	                                       macro_parameter{"p4", value_term{44}}
 	                                    });
 	MOCK_EXPECT(calling.evaluate).once().calls(
-	[this,&env](cppjinja::evt::exenv& ienv){
+	[this,&env,&calling](cppjinja::evt::exenv& ienv){
 		BOOST_TEST(&ienv == &env);
-		auto& params = calls.params();
-		BOOST_TEST(params.solve(var_name{"p1"}) == value_term{41});
-		BOOST_TEST(params.solve(var_name{"p2"}) == value_term{42});
-		BOOST_TEST(params.solve(var_name{"p3"}) == value_term{43});
-		BOOST_TEST(params.solve(var_name{"p4"}) == value_term{44});
+		auto params = calls.param_stack(&calling);
+		BOOST_TEST_REQUIRE(params.size() == 1);
+		BOOST_TEST(params[0]->solve(var_name{"p1"}) == value_term{41});
+		BOOST_TEST(params[0]->solve(var_name{"p2"}) == value_term{42});
+		BOOST_TEST(params[0]->solve(var_name{"p3"}) == value_term{43});
+		BOOST_TEST(params[0]->solve(var_name{"p4"}) == value_term{44});
 		return "ok"s;
 	});
 	function_call_parameter p1(value_term{41});

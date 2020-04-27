@@ -63,12 +63,6 @@ cppjinja::east::string_t cppjinja::evt::callstack_impl::call(exenv* env,
 	return ret;
 }
 
-const cppjinja::evt::obj_holder& cppjinja::evt::callstack_impl::params() const
-{
-	require_stack_is_not_empty();
-	return stack.back().params;
-}
-
 std::vector<const cppjinja::evt::obj_holder*>
 cppjinja::evt::callstack_impl::param_stack(const cppjinja::evt::node* last) const
 {

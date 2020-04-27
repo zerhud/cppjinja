@@ -28,8 +28,6 @@ public:
 	virtual east::string_t call(exenv* env,
 	        const evtnodes::callable* calling,
 	        std::vector<ast::function_call_parameter> params) =0 ;
-	[[deprecated("user param_stack")]]
-	virtual const obj_holder& params() const =0 ;
 	virtual std::vector<const obj_holder*> param_stack(const node* last) const =0 ;
 
 	virtual std::vector<const evtnodes::callable*> calling_stack() const  =0 ;
