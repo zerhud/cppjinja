@@ -17,7 +17,6 @@ namespace cppjinja::evt {
 class callstack_impl final : public callstack {
 	struct frame {
 		const evtnodes::callable* calling;
-		std::vector<ast::function_call_parameter> cparams;
 		obj_holder params;
 	};
 	std::vector<frame> stack;
@@ -28,7 +27,6 @@ class callstack_impl final : public callstack {
 
 	void pop() ;
 	void push(const evtnodes::callable* calling_stack) ;
-	void call_params(std::vector<ast::function_call_parameter> params) ;
 	void make_params_holder(std::vector<ast::function_call_parameter> params);
 public:
 	east::string_t call(exenv* env,

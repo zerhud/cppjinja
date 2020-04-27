@@ -37,7 +37,7 @@ void cppjinja::evt::callstack_impl::pop()
 void cppjinja::evt::callstack_impl::push(const evtnodes::callable* calling)
 {
 	if(calling == nullptr) throw std::runtime_error("cannot push nullptr calling");
-	stack.emplace_back(frame{calling, {}, obj_holder()});
+	stack.emplace_back(frame{calling, obj_holder()});
 }
 
 cppjinja::east::string_t cppjinja::evt::callstack_impl::call(exenv* env,
@@ -57,10 +57,8 @@ cppjinja::east::string_t cppjinja::evt::callstack_impl::call(exenv* env,
 			self->pop();
 		}
 	} raii(this, calling);
-	call_params(params);
 	make_params_holder(std::move(params));
-	auto ret = calling->evaluate(*env);
-	return ret;
+	return calling->evaluate(*env);
 }
 
 std::vector<const cppjinja::evt::obj_holder*>
@@ -74,13 +72,6 @@ cppjinja::evt::callstack_impl::param_stack(const cppjinja::evt::node* last) cons
 	if(!stack.empty())
 		throw std::runtime_error("no last parameter found");
 	return ret;
-}
-
-void cppjinja::evt::callstack_impl::call_params(
-        std::vector<cppjinja::ast::function_call_parameter> params)
-{
-	require_stack_is_not_empty();
-	stack.back().cparams = params;
 }
 
 void cppjinja::evt::callstack_impl::make_params_holder(std::vector<cppjinja::ast::function_call_parameter> params)
