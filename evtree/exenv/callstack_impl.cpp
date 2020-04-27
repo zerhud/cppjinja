@@ -10,12 +10,6 @@
 #include "callstack_impl.hpp"
 #include "evtree/nodes/callable.hpp"
 
-void cppjinja::evt::callstack_impl::require_stack_is_not_empty() const
-{
-	if(stack.empty())
-		throw std::runtime_error("stack is empty");
-}
-
 std::optional<cppjinja::ast::value_term>
 cppjinja::evt::callstack_impl::position_param(
           const std::vector<cppjinja::ast::function_call_parameter>& params
@@ -28,18 +22,6 @@ cppjinja::evt::callstack_impl::position_param(
 	return std::nullopt;
 }
 
-void cppjinja::evt::callstack_impl::pop()
-{
-	require_stack_is_not_empty();
-	stack.pop_back();
-}
-
-void cppjinja::evt::callstack_impl::push(const evtnodes::callable* calling)
-{
-	if(calling == nullptr) throw std::runtime_error("cannot push nullptr calling");
-	stack.emplace_back(frame{calling, obj_holder()});
-}
-
 cppjinja::east::string_t cppjinja::evt::callstack_impl::call(exenv* env,
         const cppjinja::evtnodes::callable* calling,
         std::vector<cppjinja::ast::function_call_parameter> params)
@@ -50,11 +32,11 @@ cppjinja::east::string_t cppjinja::evt::callstack_impl::call(exenv* env,
 		pushpoper(callstack_impl* s, const evtnodes::callable* c)
 		    : self(s)
 		{
-			self->push(c);
+			self->stack.emplace_back(frame{c, obj_holder()});
 		}
 		~pushpoper()
 		{
-			self->pop();
+			self->stack.pop_back();
 		}
 	} raii(this, calling);
 	make_params_holder(std::move(params));
