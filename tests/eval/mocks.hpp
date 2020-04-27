@@ -56,9 +56,6 @@ MOCK_BASE_CLASS( context, cppjinja::evt::context )
 	MOCK_METHOD(inject_obj, 2)
 	MOCK_METHOD(takeout_obj, 1)
 	MOCK_METHOD(cur_namespace, 0)
-
-	MOCK_METHOD(solve_var, 1)
-	MOCK_METHOD(solve_call, 1)
 };
 
 MOCK_BASE_CLASS(ctx_object, cppjinja::evt::ctx_object)

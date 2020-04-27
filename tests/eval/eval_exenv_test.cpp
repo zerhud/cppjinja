@@ -167,8 +167,8 @@ BOOST_FIXTURE_TEST_CASE(params, impl_exenv_fixture)
 	calls.call(&env, &calling1, {});
 	BOOST_TEST(env.params().size() == 0);
 }
-BOOST_AUTO_TEST_SUITE(context)
 
+BOOST_AUTO_TEST_SUITE(context)
 BOOST_FIXTURE_TEST_CASE(current_node, mock_impls_fixture)
 {
 	mocks::node fnode1, fnode2;
@@ -213,15 +213,6 @@ BOOST_FIXTURE_TEST_CASE(cur_namespace, mock_impls_fixture)
 }
 
 BOOST_AUTO_TEST_SUITE(solve_name)
-BOOST_FIXTURE_TEST_CASE(var_not_setted, mock_impls_fixture)
-{
-	cppjinja::ast::var_name vn{ "a" };
-	BOOST_CHECK_THROW(ctx.solve_var(vn), std::exception);
-
-	mocks::node fnode1;
-	ctx.push(&fnode1);
-	BOOST_TEST(!ctx.solve_var(vn).has_value());
-}
 BOOST_FIXTURE_TEST_CASE(inject_object, mock_impls_fixture)
 {
 	mocks::node node;
@@ -242,8 +233,8 @@ BOOST_FIXTURE_TEST_CASE(inject_object_solves, mock_impls_fixture)
 	MOCK_EXPECT(obj->solve).exactly(2).returns(value_term{"ok"s});
 	ctx.push(&node);
 	BOOST_CHECK_NO_THROW(ctx.inject_obj("n", std::move(obj)));
-	BOOST_TEST(ctx.solve_var(var_name{"n"s}) == value_term{"ok"});
-	BOOST_TEST(ctx.solve_var(var_name{"n"s, "a"s}) == value_term{"ok"});
+	BOOST_TEST(ctx.cur_namespace().solve(var_name{"n"s}) == value_term{"ok"});
+	BOOST_TEST(ctx.cur_namespace().solve(var_name{"n"s, "a"s}) == value_term{"ok"});
 }
 BOOST_FIXTURE_TEST_CASE(inject_object_calls, mock_impls_fixture)
 {
@@ -258,9 +249,9 @@ BOOST_FIXTURE_TEST_CASE(inject_object_calls, mock_impls_fixture)
 	BOOST_CHECK_NO_THROW(ctx.inject_obj("self", std::move(obj2)));
 	function_call call;
 	call.ref = {"n"s};
-	BOOST_TEST(ctx.solve_call(call) == value_term{"ok1"});
+	BOOST_TEST(ctx.cur_namespace().call(call) == value_term{"ok1"});
 	call.ref = {"self"s};
-	BOOST_TEST(ctx.solve_call(call) == value_term{"ok2"});
+	BOOST_TEST(ctx.cur_namespace().call(call) == value_term{"ok2"});
 }
 BOOST_AUTO_TEST_SUITE_END() // solve_name
 
@@ -346,9 +337,8 @@ BOOST_DATA_TEST_CASE_F(mock_solver_fixture, binary_ops
 	using cppjinja::ast::binary_op;
 	using cppjinja::evt::obj_holder;
 	binary_op bop{left, op, right};
-	expect_glp(1, 0, 1);
+	expect_glp(1, 1, 1);
 	BOOST_TEST(solver(value_term{bop}) == result);
-	MOCK_EXPECT(ctx.solve_call).returns(std::nullopt);
 	MOCK_EXPECT(data.value_function_call).once().returns(solver(left));
 	bop.left = value_term{cppjinja::ast::function_call{var_name{"a"}, {}}};
 	BOOST_TEST(solver(value_term{bop}) == result);

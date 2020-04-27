@@ -19,12 +19,7 @@ class expr_solver final {
 
 	east::value_term make_array(
 	        const std::vector<ast::forward_ast<ast::value_term>>& fields) ;
-	std::optional<ast::value_term> search_in_params(
-	        const cppjinja::ast::var_name& var) const;
 	east::value_term solve_in_data(const cppjinja::ast::function_call& obj) ;
-	east::value_term solve_in_tmpl(
-	          const cppjinja::ast::function_call& obj
-	        , const evtnodes::callable* node) ;
 public:
 	typedef east::value_term ret_t;
 

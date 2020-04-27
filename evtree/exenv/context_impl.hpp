@@ -43,11 +43,6 @@ public:
 	obj_holder& cur_namespace() override ;
 	void inject_obj(ast::string_t name, std::shared_ptr<ctx_object> obj) override ;
 	void takeout_obj(const ast::string_t& name) override ;
-
-	std::optional<ast::value_term> solve_var(
-	        const cppjinja::ast::var_name& var) const override ;
-	std::optional<ast::value_term> solve_call(
-	        const ast::function_call& call) const override ;
 };
 
 } // namespace cppjinja::evt

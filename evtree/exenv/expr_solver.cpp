@@ -105,20 +105,6 @@ cppjinja::east::value_term cppjinja::evt::expr_solver::make_array(
 	return ret;
 }
 
-std::optional<cppjinja::ast::value_term>
-cppjinja::evt::expr_solver::search_in_params(const cppjinja::ast::var_name& var) const
-{
-	std::vector<const evtnodes::callable*> callings = env->calls().calling_stack();
-	assert(!callings.empty());
-	for(auto* calling:callings)
-	{
-		auto cur_param = calling->param(env->calls(), var);
-		if(cur_param.has_value()|| calling == env->ctx().maker())
-			return cur_param;
-	}
-	throw std::runtime_error("no calling node in context");
-}
-
 cppjinja::east::value_term cppjinja::evt::expr_solver::solve_in_data(
         const cppjinja::ast::function_call& obj)
 {
@@ -130,12 +116,4 @@ cppjinja::east::value_term cppjinja::evt::expr_solver::solve_in_data(
 		                src.name,
 		                (*this)(src.value.get())});
 	return env->data()->value(call);
-}
-
-cppjinja::east::value_term cppjinja::evt::expr_solver::solve_in_tmpl(
-          const cppjinja::ast::function_call& obj
-        , const evtnodes::callable* node)
-{
-	assert(env);
-	return env->calls().call(env, node, obj.params);
 }

@@ -90,17 +90,3 @@ void cppjinja::evt::context_impl::takeout_obj(const ast::string_t& name)
 	require_not_empty();
 	ctx.back().ns.rem(name);
 }
-
-std::optional<cppjinja::ast::value_term>
-cppjinja::evt::context_impl::solve_var(const cppjinja::ast::var_name& var) const
-{
-	require_not_empty();
-	return ctx.back().ns.solve(var);
-}
-
-std::optional<cppjinja::ast::value_term> cppjinja::evt::context_impl::solve_call(
-        const cppjinja::ast::function_call& call) const
-{
-	require_not_empty();
-	return ctx.back().ns.call(call);
-}
