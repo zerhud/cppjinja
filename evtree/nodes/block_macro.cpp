@@ -20,12 +20,12 @@ std::vector<cppjinja::evt::raii_inject_obj>
 cppjinja::evtnodes::block_macro::make_injections(evt::exenv& env) const
 {
 	std::vector<cppjinja::evt::raii_inject_obj> ret;
-	for(auto& p:block.params) {
-		auto val = param(env.calls(), ast::var_name{p.name});
-		assert(val.has_value());
-		auto obj = std::make_unique<evt::delay_solver>(&val.value());
-		ret.emplace_back(p.name, std::move(obj), &env.ctx());
-	}
+	//for(auto& p:block.params) {
+	    //auto val = param(env.calls(), ast::var_name{p.name});
+	    //assert(val.has_value());
+	    //auto obj = std::make_unique<evt::delay_solver>(&val.value());
+	    //ret.emplace_back(p.name, std::move(obj), &env.ctx());
+	//}
 	return ret;
 }
 
@@ -57,14 +57,6 @@ cppjinja::evtnodes::block_macro::evaluate(cppjinja::evt::exenv& env) const
 	auto raii_injections = make_injections(env);
 	render_children(children, env, inner_ri());
 	return east::string_t();
-}
-
-std::optional<cppjinja::ast::value_term>
-cppjinja::evtnodes::block_macro::param(const evt::callstack& ctx
-        , const cppjinja::ast::var_name& name
-        ) const
-{
-	return callable::param(block.params, name, ctx);
 }
 
 std::vector<cppjinja::ast::macro_parameter>

@@ -21,9 +21,6 @@ protected:
 	        , const evt::callstack& ctx) const ;
 public:
 	virtual east::string_t evaluate( evt::exenv& env) const =0 ;
-	virtual std::optional<ast::value_term> param(
-	          const evt::callstack& ctx
-	        , const ast::var_name& name) const =0 ;
 	virtual std::vector<ast::macro_parameter> params() const =0 ;
 };
 

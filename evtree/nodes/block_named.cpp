@@ -32,12 +32,6 @@ cppjinja::ast::string_t cppjinja::evtnodes::block_named::name() const
 	return block.name;
 }
 
-std::optional<cppjinja::ast::value_term> cppjinja::evtnodes::block_named::param(
-        const evt::callstack& ctx, const cppjinja::ast::var_name& name) const
-{
-	return param(block.params, name, ctx);
-}
-
 std::vector<cppjinja::ast::macro_parameter>
 cppjinja::evtnodes::block_named::params() const
 {

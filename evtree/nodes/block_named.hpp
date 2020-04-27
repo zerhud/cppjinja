@@ -24,10 +24,6 @@ public:
 
 	east::string_t evaluate( evt::exenv& env) const override ;
 
-	std::optional<ast::value_term> param(
-	          const evt::callstack& ctx
-	        , const ast::var_name& name
-	        ) const override ;
 	std::vector<ast::macro_parameter> params() const override ;
 };
 

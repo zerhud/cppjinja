@@ -46,16 +46,6 @@ struct mock_callable_fixture : mock_exenv_fixture {
 		ast_bl.params.emplace_back(ast::macro_parameter{"p2", value_term{42}});
 		ast_bl.params.emplace_back(ast::macro_parameter{"p3", std::nullopt});
 	}
-	template<typename B>
-	void check_params_not_in_stack(B& bl)
-	{
-		MOCK_EXPECT(calls.get_params).returns(std::vector<ast::function_call_parameter>{});
-		BOOST_REQUIRE(bl.param(calls, ast::var_name{"p1"}).has_value());
-		BOOST_TEST(*bl.param(calls, ast::var_name{"p1"}) == value_term{41});
-		BOOST_REQUIRE(bl.param(calls, ast::var_name{"p2"}).has_value());
-		BOOST_TEST(*bl.param(calls, ast::var_name{"p2"}) == value_term{42});
-		BOOST_CHECK_THROW(bl.param(calls, ast::var_name{"p3"}), std::exception);
-	}
 
 	template<typename Ast>
 	void prepare_for_render_two_childrend(Ast& ast_bl)
@@ -70,7 +60,7 @@ struct mock_callable_fixture : mock_exenv_fixture {
 		BOOST_TEST(bl.name() == ast_bl.name);
 		BOOST_TEST(bl.rinfo().trim_left == ast_bl.left_open.trim);
 		BOOST_TEST(bl.rinfo().trim_right == ast_bl.right_close.trim);
-		BOOST_CHECK(!bl.param(calls, ast::var_name{"a"}).has_value());
+		BOOST_TEST(bl.params().size() == 0);
 	}
 
 	void prepare_for_render_two_childrend()
@@ -362,27 +352,6 @@ BOOST_FIXTURE_TEST_CASE(render_do_nothing, mock_callable_fixture)
 	BOOST_CHECK_NO_THROW(cnt.render(env));
 	BOOST_TEST(out.str() == "");
 }
-BOOST_FIXTURE_TEST_CASE(evaluate_two_children, mock_callable_fixture)
-{
-	using cppjinja::evt::ctx_object;
-	using cppjinja::evt::delay_solver;
-	ast::block_macro ast_bl;
-	prepare_for_render_two_childrend(ast_bl);
-	ast_bl.params.emplace_back(ast::macro_parameter{"a", std::nullopt});
-	evtnodes::block_macro cnt(ast_bl);
-	prepare_for_render_two_childrend();
-	mock::sequence ctx_seq;
-	MOCK_EXPECT(calls.get_params).once().returns(
-	            std::vector<ast::function_call_parameter>{value_term{42}});
-	MOCK_EXPECT(env.current_node).once().with(&cnt).in(ctx_seq);
-	MOCK_EXPECT(ctx.inject_obj).once().in(ctx_seq).calls(
-	[](ast::string_t n, std::shared_ptr<ctx_object> o){
-		BOOST_TEST(n == "a");
-		BOOST_TEST(dynamic_cast<delay_solver*>(o.get()) != nullptr);
-	});
-	MOCK_EXPECT(ctx.takeout_obj).once().with("a").in(ctx_seq);
-	BOOST_TEST(cnt.evaluate(env) == "");
-}
 BOOST_AUTO_TEST_CASE(params)
 {
 	ast::block_macro ast_bl;
@@ -406,30 +375,6 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(getters, T, callable_list, mock_callable_fixtur
 	prepare_for_render_two_childrend(ast_bl);
 	std::tuple_element_t<1, T> bl(ast_bl);
 	check_getters(bl, ast_bl);
-}
-BOOST_FIXTURE_TEST_CASE_TEMPLATE(position_param_with_values, T, callable_list, mock_callable_fixture)
-{
-	std::tuple_element_t<0,T> ast_bl;
-	prepare_ast_for_params(ast_bl);
-	std::tuple_element_t<1,T> cnt(ast_bl);
-	check_params_not_in_stack(cnt);
-}
-BOOST_FIXTURE_TEST_CASE_TEMPLATE(position_param_calls, T, callable_list, mock_callable_fixture)
-{
-	std::tuple_element_t<0,T> ast_bl;
-	ast_bl.name = "test_name";
-	prepare_ast_for_params(ast_bl);
-	std::vector<cppjinja::ast::function_call_parameter> call_params;
-	call_params.emplace_back(ast::function_call_parameter(value_term{51}));
-	call_params.emplace_back(ast::function_call_parameter("p3", value_term{52}));
-	std::tuple_element_t<1,T> cnt(ast_bl);
-	MOCK_EXPECT(calls.get_params).returns(call_params);
-	BOOST_REQUIRE(cnt.param(calls, ast::var_name{"p1"}).has_value());
-	BOOST_TEST(*cnt.param(calls, ast::var_name{"p1"}) == value_term{51});
-	BOOST_REQUIRE(cnt.param(calls, ast::var_name{"p2"}).has_value());
-	BOOST_TEST(*cnt.param(calls, ast::var_name{"p2"}) == value_term{42});
-	BOOST_REQUIRE(cnt.param(calls, ast::var_name{"p3"}).has_value());
-	BOOST_TEST(*cnt.param(calls, ast::var_name{"p3"}) == value_term{52});
 }
 BOOST_AUTO_TEST_SUITE_END() // callables
 
