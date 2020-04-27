@@ -70,13 +70,14 @@ struct impl_exenv_fixture : mock_env_fixture
 
 struct mock_solver_fixture : mocks::mock_exenv_fixture
 {
-	cppjinja::evt::obj_holder globals, locals, params;
 	cppjinja::evt::expr_solver solver;
+	cppjinja::evt::obj_holder globals, locals;
+	std::vector<const cppjinja::evt::obj_holder*> params;
 	mock_solver_fixture() : solver(&env) {}
 	void expect_glp(int gc, int lc, int pc)
 	{
 		using cppjinja::evt::obj_holder;
-		MOCK_EXPECT(calls.params).at_least(pc).calls([this]()->obj_holder&{return params;});
+		MOCK_EXPECT(env.params).at_least(pc).calls([this](){return params;});
 		MOCK_EXPECT(env.locals).at_least(lc).calls([this]()->obj_holder&{return locals;});
 		MOCK_EXPECT(env.globals).at_least(gc).calls([this]()->obj_holder&{return globals;});
 	}
