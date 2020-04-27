@@ -35,7 +35,7 @@ void op_set::render(evt::exenv& env) const
 void op_set::inject_value(cppjinja::evt::exenv& env) const
 {
 	auto obj = std::make_unique<evt::delay_solver>(&op.value);
-	env.ctx().inject_obj(op.name, std::move(obj));
+	env.locals().add(op.name, std::move(obj));
 }
 
 void op_set::inject_object(cppjinja::evt::exenv& env) const
@@ -43,5 +43,5 @@ void op_set::inject_object(cppjinja::evt::exenv& env) const
 	ast::var_name name = boost::get<ast::var_name>(op.value.var);
 	assert(!name.empty());
 	auto obj = env.locals().find(name[0]);
-	env.ctx().inject_obj(op.name, obj);
+	env.locals().add(op.name, std::move(obj));
 }

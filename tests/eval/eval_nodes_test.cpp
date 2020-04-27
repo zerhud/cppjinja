@@ -163,32 +163,22 @@ BOOST_FIXTURE_TEST_CASE(value, mock_exenv_fixture)
 	ast::op_set ast_node{ {1,1}, "tname", value_term{42}, {{1,1},false}, {{1,1},true} };
 	evtnodes::op_set snode(ast_node);
 	MOCK_EXPECT(env.current_node).once().with(&snode);
-	MOCK_EXPECT(ctx.inject_obj).once().calls(
-	[](const std::string& n, std::shared_ptr<cppjinja::evt::ctx_object> obj){
-		BOOST_TEST(n == "tname");
-		BOOST_TEST(dynamic_cast<cppjinja::evt::ctx_object*>(obj.get()) != nullptr);
-		BOOST_TEST(obj->solve(ast::var_name{}) == value_term{42});
-	});
-	BOOST_CHECK_NO_THROW(snode.render(env));
+	expect_glp(0, 1, 0);
+	snode.render(env);
+	BOOST_TEST(locals.solve(ast::var_name{"tname"}) == value_term{42});
 }
 BOOST_FIXTURE_TEST_CASE(name, mock_exenv_fixture)
 {
 	using namespace cppjinja::ast;
-	using cppjinja::evt::obj_holder;
 
-	obj_holder locals;
 	ast::op_set ast_node{ {1,1}, "tname", value_term{var_name{"a", "b"}}, {{1,1},false}, {{1,1},true} };
 	evtnodes::op_set snode(ast_node);
 	auto obj = std::make_shared<mocks::ctx_object>();
 	locals.add("a", obj);
+	expect_glp(0, 1, 0);
 	MOCK_EXPECT(env.current_node).once().with(&snode);
-	MOCK_EXPECT(env.locals).calls([&locals]()->obj_holder&{return locals;});
-	MOCK_EXPECT(ctx.inject_obj).once().calls(
-	[&obj](const std::string& n, std::shared_ptr<cppjinja::evt::ctx_object> in){
-		BOOST_TEST(n == "tname");
-		BOOST_TEST(obj == in);
-	});
 	snode.render(env);
+	BOOST_TEST(locals.find("tname").get() == obj.get());
 }
 BOOST_AUTO_TEST_SUITE_END() // render
 BOOST_AUTO_TEST_SUITE_END() // op_set
