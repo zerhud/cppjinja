@@ -7,13 +7,10 @@
  *************************************************************************/
 
 #include "expr_solver.hpp"
-#include "context.hpp"
-#include "callstack.hpp"
 
 #include "evtree/exenv.hpp"
 #include "eval/ast_cvt.hpp"
 #include "evtree/helpers/binary_op.hpp"
-#include "evtree/nodes/callable.hpp"
 #include "obj_holder.hpp"
 
 using namespace cppjinja::details;
