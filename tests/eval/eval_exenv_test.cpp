@@ -72,6 +72,7 @@ struct mock_solver_fixture : mocks::mock_exenv_fixture
 	mock_solver_fixture() : solver(&env) {}
 };
 
+BOOST_AUTO_TEST_SUITE(phase_evaluate)
 
 BOOST_AUTO_TEST_SUITE(exenv)
 BOOST_AUTO_TEST_CASE(rinfo_ops)
@@ -622,3 +623,41 @@ BOOST_FIXTURE_TEST_CASE(callable_multisolver, mock_exenv_fixture)
 BOOST_AUTO_TEST_SUITE_END() // ctx_objects
 
 BOOST_AUTO_TEST_SUITE_END() // exenv
+
+BOOST_AUTO_TEST_SUITE(result_formatter)
+using cppjinja::evt::result_formatter;
+BOOST_AUTO_TEST_CASE(single_shift)
+{
+	result_formatter fmt;
+	BOOST_TEST(fmt("ok\nok"s) == "ok\nok"s);
+	fmt.shift_tab(1);
+	BOOST_TEST(fmt("ok"s) == "ok"s);
+	BOOST_TEST(fmt("ok\nok"s) == "ok\n\tok"s);
+	fmt.shift_tab(0);
+	BOOST_TEST(fmt("ok\nok"s) == "ok\n\tok"s);
+	fmt.shift_tab(-1);
+	BOOST_TEST(fmt("ok\nok"s) == "ok\nok"s);
+}
+BOOST_AUTO_TEST_CASE(few_tabls)
+{
+	result_formatter fmt;
+	BOOST_TEST(fmt("ok\nok"s) == "ok\nok"s);
+	fmt.shift_tab(3);
+	BOOST_TEST(fmt("ok"s) == "ok"s);
+	BOOST_TEST(fmt("ok\nok"s) == "ok\n\t\t\tok"s);
+	BOOST_CHECK_NO_THROW(fmt.shift_tab(-2));
+	BOOST_TEST(fmt("ok\nok"s) == "ok\n\tok"s);
+	BOOST_CHECK_NO_THROW(fmt.shift_tab(-1));
+	BOOST_CHECK_THROW(fmt.shift_tab(-1), std::exception);
+}
+BOOST_AUTO_TEST_CASE(cannot_shift_under_zero)
+{
+	result_formatter fmt;
+	BOOST_CHECK_THROW(fmt.shift_tab(-1), std::exception);
+	BOOST_CHECK_NO_THROW(fmt.shift_tab(1));
+	BOOST_CHECK_THROW(fmt.shift_tab(-2), std::exception);
+	BOOST_CHECK_NO_THROW(fmt.shift_tab(0));
+}
+BOOST_AUTO_TEST_SUITE_END() // result_formatter
+
+BOOST_AUTO_TEST_SUITE_END() // phase_evaluate

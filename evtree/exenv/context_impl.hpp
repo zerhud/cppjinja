@@ -12,6 +12,7 @@
 
 #include "context.hpp"
 #include "obj_holder.hpp"
+#include "result_formatter.hpp"
 
 namespace cppjinja::evt {
 

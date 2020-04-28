@@ -36,8 +36,9 @@ cppjinja::evtree build_tree(std::string_view ptxt)
 	return tree;
 }
 
-BOOST_AUTO_TEST_SUITE(evaltree)
+BOOST_AUTO_TEST_SUITE(phase_evaluate)
 
+BOOST_AUTO_TEST_SUITE(evaltree)
 
 BOOST_AUTO_TEST_CASE(few_blocks)
 {
@@ -141,3 +142,5 @@ BOOST_AUTO_TEST_CASE(render)
 }
 
 BOOST_AUTO_TEST_SUITE_END() // evaltree
+
+BOOST_AUTO_TEST_SUITE_END() // phase_evaluate
