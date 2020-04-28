@@ -23,7 +23,7 @@ namespace txt = cppjinja::text;
 namespace ast = cppjinja::ast;
 namespace tdata = boost::unit_test::data;
 
-BOOST_AUTO_TEST_SUITE(parser)
+BOOST_AUTO_TEST_SUITE(phase_parse)
 BOOST_AUTO_TEST_SUITE(op_term)
 
 BOOST_AUTO_TEST_CASE(common)
@@ -92,5 +92,5 @@ BOOST_AUTO_TEST_CASE(only_block)
 }
 BOOST_AUTO_TEST_SUITE_END() // bsign
 
-BOOST_AUTO_TEST_SUITE_END() // parser
 BOOST_AUTO_TEST_SUITE_END() // op_term
+BOOST_AUTO_TEST_SUITE_END() // phase_parse

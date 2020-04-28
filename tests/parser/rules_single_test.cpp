@@ -48,6 +48,9 @@ ast::op_include make_op_include(ast::string_t fn, std::optional<bool> im, std::o
 	return ret;
 }
 
+BOOST_AUTO_TEST_SUITE(phase_parse)
+BOOST_AUTO_TEST_SUITE(singles)
+
 BOOST_DATA_TEST_CASE(
 	  op_out
 	, utd::make("kuku"s, "'a'"s, "foo()"s, "foo('ok')"s, "foo()|e"s, "foo()|e|a()|b('v')"s)
@@ -148,3 +151,6 @@ BOOST_DATA_TEST_CASE(
 	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::op_include, text) );
 	BOOST_TEST( result == good_result );
 }
+
+BOOST_AUTO_TEST_SUITE_END() // singles
+BOOST_AUTO_TEST_SUITE_END() // phase_parse

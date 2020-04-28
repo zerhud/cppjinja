@@ -20,7 +20,7 @@
 
 #include "mocks.hpp"
 
-const bool todo_list = false;
+const bool todo_list = true;
 
 namespace ast = cppjinja::ast;
 namespace txt = cppjinja::text;
@@ -48,7 +48,7 @@ std::string parse_single(
 	return result.str();
 }
 
-BOOST_AUTO_TEST_SUITE(standard)
+BOOST_AUTO_TEST_SUITE(extra_integrated_checks)
 BOOST_DATA_TEST_CASE( simple_string
       , data::make("ok"sv, " \nok"sv)
       , data )
@@ -58,11 +58,8 @@ BOOST_DATA_TEST_CASE( simple_string
 }
 
 BOOST_DATA_TEST_CASE( blocks
-      , data::make(
-            "<% block bl %>okok<% endblock %>"sv
-          , "ok<% block bl %>ok<% endblock %>"sv
-          , "ok<% block bl %>o<% block i%>k<% endblock %><% endblock %>"sv
-          )
+      , data::make("ok<% block bl %>ok<% endblock %>"sv,
+                   "ok<% block bl %>o<% block i%>k<% endblock %><% endblock %>"sv)
       , data)
 {
 	mocks::data_provider prov;
@@ -72,7 +69,7 @@ BOOST_DATA_TEST_CASE( blocks
 BOOST_DATA_TEST_CASE(set_var
       , data::make("<% set a='okok' %><= a =>"sv
                   ,"<% block bl %><% set a='okok' %><= a =><% endblock %>"sv
-                  //,"<% set a='okok' %><% macro bl %><= a =><% endmacro %><= bl() =>"sv
+                  ,"<% set a='okok' %><% macro bl %><= a =><% endmacro %><= bl() =>"sv
                   )
       , data )
 {
@@ -81,16 +78,8 @@ BOOST_DATA_TEST_CASE(set_var
 }
 
 BOOST_DATA_TEST_CASE(get_var_filter
-      , data::make( "<= a.b =>"sv
-                  , "<= a['b'] =>"sv
-                  , "<= a.b | a =>"sv
-                  , "<= a['b'] | a =>"sv
-                  , "<= a['b'] | a | b =>"sv
-                  , "<= a['b'] | a | b | b =>"sv
-                  )
-      ^ data::make(0, 0, 1, 1, 2, 3)
-      , data, count
-      )
+      , data::make( "<= a.b =>"sv, "<= a['b'] | a | b | b =>"sv)
+      ^ data::make(0, 3), data, count)
 {
 	namespace east = cppjinja::east;
 	int cur_count = 0;
@@ -136,4 +125,4 @@ BOOST_AUTO_TEST_CASE(get_var_nesteed, * boost::unit_test::enable_if<todo_list>()
 	});
 	BOOST_TEST( parse_single("<= a[b] =>", prov)=="ok"s );
 }
-BOOST_AUTO_TEST_SUITE_END() // standard
+BOOST_AUTO_TEST_SUITE_END() // extra_integrated_checks

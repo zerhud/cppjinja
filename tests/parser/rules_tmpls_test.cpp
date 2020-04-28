@@ -19,6 +19,9 @@
 namespace ast = cppjinja::ast;
 namespace txt = cppjinja::text;
 
+BOOST_AUTO_TEST_SUITE(phase_parse)
+BOOST_AUTO_TEST_SUITE(tmpls)
+
 BOOST_AUTO_TEST_CASE(extend_st)
 {
 	std::string data = "<% extends 'kuku.tmpl' %>";
@@ -97,3 +100,6 @@ BOOST_AUTO_TEST_CASE(few_templates)
 	BOOST_TEST( result.tmpls[0].content.size() == 1 );
 	BOOST_TEST( result.tmpls[1].content.size() == 1 );
 }
+
+BOOST_AUTO_TEST_SUITE_END() // tmpls
+BOOST_AUTO_TEST_SUITE_END() // phase_parse

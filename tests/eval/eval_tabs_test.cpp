@@ -46,6 +46,9 @@ std::string parse_single(
 	return result.str();
 }
 
+BOOST_AUTO_TEST_SUITE(extra_integrated_checks)
+BOOST_AUTO_TEST_SUITE(eval_tabls)
+
 BOOST_DATA_TEST_CASE(trim_left,
                      data::make({
          "<%block a +%>\nok<% endblock %>"sv,
@@ -120,3 +123,6 @@ BOOST_DATA_TEST_CASE(few_trim_right,
 	mocks::data_provider prov;
 	BOOST_TEST( parse_single(data, prov) == " ok1"sv );
 }
+
+BOOST_AUTO_TEST_SUITE_END() // extra_integrated_checks
+BOOST_AUTO_TEST_SUITE_END() // eval_tabls

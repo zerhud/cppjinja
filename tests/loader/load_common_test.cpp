@@ -19,6 +19,8 @@
 
 using namespace std::literals;
 
+BOOST_AUTO_TEST_SUITE(loader)
+
 BOOST_AUTO_TEST_CASE(simple)
 {
 	cppjinja::parser psr({});
@@ -34,3 +36,5 @@ BOOST_AUTO_TEST_CASE(simple)
 	BOOST_TEST( tmpls[0].name.empty() );
 	BOOST_TEST_REQUIRE( tmpls[0].content.size() == 1 );
 }
+
+BOOST_AUTO_TEST_SUITE_END() // loader

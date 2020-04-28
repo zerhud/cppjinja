@@ -26,6 +26,9 @@ namespace utd = boost::unit_test::data;
 namespace ast = cppjinja::ast;
 namespace txt = cppjinja::text;
 
+BOOST_AUTO_TEST_SUITE(phase_parse)
+BOOST_AUTO_TEST_SUITE(common)
+
 BOOST_DATA_TEST_CASE(
         quoted1_string
       ,   utd::make(u8"'kuku'"s, u8"'ku ku'"s, u8"''"s, u8"'привет'"s, u8"'k\\k'"s, u8"'ok\\'ok'"s)
@@ -158,3 +161,6 @@ BOOST_DATA_TEST_CASE(
 	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::tuple_v, text) );
 	BOOST_TEST( result == good_result );
 }
+
+BOOST_AUTO_TEST_SUITE_END() // common
+BOOST_AUTO_TEST_SUITE_END() // phase_parse

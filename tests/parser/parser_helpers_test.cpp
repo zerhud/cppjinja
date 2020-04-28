@@ -15,6 +15,9 @@
 
 #include "parser/helpers.hpp"
 
+BOOST_AUTO_TEST_SUITE(phase_parse)
+BOOST_AUTO_TEST_SUITE(helpers)
+
 BOOST_AUTO_TEST_CASE(has_str_name)
 {
 	using namespace cppjinja;
@@ -31,3 +34,5 @@ BOOST_AUTO_TEST_CASE(has_str_name)
 	BOOST_TEST( !has_str_name_v<noname> );
 }
 
+BOOST_AUTO_TEST_SUITE_END() // phase_parse
+BOOST_AUTO_TEST_SUITE_END() // helpers
