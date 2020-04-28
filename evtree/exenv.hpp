@@ -11,6 +11,7 @@
 #include "declarations.hpp"
 #include "exenv/raii.hpp"
 #include "eval/eval.hpp"
+#include "exenv/result_formatter.hpp"
 
 namespace cppjinja::evt {
 
@@ -44,6 +45,7 @@ public:
 
 	virtual callstack& calls() =0 ;
 
+	virtual result_formatter& render_format() =0 ;
 	virtual std::optional<render_info> rinfo() const =0 ;
 	virtual void rinfo(std::optional<render_info> ri) =0 ;
 };

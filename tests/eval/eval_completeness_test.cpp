@@ -48,6 +48,7 @@ std::string parse_single(
 	return result.str();
 }
 
+BOOST_AUTO_TEST_SUITE(standard)
 BOOST_DATA_TEST_CASE( simple_string
       , data::make("ok"sv, " \nok"sv)
       , data )
@@ -135,3 +136,4 @@ BOOST_AUTO_TEST_CASE(get_var_nesteed, * boost::unit_test::enable_if<todo_list>()
 	});
 	BOOST_TEST( parse_single("<= a[b] =>", prov)=="ok"s );
 }
+BOOST_AUTO_TEST_SUITE_END() // standard

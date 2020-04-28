@@ -15,6 +15,7 @@ namespace cppjinja::evtnodes {
 class block_named : public callable {
 	ast::block_named block;
 	bool has_nondefaulted_params() const ;
+	[[nodiscard]] evt::raii_result_format result_format_raii(evt::exenv& env) const ;
 public:
 	block_named(ast::block_named nb);
 	evt::render_info rinfo() const override ;

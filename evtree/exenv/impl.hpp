@@ -24,6 +24,7 @@ class exenv_impl final : public exenv {
 	callstack_impl execalls;
 	std::optional<render_info> cur_rinfo;
 	obj_holder global_namespace;
+	result_formatter rfmt;
 public:
 	exenv_impl(const data_provider* prov, const evtree* tmpl);
 
@@ -46,6 +47,7 @@ public:
 
 	callstack& calls() override ;
 
+	result_formatter& render_format() override;
 	std::optional<render_info> rinfo() const override ;
 	void rinfo(std::optional<render_info> ri) override ;
 };

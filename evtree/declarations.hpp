@@ -27,6 +27,8 @@ class callstack;
 class ctx_object;
 class obj_holder; ///< aka namespace, but it's a keyword
 
+class result_formatter;
+
 class factory {
 public:
 	virtual ~factory() noexcept =default ;

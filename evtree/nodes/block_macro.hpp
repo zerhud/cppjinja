@@ -16,6 +16,7 @@ namespace cppjinja::evtnodes {
 class block_macro : public callable {
 	ast::block_macro block;
 	evt::render_info inner_ri() const ;
+	[[nodiscard]] evt::raii_result_format result_format_raii(evt::exenv& env) const ;
 public:
 	block_macro(ast::block_macro nb);
 	evt::render_info rinfo() const override ;

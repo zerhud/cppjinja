@@ -16,6 +16,16 @@ cppjinja::evt::render_info cppjinja::evtnodes::block_macro::inner_ri() const
 	return evt::render_info{ block.left_close.trim, block.right_open.trim };
 }
 
+cppjinja::evt::raii_result_format
+cppjinja::evtnodes::block_macro::result_format_raii(cppjinja::evt::exenv& env) const
+{
+	return  evt::raii_result_format(
+	            &env.render_format(),
+	            block.left_close.bsign?*block.left_close.bsign:0,
+	            block.right_open.bsign?*block.right_open.bsign:0
+	            );
+}
+
 cppjinja::evtnodes::block_macro::block_macro(cppjinja::ast::block_macro nb)
     : block(std::move(nb))
 {
@@ -40,6 +50,7 @@ cppjinja::east::string_t
 cppjinja::evtnodes::block_macro::evaluate(cppjinja::evt::exenv& env) const
 {
 	env.current_node(this);
+	auto fmt = result_format_raii(env);
 	auto children = env.children(this);
 	render_children(children, env, inner_ri());
 	return east::string_t();

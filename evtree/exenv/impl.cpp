@@ -68,7 +68,7 @@ std::ostream& cppjinja::evt::exenv_impl::out()
 
 cppjinja::east::string_t cppjinja::evt::exenv_impl::result() const
 {
-	return ctx().result();
+	return rfmt(ctx().result());
 }
 
 cppjinja::evt::context& cppjinja::evt::exenv_impl::ctx()
@@ -104,6 +104,11 @@ std::vector<const cppjinja::evt::obj_holder*> cppjinja::evt::exenv_impl::params(
 cppjinja::evt::callstack& cppjinja::evt::exenv_impl::calls()
 {
 	return execalls;
+}
+
+cppjinja::evt::result_formatter& cppjinja::evt::exenv_impl::render_format()
+{
+	return rfmt;
 }
 
 std::optional<cppjinja::evt::render_info> cppjinja::evt::exenv_impl::rinfo() const

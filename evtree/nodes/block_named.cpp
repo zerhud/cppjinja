@@ -17,6 +17,16 @@ bool cppjinja::evtnodes::block_named::has_nondefaulted_params() const
 	return false;
 }
 
+cppjinja::evt::raii_result_format
+cppjinja::evtnodes::block_named::result_format_raii(cppjinja::evt::exenv& env) const
+{
+	return  evt::raii_result_format(
+	            &env.render_format(),
+	            block.left_close.bsign?*block.left_close.bsign:0,
+	            block.right_open.bsign?*block.right_open.bsign:0
+	            );
+}
+
 cppjinja::evtnodes::block_named::block_named(cppjinja::ast::block_named nb)
     : block(std::move(nb))
 {
@@ -47,6 +57,7 @@ void cppjinja::evtnodes::block_named::render(evt::exenv& env) const
 cppjinja::east::string_t cppjinja::evtnodes::block_named::evaluate(cppjinja::evt::exenv& env) const
 {
 	env.current_node(this);
+	auto fmt = result_format_raii(env);
 	evt::raii_push_ctx ctx_maker(this, &env.ctx());
 	evt::render_info ri{ block.left_close.trim, block.right_open.trim };
 	auto children = env.children(this);

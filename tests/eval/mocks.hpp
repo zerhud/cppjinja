@@ -92,6 +92,7 @@ MOCK_BASE_CLASS( exenv, cppjinja::evt::exenv )
 	using cppjinja::evt::exenv::rinfo;
 	MOCK_CONST_METHOD(rinfo, 0, std::optional<cppjinja::evt::render_info>(), crinfo)
 	MOCK_NON_CONST_METHOD(rinfo, 1, void(std::optional<cppjinja::evt::render_info> ri), rinfo)
+	MOCK_METHOD( render_format, 0)
 };
 
 struct mock_exenv_fixture
@@ -101,6 +102,7 @@ struct mock_exenv_fixture
 	mocks::callstack calls;
 	std::stringstream out;
 	mocks::data_provider data;
+	cppjinja::evt::result_formatter rfmt;
 
 	cppjinja::evt::obj_holder globals, locals;
 	std::vector<const cppjinja::evt::obj_holder*> params;
@@ -112,6 +114,7 @@ struct mock_exenv_fixture
 		MOCK_EXPECT(env.get_cctx).returns(ctx);
 		MOCK_EXPECT(env.calls).returns(calls);
 		MOCK_EXPECT(env.out).calls([this]()->std::ostream&{return out;});
+		MOCK_EXPECT(env.render_format).calls([this]()->cppjinja::evt::result_formatter&{return rfmt;});
 	}
 
 	void expect_glp(int gc, int lc, int pc)

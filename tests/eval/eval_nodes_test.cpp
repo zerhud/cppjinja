@@ -323,6 +323,23 @@ BOOST_FIXTURE_TEST_CASE(evaluate_two_children, mock_callable_fixture)
 	MOCK_EXPECT(env.result).once().returns("result");
 	BOOST_TEST(cnt.evaluate(env) == "result");
 }
+BOOST_FIXTURE_TEST_CASE(render_with_tabshift, mock_callable_fixture)
+{
+	using cppjinja::evt::result_formatter;
+	ast::block_named ast_bl;
+	ast_bl.right_open.bsign = -1;
+	ast_bl.left_close.bsign = 2;
+	evtnodes::block_named cnt(ast_bl);
+	expect_children({});
+	expect_call(&cnt, {});
+	expect_cxt_settings(&cnt);
+	MOCK_EXPECT(env.result).once().calls([this](){
+		BOOST_TEST(rfmt("\na"s) == "\n\t\ta"s);
+		return "ok"s;
+	});
+	cnt.render(env);
+	BOOST_TEST(rfmt("\na"s) == "\n\ta"s);
+}
 BOOST_AUTO_TEST_CASE(params)
 {
 	ast::block_named ast_bl;
@@ -342,6 +359,24 @@ BOOST_FIXTURE_TEST_CASE(render_do_nothing, mock_callable_fixture)
 	MOCK_EXPECT(env.current_node).with(&cnt);
 	BOOST_CHECK_NO_THROW(cnt.render(env));
 	BOOST_TEST(out.str() == "");
+}
+BOOST_FIXTURE_TEST_CASE(render_with_tabshift, mock_callable_fixture)
+{
+	using cppjinja::evt::render_info;
+	using cppjinja::evt::result_formatter;
+	ast::block_macro ast_bl;
+	ast_bl.right_open.bsign = -1;
+	ast_bl.left_close.bsign = 2;
+	evtnodes::block_macro cnt(ast_bl);
+	expect_children({&child1});
+	MOCK_EXPECT(env.current_node);
+	MOCK_EXPECT(env.rinfo);
+	MOCK_EXPECT(child1.rinfo).returns(render_info{false,false});
+	MOCK_EXPECT(child1.render).once().calls([this](cppjinja::evt::exenv&){
+		BOOST_TEST(rfmt("\na"s) == "\n\t\ta"s);
+	});
+	cnt.evaluate(env);
+	BOOST_TEST(rfmt("\na"s) == "\n\ta"s);
 }
 BOOST_AUTO_TEST_CASE(params)
 {

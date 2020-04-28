@@ -23,4 +23,12 @@ public:
 	~raii_push_ctx() ;
 };
 
+class raii_result_format final {
+	result_formatter* fmt;
+	int back;
+public:
+	raii_result_format(result_formatter* f, int s, int b);
+	~raii_result_format();
+};
+
 } // namespace cppjinja::evt

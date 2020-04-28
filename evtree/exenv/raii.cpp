@@ -10,6 +10,7 @@
 #include "context.hpp"
 #include "callstack.hpp"
 #include "ctx_object.hpp"
+#include "result_formatter.hpp"
 
 cppjinja::evt::raii_push_ctx::raii_push_ctx(
         cppjinja::evt::raii_push_ctx&& other) noexcept
@@ -31,4 +32,16 @@ cppjinja::evt::raii_push_ctx::raii_push_ctx(
 cppjinja::evt::raii_push_ctx::~raii_push_ctx()
 {
 	if(ctx) ctx->pop(maker);
+}
+
+cppjinja::evt::raii_result_format::raii_result_format(
+        cppjinja::evt::result_formatter* f, int s, int b)
+    : fmt(f) , back(b)
+{
+	fmt->shift_tab(s);
+}
+
+cppjinja::evt::raii_result_format::~raii_result_format()
+{
+	fmt->shift_tab(back);
 }

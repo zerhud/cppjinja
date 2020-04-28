@@ -298,6 +298,19 @@ BOOST_FIXTURE_TEST_CASE(environment, impl_exenv_fixture)
 	BOOST_CHECK_NO_THROW(env.ctx());
 	BOOST_CHECK_NO_THROW(env.calls());
 }
+BOOST_FIXTURE_TEST_CASE(render_shift, impl_exenv_fixture)
+{
+	mocks::node maker;
+	ctx.push(&maker);
+	env.out() << "ok\nok"s;
+	BOOST_TEST(env.result() == "ok\nok"s);
+	env.render_format().shift_tab(1);
+	BOOST_TEST(env.result() == "ok\n\tok"s);
+	env.render_format().shift_tab(1);
+	BOOST_TEST(env.result() == "ok\n\t\tok"s);
+	env.render_format().shift_tab(-2);
+	BOOST_TEST(env.result() == "ok\nok"s);
+}
 BOOST_FIXTURE_TEST_CASE(rinfo, impl_exenv_fixture)
 {
 	using cppjinja::evt::render_info;
@@ -489,6 +502,17 @@ BOOST_FIXTURE_TEST_CASE(push_ctx, impl_exenv_fixture)
 		BOOST_TEST(ctx.maker() == &maker);
 	}
 	BOOST_CHECK_THROW(ctx.maker(), std::exception);
+}
+BOOST_AUTO_TEST_CASE(result_formatter)
+{
+	using namespace cppjinja::evt;
+	cppjinja::evt::result_formatter fmt;
+	BOOST_TEST(fmt("\na"s) == "\na"s);
+	{
+		raii_result_format raii(&fmt, 2, -2);
+		BOOST_TEST(fmt("\na"s) == "\n\t\ta"s);
+	}
+	BOOST_TEST(fmt("\na"s) == "\na"s);
 }
 BOOST_AUTO_TEST_SUITE_END() // raii
 
