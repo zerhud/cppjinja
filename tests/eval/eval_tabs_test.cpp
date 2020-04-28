@@ -124,5 +124,12 @@ BOOST_DATA_TEST_CASE(few_trim_right,
 	BOOST_TEST( parse_single(data, prov) == " ok1"sv );
 }
 
+BOOST_AUTO_TEST_CASE(bsign)
+{
+	auto data = "<%block a 1%>\nok\n<%-1 endblock%>"sv;
+	mocks::data_provider prov;
+	BOOST_TEST( parse_single(data, prov) == "\n\tok\n"sv );
+}
+
 BOOST_AUTO_TEST_SUITE_END() // extra_integrated_checks
 BOOST_AUTO_TEST_SUITE_END() // eval_tabls
