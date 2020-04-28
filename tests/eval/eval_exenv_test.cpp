@@ -74,6 +74,213 @@ struct mock_solver_fixture : mocks::mock_exenv_fixture
 
 BOOST_AUTO_TEST_SUITE(phase_evaluate)
 
+BOOST_AUTO_TEST_SUITE(context)
+BOOST_FIXTURE_TEST_CASE(current_node, mock_impls_fixture)
+{
+	mocks::node fnode1, fnode2;
+
+	BOOST_CHECK_THROW(ctx.nth_node_on_stack(0), std::exception);
+	BOOST_CHECK_THROW(ctx.current_node(&fnode1), std::exception);
+
+	ctx.push(&fnode1);
+	ctx.current_node(&fnode1);
+	BOOST_TEST(ctx.nth_node_on_stack(0) == &fnode1);
+
+	ctx.current_node(&fnode2);
+	BOOST_TEST(ctx.nth_node_on_stack(0) == &fnode2);
+	BOOST_TEST(ctx.nth_node_on_stack(1) == &fnode1);
+
+	BOOST_CHECK_THROW(ctx.nth_node_on_stack(2), std::exception);
+}
+BOOST_FIXTURE_TEST_CASE(stack, mock_impls_fixture)
+{
+	mocks::node fnode1, fnode2;
+	BOOST_CHECK_THROW(ctx.maker(), std::exception);
+	BOOST_CHECK_THROW(ctx.pop(&fnode1), std::exception);
+
+	ctx.push(&fnode1);
+	BOOST_TEST(ctx.maker() == &fnode1);
+	BOOST_CHECK_THROW(ctx.pop(&fnode2), std::exception);
+
+	ctx.push(&fnode2);
+	BOOST_TEST(ctx.maker() == &fnode2);
+
+	BOOST_CHECK_NO_THROW(ctx.pop(&fnode2));
+	BOOST_TEST(ctx.maker() == &fnode1);
+}
+BOOST_FIXTURE_TEST_CASE(cur_namespace, mock_impls_fixture)
+{
+	BOOST_CHECK_THROW(ctx.cur_namespace(), std::exception);
+	mocks::node maker;
+	ctx.push(&maker);
+	BOOST_CHECK_NO_THROW(ctx.cur_namespace());
+}
+
+BOOST_FIXTURE_TEST_CASE(out, mock_impls_fixture)
+{
+	mocks::node node1, node2;
+	BOOST_CHECK_THROW(ctx.out(), std::exception);
+	BOOST_CHECK_THROW(ctx.result(), std::exception);
+	ctx.push(&node1);
+	BOOST_REQUIRE_NO_THROW(ctx.out());
+	std::ostream* out1 = &ctx.out();
+	BOOST_TEST(ctx.result() == "");
+	ctx.out() << "test";
+	BOOST_TEST(ctx.result() == "test");
+	ctx.push(&node2);
+	BOOST_TEST(ctx.result() == "");
+	BOOST_TEST(&ctx.out() != out1);
+	ctx.pop(&node2);
+	BOOST_TEST(&ctx.out() == out1);
+	BOOST_TEST(ctx.result() == "test");
+	ctx.out() << "test";
+	BOOST_TEST(ctx.result() == "testtest");
+}
+BOOST_AUTO_TEST_SUITE_END() // context
+
+BOOST_AUTO_TEST_SUITE(callstack)
+BOOST_FIXTURE_TEST_CASE(cannot_call_nullptr, mock_impls_fixture)
+{
+	mocks::exenv env;
+	mocks::callable_node calling;
+	BOOST_CHECK_THROW(calls.call(nullptr, nullptr, {}), std::exception);
+	BOOST_CHECK_THROW(calls.call(&env, nullptr, {}), std::exception);
+	BOOST_CHECK_THROW(calls.call(nullptr, &calling, {}), std::exception);
+}
+BOOST_FIXTURE_TEST_CASE(call_block, mock_impls_fixture)
+{
+	using namespace cppjinja::ast;
+
+	mocks::exenv env;
+	mocks::callable_node calling;
+	MOCK_EXPECT(calling.params).returns(std::vector<macro_parameter>{
+	                                       macro_parameter{"p1", std::nullopt},
+	                                       macro_parameter{"p2", value_term{52}},
+	                                       macro_parameter{"p4", value_term{44}}
+	                                    });
+	MOCK_EXPECT(calling.evaluate).once().calls(
+	[this,&env,&calling](cppjinja::evt::exenv& ienv){
+		BOOST_TEST(&ienv == &env);
+		auto params = calls.param_stack(&calling);
+		BOOST_TEST_REQUIRE(params.size() == 1);
+		BOOST_TEST(params[0]->solve(var_name{"p1"}) == value_term{41});
+		BOOST_TEST(params[0]->solve(var_name{"p2"}) == value_term{42});
+		BOOST_TEST(params[0]->solve(var_name{"p3"}) == value_term{43});
+		BOOST_TEST(params[0]->solve(var_name{"p4"}) == value_term{44});
+		return "ok"s;
+	});
+	function_call_parameter p1(value_term{41});
+	function_call_parameter p2("p2", value_term{42});
+	function_call_parameter p3("p3", value_term{43});
+	BOOST_TEST(calls.call(&env, &calling, {p1,p2,p3}) == "ok");
+}
+BOOST_FIXTURE_TEST_CASE(param_stack, mock_impls_fixture)
+{
+	using namespace cppjinja::ast;
+
+	mocks::exenv env;
+	mocks::callable_node calling1, calling2;
+	MOCK_EXPECT(calling1.params).calls([]()->std::vector<macro_parameter>{return {};});
+	MOCK_EXPECT(calling2.params).calls([]()->std::vector<macro_parameter>{
+	                                       return {macro_parameter{"p",value_term{42}}};
+	                                   });
+	MOCK_EXPECT(calling1.evaluate).once().calls(
+	[this,&calling1,&env,&calling2](cppjinja::evt::exenv&){
+		BOOST_TEST(calls.param_stack(&calling1).size()==1);
+		calls.call(&env, &calling2, {});
+		BOOST_TEST(calls.param_stack(&calling1).size()==1);
+		return "c1";
+	});
+	MOCK_EXPECT(calling2.evaluate).once().calls(
+	[this,&calling1](cppjinja::evt::exenv&){
+		BOOST_TEST(calls.param_stack(&calling1).size()==2);
+		BOOST_TEST(calls.param_stack(&calling1)[1]->solve(var_name{"p"}).has_value() == false);
+		BOOST_TEST(calls.param_stack(&calling1)[0]->solve(var_name{"p"}) == value_term{42});
+		BOOST_CHECK_THROW(calls.param_stack(nullptr), std::exception);
+		return "c2";
+	});
+	BOOST_TEST(calls.param_stack(nullptr).size() == 0);
+	BOOST_TEST(calls.param_stack(&calling1).size() == 0);
+	calls.call(&env, &calling1, {});
+}
+BOOST_AUTO_TEST_SUITE_END() // callstack
+
+BOOST_AUTO_TEST_SUITE(filter)
+BOOST_FIXTURE_TEST_CASE(by_var, mock_exenv_fixture)
+{
+	using cppjinja::ast::filter_call;
+	cppjinja::ast::var_name vn{"a"};
+	auto check = [&vn](
+	          const cppjinja::east::function_call& fc
+	        , const east_value_term& base){
+		BOOST_TEST_REQUIRE(fc.ref.size()==1);
+		BOOST_TEST(fc.ref[0]==vn[0]);
+		BOOST_TEST(base == east_value_term{2});
+		BOOST_CHECK(fc.params.empty());
+		return east_value_term{101};
+	};
+	MOCK_EXPECT(data.filter).exactly(2).calls(check);
+	BOOST_TEST(expr_filter(&env, 2)(vn) == east_value_term{101});
+	BOOST_TEST(expr_filter(&env, 2)(filter_call{vn}) == east_value_term{101});
+}
+BOOST_FIXTURE_TEST_CASE(by_fnc, mock_exenv_fixture)
+{
+	cppjinja::ast::function_call fc;
+	fc.ref.push_back("a");
+	fc.params.emplace_back(value_term{42});
+	auto check = [&fc](
+	          const cppjinja::east::function_call& udfc
+	        , const east_value_term& base){
+		BOOST_TEST_REQUIRE(fc.ref.size()==1);
+		BOOST_TEST(udfc.ref[0]==fc.ref[0]);
+		BOOST_TEST(base == east_value_term{2});
+		BOOST_TEST(udfc.params.size() == fc.params.size());
+		BOOST_TEST(udfc.params[0].name.has_value() == fc.params[0].name.has_value());
+		BOOST_TEST(udfc.params[0].val == east_value_term{42});
+		return east_value_term{101};
+	};
+	MOCK_EXPECT(data.filter).once().calls(check);
+	BOOST_TEST(expr_filter(&env, 2)(fc) == east_value_term{101});
+	MOCK_EXPECT(data.filter).once().calls(check);
+	BOOST_TEST(expr_filter(&env, 2)(value_term{fc}) == east_value_term{101});
+}
+BOOST_FIXTURE_TEST_CASE(by_wrong, mock_exenv_fixture)
+{
+	using namespace cppjinja::ast;
+	BOOST_CHECK_THROW(expr_filter(nullptr, 42), std::exception);
+	BOOST_CHECK_THROW(expr_filter(&env, 42)(2), std::exception);
+	BOOST_CHECK_THROW(expr_filter(&env, 42)("str"s), std::exception);
+	BOOST_CHECK_THROW(expr_filter(&env, 42)(tuple_v{}), std::exception);
+	BOOST_CHECK_THROW(expr_filter(&env, 42)(array_v{}), std::exception);
+	BOOST_CHECK_THROW(expr_filter(&env, 42)(binary_op{}), std::exception);
+}
+BOOST_FIXTURE_TEST_CASE(few_times, mock_exenv_fixture)
+{
+	using cppjinja::ast::var_name;
+	using cppjinja::ast::function_call;
+	int calls_num = 40;
+	auto check = [&calls_num](
+	          const cppjinja::east::function_call&
+	        , const east_value_term& base){
+		BOOST_TEST(base == east_value_term{calls_num});
+		return east_value_term{calls_num + 1};
+	};
+
+	MOCK_EXPECT(data.filter).calls(check);
+	expr_filter flt(&env, 40);
+	for(;calls_num < 45;++calls_num)
+		BOOST_TEST(flt(var_name{"a"}) == east_value_term{calls_num+1});
+	for(;calls_num < 50;++calls_num)
+		BOOST_TEST(flt(function_call{}) == east_value_term{calls_num+1});
+}
+BOOST_FIXTURE_TEST_CASE(print, mock_exenv_fixture)
+{
+	std::stringstream out;
+	out << expr_filter(&env, 40);
+	BOOST_TEST(out.str() == "40");
+}
+BOOST_AUTO_TEST_SUITE_END() // filter
+
 BOOST_AUTO_TEST_SUITE(exenv)
 BOOST_AUTO_TEST_CASE(rinfo_ops)
 {
@@ -168,70 +375,6 @@ BOOST_FIXTURE_TEST_CASE(params, impl_exenv_fixture)
 	calls.call(&env, &calling1, {});
 	BOOST_TEST(env.params().size() == 0);
 }
-
-BOOST_AUTO_TEST_SUITE(context)
-BOOST_FIXTURE_TEST_CASE(current_node, mock_impls_fixture)
-{
-	mocks::node fnode1, fnode2;
-
-	BOOST_CHECK_THROW(ctx.nth_node_on_stack(0), std::exception);
-	BOOST_CHECK_THROW(ctx.current_node(&fnode1), std::exception);
-
-	ctx.push(&fnode1);
-	ctx.current_node(&fnode1);
-	BOOST_TEST(ctx.nth_node_on_stack(0) == &fnode1);
-
-	ctx.current_node(&fnode2);
-	BOOST_TEST(ctx.nth_node_on_stack(0) == &fnode2);
-	BOOST_TEST(ctx.nth_node_on_stack(1) == &fnode1);
-
-	BOOST_CHECK_THROW(ctx.nth_node_on_stack(2), std::exception);
-}
-BOOST_FIXTURE_TEST_CASE(stack, mock_impls_fixture)
-{
-	mocks::node fnode1, fnode2;
-	BOOST_CHECK_THROW(ctx.maker(), std::exception);
-	BOOST_CHECK_THROW(ctx.pop(&fnode1), std::exception);
-
-	ctx.push(&fnode1);
-	BOOST_TEST(ctx.maker() == &fnode1);
-	BOOST_CHECK_THROW(ctx.pop(&fnode2), std::exception);
-
-	ctx.push(&fnode2);
-	BOOST_TEST(ctx.maker() == &fnode2);
-
-	BOOST_CHECK_NO_THROW(ctx.pop(&fnode2));
-	BOOST_TEST(ctx.maker() == &fnode1);
-}
-BOOST_FIXTURE_TEST_CASE(cur_namespace, mock_impls_fixture)
-{
-	BOOST_CHECK_THROW(ctx.cur_namespace(), std::exception);
-	mocks::node maker;
-	ctx.push(&maker);
-	BOOST_CHECK_NO_THROW(ctx.cur_namespace());
-}
-
-BOOST_FIXTURE_TEST_CASE(out, mock_impls_fixture)
-{
-	mocks::node node1, node2;
-	BOOST_CHECK_THROW(ctx.out(), std::exception);
-	BOOST_CHECK_THROW(ctx.result(), std::exception);
-	ctx.push(&node1);
-	BOOST_REQUIRE_NO_THROW(ctx.out());
-	std::ostream* out1 = &ctx.out();
-	BOOST_TEST(ctx.result() == "");
-	ctx.out() << "test";
-	BOOST_TEST(ctx.result() == "test");
-	ctx.push(&node2);
-	BOOST_TEST(ctx.result() == "");
-	BOOST_TEST(&ctx.out() != out1);
-	ctx.pop(&node2);
-	BOOST_TEST(&ctx.out() == out1);
-	BOOST_TEST(ctx.result() == "test");
-	ctx.out() << "test";
-	BOOST_TEST(ctx.result() == "testtest");
-}
-BOOST_AUTO_TEST_SUITE_END() // context
 
 BOOST_AUTO_TEST_SUITE(solver)
 BOOST_DATA_TEST_CASE_F(mock_solver_fixture, simples_num
@@ -329,149 +472,6 @@ BOOST_AUTO_TEST_CASE(cannot_create_without_context)
 	BOOST_CHECK_THROW(cppjinja::evt::expr_solver(nullptr), std::exception);
 }
 BOOST_AUTO_TEST_SUITE_END() // solver
-
-BOOST_AUTO_TEST_SUITE(filter)
-BOOST_FIXTURE_TEST_CASE(by_var, mock_exenv_fixture)
-{
-	using cppjinja::ast::filter_call;
-	cppjinja::ast::var_name vn{"a"};
-	auto check = [&vn](
-	          const cppjinja::east::function_call& fc
-	        , const east_value_term& base){
-		BOOST_TEST_REQUIRE(fc.ref.size()==1);
-		BOOST_TEST(fc.ref[0]==vn[0]);
-		BOOST_TEST(base == east_value_term{2});
-		BOOST_CHECK(fc.params.empty());
-		return east_value_term{101};
-	};
-	MOCK_EXPECT(data.filter).exactly(2).calls(check);
-	BOOST_TEST(expr_filter(&env, 2)(vn) == east_value_term{101});
-	BOOST_TEST(expr_filter(&env, 2)(filter_call{vn}) == east_value_term{101});
-}
-BOOST_FIXTURE_TEST_CASE(by_fnc, mock_exenv_fixture)
-{
-	cppjinja::ast::function_call fc;
-	fc.ref.push_back("a");
-	fc.params.emplace_back(value_term{42});
-	auto check = [&fc](
-	          const cppjinja::east::function_call& udfc
-	        , const east_value_term& base){
-		BOOST_TEST_REQUIRE(fc.ref.size()==1);
-		BOOST_TEST(udfc.ref[0]==fc.ref[0]);
-		BOOST_TEST(base == east_value_term{2});
-		BOOST_TEST(udfc.params.size() == fc.params.size());
-		BOOST_TEST(udfc.params[0].name.has_value() == fc.params[0].name.has_value());
-		BOOST_TEST(udfc.params[0].val == east_value_term{42});
-		return east_value_term{101};
-	};
-	MOCK_EXPECT(data.filter).once().calls(check);
-	BOOST_TEST(expr_filter(&env, 2)(fc) == east_value_term{101});
-	MOCK_EXPECT(data.filter).once().calls(check);
-	BOOST_TEST(expr_filter(&env, 2)(value_term{fc}) == east_value_term{101});
-}
-BOOST_FIXTURE_TEST_CASE(by_wrong, mock_exenv_fixture)
-{
-	using namespace cppjinja::ast;
-	BOOST_CHECK_THROW(expr_filter(nullptr, 42), std::exception);
-	BOOST_CHECK_THROW(expr_filter(&env, 42)(2), std::exception);
-	BOOST_CHECK_THROW(expr_filter(&env, 42)("str"s), std::exception);
-	BOOST_CHECK_THROW(expr_filter(&env, 42)(tuple_v{}), std::exception);
-	BOOST_CHECK_THROW(expr_filter(&env, 42)(array_v{}), std::exception);
-	BOOST_CHECK_THROW(expr_filter(&env, 42)(binary_op{}), std::exception);
-}
-BOOST_FIXTURE_TEST_CASE(few_times, mock_exenv_fixture)
-{
-	using cppjinja::ast::var_name;
-	using cppjinja::ast::function_call;
-	int calls_num = 40;
-	auto check = [&calls_num](
-	          const cppjinja::east::function_call&
-	        , const east_value_term& base){
-		BOOST_TEST(base == east_value_term{calls_num});
-		return east_value_term{calls_num + 1};
-	};
-
-	MOCK_EXPECT(data.filter).calls(check);
-	expr_filter flt(&env, 40);
-	for(;calls_num < 45;++calls_num)
-		BOOST_TEST(flt(var_name{"a"}) == east_value_term{calls_num+1});
-	for(;calls_num < 50;++calls_num)
-		BOOST_TEST(flt(function_call{}) == east_value_term{calls_num+1});
-}
-BOOST_FIXTURE_TEST_CASE(print, mock_exenv_fixture)
-{
-	std::stringstream out;
-	out << expr_filter(&env, 40);
-	BOOST_TEST(out.str() == "40");
-}
-BOOST_AUTO_TEST_SUITE_END() // filter
-
-BOOST_AUTO_TEST_SUITE(callstack)
-BOOST_FIXTURE_TEST_CASE(cannot_call_nullptr, mock_impls_fixture)
-{
-	mocks::exenv env;
-	mocks::callable_node calling;
-	BOOST_CHECK_THROW(calls.call(nullptr, nullptr, {}), std::exception);
-	BOOST_CHECK_THROW(calls.call(&env, nullptr, {}), std::exception);
-	BOOST_CHECK_THROW(calls.call(nullptr, &calling, {}), std::exception);
-}
-BOOST_FIXTURE_TEST_CASE(call_block, mock_impls_fixture)
-{
-	using namespace cppjinja::ast;
-
-	mocks::exenv env;
-	mocks::callable_node calling;
-	MOCK_EXPECT(calling.params).returns(std::vector<macro_parameter>{
-	                                       macro_parameter{"p1", std::nullopt},
-	                                       macro_parameter{"p2", value_term{52}},
-	                                       macro_parameter{"p4", value_term{44}}
-	                                    });
-	MOCK_EXPECT(calling.evaluate).once().calls(
-	[this,&env,&calling](cppjinja::evt::exenv& ienv){
-		BOOST_TEST(&ienv == &env);
-		auto params = calls.param_stack(&calling);
-		BOOST_TEST_REQUIRE(params.size() == 1);
-		BOOST_TEST(params[0]->solve(var_name{"p1"}) == value_term{41});
-		BOOST_TEST(params[0]->solve(var_name{"p2"}) == value_term{42});
-		BOOST_TEST(params[0]->solve(var_name{"p3"}) == value_term{43});
-		BOOST_TEST(params[0]->solve(var_name{"p4"}) == value_term{44});
-		return "ok"s;
-	});
-	function_call_parameter p1(value_term{41});
-	function_call_parameter p2("p2", value_term{42});
-	function_call_parameter p3("p3", value_term{43});
-	BOOST_TEST(calls.call(&env, &calling, {p1,p2,p3}) == "ok");
-}
-BOOST_FIXTURE_TEST_CASE(param_stack, mock_impls_fixture)
-{
-	using namespace cppjinja::ast;
-
-	mocks::exenv env;
-	mocks::callable_node calling1, calling2;
-	MOCK_EXPECT(calling1.params).calls([]()->std::vector<macro_parameter>{return {};});
-	MOCK_EXPECT(calling2.params).calls([]()->std::vector<macro_parameter>{
-	                                       return {macro_parameter{"p",value_term{42}}};
-	                                   });
-	MOCK_EXPECT(calling1.evaluate).once().calls(
-	[this,&calling1,&env,&calling2](cppjinja::evt::exenv&){
-		BOOST_TEST(calls.param_stack(&calling1).size()==1);
-		calls.call(&env, &calling2, {});
-		BOOST_TEST(calls.param_stack(&calling1).size()==1);
-		return "c1";
-	});
-	MOCK_EXPECT(calling2.evaluate).once().calls(
-	[this,&calling1](cppjinja::evt::exenv&){
-		BOOST_TEST(calls.param_stack(&calling1).size()==2);
-		BOOST_TEST(calls.param_stack(&calling1)[1]->solve(var_name{"p"}).has_value() == false);
-		BOOST_TEST(calls.param_stack(&calling1)[0]->solve(var_name{"p"}) == value_term{42});
-		BOOST_CHECK_THROW(calls.param_stack(nullptr), std::exception);
-		return "c2";
-	});
-	BOOST_TEST(calls.param_stack(nullptr).size() == 0);
-	BOOST_TEST(calls.param_stack(&calling1).size() == 0);
-	calls.call(&env, &calling1, {});
-}
-BOOST_AUTO_TEST_SUITE_END() // callstack
 
 BOOST_AUTO_TEST_SUITE(raii)
 BOOST_FIXTURE_TEST_CASE(push_ctx, impl_exenv_fixture)

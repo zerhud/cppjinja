@@ -132,6 +132,8 @@ cppjinja::evt::compiled_tmpl build_tree(std::string_view ptxt)
 	return cppjinja::evt::tmpl_compiler()(parsed.tmpls[0]);
 }
 
+BOOST_AUTO_TEST_SUITE(phase_compilation)
+
 BOOST_AUTO_TEST_SUITE(tmpl_compiler)
 
 BOOST_AUTO_TEST_CASE(empty_tmpl)
@@ -253,3 +255,5 @@ BOOST_AUTO_TEST_CASE(tmpl_name)
 }
 
 BOOST_AUTO_TEST_SUITE_END() // tmpl_compiler
+
+BOOST_AUTO_TEST_SUITE_END() // phase_compilation

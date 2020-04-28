@@ -84,6 +84,7 @@ void test_name_equals(const Node& evtn, const Ast& astnode)
 	BOOST_TEST( evtn.name() == astnode.name );
 }
 
+BOOST_AUTO_TEST_SUITE( phase_evaluate )
 BOOST_AUTO_TEST_SUITE(nodes)
 
 BOOST_AUTO_TEST_SUITE(tmpl)
@@ -419,3 +420,4 @@ BOOST_FIXTURE_TEST_CASE(render_false, mock_callable_fixture)
 BOOST_AUTO_TEST_SUITE_END() // block_if
 
 BOOST_AUTO_TEST_SUITE_END() // nodes
+BOOST_AUTO_TEST_SUITE_END() // phase_evaluate
