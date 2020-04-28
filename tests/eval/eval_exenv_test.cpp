@@ -682,6 +682,12 @@ BOOST_AUTO_TEST_CASE(cannot_shift_under_zero)
 	BOOST_CHECK_THROW(fmt.shift_tab(-2), std::exception);
 	BOOST_CHECK_NO_THROW(fmt.shift_tab(0));
 }
+BOOST_AUTO_TEST_CASE(cannot_shift_too_much)
+{
+	result_formatter fmt;
+	BOOST_CHECK_THROW(fmt.shift_tab(101), std::exception);
+	BOOST_TEST(fmt("\na") == "\na");
+}
 BOOST_AUTO_TEST_SUITE_END() // result_formatter
 
 BOOST_AUTO_TEST_SUITE_END() // phase_evaluate

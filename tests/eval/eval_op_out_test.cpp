@@ -66,6 +66,9 @@ struct mock_data_provider_fixture
 	        std::make_unique<mocks::data_provider>();
 };
 
+
+BOOST_AUTO_TEST_SUITE(old_integrations_tests)
+
 auto block_macro_data =
         tdata::make("block"s,    "macro"s)
       ^ tdata::make("endblock"s, "endmacro"s);
@@ -235,3 +238,5 @@ BOOST_AUTO_TEST_CASE(simple_if)
 	BOOST_TEST(parse_single(pdata, *data) == "ok"sv );
 }
 BOOST_AUTO_TEST_SUITE_END() // binary_ops
+
+BOOST_AUTO_TEST_SUITE_END() // old_integrations_tests

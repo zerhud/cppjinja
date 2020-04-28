@@ -14,6 +14,8 @@ void cppjinja::evt::result_formatter::shift_tab(int val)
 {
 	if(bval + val < 0)
 		throw std::runtime_error("cannot shift_tab under zero");
+	if(100 < bval + val)
+		throw std::runtime_error("too much");
 	bval += val;
 }
 

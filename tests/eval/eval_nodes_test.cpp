@@ -434,7 +434,6 @@ BOOST_FIXTURE_TEST_CASE(render_false_we, mock_callable_fixture)
 	prepare_for_render_two_childrend(ast_bl);
 	evtnodes::block_if bl(ast_bl);
 	expect_children({&child1});
-	MOCK_EXPECT(env.rinfo).once();
 	MOCK_EXPECT(env.current_node).with(&bl);
 	BOOST_CHECK_NO_THROW(bl.render(env));
 	BOOST_TEST(out.str() == "");
@@ -451,6 +450,83 @@ BOOST_FIXTURE_TEST_CASE(render_false, mock_callable_fixture)
 	MOCK_EXPECT(env.current_node).with(&bl);
 	BOOST_CHECK_NO_THROW(bl.render(env));
 	BOOST_TEST(out.str() == "");
+}
+BOOST_FIXTURE_TEST_CASE(render_if_rinfo, mock_callable_fixture)
+{
+	ast::block_if ast_bl;
+	ast_bl.condition = ast::binary_op(value_term{1}, ast::comparator::eq, value_term{1});
+	ast_bl.left_close.trim = true;
+	ast_bl.right_open.trim = false;
+	evtnodes::block_if cnt(ast_bl);
+	expect_children({&child1, &child2});
+	MOCK_EXPECT(child1.render);
+	MOCK_EXPECT(env.current_node);
+	MOCK_EXPECT(env.rinfo).once().calls([](std::optional<cppjinja::evt::render_info> ri){
+		BOOST_REQUIRE(ri.has_value());
+		BOOST_TEST((bool)ri->trim_left == true);
+		BOOST_TEST((bool)ri->trim_right == false);
+	});
+	cnt.render(env);
+
+	ast_bl.else_block.emplace().left_open.trim = true;
+	ast_bl.else_block->left_close.trim = false;
+	cnt = evtnodes::block_if(ast_bl);
+	MOCK_EXPECT(env.rinfo).once().calls([](std::optional<cppjinja::evt::render_info> ri){
+		BOOST_REQUIRE(ri.has_value());
+		BOOST_TEST((bool)ri->trim_left == true);
+		BOOST_TEST((bool)ri->trim_right == true);
+	});
+	cnt.render(env);
+
+	ast_bl.condition = ast::binary_op(value_term{2}, ast::comparator::eq, value_term{1});
+	cnt = evtnodes::block_if(ast_bl);
+	MOCK_EXPECT(child2.render).once();
+	MOCK_EXPECT(env.rinfo).once().calls([](std::optional<cppjinja::evt::render_info> ri){
+		BOOST_REQUIRE(ri.has_value());
+		BOOST_TEST((bool)ri->trim_left == false);
+		BOOST_TEST((bool)ri->trim_right == false);
+	});
+	cnt.render(env);
+}
+BOOST_FIXTURE_TEST_CASE(render_if_tabshift, mock_callable_fixture)
+{
+	ast::block_if ast_bl;
+	ast_bl.condition = ast::binary_op(value_term{1}, ast::comparator::eq, value_term{1});
+	ast_bl.left_close.bsign = 2;
+	ast_bl.right_open.bsign = -1;
+	evtnodes::block_if cnt(ast_bl);
+	expect_children({&child1, &child2});
+	MOCK_EXPECT(env.rinfo);
+	MOCK_EXPECT(env.current_node);
+	MOCK_EXPECT(child1.render).once().calls([this](cppjinja::evt::exenv&){
+		BOOST_TEST(rfmt("\na"s) == "\n\t\ta"s);
+	});
+	cnt.render(env);
+	BOOST_TEST(rfmt("\na"s) == "\n\ta"s);
+
+	ast_bl.else_block.emplace().left_open.bsign = -3;
+	cnt = evtnodes::block_if(ast_bl);
+	MOCK_EXPECT(child1.render).once().calls([this](cppjinja::evt::exenv&){
+		BOOST_TEST(rfmt("\na"s) == "\n\t\t\ta"s);
+	});
+	cnt.render(env);
+	BOOST_TEST(rfmt("\na"s) == "\na"s);
+}
+BOOST_FIXTURE_TEST_CASE(render_else_tabshift, mock_callable_fixture)
+{
+	ast::block_if ast_bl;
+	ast_bl.condition = ast::binary_op(value_term{2}, ast::comparator::eq, value_term{1});
+	ast_bl.else_block.emplace().left_close.bsign = 2;
+	ast_bl.right_open.bsign = -1;
+	evtnodes::block_if cnt(ast_bl);
+	expect_children({&child1, &child2});
+	MOCK_EXPECT(env.rinfo);
+	MOCK_EXPECT(env.current_node);
+	MOCK_EXPECT(child2.render).once().calls([this](cppjinja::evt::exenv&){
+		BOOST_TEST(rfmt("\na"s) == "\n\t\ta"s);
+	});
+	cnt.render(env);
+	BOOST_TEST(rfmt("\na"s) == "\n\ta"s);
 }
 BOOST_AUTO_TEST_SUITE_END() // block_if
 

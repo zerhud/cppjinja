@@ -13,9 +13,44 @@
 using namespace std::literals;
 using namespace cppjinja::evtnodes;
 
-cppjinja::evt::render_info block_if::rinfo_for_children() const
+void block_if::render_if(cppjinja::evt::exenv& ctx) const
 {
-	return evt::render_info{ block.left_close.trim, block.right_open.trim };
+	auto formatter = raii_if_formatter(ctx);
+	ctx.children(this).at(0)->render(ctx);
+}
+
+void block_if::render_else(cppjinja::evt::exenv& ctx) const
+{
+	auto children = ctx.children(this);
+	if(children.size() == 2) {
+		auto formatter = raii_else_formatter(ctx);
+		children[1]->render(ctx);
+	}
+}
+
+cppjinja::evt::raii_result_format block_if::raii_if_formatter(cppjinja::evt::exenv& ctx) const
+{
+	bool first_trim = block.left_close.trim;
+	auto first_bsign = block.left_close.bsign ? *block.left_close.bsign : 0;
+	if(block.else_block.has_value()) {
+		ctx.rinfo(evt::render_info{first_trim, block.else_block->left_open.trim});
+		return evt::raii_result_format( &ctx.render_format(), first_bsign,
+		            block.else_block->left_open.bsign ?
+		                *block.else_block->left_open.bsign : 0);
+	}
+	ctx.rinfo(evt::render_info{first_trim, block.right_open.trim});
+	return evt::raii_result_format( &ctx.render_format(), first_bsign,
+	                                block.right_open.bsign ? *block.right_open.bsign : 0);
+}
+
+cppjinja::evt::raii_result_format block_if::raii_else_formatter(cppjinja::evt::exenv& ctx) const
+{
+	ctx.rinfo(evt::render_info{block.else_block->left_close.trim, block.right_open.trim});
+	return evt::raii_result_format(
+	            &ctx.render_format(),
+	            block.else_block->left_close.bsign ? *block.else_block->left_close.bsign : 0,
+	            block.right_open.bsign ? *block.right_open.bsign : 0
+	            );
 }
 
 block_if::block_if(cppjinja::ast::block_if nb) : block(std::move(nb))
@@ -31,11 +66,6 @@ void block_if::render(evt::exenv& ctx) const
 {
 	ctx.current_node(this);
 	auto ifresult = evt::expr_solver(&ctx)(block.condition) == east::value_term{1};
-
-	auto children = ctx.children(this);
-	assert(!children.empty() && children.size() < 3);
-
-	ctx.rinfo(rinfo_for_children());
-	if(ifresult) children[0]->render(ctx);
-	if(children.size()==2 && !ifresult) children[1]->render(ctx);
+	if(ifresult) render_if(ctx);
+	else render_else(ctx);
 }

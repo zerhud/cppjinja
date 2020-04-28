@@ -24,6 +24,8 @@ namespace txt = cppjinja::text;
 namespace ast = cppjinja::ast;
 namespace utd = boost::unit_test::data;
 
+BOOST_AUTO_TEST_SUITE(phase_parse)
+
 BOOST_AUTO_TEST_SUITE(block_raw)
 BOOST_DATA_TEST_CASE(
 	  good
@@ -98,12 +100,16 @@ BOOST_AUTO_TEST_CASE(else_thread)
 	BOOST_REQUIRE_NO_THROW( result = cppjinja::text::parse(txt::block_if, text) );
 	BOOST_TEST_REQUIRE( result.else_block.has_value() );
 	BOOST_TEST_REQUIRE( result.else_block->content.size() == 1 );
+	BOOST_TEST( result.else_block->left_open.bsign.has_value() == false);
+	BOOST_TEST( result.else_block->left_close.bsign.has_value() == false);
 
 	text = "<% if 1==2 %> never seen <% else %> ok <% endif %>"s;
 	BOOST_REQUIRE_NO_THROW( result = cppjinja::text::parse(txt::block_if, text) );
 	BOOST_TEST_REQUIRE( result.content.size() == 1 );
 	BOOST_TEST_REQUIRE( result.else_block.has_value() );
 	BOOST_TEST_REQUIRE( result.else_block->content.size() == 1 );
+	BOOST_TEST( result.else_block->left_open.bsign.has_value() == false);
+	BOOST_TEST( result.else_block->left_close.bsign.has_value() == false);
 
 	auto* else_cnt = boost::get<std::string>(&result.else_block->content[0]);
 	BOOST_TEST_REQUIRE( else_cnt != nullptr );
@@ -198,3 +204,5 @@ BOOST_AUTO_TEST_CASE(block_call)
 	data = "<% call name %>content<%endcall%>"s;
 	BOOST_CHECK_NO_THROW( result = txt::parse(txt::block_call, data) );
 }
+
+BOOST_AUTO_TEST_SUITE_END() // phase_parse
