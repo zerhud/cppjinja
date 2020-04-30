@@ -34,7 +34,7 @@ namespace cppjinja::text {
 	auto const array_v_def = lit('[') >> (value_term % ',') >> lit(']');
 	auto const tuple_v_def = lit('(') >> (value_term % ',') >> lit(')');
 
-	auto const var_name_def = single_var_name >> *('.' >> single_var_name % '.');
+	auto const var_name_def = single_var_name % '.';
 	auto const array_call_def = var_name >> '[' >> value_term >> ']';
 
 	auto const binary_op_sign =

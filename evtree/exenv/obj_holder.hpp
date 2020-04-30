@@ -16,8 +16,6 @@ namespace cppjinja::evt {
 
 class obj_holder final {
 	std::unordered_map<ast::string_t, std::shared_ptr<ctx_object>> map;
-
-	std::optional<ast::value_term> solve(ast::var_name var) const ;
 public:
 	obj_holder(obj_holder&& other) =default ;
 	obj_holder() =default ;
