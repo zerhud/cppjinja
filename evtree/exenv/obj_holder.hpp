@@ -16,6 +16,8 @@ namespace cppjinja::evt {
 
 class obj_holder final {
 	std::unordered_map<ast::string_t, std::shared_ptr<ctx_object>> map;
+
+	std::optional<ast::value_term> solve(ast::var_name var) const ;
 public:
 	obj_holder(obj_holder&& other) =default ;
 	obj_holder() =default ;
@@ -25,8 +27,8 @@ public:
 	void rem(const ast::string_t& n);
 	std::shared_ptr<ctx_object> find(const ast::string_t& n) const ;
 
-	std::optional<ast::value_term> call(ast::function_call fnc) const ;
-	std::optional<ast::value_term> solve(ast::var_name var) const ;
+	std::optional<ast::value_term> operator()(ast::var_name var) const ;
+	std::optional<ast::value_term> operator()(ast::function_call fnc) const ;
 };
 
 } // namespace cppjinja::evt

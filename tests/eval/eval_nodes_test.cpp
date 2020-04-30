@@ -140,13 +140,13 @@ BOOST_FIXTURE_TEST_CASE(creates_self, mock_exenv_fixture)
 	cppjinja::ast::function_call call;
 	call.ref.emplace_back("ch1");
 	expect_call(&child1, {});
-	BOOST_TEST(globals.call(call) == value_term{"ok_ch1"});
+	BOOST_TEST(globals(call) == value_term{"ok_ch1"});
 	call.ref = {"self", "ch1"};
 	expect_call(&child1, {});
-	BOOST_TEST(globals.call(call) == value_term{"ok_ch1"});
+	BOOST_TEST(globals(call) == value_term{"ok_ch1"});
 	call.ref.back() = "ch2";
 	expect_call(&child2, {});
-	BOOST_TEST(globals.call(call) == value_term{"ok_ch2"});
+	BOOST_TEST(globals(call) == value_term{"ok_ch2"});
 }
 BOOST_AUTO_TEST_SUITE_END() // tmpl
 
@@ -166,7 +166,7 @@ BOOST_FIXTURE_TEST_CASE(value, mock_exenv_fixture)
 	MOCK_EXPECT(env.current_node).once().with(&snode);
 	expect_glp(0, 1, 0);
 	snode.render(env);
-	BOOST_TEST(locals.solve(ast::var_name{"tname"}) == value_term{42});
+	BOOST_TEST(locals(ast::var_name{"tname"}) == value_term{42});
 }
 BOOST_FIXTURE_TEST_CASE(name, mock_exenv_fixture)
 {

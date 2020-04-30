@@ -163,10 +163,10 @@ BOOST_FIXTURE_TEST_CASE(call_block, mock_impls_fixture)
 		BOOST_TEST(&ienv == &env);
 		auto params = calls.param_stack(&calling);
 		BOOST_TEST_REQUIRE(params.size() == 1);
-		BOOST_TEST(params[0]->solve(var_name{"p1"}) == value_term{41});
-		BOOST_TEST(params[0]->solve(var_name{"p2"}) == value_term{42});
-		BOOST_TEST(params[0]->solve(var_name{"p3"}) == value_term{43});
-		BOOST_TEST(params[0]->solve(var_name{"p4"}) == value_term{44});
+		BOOST_TEST((*params[0])(var_name{"p1"}) == value_term{41});
+		BOOST_TEST((*params[0])(var_name{"p2"}) == value_term{42});
+		BOOST_TEST((*params[0])(var_name{"p3"}) == value_term{43});
+		BOOST_TEST((*params[0])(var_name{"p4"}) == value_term{44});
 		return "ok"s;
 	});
 	function_call_parameter p1(value_term{41});
@@ -194,8 +194,8 @@ BOOST_FIXTURE_TEST_CASE(param_stack, mock_impls_fixture)
 	MOCK_EXPECT(calling2.evaluate).once().calls(
 	[this,&calling1](cppjinja::evt::exenv&){
 		BOOST_TEST(calls.param_stack(&calling1).size()==2);
-		BOOST_TEST(calls.param_stack(&calling1)[1]->solve(var_name{"p"}).has_value() == false);
-		BOOST_TEST(calls.param_stack(&calling1)[0]->solve(var_name{"p"}) == value_term{42});
+		BOOST_TEST((*calls.param_stack(&calling1)[1])(var_name{"p"}).has_value() == false);
+		BOOST_TEST((*calls.param_stack(&calling1)[0])(var_name{"p"}) == value_term{42});
 		BOOST_CHECK_THROW(calls.param_stack(nullptr), std::exception);
 		return "c2";
 	});
@@ -373,8 +373,8 @@ BOOST_FIXTURE_TEST_CASE(params, impl_exenv_fixture)
 	                                   });
 	MOCK_EXPECT(calling2.evaluate).once().calls([this](cppjinja::evt::exenv&){
 		BOOST_TEST(env.params().size() == 2);
-		BOOST_TEST(env.params().front()->solve(var_name{"p"}) == value_term{42});
-		BOOST_TEST(env.params().back()->solve(var_name{"p"}).has_value() == false);
+		BOOST_TEST((*env.params().front())(var_name{"p"}) == value_term{42});
+		BOOST_TEST((*env.params().back())(var_name{"p"}).has_value() == false);
 		return "calling2";
 	});
 	MOCK_EXPECT(calling1.evaluate).once().calls([this,&calling2](cppjinja::evt::exenv&){
@@ -545,7 +545,7 @@ BOOST_AUTO_TEST_CASE(call)
 	ns.add("a", std::move(obj_));
 	function_call call;
 	call.ref.emplace_back("n");
-	BOOST_TEST(ns.call(call).has_value() == false);
+	BOOST_TEST(ns(call).has_value() == false);
 	call.ref.clear();
 
 	MOCK_EXPECT(obj->call).once().calls([](function_call c){
@@ -553,7 +553,7 @@ BOOST_AUTO_TEST_CASE(call)
 		return value_term{"ok"s};
 	});
 	call.ref.emplace_back("a");
-	BOOST_TEST(ns.call(call) == value_term{"ok"});
+	BOOST_TEST(ns(call) == value_term{"ok"});
 
 	MOCK_EXPECT(obj->call).once().calls([](function_call c){
 		BOOST_TEST(c.ref.size() == 1);
@@ -561,7 +561,7 @@ BOOST_AUTO_TEST_CASE(call)
 		return value_term{"ok"s};
 	});
 	call.ref.emplace_back("b");
-	BOOST_TEST(ns.call(call) == value_term{"ok"});
+	BOOST_TEST(ns(call) == value_term{"ok"});
 }
 BOOST_AUTO_TEST_CASE(solve)
 {
@@ -569,20 +569,20 @@ BOOST_AUTO_TEST_CASE(solve)
 	auto obj_ = std::make_unique<mocks::ctx_object>();
 	mocks::ctx_object* obj = obj_.get();
 	ns.add("a", std::move(obj_));
-	BOOST_TEST(ns.solve(var_name{"b"s}).has_value() == false);
+	BOOST_TEST(ns(var_name{"b"s}).has_value() == false);
 
 	MOCK_EXPECT(obj->solve).once().calls([](var_name n){
 		BOOST_TEST(n.size() == 0);
 		return value_term{"ok"s};
 	});
-	BOOST_TEST(ns.solve(var_name{"a"}) == value_term{"ok"s});
+	BOOST_TEST(ns(var_name{"a"}) == value_term{"ok"s});
 
 	MOCK_EXPECT(obj->solve).once().calls([](var_name n){
 		BOOST_TEST(n.size() == 1);
 		BOOST_TEST(n[0] == "b"s);
 		return value_term{"ok"s};
 	});
-	BOOST_TEST(ns.solve(var_name{"a", "b"}) == value_term{"ok"s});
+	BOOST_TEST(ns(var_name{"a", "b"}) == value_term{"ok"s});
 }
 BOOST_AUTO_TEST_SUITE_END() // holder
 BOOST_FIXTURE_TEST_CASE(delay_solver, mock_exenv_fixture)

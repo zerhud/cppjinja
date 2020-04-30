@@ -15,6 +15,47 @@
 
 using namespace cppjinja::details;
 
+
+cppjinja::evt::expr_solver::ret_t
+cppjinja::evt::expr_solver::solve_queue(const ast::function_call& obj)
+{
+	return solve_in_data(obj);
+}
+
+cppjinja::evt::expr_solver::ret_t
+cppjinja::evt::expr_solver::solve_queue(const ast::var_name& obj)
+{
+	return env->data()->value(east_cvt::cvt(obj));
+}
+
+template<typename Obj, typename Cont, typename... Conts>
+cppjinja::evt::expr_solver::ret_t
+cppjinja::evt::expr_solver::solve_queue(const Obj& obj, const Cont& cont, const Conts&... conts)
+{
+	auto ret = cont(obj);
+	if(ret) return (*this)(*ret);
+	return solve_queue(obj, conts...);
+}
+
+template<typename Obj>
+std::optional<cppjinja::evt::expr_solver::ret_t>
+cppjinja::evt::expr_solver::solve_in_params(const Obj& obj)
+{
+	for(auto& params:env->params()) {
+		auto val = (*params)(obj);
+		if(val) return (*this)(*val);
+	}
+	return std::nullopt;
+}
+
+template<typename Obj>
+cppjinja::evt::expr_solver::ret_t
+cppjinja::evt::expr_solver::solve_calls(const Obj& obj)
+{
+	auto in_params = solve_in_params(obj);
+	return in_params ? *in_params : solve_queue(obj, env->locals(), env->globals());
+}
+
 cppjinja::evt::expr_solver::expr_solver(exenv* e)
     : env(e)
 {
@@ -49,29 +90,13 @@ cppjinja::evt::expr_solver::operator()(const cppjinja::ast::array_call& op)
 cppjinja::evt::expr_solver::ret_t
 cppjinja::evt::expr_solver::operator()(const cppjinja::ast::function_call& obj)
 {
-	for(auto& params:env->params()) {
-		auto val = params->call(obj);
-		if(val) return (*this)(*val);
-	}
-	auto ctx_val = env->locals().call(obj);
-	if(ctx_val) return (*this)(*ctx_val);
-	auto glob_val = env->globals().call(obj);
-	if(glob_val) return (*this)(*glob_val);
-	return solve_in_data(obj);
+	return solve_calls(obj);
 }
 
 cppjinja::evt::expr_solver::ret_t
 cppjinja::evt::expr_solver::operator()(const cppjinja::ast::var_name& obj)
 {
-	for(auto& params:env->params()) {
-		auto val = params->solve(obj);
-		if(val) return (*this)(*val);
-	}
-	auto ctx_val = env->locals().solve(obj);
-	if(ctx_val) return (*this)(*ctx_val);
-	auto glob_val = env->globals().solve(obj);
-	if(glob_val) return (*this)(*glob_val);
-	return env->data()->value(east_cvt::cvt(obj));
+	return solve_calls(obj);
 }
 
 cppjinja::evt::expr_solver::ret_t

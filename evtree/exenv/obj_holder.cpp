@@ -39,8 +39,12 @@ std::shared_ptr<cppjinja::evt::ctx_object> cppjinja::evt::obj_holder::find(
 	return pos->second;
 }
 
-std::optional<cppjinja::ast::value_term>
-cppjinja::evt::obj_holder::call(cppjinja::ast::function_call fnc) const
+std::optional<cppjinja::ast::value_term> cppjinja::evt::obj_holder::operator()(cppjinja::ast::var_name var) const
+{
+	return solve(var);
+}
+
+std::optional<cppjinja::ast::value_term> cppjinja::evt::obj_holder::operator()(cppjinja::ast::function_call fnc) const
 {
 	auto pos = map.find(fnc.ref[0]);
 	if(pos!=map.end()){
