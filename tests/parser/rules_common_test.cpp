@@ -59,16 +59,8 @@ BOOST_DATA_TEST_CASE(
 	BOOST_TEST( result == good_result );
 }
 
-BOOST_DATA_TEST_CASE(
-          var_name
-        , utd::make("a"s, "a.b"s, "a['b']"s, "a['b']['c']"s, "a['b'].c"s)
-        ^ utd::make(
-		  ast::var_name{"a"s}
-		, ast::var_name{"a"s, "b"s}
-		, ast::var_name{"a"s, "b"s}
-		, ast::var_name{"a"s, "b"s, "c"s}
-		, ast::var_name{"a"s, "b"s, "c"s}
-		)
+BOOST_DATA_TEST_CASE( var_name , utd::make("a"s, "a.b"s)
+        ^ utd::make( ast::var_name{"a"s} , ast::var_name{"a"s, "b"s} )
         , data, good_result)
 {
 	ast::var_name result;
@@ -98,7 +90,7 @@ BOOST_DATA_TEST_CASE(
 
 BOOST_DATA_TEST_CASE(
           value_term
-        , utd::make("'a'"s, "a"s, "a.a"s, "foo()"s, "1"s, "1.0"s, "a['b'].c")
+        , utd::make("'a'"s, "a"s, "a.a"s, "foo()"s, "1"s, "1.0"s)
         ^ utd::make(
               ast::value_term{"a"s}
             , ast::var_name{"a"s}
@@ -106,7 +98,6 @@ BOOST_DATA_TEST_CASE(
             , ast::function_call{ast::var_name{"foo"s}, {}}
             , 1.0
             , 1.0
-            , ast::var_name{"a"s, "b"s, "c"s}
             )
         , data, good_result)
 {

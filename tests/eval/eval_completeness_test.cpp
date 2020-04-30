@@ -20,7 +20,7 @@
 
 #include "mocks.hpp"
 
-const bool todo_list = true;
+const bool todo_list = false;
 
 namespace ast = cppjinja::ast;
 namespace txt = cppjinja::text;
@@ -78,7 +78,7 @@ BOOST_DATA_TEST_CASE(set_var
 }
 
 BOOST_DATA_TEST_CASE(get_var_filter
-      , data::make( "<= a.b =>"sv, "<= a['b'] | a | b | b =>"sv)
+      , data::make( "<= a.b =>"sv, "<= a.b | a | b | b =>"sv)
       ^ data::make(0, 3), data, count)
 {
 	namespace east = cppjinja::east;

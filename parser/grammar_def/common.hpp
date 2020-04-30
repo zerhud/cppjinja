@@ -34,12 +34,7 @@ namespace cppjinja::text {
 	auto const array_v_def = lit('[') >> (value_term % ',') >> lit(']');
 	auto const tuple_v_def = lit('(') >> (value_term % ',') >> lit(')');
 
-	auto const var_name_def =
-		single_var_name >> *(
-			  ('.' >> single_var_name % '.')
-			| lexeme[ lit("['")  >> single_var_name >> lit("']") ]
-			| lexeme[ lit("[\"") >> single_var_name >> lit("\"]")]
-			);
+	auto const var_name_def = single_var_name >> *('.' >> single_var_name % '.');
 
 	auto const binary_op_sign =
 		  lit("in") >> x3::attr(ast::comparator::in)
