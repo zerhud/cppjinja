@@ -12,6 +12,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/data/monomorphic.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "parser/parse.hpp"
 #include "evtree/evtree.hpp"
@@ -26,6 +27,13 @@ namespace east = cppjinja::east;
 using namespace std::literals;
 
 namespace data = boost::unit_test::data;
+
+std::string str_to_line(std::string s)
+{
+	boost::algorithm::replace_all(s, "\n", "\\n");
+	boost::algorithm::replace_all(s, "\t", "\\t");
+	return s;
+}
 
 std::string parse_single(
           std::string_view data
@@ -128,7 +136,7 @@ BOOST_AUTO_TEST_CASE(bsign)
 {
 	auto data = "<%block a 1%>\nok\n<%-1 endblock%>"sv;
 	mocks::data_provider prov;
-	BOOST_TEST( parse_single(data, prov) == "\n\tok\n"sv );
+	BOOST_TEST( str_to_line(parse_single(data, prov)) == str_to_line("\n\tok"s) );
 }
 
 BOOST_AUTO_TEST_SUITE_END() // extra_integrated_checks
