@@ -81,7 +81,7 @@ cppjinja::evt::expr_solver::operator()(const cppjinja::ast::binary_op& op)
 }
 
 cppjinja::evt::expr_solver::ret_t
-cppjinja::evt::expr_solver::operator()(const cppjinja::ast::array_call& op)
+cppjinja::evt::expr_solver::operator()(const cppjinja::ast::array_calls& op)
 {
 	(void)op;
 	return ret_t{""};

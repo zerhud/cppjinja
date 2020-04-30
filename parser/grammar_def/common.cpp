@@ -25,5 +25,6 @@ BOOST_SPIRIT_INSTANTIATE( decltype(function_call_parameter), iterator_type, cont
 BOOST_SPIRIT_INSTANTIATE( decltype(array_v), iterator_type, context_type )
 BOOST_SPIRIT_INSTANTIATE( decltype(tuple_v), iterator_type, context_type )
 BOOST_SPIRIT_INSTANTIATE( decltype(array_call), iterator_type, context_type )
+BOOST_SPIRIT_INSTANTIATE( decltype(array_calls), iterator_type, context_type )
 
 } // namespace cppjinja::text

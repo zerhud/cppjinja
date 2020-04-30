@@ -9,6 +9,8 @@
 #include "common.hpp"
 #include <boost/spirit/home/karma.hpp>
 
+using namespace std::literals;
+
 std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::var_name& obj)
 {
 	using namespace boost::spirit::karma;
@@ -77,5 +79,12 @@ std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::tuple_v&
 
 std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::array_call& obj)
 {
-	return out << obj.name << '[' << obj.call.get() << ']';
+	if(obj.name) out << *obj.name;
+	return out << '[' << obj.call.get() << ']';
+}
+
+std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::array_calls& obj)
+{
+	for(auto& v:obj) out << v;
+	return out;
 }

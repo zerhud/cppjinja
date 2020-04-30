@@ -68,14 +68,17 @@ BOOST_DATA_TEST_CASE( var_name , utd::make("a"s, "a.b"s)
 	BOOST_TEST( result == good_result );
 }
 
-BOOST_AUTO_TEST_CASE(array_call)
+BOOST_AUTO_TEST_CASE(array_calls)
 {
-	auto data = "a[b]"sv;
-	cppjinja::ast::array_call good_result(ast::var_name{"a"s}, ast::value_term{ast::var_name{"b"s}});
-	cppjinja::ast::array_call result =
-	        cppjinja::text::parse(cppjinja::text::array_call, data);
-	BOOST_TEST(result == good_result);
-	BOOST_TEST(cppjinja::text::parse(cppjinja::text::value_term, data) == ast::value_term{good_result});
+	cppjinja::ast::array_calls result =
+	        cppjinja::text::parse(cppjinja::text::array_calls, "a[42]"sv);
+	BOOST_TEST(result.size() == 1);
+	BOOST_TEST(result[0] == ast::array_call(ast::var_name{"a"s}, ast::value_term{42}));
+	result = cppjinja::text::parse(cppjinja::text::array_calls, "a[b][c]"sv);
+	BOOST_TEST(result.size() == 2);
+	BOOST_TEST(result[1] == ast::array_call(std::nullopt, ast::value_term{ast::var_name{"c"s}}));
+	result = cppjinja::text::parse(cppjinja::text::array_calls, "a[b].a[c]"sv);
+	BOOST_TEST(result.size() == 2);
 }
 
 BOOST_DATA_TEST_CASE(

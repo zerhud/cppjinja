@@ -36,6 +36,8 @@ namespace cppjinja::text {
 
 	auto const var_name_def = single_var_name % '.';
 	auto const array_call_def = var_name >> '[' >> value_term >> ']';
+	auto const array_call_tail_def = -( '.' >> var_name) >> '[' >> value_term >> ']';
+	auto const array_calls_def = array_call >> *array_call_tail;
 
 	auto const binary_op_sign =
 		  lit("in") >> x3::attr(ast::comparator::in)
@@ -57,7 +59,7 @@ namespace cppjinja::text {
 	              | tuple_v
 	              | function_call
 	              | quoted_string
-	              | array_call
+	              | array_calls
 	              | var_name
 	              | binary_op
 	              );
@@ -76,6 +78,9 @@ namespace cppjinja::text {
 	class function_call_parameter_class : x3::annotate_on_success {};
 	class array_class : x3::annotate_on_success {};
 	class tuple_class : x3::annotate_on_success {};
+	class array_call_class      : x3::annotate_on_success {};
+	class array_calls_class     : x3::annotate_on_success {};
+	class array_call_tail_class : x3::annotate_on_success {};
 
 	BOOST_SPIRIT_DEFINE( quoted_string )
 	BOOST_SPIRIT_DEFINE( single_var_name )
@@ -87,5 +92,7 @@ namespace cppjinja::text {
 	BOOST_SPIRIT_DEFINE( array_v )
 	BOOST_SPIRIT_DEFINE( tuple_v )
 	BOOST_SPIRIT_DEFINE( array_call )
+	BOOST_SPIRIT_DEFINE( array_calls )
+	BOOST_SPIRIT_DEFINE( array_call_tail )
 
 } // namespace cppjinja::text
