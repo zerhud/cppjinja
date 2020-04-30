@@ -23,6 +23,7 @@ namespace cppjinja::text {
 	class value_term_class;
 	class array_class;
 	class tuple_class;
+	class array_call_class;
 
 	const x3::rule<quoted_string_class, ast::string_t> quoted_string = "quoted_string";
 	const x3::rule<single_var_name_class, ast::string_t> single_var_name = "single_var_name";
@@ -33,6 +34,7 @@ namespace cppjinja::text {
 	const x3::rule<value_term_class, ast::value_term> value_term = "value_term";
 	const x3::rule<array_class, ast::array_v> array_v = "array";
 	const x3::rule<tuple_class, ast::tuple_v> tuple_v = "tuple";
+	const x3::rule<array_call_class, ast::array_call> array_call = "array_call";
 
 	BOOST_SPIRIT_DECLARE(decltype(quoted_string))
 	BOOST_SPIRIT_DECLARE(decltype(single_var_name))
@@ -43,6 +45,7 @@ namespace cppjinja::text {
 	BOOST_SPIRIT_DECLARE(decltype(value_term))
 	BOOST_SPIRIT_DECLARE(decltype(array_v))
 	BOOST_SPIRIT_DECLARE(decltype(tuple_v))
+	BOOST_SPIRIT_DECLARE(decltype(array_call))
 
 } // namespace cppjinja::text
 

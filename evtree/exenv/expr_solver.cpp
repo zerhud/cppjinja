@@ -40,6 +40,13 @@ cppjinja::evt::expr_solver::operator()(const cppjinja::ast::binary_op& op)
 }
 
 cppjinja::evt::expr_solver::ret_t
+cppjinja::evt::expr_solver::operator()(const cppjinja::ast::array_call& op)
+{
+	(void)op;
+	return ret_t{""};
+}
+
+cppjinja::evt::expr_solver::ret_t
 cppjinja::evt::expr_solver::operator()(const cppjinja::ast::function_call& obj)
 {
 	for(auto& params:env->params()) {

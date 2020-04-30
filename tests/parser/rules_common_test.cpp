@@ -68,6 +68,16 @@ BOOST_DATA_TEST_CASE( var_name , utd::make("a"s, "a.b"s)
 	BOOST_TEST( result == good_result );
 }
 
+BOOST_AUTO_TEST_CASE(array_call)
+{
+	auto data = "a[b]"sv;
+	cppjinja::ast::array_call good_result(ast::var_name{"a"s}, ast::value_term{ast::var_name{"b"s}});
+	cppjinja::ast::array_call result =
+	        cppjinja::text::parse(cppjinja::text::array_call, data);
+	BOOST_TEST(result == good_result);
+	BOOST_TEST(cppjinja::text::parse(cppjinja::text::value_term, data) == ast::value_term{good_result});
+}
+
 BOOST_DATA_TEST_CASE(
           function_call
         , utd::make("foo()"s, "f_oo()"s, "foo.bar()"s, "f_oo.bar()"s, "foo('a')", "foo('a','a')"s, "foo ( 'a' , 'a' )"s, "foo\n(  )"s)

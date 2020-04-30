@@ -35,6 +35,7 @@ namespace cppjinja::text {
 	auto const tuple_v_def = lit('(') >> (value_term % ',') >> lit(')');
 
 	auto const var_name_def = single_var_name >> *('.' >> single_var_name % '.');
+	auto const array_call_def = var_name >> '[' >> value_term >> ']';
 
 	auto const binary_op_sign =
 		  lit("in") >> x3::attr(ast::comparator::in)
@@ -56,6 +57,7 @@ namespace cppjinja::text {
 	              | tuple_v
 	              | function_call
 	              | quoted_string
+	              | array_call
 	              | var_name
 	              | binary_op
 	              );
@@ -84,5 +86,6 @@ namespace cppjinja::text {
 	BOOST_SPIRIT_DEFINE( function_call_parameter )
 	BOOST_SPIRIT_DEFINE( array_v )
 	BOOST_SPIRIT_DEFINE( tuple_v )
+	BOOST_SPIRIT_DEFINE( array_call )
 
 } // namespace cppjinja::text

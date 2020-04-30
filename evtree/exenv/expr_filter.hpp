@@ -33,6 +33,7 @@ public:
 	[[noreturn]] east::value_term operator()(const ast::tuple_v& obj) const ;
 	[[noreturn]] east::value_term operator()(const ast::array_v& obj) const ;
 	[[noreturn]] east::value_term operator()(const ast::binary_op& op) const ;
+	[[noreturn]] east::value_term operator()(const ast::array_call& op) const ;
 };
 
 std::ostream& operator << (std::ostream& out, const expr_filter& obj);

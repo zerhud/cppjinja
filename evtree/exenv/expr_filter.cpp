@@ -98,6 +98,12 @@ cppjinja::evt::expr_filter::operator()(const ast::binary_op& obj) const
 	ilegal_operator();
 }
 
+cppjinja::east::value_term cppjinja::evt::expr_filter::operator()(const cppjinja::ast::array_call& op) const
+{
+	(void)op;
+	ilegal_operator();
+}
+
 std::ostream& cppjinja::evt::operator << (
         std::ostream& out, const cppjinja::evt::expr_filter& obj)
 {

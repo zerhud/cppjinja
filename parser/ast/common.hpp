@@ -66,6 +66,14 @@ struct function_call : x3::position_tagged
 	std::vector<function_call_parameter> params;
 };
 
+struct array_call : x3::position_tagged
+{
+	array_call() =default ;
+	array_call(var_name n, const value_term& v) : name(std::move(n)), call(v) {}
+	var_name name;
+	forward_ast<value_term> call;
+};
+
 struct tuple_v : x3::position_tagged
 {
 	std::vector<forward_ast<value_term>> fields;
@@ -83,6 +91,7 @@ using value_term_var = x3::variant<
 	, array_v
 	, var_name
 	, function_call
+	, array_call
 	, binary_op
 > ;
 

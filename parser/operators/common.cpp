@@ -74,3 +74,8 @@ std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::tuple_v&
 	while(begin!=end) out << *begin++ << ',';
 	return out << *end << ')';
 }
+
+std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::array_call& obj)
+{
+	return out << obj.name << '[' << obj.call.get() << ']';
+}

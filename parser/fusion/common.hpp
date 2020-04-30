@@ -13,6 +13,7 @@
 
 BOOST_FUSION_ADAPT_STRUCT(cppjinja::ast::array_v, fields)
 BOOST_FUSION_ADAPT_STRUCT(cppjinja::ast::tuple_v, fields)
+BOOST_FUSION_ADAPT_STRUCT(cppjinja::ast::array_call, name, call)
 
 BOOST_FUSION_ADAPT_STRUCT(
 		cppjinja::ast::binary_op,

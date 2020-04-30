@@ -34,6 +34,7 @@ public:
 	ret_t operator()(const ast::var_name& obj) ;
 	ret_t operator()(const ast::function_call& obj) ;
 	ret_t operator()(const ast::binary_op& op) ;
+	ret_t operator()(const ast::array_call& op) ;
 };
 
 } // namespace cppjinja::evt
