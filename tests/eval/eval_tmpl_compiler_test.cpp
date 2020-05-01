@@ -119,6 +119,7 @@ void check_main(compiled_tmpl& t, std::string name, std::size_t blocks, int cnt)
 	BOOST_TEST(dynamic_cast<nodes::tmpl*>(t.tmpl_node()) != nullptr);
 	BOOST_TEST(dynamic_cast<nodes::block_named*>(t.main_block()) != nullptr);
 	BOOST_TEST(make_node_seq_str(t.tmpl_node(), t.lrnd).substr(0,16) == "tmpl,block_named");
+	BOOST_TEST(make_node_seq_str(t.tmpl_node(), t.render_tree.all_tree()).substr(0,16) == "tmpl,block_named");
 	BOOST_TEST(t.roots.size() == blocks );
 	check_main_nodes(t.nodes, blocks, cnt);
 }
@@ -134,6 +135,50 @@ cppjinja::evt::compiled_tmpl build_tree(std::string_view ptxt)
 
 BOOST_AUTO_TEST_SUITE(phase_compilation)
 
+BOOST_AUTO_TEST_SUITE(node_tree)
+using cppjinja::evt::node_tree;
+BOOST_AUTO_TEST_CASE(roots)
+{
+	node_tree<int> tree;
+	std::vector<int> storage{1, 2, 3};
+	tree.add_root(&storage[0]);
+	tree.add_root(&storage[1]);
+	std::vector<int*> roots = tree.roots();
+	BOOST_TEST_REQUIRE(roots.size()==2);
+	BOOST_TEST(*roots[0] == 1);
+	BOOST_TEST(*roots[1] == 2);
+}
+BOOST_AUTO_TEST_CASE(children)
+{
+	node_tree<int> tree;
+	std::vector<int> storage{1, 2, 3};
+	tree.add_root(&storage[0]);
+	tree.add_child(&storage[0], &storage[1]);
+	BOOST_TEST(tree.children(&storage[0]).at(0) == &storage[1]);
+	tree.add_child(&storage[0], &storage[2]);
+	BOOST_TEST(tree.children(&storage[0]).at(0) == &storage[1]);
+	BOOST_TEST(tree.children(&storage[0]).at(1) == &storage[2]);
+	tree.add_child(&storage[0], &storage[2]);
+	BOOST_TEST(tree.children(&storage[0]).at(0) == &storage[1]);
+	BOOST_TEST(tree.children(&storage[0]).at(1) == &storage[2]);
+}
+BOOST_AUTO_TEST_CASE(root_exists)
+{
+	node_tree<int> tree;
+	std::vector<int> storage{1, 2, 3};
+	tree.add_root(&storage[0]);
+	BOOST_CHECK_THROW(tree.add_root(&storage[0]), std::exception);
+}
+BOOST_AUTO_TEST_CASE(root_not_exists)
+{
+	node_tree<int> tree;
+	std::vector<int> storage{1, 2, 3};
+	tree.add_root(&storage[0]);
+	BOOST_CHECK_THROW(tree.add_child(&storage[1], &storage[2]), std::exception);
+	BOOST_TEST(tree.children(&storage[1]).size() == 0);
+}
+BOOST_AUTO_TEST_SUITE_END() // compiled_tmpl
+
 BOOST_AUTO_TEST_SUITE(tmpl_compiler)
 
 BOOST_AUTO_TEST_CASE(empty_tmpl)
@@ -142,6 +187,7 @@ BOOST_AUTO_TEST_CASE(empty_tmpl)
 	compiled_tmpl tree = cppjinja::evt::tmpl_compiler()(tmpl);
 	check_main(tree, "", 1, 0);
 	BOOST_TEST(tree.lrnd.size() == 1);
+	BOOST_TEST(tree.render_tree.all_tree().size() == 1);
 }
 
 BOOST_DATA_TEST_CASE_F(
@@ -154,6 +200,7 @@ BOOST_DATA_TEST_CASE_F(
 	compiled_tmpl tree = build_tree(begin + cnt + end);
 	check_main(tree, "", 1, 1);
 	BOOST_TEST(make_node_seq_str(tree.main_block(), tree.lrnd) == "block_named,content..");
+	BOOST_TEST(make_node_seq_str(tree.main_block(), tree.render_tree.all_tree()) == "block_named,content..");
 
 	nodes::content* cntn = nullptr;
 	for(auto& n:tree.nodes)

@@ -54,6 +54,8 @@ void cppjinja::evt::tmpl_compiler::make_main_nodes()
 	details::push_pop_raii rnd_raii(rnd_stack, result.tmpl_node());
 	add_block(create_ast_main_block());
 	result.lrnd.emplace_back(result.tmpl_node(), result.main_block());
+	result.render_tree.add_root(result.tmpl_node());
+	result.render_tree.add_child(result.tmpl_node(), result.main_block());
 }
 
 cppjinja::ast::block_named cppjinja::evt::tmpl_compiler::create_ast_main_block()
@@ -67,6 +69,7 @@ cppjinja::evtnodes::callable*
 cppjinja::evt::tmpl_compiler::add_block(ast::block_named obj)
 {
 	evtnodes::callable* ret = create_node<evtnodes::block_named>(obj);
+	result.render_tree.add_root(ret);
 	compile_content(ret, obj.content);
 	return result.roots.emplace_back(ret);
 }
@@ -85,6 +88,7 @@ N* cppjinja::evt::tmpl_compiler::create_rendered_node(Args ... args)
 	assert(!rnd_stack.empty());
 	N* ret = create_node<N>(std::forward<Args>(args)...);
 	result.lrnd.emplace_back(rnd_stack.back(), ret);
+	result.render_tree.add_child(rnd_stack.back(), ret);
 	return ret;
 }
 

@@ -9,6 +9,7 @@
 #pragma once
 
 #include "declarations.hpp"
+#include "node_tree.hpp"
 #include "evtree/node.hpp"
 #include "nodes/tmpl.hpp"
 #include "nodes/callable.hpp"
@@ -16,13 +17,6 @@
 #include <iostream>
 
 namespace cppjinja::evt {
-
-template<typename Node>
-struct edge {
-	edge(Node* p, Node* c) : parent(p), child(c) {}
-	Node* parent;
-	Node* child;
-};
 
 typedef edge<node> node_edge;
 typedef edge<evtnodes::callable> callable_edge;
@@ -40,6 +34,8 @@ struct compiled_tmpl final {
 	std::vector<std::unique_ptr<node>> nodes;
 	std::vector<evtnodes::callable*> roots;
 	std::vector<node_edge> lrnd;
+
+	node_tree<node> render_tree;
 
 	evtnodes::tmpl* tmpl_node() ;
 	const evtnodes::tmpl* tmpl_node() const ;
