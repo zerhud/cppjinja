@@ -53,7 +53,6 @@ void cppjinja::evt::tmpl_compiler::make_main_nodes()
 	create_node<evtnodes::tmpl>(cur_tmpl);
 	details::push_pop_raii rnd_raii(rnd_stack, result.tmpl_node());
 	add_block(create_ast_main_block());
-	result.lrnd.emplace_back(result.tmpl_node(), result.main_block());
 	result.render_tree.add_root(result.tmpl_node());
 	result.render_tree.add_child(result.tmpl_node(), result.main_block());
 }
@@ -87,7 +86,6 @@ N* cppjinja::evt::tmpl_compiler::create_rendered_node(Args ... args)
 {
 	assert(!rnd_stack.empty());
 	N* ret = create_node<N>(std::forward<Args>(args)...);
-	result.lrnd.emplace_back(rnd_stack.back(), ret);
 	result.render_tree.add_child(rnd_stack.back(), ret);
 	return ret;
 }
@@ -112,7 +110,7 @@ void cppjinja::evt::tmpl_compiler::operator()(ast::forward_ast<ast::block_named>
 {
 	const bool render_in_place = can_render_in_place(obj.get());
 	auto bl = add_block(obj.get());
-	if(render_in_place) result.lrnd.emplace_back(rnd_stack.back(), bl);
+	if(render_in_place) result.render_tree.add_child(rnd_stack.back(), bl);
 }
 
 bool cppjinja::evt::tmpl_compiler::can_render_in_place(
@@ -172,6 +170,7 @@ void cppjinja::evt::tmpl_compiler::operator()(
         ast::forward_ast<cppjinja::ast::block_macro>& obj)
 {
 	auto mcr = create_node<evtnodes::block_macro>(obj.get());
+	result.render_tree.add_root(mcr);
 	compile_content(result.roots.emplace_back(mcr), obj.get().content);
 }
 

@@ -41,12 +41,8 @@ cppjinja::evtree::search_tmpl(const ast::string_t& name) const
 std::vector<const cppjinja::evt::node*> cppjinja::evtree::children(
           const cppjinja::evt::node* selected) const
 {
-	std::vector<const cppjinja::evt::node*> ret;
-	if(selected) {
-		for(auto& edge:tmpl_by_node(selected).lrnd)
-			if(edge.parent == selected) ret.emplace_back(edge.child);
-	}
-	return ret;
+	if(!selected) return {};
+	return tmpl_by_node(selected).render_tree.children(selected);
 }
 
 std::vector<const cppjinja::evtnodes::callable*>

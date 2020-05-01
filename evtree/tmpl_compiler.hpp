@@ -33,9 +33,8 @@ struct compiled_tmpl final {
 	std::vector<ast::extend_st> extends;
 	std::vector<std::unique_ptr<node>> nodes;
 	std::vector<evtnodes::callable*> roots;
-	std::vector<node_edge> lrnd;
 
-	node_tree<node> render_tree;
+	node_tree<const node> render_tree;
 
 	evtnodes::tmpl* tmpl_node() ;
 	const evtnodes::tmpl* tmpl_node() const ;
