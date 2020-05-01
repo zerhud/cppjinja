@@ -115,7 +115,7 @@ std::string make_node_seq_str(
 
 void check_main(compiled_tmpl& t, std::string name, std::size_t blocks, int cnt)
 {
-	BOOST_TEST(t.tmpl_name == name);
+	BOOST_TEST(t.tmpl_name() == name);
 	BOOST_TEST(dynamic_cast<nodes::tmpl*>(t.tmpl_node()) != nullptr);
 	BOOST_TEST(dynamic_cast<nodes::block_named*>(t.main_block()) != nullptr);
 	BOOST_TEST(make_node_seq_str(t.tmpl_node(), t.render_tree.all_tree()).substr(0,16) == "tmpl,block_named");
@@ -292,7 +292,7 @@ BOOST_FIXTURE_TEST_CASE(if_else, mock_exenv_fixture)
 BOOST_AUTO_TEST_CASE(tmpl_name)
 {
 	compiled_tmpl tree = build_tree("<% template kuku %>c<%endtemplate%>");
-	BOOST_TEST(tree.tmpl_name == "kuku");
+	BOOST_TEST(tree.tmpl_name() == "kuku");
 	tree = build_tree("<% template kuku extends base%>c<%endtemplate%>");
 	BOOST_REQUIRE(tree.extends.size() == 1);
 	BOOST_REQUIRE(tree.extends[0].tmpl_name);

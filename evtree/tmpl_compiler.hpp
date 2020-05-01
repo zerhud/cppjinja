@@ -29,13 +29,12 @@ struct compiled_tmpl final {
 	compiled_tmpl() =default ;
 	~compiled_tmpl() noexcept =default ;
 
-	std::string tmpl_name;
 	std::vector<ast::extend_st> extends;
 	std::vector<std::unique_ptr<node>> nodes;
 	std::vector<evtnodes::callable*> roots;
-
 	node_tree<const node> render_tree;
 
+	std::string tmpl_name() const ;
 	evtnodes::tmpl* tmpl_node() ;
 	const evtnodes::tmpl* tmpl_node() const ;
 	evtnodes::callable* main_block();

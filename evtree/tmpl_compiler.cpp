@@ -42,7 +42,6 @@ cppjinja::evt::compiled_tmpl
 cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::tmpl t)
 {
 	cur_tmpl = std::move(t);
-	result.tmpl_name = cur_tmpl.name;
 	result.extends = std::move(cur_tmpl.extends);
 	make_main_nodes();
 	return std::move(result);
@@ -185,6 +184,11 @@ void cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::op_set& obj)
 void cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::op_out& obj)
 {
 	create_rendered_node<evtnodes::op_out>(std::move(obj));
+}
+
+std::string cppjinja::evt::compiled_tmpl::tmpl_name() const
+{
+	return tmpl_node()->name();
 }
 
 cppjinja::evtnodes::tmpl* cppjinja::evt::compiled_tmpl::tmpl_node()

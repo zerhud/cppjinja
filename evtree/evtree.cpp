@@ -34,7 +34,7 @@ const cppjinja::evtnodes::tmpl*
 cppjinja::evtree::search_tmpl(const ast::string_t& name) const
 {
 	for(auto& t:templates)
-		if(t.tmpl_name == name) return t.tmpl_node();
+		if(t.tmpl_name() == name) return t.tmpl_node();
 	return nullptr;
 }
 
