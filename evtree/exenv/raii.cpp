@@ -45,3 +45,17 @@ cppjinja::evt::raii_result_format::~raii_result_format()
 {
 	fmt->shift_tab(back);
 }
+
+cppjinja::evt::raii_callstack_push::raii_callstack_push(
+          cppjinja::evt::callstack* c
+        , cppjinja::evtnodes::callable* n
+        , context_objects::callable_params params)
+    : calls(c)
+{
+	calls->push(n, std::move(params));
+}
+
+cppjinja::evt::raii_callstack_push::~raii_callstack_push()
+{
+	calls->pop();
+}

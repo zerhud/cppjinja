@@ -14,6 +14,7 @@
 #include "evtree/exenv/callstack.hpp"
 #include "evtree/exenv/ctx_object.hpp"
 #include "evtree/exenv/obj_holder.hpp"
+#include "evtree/exenv/context_object.hpp"
 #include "parser/operators/single.hpp"
 
 namespace mocks {
@@ -37,8 +38,8 @@ MOCK_BASE_CLASS( callable_node, cppjinja::evtnodes::callable )
 	MOCK_METHOD( name, 0 )
 	MOCK_METHOD( render, 1 )
 	MOCK_METHOD( evaluate, 1 )
-	MOCK_METHOD( param, 2, std::optional<cppjinja::ast::value_term>(const cppjinja::evt::callstack& ctx,const cppjinja::ast::var_name& name) )
 	MOCK_METHOD( params, 0 )
+	MOCK_METHOD( solved_params, 1 )
 };
 
 MOCK_BASE_CLASS( context, cppjinja::evt::context )
@@ -56,6 +57,14 @@ MOCK_BASE_CLASS( context, cppjinja::evt::context )
 	MOCK_METHOD(cur_namespace, 0)
 };
 
+MOCK_BASE_CLASS(context_object, cppjinja::evt::context_object)
+{
+	MOCK_METHOD(add, 2)
+	MOCK_METHOD(find, 1)
+	MOCK_METHOD(solve, 0)
+	MOCK_METHOD(call, 1)
+};
+
 MOCK_BASE_CLASS(ctx_object, cppjinja::evt::ctx_object)
 {
 	MOCK_METHOD(call, 1)
@@ -66,6 +75,9 @@ MOCK_BASE_CLASS( callstack, cppjinja::evt::callstack )
 {
 	MOCK_METHOD( call, 3 )
 	MOCK_METHOD( param_stack, 1 )
+	MOCK_METHOD( push, 2 )
+	MOCK_METHOD( pop, 0 )
+	MOCK_METHOD( current_params, 1 )
 };
 
 MOCK_BASE_CLASS( exenv, cppjinja::evt::exenv )

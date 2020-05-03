@@ -11,6 +11,8 @@
 #include <vector>
 #include "evtree/declarations.hpp"
 #include "parser/ast/common.hpp"
+#include "context_objects/queue.hpp"
+#include "context_objects/callable_params.hpp"
 #include "eval/ast.hpp"
 
 namespace cppjinja::evt {
@@ -29,6 +31,12 @@ public:
 	        const evtnodes::callable* calling,
 	        std::vector<ast::function_call_parameter> params) =0 ;
 	virtual std::vector<const obj_holder*> param_stack(const node* last) const =0 ;
+
+	virtual context_objects::queue current_params(const node* last) const =0 ;
+	virtual void pop() =0 ;
+	virtual void push(
+	          const evtnodes::callable* calling
+	        , context_objects::callable_params params) =0 ;
 
 };
 

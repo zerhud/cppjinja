@@ -54,7 +54,7 @@ extern struct value_term : value_term_var
 
 struct function_parameter {
 	std::optional<string_t> name;
-	value_term val;
+	std::optional<value_term> val;
 };
 
 struct function_call {

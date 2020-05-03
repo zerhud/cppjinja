@@ -21,6 +21,10 @@
 #include "evtree/exenv/callstack_impl.hpp"
 #include "evtree/exenv/expr_solver.hpp"
 #include "evtree/exenv/expr_filter.hpp"
+#include "evtree/exenv/context_objects/tree.hpp"
+#include "evtree/exenv/context_objects/value.hpp"
+#include "evtree/exenv/context_objects/callable_node.hpp"
+#include "evtree/exenv/context_objects/user_data.hpp"
 #include "evtree/nodes/callable.hpp"
 #include "parser/operators/common.hpp"
 #include "parser/grammar/tmpls.hpp"
@@ -73,6 +77,184 @@ struct mock_solver_fixture : mocks::mock_exenv_fixture
 };
 
 BOOST_AUTO_TEST_SUITE(phase_evaluate)
+
+BOOST_AUTO_TEST_SUITE(context_object)
+using cppjinja::east::var_name;
+using cppjinja::evt::context_objects::tree;
+BOOST_AUTO_TEST_SUITE(obj_tree)
+BOOST_AUTO_TEST_CASE(find)
+{
+	tree obj;
+	auto child1 = std::make_shared<tree>();
+	auto child2 = std::make_shared<tree>();
+	obj.add("child1"s, child1);
+	BOOST_TEST(obj.find(var_name{"no"}) == nullptr);
+	BOOST_TEST(obj.find(var_name{"child1"}) == child1);
+	obj.add("child2"s, child2);
+	BOOST_TEST(obj.find(var_name{"no"}) == nullptr);
+	BOOST_TEST(obj.find(var_name{"child2"}) == child2);
+}
+BOOST_AUTO_TEST_CASE(solve)
+{
+	tree obj;
+	BOOST_TEST(obj.solve() == east_value_term{"{}"s});
+	obj.add("c1", std::make_shared<tree>());
+	BOOST_TEST(obj.solve() == east_value_term{"{\"c1\":{}}"s});
+	obj.add("c2", std::make_shared<tree>());
+	BOOST_TEST(obj.solve() == east_value_term{"{\"c1\":{},\"c2\":{}}"s});
+	obj.find(var_name{"c2"})->add("c3", std::make_shared<tree>());
+	obj.find(var_name{"c2"})->add("c4", std::make_shared<cppjinja::evt::context_objects::value>("ok"s));
+	BOOST_TEST(obj.solve() == east_value_term{"{\"c1\":{},\"c2\":{\"c3\":{},\"c4\":\"ok\"}}"s});
+}
+BOOST_AUTO_TEST_CASE(cannot_call)
+{
+	tree obj;
+	BOOST_CHECK_THROW(obj.call({}), std::exception);
+}
+BOOST_AUTO_TEST_SUITE_END() // tree
+BOOST_AUTO_TEST_SUITE(obj_value)
+BOOST_AUTO_TEST_CASE(no_tree_methods_and_no_call)
+{
+	cppjinja::evt::context_objects::value val("ok");
+	BOOST_CHECK_THROW(val.add("a",std::make_shared<tree>()), std::exception);
+	BOOST_CHECK_THROW(val.find(var_name{"a"}), std::exception);
+	BOOST_CHECK_THROW(val.call({}), std::exception);
+}
+BOOST_AUTO_TEST_CASE(solve)
+{
+	using cppjinja::evt::context_objects::value;
+	BOOST_TEST(value("ok"s).solve() == east_value_term{"ok"s});
+	BOOST_TEST(value(4).solve() == east_value_term{4});
+}
+BOOST_AUTO_TEST_SUITE_END() // value
+BOOST_AUTO_TEST_SUITE(callable_node)
+BOOST_AUTO_TEST_CASE(no_tree_methods_and_no_solve)
+{
+	mocks::callable_node node;
+	mocks::exenv env;
+	cppjinja::evt::context_objects::callable_node val(&env, &node);
+	BOOST_CHECK_THROW(val.add("a",std::make_shared<tree>()), std::exception);
+	BOOST_CHECK_THROW(val.find(var_name{"a"}), std::exception);
+	BOOST_CHECK_THROW(val.solve(), std::exception);
+}
+BOOST_FIXTURE_TEST_CASE(call, mock_exenv_fixture)
+{
+	mocks::callable_node node;
+	cppjinja::evt::context_objects::callable_node val(&env, &node);
+	mock::sequence seq;
+	cppjinja::east::function_parameter p1{"a"s, east_value_term{"ok"s}};
+	MOCK_EXPECT(calls.push).once().in(seq).calls([&node,&p1](auto*n, auto params){
+		BOOST_TEST(n == &node);
+		auto sp1 = params.find(var_name{"a"});
+		BOOST_TEST(sp1->solve() == *p1.val);
+	});
+	MOCK_EXPECT(node.evaluate)
+	        .once()
+	        .in(seq)
+	        .with([this](auto& e){return &e==&env;})
+	        .returns("ok"s);
+	MOCK_EXPECT(calls.pop).once().in(seq);
+	MOCK_EXPECT(node.solved_params).at_least(1).returns(std::vector<cppjinja::east::function_parameter>{});
+	BOOST_TEST(val.call({p1}) == east_value_term{"ok"s});
+}
+BOOST_AUTO_TEST_SUITE_END() // callable_node
+BOOST_AUTO_TEST_SUITE(callable_params)
+BOOST_AUTO_TEST_CASE(cannot_add_solve_call)
+{
+	cppjinja::evt::context_objects::callable_params obj({}, {});
+	BOOST_CHECK_THROW(obj.add("a", nullptr), std::exception);
+	BOOST_CHECK_THROW(obj.call({}), std::exception);
+	BOOST_CHECK_THROW(obj.solve(), std::exception);
+}
+BOOST_AUTO_TEST_CASE(params)
+{
+	using cppjinja::east::function_parameter;
+	function_parameter c1{std::nullopt, east_value_term{41}};
+	function_parameter c2{"p2"s, east_value_term{42}};
+	function_parameter c3{"p3"s, east_value_term{43}};
+	function_parameter c4{std::nullopt, east_value_term{44}};
+
+	function_parameter p1{"p1", std::nullopt};
+	function_parameter p2{"p2", east_value_term{52}};
+	function_parameter p4{"p4", east_value_term{54}};
+	function_parameter p5{"p5", east_value_term{55}};
+
+	cppjinja::evt::context_objects::callable_params obj({p1, p2, p4, p5}, {c1, c2, c4, c3});
+	BOOST_TEST(obj.find(var_name{"p1"})->solve() == east_value_term{41});
+	BOOST_TEST(obj.find(var_name{"p2"})->solve() == east_value_term{42});
+	BOOST_TEST(obj.find(var_name{"p3"})->solve() == east_value_term{43});
+	BOOST_TEST(obj.find(var_name{"p4"})->solve() == east_value_term{44});
+	BOOST_TEST(obj.find(var_name{"p5"})->solve() == east_value_term{55});
+	BOOST_TEST(obj.find(var_name{"P1"}) == nullptr);
+}
+BOOST_AUTO_TEST_SUITE_END() // callable_params
+BOOST_AUTO_TEST_SUITE(queue)
+BOOST_AUTO_TEST_CASE(find)
+{
+	mocks::context_object obj1, obj2;
+	auto obj3 = std::make_shared<mocks::context_object>();
+	cppjinja::evt::context_objects::queue q({&obj1, &obj2});
+
+	BOOST_CHECK_THROW(q.solve(), std::exception);
+	BOOST_CHECK_THROW(q.call({}), std::exception);
+
+	MOCK_EXPECT(obj1.find).once().with(var_name{"a"}).returns(nullptr);
+	MOCK_EXPECT(obj2.find).once().with(var_name{"a"}).returns(nullptr);
+	BOOST_TEST(q.find(var_name{"a"}) == nullptr);
+
+	MOCK_EXPECT(obj1.find).once().with(var_name{"a"}).returns(nullptr);
+	MOCK_EXPECT(obj2.find).once().with(var_name{"a"}).returns(nullptr);
+	MOCK_EXPECT(obj3->find).once().with(var_name{"a"}).returns(nullptr);
+	q.add("", obj3);
+	BOOST_TEST(q.find(var_name{"a"}) == nullptr);
+
+	auto obj4 = std::make_shared<mocks::context_object>();
+	MOCK_EXPECT(obj1.find).once().with(var_name{"a"}).returns(nullptr);
+	MOCK_EXPECT(obj2.find).once().with(var_name{"a"}).returns(obj4);
+	BOOST_TEST(q.find(var_name{"a"}) == obj4);
+}
+BOOST_AUTO_TEST_CASE(cannot_add_twice)
+{
+	cppjinja::evt::context_objects::queue q({});
+	auto obj1 = std::make_shared<mocks::context_object>();
+	BOOST_CHECK_THROW(q.add("a", obj1), std::exception);
+	BOOST_CHECK_THROW(q.add("", nullptr), std::exception);
+	q.add("", obj1);
+	BOOST_CHECK_THROW(q.add("", obj1), std::exception);
+}
+BOOST_AUTO_TEST_SUITE_END() // queue
+BOOST_AUTO_TEST_SUITE(user_data)
+BOOST_AUTO_TEST_CASE(cannot_add)
+{
+	auto prov = std::make_shared<mocks::data_provider>();
+	cppjinja::evt::context_objects::user_data obj(prov);
+	BOOST_CHECK_THROW(obj.add("", nullptr), std::exception);
+}
+BOOST_AUTO_TEST_CASE(find_is_link)
+{
+	auto prov = std::make_shared<mocks::data_provider>();
+	cppjinja::evt::context_objects::user_data obj(prov);
+	auto obj_a = obj.find(var_name{"a"s});
+	BOOST_REQUIRE(obj_a);
+	MOCK_EXPECT(prov->value_var_name).with(var_name{"a"s}).returns(east_value_term{"ok"s});
+	BOOST_TEST(obj_a->solve() == east_value_term{"ok"s});
+
+	auto obj_b = obj.find(var_name{"b"s});
+	MOCK_EXPECT(prov->value_function_call).calls([](auto call){
+		BOOST_TEST(call.ref.size()==1);
+		BOOST_TEST(call.ref.at(0) == "b");
+		BOOST_TEST(call.params.size() == 1);
+		BOOST_TEST(*call.params.at(0).name == "p1"s);
+		BOOST_TEST(*call.params.at(0).val == east_value_term{"p1_val"s});
+		return east_value_term{"ok"s};
+	} );
+	cppjinja::east::function_parameter p1;
+	p1.name = "p1"s;
+	p1.val = east_value_term{"p1_val"s};
+	BOOST_TEST(obj_b->call({p1}) == east_value_term{"ok"s});
+}
+BOOST_AUTO_TEST_SUITE_END() // user_data
+BOOST_AUTO_TEST_SUITE_END() // context_object
 
 BOOST_AUTO_TEST_SUITE(context)
 BOOST_FIXTURE_TEST_CASE(current_node, mock_impls_fixture)
@@ -146,6 +328,18 @@ BOOST_FIXTURE_TEST_CASE(cannot_call_nullptr, mock_impls_fixture)
 	BOOST_CHECK_THROW(calls.call(nullptr, nullptr, {}), std::exception);
 	BOOST_CHECK_THROW(calls.call(&env, nullptr, {}), std::exception);
 	BOOST_CHECK_THROW(calls.call(nullptr, &calling, {}), std::exception);
+}
+BOOST_FIXTURE_TEST_CASE(push_pop, mock_impls_fixture)
+{
+	using namespace cppjinja::east;
+	mocks::callable_node calling1, calling2;
+
+	BOOST_CHECK_THROW(calls.current_params(&calling1), std::exception);
+	calls.push(&calling1, cppjinja::evt::context_objects::callable_params({}, {}));
+	BOOST_TEST(calls.current_params(&calling1).find(var_name{"a"}) == nullptr);
+	BOOST_CHECK_THROW(calls.current_params(&calling2), std::exception);
+	calls.pop();
+	BOOST_CHECK_THROW(calls.current_params(&calling1), std::exception);
 }
 BOOST_FIXTURE_TEST_CASE(call_block, mock_impls_fixture)
 {
@@ -236,7 +430,8 @@ BOOST_FIXTURE_TEST_CASE(by_fnc, mock_exenv_fixture)
 		BOOST_TEST(base == east_value_term{2});
 		BOOST_TEST(udfc.params.size() == fc.params.size());
 		BOOST_TEST(udfc.params[0].name.has_value() == fc.params[0].name.has_value());
-		BOOST_TEST(udfc.params[0].val == east_value_term{42});
+		BOOST_CHECK(udfc.params[0].val.has_value());
+		BOOST_TEST(*udfc.params[0].val == east_value_term{42});
 		return east_value_term{101};
 	};
 	MOCK_EXPECT(data.filter).once().calls(check);

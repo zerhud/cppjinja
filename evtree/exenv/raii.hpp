@@ -10,6 +10,8 @@
 
 #include <vector>
 #include "evtree/declarations.hpp"
+#include "context_objects/callable_params.hpp"
+#include "eval/ast.hpp"
 
 namespace cppjinja::evt {
 
@@ -29,6 +31,16 @@ class raii_result_format final {
 public:
 	raii_result_format(result_formatter* f, int s, int b);
 	~raii_result_format();
+};
+
+class raii_callstack_push final {
+	callstack* calls;
+public:
+	raii_callstack_push(
+	        callstack* c,
+	        evtnodes::callable* n,
+	        context_objects::callable_params params);
+	~raii_callstack_push();
 };
 
 } // namespace cppjinja::evt

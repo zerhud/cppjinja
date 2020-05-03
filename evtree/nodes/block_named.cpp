@@ -10,6 +10,7 @@
 #include "parser/helpers.hpp"
 #include "../evtree.hpp"
 #include "evtree/exenv/callstack.hpp"
+#include "evtree/exenv/expr_solver.hpp"
 
 bool cppjinja::evtnodes::block_named::has_nondefaulted_params() const
 {
@@ -46,6 +47,20 @@ std::vector<cppjinja::ast::macro_parameter>
 cppjinja::evtnodes::block_named::params() const
 {
 	return block.params;
+}
+
+std::vector<cppjinja::east::function_parameter>
+cppjinja::evtnodes::block_named::solved_params(cppjinja::evt::exenv& env) const
+{
+	std::vector<cppjinja::east::function_parameter> ret;
+	evt::expr_solver slv(&env);
+	for(auto& p:block.params){
+		auto& i = ret.emplace_back();
+		i.name = p.name;
+		if(p.value)
+			i.val = slv(*p.value);
+	}
+	return ret;
 }
 
 void cppjinja::evtnodes::block_named::render(evt::exenv& env) const

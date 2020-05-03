@@ -56,6 +56,28 @@ cppjinja::evt::callstack_impl::param_stack(const cppjinja::evt::node* last) cons
 	return ret;
 }
 
+cppjinja::evt::context_objects::queue cppjinja::evt::callstack_impl::current_params(const node* last) const
+{
+	std::vector<const context_object*> cnt;
+	for(auto pos=stack.rbegin();pos!=stack.rend();++pos) {
+		cnt.emplace_back(&pos->param_object.value());
+		if(pos->calling == last) return cnt;
+	}
+	throw std::runtime_error("cannot find last node in callstack");
+}
+
+void cppjinja::evt::callstack_impl::pop()
+{
+	stack.pop_back();
+}
+
+void cppjinja::evt::callstack_impl::push(
+          const cppjinja::evtnodes::callable* calling
+        , context_objects::callable_params params)
+{
+	stack.emplace_back(frame{calling, obj_holder(), std::move(params)});
+}
+
 void cppjinja::evt::callstack_impl::make_params_holder(std::vector<cppjinja::ast::function_call_parameter> params)
 {
 	obj_holder& hld = stack.back().params;
@@ -66,4 +88,11 @@ void cppjinja::evt::callstack_impl::make_params_holder(std::vector<cppjinja::ast
 		auto val = position_param(params, i);
 		if(val) hld.add(cparams[i].name, std::make_unique<var_solver>(*val));
 	}
+}
+
+void cppjinja::evt::callstack_impl::make_params_holder(std::vector<cppjinja::east::function_parameter> params)
+{
+	obj_holder& hld = stack.back().params;
+	auto cparams = stack.back().calling->params();
+	for(auto& p:cparams) if(p.value.has_value()) hld.add(p.name, std::make_unique<var_solver>(*p.value));
 }

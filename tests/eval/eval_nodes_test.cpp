@@ -400,7 +400,21 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(getters, T, callable_list, mock_callable_fixtur
 	ast_bl.name = "test_name";
 	prepare_for_render_two_childrend(ast_bl);
 	std::tuple_element_t<1, T> bl(ast_bl);
+	expect_glp(0, 1, 1);
 	check_getters(bl, ast_bl);
+	cppjinja::ast::macro_parameter p1{"a", value_term{"a"s}};
+	cppjinja::ast::macro_parameter p2{"b", value_term{cppjinja::ast::var_name{"a"s}}};
+	ast_bl.params = {p1, p2};
+	std::tuple_element_t<1, T> blp(ast_bl);
+	auto obj = std::make_shared<mocks::ctx_object>();
+	locals.add("a", obj);
+	MOCK_EXPECT(obj->solve).returns("b");
+	auto solved = blp.solved_params(env);
+	BOOST_TEST_REQUIRE(solved.size() == 2);
+	BOOST_TEST(*solved[0].name == "a"s);
+	BOOST_TEST(*solved[1].name == "b"s);
+	BOOST_TEST(*solved[0].val == cppjinja::east::value_term{"a"});
+	BOOST_TEST(*solved[1].val == cppjinja::east::value_term{"b"});
 }
 BOOST_AUTO_TEST_SUITE_END() // callables
 

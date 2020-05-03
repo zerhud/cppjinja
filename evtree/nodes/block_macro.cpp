@@ -10,6 +10,7 @@
 #include "block_macro.hpp"
 #include "../evtree.hpp"
 #include "evtree/exenv/ctx_object.hpp"
+#include "evtree/exenv/expr_solver.hpp"
 
 cppjinja::evt::render_info cppjinja::evtnodes::block_macro::inner_ri() const
 {
@@ -60,4 +61,18 @@ std::vector<cppjinja::ast::macro_parameter>
 cppjinja::evtnodes::block_macro::params() const
 {
 	return block.params;
+}
+
+std::vector<cppjinja::east::function_parameter>
+cppjinja::evtnodes::block_macro::solved_params(cppjinja::evt::exenv& env) const
+{
+	std::vector<cppjinja::east::function_parameter> ret;
+	evt::expr_solver slv(&env);
+	for(auto& p:block.params){
+		auto& i = ret.emplace_back();
+		i.name = p.name;
+		if(p.value)
+			i.val = slv(*p.value);
+	}
+	return ret;
 }
