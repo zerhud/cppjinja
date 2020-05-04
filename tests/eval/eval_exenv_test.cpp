@@ -207,6 +207,24 @@ BOOST_AUTO_TEST_CASE(params)
 }
 BOOST_AUTO_TEST_SUITE_END() // callable_params
 BOOST_AUTO_TEST_SUITE(queue)
+BOOST_AUTO_TEST_CASE(from_queue)
+{
+	mocks::context_object obj1, obj2, obj3;
+	cppjinja::evt::context_objects::queue q1({&obj1, &obj2});
+	cppjinja::evt::context_objects::queue q2({&obj3});
+	cppjinja::evt::context_objects::queue q({q1, q2});
+
+	MOCK_EXPECT(obj1.find).once().with(var_name{"a"}).returns(nullptr);
+	MOCK_EXPECT(obj2.find).once().with(var_name{"a"}).returns(nullptr);
+	MOCK_EXPECT(obj3.find).once().with(var_name{"a"}).returns(nullptr);
+	BOOST_TEST(q.find(var_name{"a"}) == nullptr);
+
+	auto obj4 = std::make_shared<mocks::context_object>();
+	MOCK_EXPECT(obj1.find).once().with(var_name{"a"}).returns(nullptr);
+	MOCK_EXPECT(obj2.find).once().with(var_name{"a"}).returns(nullptr);
+	MOCK_EXPECT(obj3.find).once().with(var_name{"a"}).returns(obj4);
+	BOOST_TEST(q.find(var_name{"a"}) == obj4);
+}
 BOOST_AUTO_TEST_CASE(find)
 {
 	mocks::context_object obj1, obj2;
