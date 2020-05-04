@@ -3,11 +3,16 @@ project(cppjinja VERSION 0.0.0.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+SET( CMAKE_CXX_EXTENSIONS "OFF" )
 
 option(ENABLE_TODO "enable todo warnings in debug mode" ON)
 option(ENABLE_TESTS "enable tests.. it depends on turtle library" ON)
 option(LOW_MEMORY "assume we don't have efough memroty for complie grammars (gcc optimizations)" ON)
 option(CODE_COVERAGE "enable code coverage generation" OFF)
+
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+    add_compile_definitions(_GLIBCXX_DEBUG _GLIBCXX_DEBUG_PEDANTIC)
+endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 

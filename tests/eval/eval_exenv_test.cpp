@@ -544,7 +544,13 @@ BOOST_FIXTURE_TEST_CASE(params, impl_exenv_fixture)
 	calls.push(&calling1, params);
 	BOOST_TEST(env.params().find(evar_name{"p1"s}) != nullptr);
 }
-
+BOOST_FIXTURE_TEST_CASE(user_data, impl_exenv_fixture)
+{
+//	BOOST_TEST(env.user_data().find(evar_name{"a"})->solve() == evalue_term{42});
+}
+BOOST_FIXTURE_TEST_CASE(all_ctx, impl_exenv_fixture)
+{
+}
 BOOST_AUTO_TEST_SUITE(solver)
 BOOST_DATA_TEST_CASE_F(mock_solver_fixture, simples_num
        , tdata::random(-90000000.0,90000000.0)^tdata::xrange(93)

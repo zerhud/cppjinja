@@ -450,6 +450,7 @@ BOOST_FIXTURE_TEST_CASE(render_false, mock_callable_fixture)
 {
 	ast::block_if ast_bl;
 	ast_bl.condition = ast::binary_op(value_term{2}, ast::comparator::eq, value_term{1});
+	ast_bl.else_block.emplace().left_open.trim = true;
 	prepare_for_render_two_childrend(ast_bl);
 	evtnodes::block_if bl(ast_bl);
 	expect_children({&child1, &child2});
