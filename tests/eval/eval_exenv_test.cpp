@@ -546,10 +546,16 @@ BOOST_FIXTURE_TEST_CASE(params, impl_exenv_fixture)
 }
 BOOST_FIXTURE_TEST_CASE(user_data, impl_exenv_fixture)
 {
-//	BOOST_TEST(env.user_data().find(evar_name{"a"})->solve() == evalue_term{42});
+	MOCK_EXPECT(data.value_var_name).with(evar_name{"a"s}).returns(evalue_term{42});
+	BOOST_TEST(env.user_data().find(evar_name{"a"})->solve() == evalue_term{42});
 }
 BOOST_FIXTURE_TEST_CASE(all_ctx, impl_exenv_fixture)
 {
+	mocks::callable_node maker;
+	ctx.push(&maker);
+	calls.push(&maker, cppjinja::evt::context_objects::callable_params({},{}));
+	MOCK_EXPECT(data.value_var_name).with(evar_name{"a"s}).returns(evalue_term{42});
+	BOOST_TEST(env.all_ctx().find(evar_name{"a"})->solve() == evalue_term{42});
 }
 BOOST_AUTO_TEST_SUITE(solver)
 BOOST_DATA_TEST_CASE_F(mock_solver_fixture, simples_num
