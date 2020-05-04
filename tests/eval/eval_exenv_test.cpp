@@ -623,6 +623,15 @@ BOOST_AUTO_TEST_CASE(cannot_create_without_context)
 {
 	BOOST_CHECK_THROW(cppjinja::evt::expr_solver(nullptr), std::exception);
 }
+BOOST_FIXTURE_TEST_CASE(var_name_array, mock_solver_fixture)
+{
+	using namespace cppjinja::ast;
+	auto val = std::make_shared<cppjinja::evt::context_objects::value>(evalue_term{"ok"s});
+	auto neested_var = std::make_shared<cppjinja::evt::context_objects::value>(evalue_term{"c"s});
+	MOCK_EXPECT(all_ctx.find).with(evar_name{"a"s, "c"s}).returns(val);
+	MOCK_EXPECT(all_ctx.find).with(evar_name{"b"s}).returns(neested_var);
+	BOOST_TEST(solver(array_calls{{var_name{"a"s}, value_term{var_name{"b"}}}}) == val->solve());
+}
 BOOST_AUTO_TEST_SUITE_END() // solver
 
 BOOST_AUTO_TEST_SUITE(raii)

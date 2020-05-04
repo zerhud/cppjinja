@@ -20,8 +20,6 @@
 
 #include "mocks.hpp"
 
-const bool todo_list = false;
-
 namespace ast = cppjinja::ast;
 namespace txt = cppjinja::text;
 namespace east = cppjinja::east;
@@ -108,7 +106,7 @@ BOOST_DATA_TEST_CASE(get_var_filter
 	BOOST_TEST( parse_single(data, prov)=="filter"s+std::to_string(cur_count) );
 }
 
-BOOST_AUTO_TEST_CASE(get_var_nesteed, * boost::unit_test::enable_if<todo_list>())
+BOOST_AUTO_TEST_CASE(get_var_nesteed)
 {
 	namespace east = cppjinja::east;
 	mocks::data_provider prov;

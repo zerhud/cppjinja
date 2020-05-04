@@ -8,6 +8,8 @@
 
 #include "expr_solver.hpp"
 
+#include <exception>
+
 #include "evtree/exenv.hpp"
 #include "eval/ast_cvt.hpp"
 #include "evtree/helpers/binary_op.hpp"
@@ -55,6 +57,23 @@ std::vector<cppjinja::east::function_parameter> cppjinja::evt::expr_solver::redu
 	return ret;
 }
 
+cppjinja::east::var_name cppjinja::evt::expr_solver::reduce(const cppjinja::ast::array_calls& obj)
+{
+	east::var_name ret;
+	for(auto& np:obj) {
+		if(np.name) for(auto& nn:*np.name) ret.emplace_back(nn);
+		ret.emplace_back(reduce_to_string((*this)(np.call.get())));
+	}
+	return ret;
+}
+
+cppjinja::east::string_t cppjinja::evt::expr_solver::reduce_to_string(const cppjinja::east::value_term& obj)
+{
+	if(std::holds_alternative<east::string_t>(obj)) return std::get<east::string_t>(obj);
+	if(std::holds_alternative<double>(obj)) return std::to_string(std::get<double>(obj));
+	throw std::logic_error("canno solve neested array yet");
+}
+
 cppjinja::evt::expr_solver::expr_solver(exenv* e)
     : env(e)
 {
@@ -76,8 +95,8 @@ cppjinja::evt::expr_solver::operator()(const cppjinja::ast::binary_op& op)
 cppjinja::evt::expr_solver::ret_t
 cppjinja::evt::expr_solver::operator()(const cppjinja::ast::array_calls& op)
 {
-	(void)op;
-	return ret_t{""};
+	east::var_name solved = reduce(op);
+	return (*this)(solved);
 }
 
 cppjinja::evt::expr_solver::ret_t
