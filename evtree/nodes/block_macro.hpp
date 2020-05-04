@@ -24,7 +24,6 @@ public:
 	void render(evt::exenv& env) const override ;
 
 	east::string_t evaluate( evt::exenv& env) const override ;
-	std::vector<ast::macro_parameter> params() const override ;
 	std::vector<east::function_parameter> solved_params(evt::exenv& env) const override ;
 };
 

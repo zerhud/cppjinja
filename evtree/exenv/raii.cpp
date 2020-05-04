@@ -9,7 +9,6 @@
 #include "raii.hpp"
 #include "context.hpp"
 #include "callstack.hpp"
-#include "ctx_object.hpp"
 #include "result_formatter.hpp"
 
 cppjinja::evt::raii_push_ctx::raii_push_ctx(
@@ -48,7 +47,7 @@ cppjinja::evt::raii_result_format::~raii_result_format()
 
 cppjinja::evt::raii_callstack_push::raii_callstack_push(
           cppjinja::evt::callstack* c
-        , cppjinja::evtnodes::callable* n
+        , const cppjinja::evtnodes::callable* n
         , context_objects::callable_params params)
     : calls(c)
 {

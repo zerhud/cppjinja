@@ -13,17 +13,18 @@
 
 #include "context_impl.hpp"
 #include "callstack_impl.hpp"
-#include "obj_holder.hpp"
+#include "context_objects/tree.hpp"
+#include "context_objects/user_data.hpp"
 
 namespace cppjinja::evt {
 
 class exenv_impl final : public exenv {
 	const evtree* compiled_template;
-	const data_provider* user_data;
+	context_objects::user_data given_data;
 	context_impl exectx;
 	callstack_impl execalls;
 	std::optional<render_info> cur_rinfo;
-	obj_holder global_namespace;
+	context_objects::tree global_namespace;
 	result_formatter rfmt;
 public:
 	exenv_impl(const data_provider* prov, const evtree* tmpl);
@@ -41,9 +42,11 @@ public:
 	const context& ctx() const override ;
 	void current_node(const node* n) override ;
 
-	obj_holder& locals() override ;
-	obj_holder& globals() override ;
-	std::vector<const obj_holder*> params() const override ;
+	context_object& locals() override ;
+	context_object& globals() override ;
+	const context_objects::queue params() const override ;
+	const context_object& user_data() const override ;
+	const context_objects::queue all_ctx() override ;
 
 	callstack& calls() override ;
 

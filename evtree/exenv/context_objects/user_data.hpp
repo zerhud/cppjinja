@@ -15,12 +15,14 @@
 namespace cppjinja::evt::context_objects {
 
 class user_data : public context_object {
-	std::shared_ptr<data_provider> provider;
+	const data_provider* provider;
 	east::var_name selected_name;
 public:
-	user_data(std::shared_ptr<data_provider> prov);
-	user_data(std::shared_ptr<data_provider> prov, east::var_name selected);
+	user_data(const data_provider* prov);
+	user_data(const data_provider* prov, east::var_name selected);
 	~user_data() noexcept override ;
+
+	const data_provider* data() const ;
 
 	void add(east::string_t n, std::shared_ptr<context_object> child) override ;
 	std::shared_ptr<context_object> find(east::var_name n) const override ;

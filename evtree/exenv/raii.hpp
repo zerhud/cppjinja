@@ -38,7 +38,7 @@ class raii_callstack_push final {
 public:
 	raii_callstack_push(
 	        callstack* c,
-	        evtnodes::callable* n,
+	        const evtnodes::callable* n,
 	        context_objects::callable_params params);
 	~raii_callstack_push();
 };

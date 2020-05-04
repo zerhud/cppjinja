@@ -11,7 +11,7 @@
 
 cppjinja::evt::context_objects::callable_node::callable_node(
           exenv* e
-        , cppjinja::evtnodes::callable* n)
+        , const evtnodes::callable* n)
     : env(e)
     , node(n)
 {
@@ -19,6 +19,11 @@ cppjinja::evt::context_objects::callable_node::callable_node(
 
 cppjinja::evt::context_objects::callable_node::~callable_node() noexcept
 {
+}
+
+bool cppjinja::evt::context_objects::callable_node::is_it(const cppjinja::evtnodes::callable* n) const
+{
+	return node == n;
 }
 
 void cppjinja::evt::context_objects::callable_node::add(

@@ -8,8 +8,9 @@
 
 #include "tmpl.hpp"
 #include "evtree/evtree.hpp"
-#include "evtree/exenv/obj_holder.hpp"
-#include "evtree/exenv/callstack.hpp"
+#include "evtree/exenv/context_objects/tree.hpp"
+#include "evtree/exenv/context_objects/callable_node.hpp"
+#include "evtree/exenv/context_objects/callable_params.hpp"
 
 cppjinja::evtnodes::tmpl::tmpl(cppjinja::ast::tmpl t)
     : itmpl_(std::move(t))
@@ -32,18 +33,22 @@ void cppjinja::evtnodes::tmpl::render(evt::exenv& env) const
 	create_self_obj(&env);
 
 	auto children = env.roots(this);
-	for(auto&& child:children)
-		if(child->name().empty())
-			env.out() << env.calls().call(&env, child, {});
+	for(auto&& child:children) {
+		if(child->name().empty()) {
+			evt::context_objects::callable_params params({}, {});
+			evt::raii_callstack_push stack(&env.calls(), child, std::move(params));
+			env.out() << child->evaluate(env);
+		}
+	}
 }
 
 void cppjinja::evtnodes::tmpl::create_self_obj(cppjinja::evt::exenv* env) const
 {
 	auto children = env->roots(this);
-	auto self = std::make_shared<callable_multisolver>(env);
+	auto self = std::make_shared<evt::context_objects::tree>();
 	for(auto& child:children) {
-		auto child_obj = std::make_unique<callable_solver>(env, child);
-		self->add(child->name(), child);
+		auto child_obj = std::make_shared<evt::context_objects::callable_node>(env, child);
+		self->add(child->name(), child_obj);
 		env->globals().add(child->name(), std::move(child_obj));
 	}
 	if(!children.empty())

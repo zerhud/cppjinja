@@ -9,6 +9,7 @@
 #include "block_named.hpp"
 #include "parser/helpers.hpp"
 #include "../evtree.hpp"
+#include "evtree/exenv/context_objects/callable_params.hpp"
 #include "evtree/exenv/callstack.hpp"
 #include "evtree/exenv/expr_solver.hpp"
 
@@ -43,12 +44,6 @@ cppjinja::ast::string_t cppjinja::evtnodes::block_named::name() const
 	return block.name;
 }
 
-std::vector<cppjinja::ast::macro_parameter>
-cppjinja::evtnodes::block_named::params() const
-{
-	return block.params;
-}
-
 std::vector<cppjinja::east::function_parameter>
 cppjinja::evtnodes::block_named::solved_params(cppjinja::evt::exenv& env) const
 {
@@ -66,7 +61,10 @@ cppjinja::evtnodes::block_named::solved_params(cppjinja::evt::exenv& env) const
 void cppjinja::evtnodes::block_named::render(evt::exenv& env) const
 {
 	if(has_nondefaulted_params()) env.current_node(this);
-	else  env.out() << env.calls().call(&env, this, {});
+	else {
+		evt::raii_callstack_push calls(&env.calls(), this, evt::context_objects::callable_params({},{}));
+		env.out() << evaluate(env);
+	}
 }
 
 cppjinja::east::string_t cppjinja::evtnodes::block_named::evaluate(cppjinja::evt::exenv& env) const

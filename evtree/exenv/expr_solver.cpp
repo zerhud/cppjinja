@@ -11,61 +11,54 @@
 #include "evtree/exenv.hpp"
 #include "eval/ast_cvt.hpp"
 #include "evtree/helpers/binary_op.hpp"
-#include "obj_holder.hpp"
+#include "context_object.hpp"
 
 using namespace cppjinja::details;
 
-
 cppjinja::evt::expr_solver::ret_t
-cppjinja::evt::expr_solver::solve_queue(const ast::function_call& obj)
+cppjinja::evt::expr_solver::operator()(const cppjinja::ast::value_term& val)
 {
-	return solve_in_data(obj);
+	return boost::apply_visitor(*this, val.var);
 }
 
 cppjinja::evt::expr_solver::ret_t
-cppjinja::evt::expr_solver::solve_queue(const ast::var_name& obj)
+cppjinja::evt::expr_solver::operator()(const cppjinja::ast::var_name& obj)
 {
-	return env->data()->value(east_cvt::cvt(obj));
+	auto found = env->all_ctx().find(reduce(obj));
+	return found->solve();
 }
 
-template<typename Obj, typename Cont, typename... Conts>
 cppjinja::evt::expr_solver::ret_t
-cppjinja::evt::expr_solver::solve_queue(const Obj& obj, const Cont& cont, const Conts&... conts)
+cppjinja::evt::expr_solver::operator()(const cppjinja::ast::function_call& obj)
 {
-	auto ret = cont(obj);
-	if(ret) return (*this)(*ret);
-	return solve_queue(obj, conts...);
+	auto found = env->all_ctx().find(reduce(obj.ref));
+	return found->call(reduce(obj.params));
 }
 
-template<typename Obj>
-std::optional<cppjinja::evt::expr_solver::ret_t>
-cppjinja::evt::expr_solver::solve_in_params(const Obj& obj)
+cppjinja::east::var_name cppjinja::evt::expr_solver::reduce(const cppjinja::ast::var_name& obj)
 {
-	for(auto& params:env->params()) {
-		auto val = (*params)(obj);
-		if(val) return (*this)(*val);
-	}
-	return std::nullopt;
+	return east_cvt::cvt(obj);
 }
 
-template<typename Obj>
-cppjinja::evt::expr_solver::ret_t
-cppjinja::evt::expr_solver::solve_calls(const Obj& obj)
+cppjinja::east::function_parameter cppjinja::evt::expr_solver::reduce(const cppjinja::ast::function_call_parameter& obj)
 {
-	auto in_params = solve_in_params(obj);
-	return in_params ? *in_params : solve_queue(obj, env->locals(), env->globals());
+	east::function_parameter ret;
+	ret.name = obj.name;
+	ret.val = (*this)(obj.value.get());
+	return ret;
+}
+
+std::vector<cppjinja::east::function_parameter> cppjinja::evt::expr_solver::reduce(const std::vector<cppjinja::ast::function_call_parameter>& obj)
+{
+	std::vector<cppjinja::east::function_parameter> ret;
+	for(auto& p:obj) ret.emplace_back(reduce(p));
+	return ret;
 }
 
 cppjinja::evt::expr_solver::expr_solver(exenv* e)
     : env(e)
 {
 	if(!env) throw std::runtime_error("cannot crate solver without environment");
-}
-
-cppjinja::evt::expr_solver::ret_t
-cppjinja::evt::expr_solver::operator()(const cppjinja::ast::value_term& val)
-{
-	return boost::apply_visitor(*this, val.var);
 }
 
 cppjinja::evt::expr_solver::ret_t
@@ -88,21 +81,20 @@ cppjinja::evt::expr_solver::operator()(const cppjinja::ast::array_calls& op)
 }
 
 cppjinja::evt::expr_solver::ret_t
-cppjinja::evt::expr_solver::operator()(const cppjinja::ast::function_call& obj)
-{
-	return solve_calls(obj);
-}
-
-cppjinja::evt::expr_solver::ret_t
-cppjinja::evt::expr_solver::operator()(const cppjinja::ast::var_name& obj)
-{
-	return solve_calls(obj);
-}
-
-cppjinja::evt::expr_solver::ret_t
 cppjinja::evt::expr_solver::operator()(const cppjinja::ast::array_v& obj)
 {
 	return make_array(obj.fields);
+}
+
+cppjinja::east::value_term cppjinja::evt::expr_solver::make_array(
+        const std::vector<ast::forward_ast<cppjinja::ast::value_term> >& fields)
+{
+	east::array_v ret;
+	for(auto& i:fields)
+		ret.items.push_back(
+		            std::make_unique<east::value_term>(
+		                (*this)(i.get())));
+	return ret;
 }
 
 cppjinja::evt::expr_solver::ret_t
@@ -121,28 +113,4 @@ cppjinja::evt::expr_solver::ret_t
 cppjinja::evt::expr_solver::operator()(const double& obj) const
 {
 	return obj;
-}
-
-cppjinja::east::value_term cppjinja::evt::expr_solver::make_array(
-        const std::vector<ast::forward_ast<cppjinja::ast::value_term> >& fields)
-{
-	east::array_v ret;
-	for(auto& i:fields)
-		ret.items.push_back(
-		            std::make_unique<east::value_term>(
-		                (*this)(i.get())));
-	return ret;
-}
-
-cppjinja::east::value_term cppjinja::evt::expr_solver::solve_in_data(
-        const cppjinja::ast::function_call& obj)
-{
-	east::function_call call;
-	call.ref = east_cvt::cvt(obj.ref);
-	for(auto& src:obj.params)
-		call.params.emplace_back(
-		            east::function_parameter{
-		                src.name,
-		                (*this)(src.value.get())});
-	return env->data()->value(call);
 }

@@ -11,8 +11,8 @@
 #include <list>
 
 #include "context.hpp"
-#include "obj_holder.hpp"
 #include "result_formatter.hpp"
+#include "context_objects/tree.hpp"
 
 namespace cppjinja::evt {
 
@@ -22,7 +22,7 @@ class context_impl final : public context {
 		const node* maker;
 		std::vector<const node*> node_stack;
 		std::stringstream out;
-		obj_holder ns;
+		context_objects::tree ns;
 	};
 	std::list<frame> ctx;
 
@@ -41,7 +41,7 @@ public:
 	std::ostream& out() override ;
 	std::string result() const override ;
 
-	obj_holder& cur_namespace() override ;
+	context_object& cur_namespace() override ;
 };
 
 } // namespace cppjinja::evt

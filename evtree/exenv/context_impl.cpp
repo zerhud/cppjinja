@@ -8,8 +8,6 @@
 
 #include "context_impl.hpp"
 #include "eval/ast_cvt.hpp"
-#include "nodes/callable.hpp"
-#include "ctx_object.hpp"
 
 using namespace cppjinja::details;
 
@@ -50,7 +48,7 @@ void cppjinja::evt::context_impl::pop(const cppjinja::evt::node* n)
 
 void cppjinja::evt::context_impl::push(const cppjinja::evt::node* n)
 {
-	ctx.emplace_back(frame{n, {}, std::stringstream{}, obj_holder()});
+	ctx.emplace_back(frame{n, {}, std::stringstream{}, context_objects::tree()});
 }
 
 const cppjinja::evt::node* cppjinja::evt::context_impl::maker() const
@@ -71,7 +69,7 @@ std::string cppjinja::evt::context_impl::result() const
 	return ctx.back().out.str();
 }
 
-cppjinja::evt::obj_holder& cppjinja::evt::context_impl::cur_namespace()
+cppjinja::evt::context_object& cppjinja::evt::context_impl::cur_namespace()
 {
 	require_not_empty();
 	return ctx.back().ns;

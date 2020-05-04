@@ -9,7 +9,6 @@
 #include <istream>
 #include "block_macro.hpp"
 #include "../evtree.hpp"
-#include "evtree/exenv/ctx_object.hpp"
 #include "evtree/exenv/expr_solver.hpp"
 
 cppjinja::evt::render_info cppjinja::evtnodes::block_macro::inner_ri() const
@@ -55,12 +54,6 @@ cppjinja::evtnodes::block_macro::evaluate(cppjinja::evt::exenv& env) const
 	auto children = env.children(this);
 	render_children(children, env, inner_ri());
 	return east::string_t();
-}
-
-std::vector<cppjinja::ast::macro_parameter>
-cppjinja::evtnodes::block_macro::params() const
-{
-	return block.params;
 }
 
 std::vector<cppjinja::east::function_parameter>

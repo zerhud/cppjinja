@@ -15,6 +15,8 @@ namespace cppjinja::evt::context_objects {
 class queue : public context_object {
 	std::vector<const context_object*> content;
 public:
+	queue();
+	queue(std::initializer_list<queue> cnt);
 	queue(std::initializer_list<const context_object*> cnt);
 	queue(std::vector<const context_object*> cnt);
 	~queue() noexcept override ;

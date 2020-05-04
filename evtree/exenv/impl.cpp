@@ -32,7 +32,7 @@ cppjinja::evt::exenv_impl::exenv_impl(
         , const cppjinja::evtree* tree
         )
     : compiled_template(tree)
-    , user_data(prov)
+    , given_data(prov)
 {
 }
 
@@ -57,8 +57,7 @@ cppjinja::evt::exenv_impl::roots(const cppjinja::evtnodes::tmpl* tmpl) const
 
 const cppjinja::data_provider* cppjinja::evt::exenv_impl::data() const
 {
-	assert(user_data);
-	return user_data;
+	return given_data.data();
 }
 
 std::ostream& cppjinja::evt::exenv_impl::out()
@@ -86,19 +85,29 @@ void cppjinja::evt::exenv_impl::current_node(const cppjinja::evt::node* n)
 	ctx().current_node(n);
 }
 
-cppjinja::evt::obj_holder& cppjinja::evt::exenv_impl::locals()
+cppjinja::evt::context_object& cppjinja::evt::exenv_impl::locals()
 {
 	return ctx().cur_namespace();
 }
 
-cppjinja::evt::obj_holder& cppjinja::evt::exenv_impl::globals()
+cppjinja::evt::context_object& cppjinja::evt::exenv_impl::globals()
 {
 	return global_namespace;
 }
 
-std::vector<const cppjinja::evt::obj_holder*> cppjinja::evt::exenv_impl::params() const
+const cppjinja::evt::context_objects::queue cppjinja::evt::exenv_impl::params() const
 {
-	return execalls.param_stack(exectx.maker());
+	return execalls.current_params(exectx.maker());
+}
+
+const cppjinja::evt::context_object& cppjinja::evt::exenv_impl::user_data() const
+{
+	return given_data;
+}
+
+const cppjinja::evt::context_objects::queue cppjinja::evt::exenv_impl::all_ctx()
+{
+	return {params(), {&locals(), &globals(), &user_data()}};
 }
 
 cppjinja::evt::callstack& cppjinja::evt::exenv_impl::calls()

@@ -18,19 +18,8 @@
 namespace cppjinja::evt {
 
 class callstack {
-	struct frame {
-		const evtnodes::callable* calling;
-		std::vector<ast::function_call_parameter> cparams;
-	};
-	std::vector<frame> stack;
-	void require_stack_is_not_empty() const ;
 public:
 	virtual ~callstack() noexcept =default ;
-
-	virtual east::string_t call(exenv* env,
-	        const evtnodes::callable* calling,
-	        std::vector<ast::function_call_parameter> params) =0 ;
-	virtual std::vector<const obj_holder*> param_stack(const node* last) const =0 ;
 
 	virtual context_objects::queue current_params(const node* last) const =0 ;
 	virtual void pop() =0 ;

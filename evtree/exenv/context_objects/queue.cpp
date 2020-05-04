@@ -10,6 +10,15 @@
 
 using namespace std::literals;
 
+cppjinja::evt::context_objects::queue::queue()
+{
+}
+
+cppjinja::evt::context_objects::queue::queue(std::initializer_list<cppjinja::evt::context_objects::queue> cnt)
+{
+	for(auto& c:cnt) for(auto& oc:c.content) content.emplace_back(oc);
+}
+
 cppjinja::evt::context_objects::queue::queue(
         std::initializer_list<const context_object*> cnt)
     : queue(std::vector<const cppjinja::evt::context_object*>(std::move(cnt)))

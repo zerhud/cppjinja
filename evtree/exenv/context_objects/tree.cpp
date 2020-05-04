@@ -50,7 +50,9 @@ std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::t
 {
 	auto pos = children.find(n.at(0));
 	if(pos==children.end()) return nullptr;
-	return pos->second;
+	if(n.size()==1) return pos->second;
+	n.erase(n.begin());
+	return pos->second->find(n);
 }
 
 cppjinja::east::value_term cppjinja::evt::context_objects::tree::solve() const

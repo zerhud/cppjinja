@@ -16,11 +16,12 @@ namespace cppjinja::evt::context_objects {
 
 class callable_node : public context_object {
 	evt::exenv* env;
-	evtnodes::callable* node;
+	const evtnodes::callable* node;
 public:
-	callable_node(evt::exenv* e, evtnodes::callable* n);
+	callable_node(evt::exenv* e, const evtnodes::callable* n);
 	~callable_node() noexcept override ;
 
+	bool is_it(const evtnodes::callable* n) const ;
 	void add(east::string_t n, std::shared_ptr<context_object> child) override ;
 	std::shared_ptr<context_object> find(east::var_name n) const override ;
 	east::value_term solve() const override ;

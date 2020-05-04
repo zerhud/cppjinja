@@ -79,3 +79,10 @@ std::ostream& cppjinja::east::operator << (
 	std::visit(render, stdval);
 	return out;
 }
+
+bool cppjinja::east::operator ==(
+          const cppjinja::east::function_parameter& left
+        , const cppjinja::east::function_parameter& right)
+{
+	return left.name == right.name && left.val == right.val;
+}

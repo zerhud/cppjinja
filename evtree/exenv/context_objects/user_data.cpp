@@ -11,13 +11,13 @@
 
 using namespace std::literals;
 
-cppjinja::evt::context_objects::user_data::user_data(std::shared_ptr<cppjinja::data_provider> prov)
+cppjinja::evt::context_objects::user_data::user_data(const cppjinja::data_provider* prov)
     : user_data(std::move(prov), east::var_name{})
 {
 }
 
 cppjinja::evt::context_objects::user_data::user_data(
-          std::shared_ptr<cppjinja::data_provider> prov
+          const cppjinja::data_provider* prov
         , cppjinja::east::var_name selected)
     : provider(std::move(prov))
     , selected_name(std::move(selected))
@@ -26,6 +26,11 @@ cppjinja::evt::context_objects::user_data::user_data(
 
 cppjinja::evt::context_objects::user_data::~user_data() noexcept
 {
+}
+
+const cppjinja::data_provider* cppjinja::evt::context_objects::user_data::data() const
+{
+	return provider;
 }
 
 void cppjinja::evt::context_objects::user_data::add(

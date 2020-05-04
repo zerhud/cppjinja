@@ -28,7 +28,7 @@ public:
 	virtual std::ostream& out() =0 ;
 	virtual std::string result() const =0 ;
 
-	virtual obj_holder& cur_namespace() =0 ;
+	virtual context_object& cur_namespace() =0 ;
 };
 
 } // namespace cppjinja::evt

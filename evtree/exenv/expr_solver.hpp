@@ -17,21 +17,17 @@ namespace cppjinja::evt {
 class expr_solver final {
 	exenv* env;
 
-	east::value_term solve_queue(const ast::var_name& obj);
-	east::value_term solve_queue(const ast::function_call& obj);
-	template<typename Obj, typename Cont, typename... Conts>
-	east::value_term solve_queue(const Obj& obj, const Cont& cont, const Conts&... conts);
-	template<typename Obj>
-	std::optional<east::value_term> solve_in_params(const Obj& obj);
-	template<typename Obj> east::value_term solve_calls(const Obj& obj);
-
 	east::value_term make_array(
 	        const std::vector<ast::forward_ast<ast::value_term>>& fields) ;
-	east::value_term solve_in_data(const cppjinja::ast::function_call& obj) ;
+
+	east::function_parameter reduce(const ast::function_call_parameter& obj);
+	std::vector<east::function_parameter> reduce(const std::vector<ast::function_call_parameter>& obj);
 public:
 	typedef east::value_term ret_t;
 
 	expr_solver(exenv* e);
+
+	east::var_name reduce(const ast::var_name& obj) ;
 
 	ret_t operator()(const ast::value_term& val) ;
 

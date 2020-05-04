@@ -8,8 +8,8 @@
 
 #include "op_set.hpp"
 #include "exenv.hpp"
-#include "evtree/exenv/ctx_object.hpp"
-#include "evtree/exenv/obj_holder.hpp"
+#include "evtree/exenv/expr_solver.hpp"
+#include "evtree/exenv/context_objects/value.hpp"
 
 using namespace cppjinja::evtnodes;
 using namespace std::literals;
@@ -33,7 +33,8 @@ void op_set::render(evt::exenv& env) const
 
 void op_set::inject_value(cppjinja::evt::exenv& env) const
 {
-	auto obj = std::make_unique<evt::delay_solver>(&op.value);
+	auto obj = std::make_unique<evt::context_objects::value>(
+	            evt::expr_solver(&env)(op.value));
 	env.locals().add(op.name, std::move(obj));
 }
 
@@ -41,6 +42,6 @@ void op_set::inject_object(cppjinja::evt::exenv& env) const
 {
 	ast::var_name name = boost::get<ast::var_name>(op.value.var);
 	assert(!name.empty());
-	auto obj = env.locals().find(name[0]);
+	auto obj = env.locals().find(evt::expr_solver(&env).reduce(name));
 	env.locals().add(op.name, std::move(obj));
 }

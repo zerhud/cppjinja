@@ -12,8 +12,6 @@
 #include "evtree/nodes/callable.hpp"
 #include "evtree/exenv/context.hpp"
 #include "evtree/exenv/callstack.hpp"
-#include "evtree/exenv/ctx_object.hpp"
-#include "evtree/exenv/obj_holder.hpp"
 #include "evtree/exenv/context_object.hpp"
 #include "parser/operators/single.hpp"
 
@@ -38,7 +36,6 @@ MOCK_BASE_CLASS( callable_node, cppjinja::evtnodes::callable )
 	MOCK_METHOD( name, 0 )
 	MOCK_METHOD( render, 1 )
 	MOCK_METHOD( evaluate, 1 )
-	MOCK_METHOD( params, 0 )
 	MOCK_METHOD( solved_params, 1 )
 };
 
@@ -65,16 +62,8 @@ MOCK_BASE_CLASS(context_object, cppjinja::evt::context_object)
 	MOCK_METHOD(call, 1)
 };
 
-MOCK_BASE_CLASS(ctx_object, cppjinja::evt::ctx_object)
-{
-	MOCK_METHOD(call, 1)
-	MOCK_METHOD(solve, 1)
-};
-
 MOCK_BASE_CLASS( callstack, cppjinja::evt::callstack )
 {
-	MOCK_METHOD( call, 3 )
-	MOCK_METHOD( param_stack, 1 )
 	MOCK_METHOD( push, 2 )
 	MOCK_METHOD( pop, 0 )
 	MOCK_METHOD( current_params, 1 )
@@ -98,6 +87,8 @@ MOCK_BASE_CLASS( exenv, cppjinja::evt::exenv )
 	MOCK_METHOD( globals, 0)
 	MOCK_METHOD( locals, 0)
 	MOCK_METHOD( params, 0)
+	MOCK_METHOD( user_data, 0)
+	MOCK_METHOD( all_ctx, 0)
 
 	MOCK_NON_CONST_METHOD(calls, 0, callstack&(), calls)
 
@@ -116,10 +107,10 @@ struct mock_exenv_fixture
 	mocks::data_provider data;
 	cppjinja::evt::result_formatter rfmt;
 
-	cppjinja::evt::obj_holder globals, locals;
-	std::vector<const cppjinja::evt::obj_holder*> params;
+	context_object params, locals, globals, user_data, all_ctx;
+	std::shared_ptr<context_object> mock_all_ctx = std::make_shared<context_object>();
 
-	mock_exenv_fixture()
+	mock_exenv_fixture() : params({})
 	{
 		MOCK_EXPECT(env.data).returns(&data);
 		MOCK_EXPECT(env.get_ctx).returns(ctx);
@@ -127,33 +118,59 @@ struct mock_exenv_fixture
 		MOCK_EXPECT(env.calls).returns(calls);
 		MOCK_EXPECT(env.out).calls([this]()->std::ostream&{return out;});
 		MOCK_EXPECT(env.render_format).calls([this]()->cppjinja::evt::result_formatter&{return rfmt;});
+		MOCK_EXPECT(env.all_ctx).calls([this]()->cppjinja::evt::context_objects::queue{
+		                                   return {&all_ctx};
+		                               });
 	}
 
 	void expect_glp(int gc, int lc, int pc)
 	{
-		using cppjinja::evt::obj_holder;
-		MOCK_EXPECT(env.params).at_least(pc).calls([this](){return params;});
-		MOCK_EXPECT(env.locals).at_least(lc).calls([this]()->obj_holder&{return locals;});
-		MOCK_EXPECT(env.globals).at_least(gc).calls([this]()->obj_holder&{return globals;});
+		using cppjinja::evt::context_object;
+		using cppjinja::evt::context_objects::queue;
+		MOCK_EXPECT(env.params).at_least(pc).calls([this]()->queue{return queue({&params});});
+		MOCK_EXPECT(env.locals).at_least(lc).calls([this]()->context_object&{return locals;});
+		MOCK_EXPECT(env.globals).at_least(gc).calls([this]()->context_object&{return globals;});
+		MOCK_EXPECT(env.user_data).calls([this]()->context_object&{return user_data;});
+	}
+
+	void expect_sovle(cppjinja::east::var_name n, cppjinja::east::value_term v)
+	{
+		MOCK_EXPECT(all_ctx.find).once().with(n).returns(mock_all_ctx);
+		MOCK_EXPECT(mock_all_ctx->solve).once().returns(v);
+	}
+
+	void expect_call(cppjinja::east::var_name n, std::vector<cppjinja::east::function_parameter> p, cppjinja::east::value_term v)
+	{
+		MOCK_EXPECT(all_ctx.find).once().with(n).returns(mock_all_ctx);
+		MOCK_EXPECT(mock_all_ctx->call).once().with(p).returns(v);
+	}
+
+	cppjinja::east::value_term call_in(
+	          cppjinja::evt::context_object& obj
+	        , cppjinja::east::var_name n
+	        , std::vector<cppjinja::east::function_parameter> params)
+	{
+		auto found = obj.find(n);
+		BOOST_REQUIRE(found);
+		return found->call(std::move(params));
+	}
+
+	cppjinja::east::value_term solve_in(
+	          cppjinja::evt::context_object& obj
+	        , cppjinja::east::var_name n)
+	{
+		auto found = obj.find(n);
+		BOOST_REQUIRE(found);
+		return found->solve();
 	}
 
 	void expect_call(
 	        cppjinja::evtnodes::callable* calling,
-	        std::vector<cppjinja::ast::function_call_parameter> params)
+	        std::vector<cppjinja::east::value_term> params)
 	{
-		auto check_params =
-		        [params](std::vector<cppjinja::ast::function_call_parameter> called_params){
-			BOOST_REQUIRE(called_params.size() == params.size());
-			BOOST_TEST( called_params == params );
-		};
-		MOCK_EXPECT(calls.call).once().calls(
-		            [check_params,calling](cppjinja::evt::exenv* env,
-		            const cppjinja::evtnodes::callable* icalling,
-		            std::vector<cppjinja::ast::function_call_parameter> params){
-			check_params(params);
-			BOOST_TEST(calling == icalling);
-			return calling->evaluate(*env);
-		});
+		mock::sequence seq;
+		MOCK_EXPECT(calls.push).once().in(seq);
+		MOCK_EXPECT(calls.pop).once().in(seq);
 	}
 
 	void expect_cxt_settings(cppjinja::evt::node* maker)

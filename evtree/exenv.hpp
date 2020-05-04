@@ -12,6 +12,7 @@
 #include "exenv/raii.hpp"
 #include "eval/eval.hpp"
 #include "exenv/result_formatter.hpp"
+#include "exenv/context_objects/queue.hpp"
 
 namespace cppjinja::evt {
 
@@ -39,9 +40,11 @@ public:
 	virtual const context& ctx() const =0 ;
 	virtual void current_node(const node* n) =0 ;
 
-	virtual obj_holder& locals() =0 ;
-	virtual obj_holder& globals() =0 ;
-	virtual std::vector<const obj_holder*> params() const =0 ;
+	virtual context_object& locals() =0 ;
+	virtual context_object& globals() =0 ;
+	virtual const context_objects::queue params() const =0 ;
+	virtual const context_object& user_data() const =0 ;
+	virtual const context_objects::queue all_ctx() =0 ;
 
 	virtual callstack& calls() =0 ;
 
