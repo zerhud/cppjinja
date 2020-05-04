@@ -8,19 +8,20 @@
 
 #pragma once
 
-#include "block_with_name.hpp"
+#include "callable.hpp"
 
 namespace cppjinja::evtnodes {
 
-class block_named : public block_with_name {
-	ast::block_named block;
-
-	bool has_nondefaulted_params() const ;
-	const ast::block_with_name& cur_ast() const override ;
+class block_with_name : public callable {
+	virtual const ast::block_with_name& cur_ast() const =0 ;
+	[[nodiscard]] evt::raii_result_format result_format_raii(evt::exenv& env) const ;
+protected:
+	evt::render_info inner_ri() const ;
+	[[nodiscard]] evt::raii_result_format inner_evaluate(evt::exenv& env) const ;
 public:
-	block_named(ast::block_named nb);
-	void render(evt::exenv& env) const override ;
-	east::string_t evaluate( evt::exenv& env) const override ;
+	evt::render_info rinfo() const override ;
+	ast::string_t name() const override ;
+	std::vector<east::function_parameter> solved_params(evt::exenv& env) const override ;
 };
 
 } // namespace cppjinja::evtnodes

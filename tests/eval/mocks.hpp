@@ -164,12 +164,10 @@ struct mock_exenv_fixture
 		return found->solve();
 	}
 
-	void expect_call(
-	        cppjinja::evtnodes::callable* calling,
-	        std::vector<cppjinja::east::value_term> params)
+	void expect_call(cppjinja::evtnodes::callable* calling)
 	{
 		mock::sequence seq;
-		MOCK_EXPECT(calls.push).once().in(seq);
+		MOCK_EXPECT(calls.push).once().with(calling, mock::any).in(seq);
 		MOCK_EXPECT(calls.pop).once().in(seq);
 	}
 

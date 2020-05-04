@@ -114,7 +114,7 @@ BOOST_FIXTURE_TEST_CASE(rendered_only_empty_name, mock_exenv_fixture)
 	mock::sequence ctx_seq;
 	mocks::callable_node child_with_name, child_empty_name;
 	expect_glp(1, 0, 0);
-	expect_call(&child_empty_name, {});
+	expect_call(&child_empty_name);
 	expect_roots({&child_with_name, &child_empty_name});
 	MOCK_EXPECT(globals.add);
 	MOCK_EXPECT(env.current_node).with(&tmpl);
@@ -293,7 +293,7 @@ BOOST_FIXTURE_TEST_CASE(render_no_children, mock_exenv_fixture)
 	evtnodes::block_named cnt(ast_bl);
 	expect_children({});
 	expect_cxt_settings(&cnt);
-	expect_call(&cnt, {});
+	expect_call(&cnt);
 	MOCK_EXPECT(env.result).once().returns("result");
 	BOOST_CHECK_NO_THROW(cnt.render(env));
 	BOOST_TEST(out.str() == "result");
@@ -313,7 +313,7 @@ BOOST_FIXTURE_TEST_CASE(render_two_children, mock_callable_fixture)
 	prepare_for_render_two_childrend(ast_bl);
 	evtnodes::block_named cnt(ast_bl);
 	expect_cxt_settings(&cnt);
-	expect_call(&cnt, {});
+	expect_call(&cnt);
 	prepare_for_render_two_childrend();
 	MOCK_EXPECT(env.result).once().returns("result");
 	BOOST_CHECK_NO_THROW(cnt.render(env));
@@ -338,7 +338,7 @@ BOOST_FIXTURE_TEST_CASE(render_with_tabshift, mock_callable_fixture)
 	ast_bl.left_close.bsign = 2;
 	evtnodes::block_named cnt(ast_bl);
 	expect_children({});
-	expect_call(&cnt, {});
+	expect_call(&cnt);
 	expect_cxt_settings(&cnt);
 	MOCK_EXPECT(env.result).once().calls([this](){
 		BOOST_TEST(rfmt("\na"s) == "\n\t\ta"s);
