@@ -15,8 +15,6 @@ namespace cppjinja::details {
 
 struct east_cvt {
 	static east::var_name cvt(const ast::var_name& name) ;
-	static east::function_call cvt(const ast::function_call& fnc) ;
-	static east::function_call cvt(const ast::filter_call& filter) ;
 	static east::string_t cvt(const ast::string_t& str) ;
 	static east::value_term cvt(const ast::value_term& val) ;
 };

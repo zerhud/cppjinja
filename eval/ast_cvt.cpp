@@ -15,30 +15,6 @@ cppjinja::east::var_name cppjinja::details::east_cvt::cvt(const ast::var_name& n
 	return name;
 }
 
-cppjinja::east::function_call cppjinja::details::east_cvt::cvt(const ast::function_call& fnc)
-{
-	east::function_call ret;
-	ret.ref = cvt(fnc.ref);
-	for(auto& param:fnc.params)
-	{
-		east::function_parameter& p = ret.params.emplace_back();
-		if(param.name) p.name = cvt(*param.name);
-		p.val = cvt(param.value);
-	}
-
-	return ret;
-}
-
-cppjinja::east::function_call cppjinja::details::east_cvt::cvt(const ast::filter_call& filter)
-{
-	if(filter.var.type() == typeid(ast::function_call))
-		return cvt(boost::get<ast::function_call>(filter));
-
-	ast::function_call fnc;
-	fnc.ref = boost::get<ast::var_name>(filter.var);
-	return cvt(fnc);
-}
-
 cppjinja::east::string_t cppjinja::details::east_cvt::cvt(const ast::string_t& str)
 {
 	return str;

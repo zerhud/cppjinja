@@ -51,7 +51,7 @@ cppjinja::east::value_term cppjinja::evt::expr_filter::operator()(
         const cppjinja::ast::function_call& obj)
 {
 	east::function_call call;
-	call.ref = east_cvt::cvt(obj.ref);
+	call.ref = expr_solver(user_data).reduce(obj.ref);
 	for(auto& p:obj.params)
 	{
 		east::function_parameter param;
