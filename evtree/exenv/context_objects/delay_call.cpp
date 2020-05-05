@@ -9,7 +9,9 @@
 #include "delay_call.hpp"
 #include <algorithm>
 
-cppjinja::evt::context_objects::delay_call::delay_call(std::shared_ptr<cppjinja::evt::context_object> o, std::vector<cppjinja::east::function_parameter> p)
+cppjinja::evt::context_objects::delay_call::delay_call(
+          std::shared_ptr<cppjinja::evt::context_object> o
+        , std::vector<cppjinja::east::function_parameter> p)
     : obj(std::move(o))
     , params(std::move(p))
 {
@@ -19,7 +21,8 @@ cppjinja::evt::context_objects::delay_call::~delay_call() noexcept
 {
 }
 
-void cppjinja::evt::context_objects::delay_call::add(cppjinja::east::string_t n, std::shared_ptr<cppjinja::evt::context_object>)
+void cppjinja::evt::context_objects::delay_call::add(
+        cppjinja::east::string_t, std::shared_ptr<cppjinja::evt::context_object>)
 {
 	throw std::runtime_error("cannot add child to delay_call");
 }
@@ -31,10 +34,10 @@ std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::d
 
 cppjinja::east::value_term cppjinja::evt::context_objects::delay_call::solve() const
 {
-	return obj->call(params);
+	return obj->call(params)->solve();
 }
 
-cppjinja::east::value_term cppjinja::evt::context_objects::delay_call::call(
+std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::delay_call::call(
         std::vector<cppjinja::east::function_parameter> params) const
 {
 	std::vector<cppjinja::east::function_parameter> result = this->params;

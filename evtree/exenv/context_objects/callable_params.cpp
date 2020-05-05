@@ -87,7 +87,7 @@ cppjinja::evt::context_objects::callable_params::solve() const
 	throw std::runtime_error("cannot cannot solve a callable_params");
 }
 
-cppjinja::east::value_term cppjinja::evt::context_objects::callable_params::call(
+std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::callable_params::call(
         std::vector<cppjinja::east::function_parameter>) const
 {
 	throw std::runtime_error("cannot cannot call a callable_params");

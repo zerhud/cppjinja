@@ -41,12 +41,14 @@ cppjinja::evt::context_objects::tree::~tree() noexcept
 
 }
 
-void cppjinja::evt::context_objects::tree::add(east::string_t n, std::shared_ptr<cppjinja::evt::context_object> child)
+void cppjinja::evt::context_objects::tree::add(
+        east::string_t n, std::shared_ptr<cppjinja::evt::context_object> child)
 {
 	children[n] = std::move(child);
 }
 
-std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::tree::find(cppjinja::east::var_name n) const
+std::shared_ptr<cppjinja::evt::context_object>
+cppjinja::evt::context_objects::tree::find(cppjinja::east::var_name n) const
 {
 	auto pos = children.find(n.at(0));
 	if(pos==children.end()) return nullptr;
@@ -64,7 +66,8 @@ cppjinja::east::value_term cppjinja::evt::context_objects::tree::solve() const
 	return ret.size() == 2 ? ret : ret.erase(ret.size()-2, 1);
 }
 
-cppjinja::east::value_term cppjinja::evt::context_objects::tree::call(std::vector<cppjinja::east::function_parameter> params) const
+std::shared_ptr<cppjinja::evt::context_object>
+cppjinja::evt::context_objects::tree::call(std::vector<cppjinja::east::function_parameter> params) const
 {
 	(void)params;
 	throw std::runtime_error("cannot call a tree");

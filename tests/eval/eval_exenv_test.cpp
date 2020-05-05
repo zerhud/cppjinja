@@ -175,7 +175,7 @@ BOOST_FIXTURE_TEST_CASE(call, mock_exenv_fixture)
 	        .returns("ok"s);
 	MOCK_EXPECT(calls.pop).once().in(seq);
 	MOCK_EXPECT(node.solved_params).at_least(1).returns(std::vector<cppjinja::east::function_parameter>{});
-	BOOST_TEST(val.call({p1}) == east_value_term{"ok"s});
+	BOOST_TEST(val.call({p1})->solve() == east_value_term{"ok"s});
 }
 BOOST_AUTO_TEST_SUITE_END() // callable_node
 BOOST_AUTO_TEST_SUITE(callable_params)
@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(find_is_link)
 	cppjinja::east::function_parameter p1;
 	p1.name = "p1"s;
 	p1.val = east_value_term{"p1_val"s};
-	BOOST_TEST(obj_b->call({p1}) == east_value_term{"ok"s});
+	BOOST_TEST(obj_b->call({p1})->solve() == east_value_term{"ok"s});
 }
 BOOST_AUTO_TEST_SUITE_END() // user_data
 BOOST_AUTO_TEST_SUITE(delay_call)
@@ -299,7 +299,8 @@ BOOST_AUTO_TEST_CASE(solve)
 	std::vector<cppjinja::east::function_parameter> params;
 	params.emplace_back().val = evalue_term{"pval"s};
 	cppjinja::evt::context_objects::delay_call dc(obj, params);
-	MOCK_EXPECT(obj->call).once().with(params).returns(evalue_term{"ok"s});
+	auto obj_val = std::make_shared<cppjinja::evt::context_objects::value>(evalue_term{"ok"s});
+	MOCK_EXPECT(obj->call).once().with(params).returns(obj_val);
 	BOOST_TEST(dc.solve() == evalue_term{"ok"s});
 }
 BOOST_AUTO_TEST_CASE(cannot_find_add)
@@ -327,8 +328,9 @@ BOOST_AUTO_TEST_CASE(call)
 	call_params.emplace_back().name = "p3";
 	call_params.back().val = evalue_term{"good"s};
 
-	MOCK_EXPECT(obj->call).once().with(params).returns(evalue_term{"ok"});
-	BOOST_TEST(dc.call(call_params) == evalue_term{"ok"s});
+	auto obj_val = std::make_shared<cppjinja::evt::context_objects::value>(evalue_term{"ok"s});
+	MOCK_EXPECT(obj->call).once().with(params).returns(obj_val);
+	BOOST_TEST(dc.call(call_params)->solve() == evalue_term{"ok"s});
 }
 BOOST_AUTO_TEST_SUITE_END() // delay_call
 BOOST_AUTO_TEST_SUITE_END() // context_object

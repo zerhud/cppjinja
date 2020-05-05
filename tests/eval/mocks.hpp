@@ -14,6 +14,7 @@
 #include "evtree/exenv/callstack.hpp"
 #include "evtree/exenv/context_object.hpp"
 #include "parser/operators/single.hpp"
+#include "evtree/exenv/context_objects/value.hpp"
 
 namespace mocks {
 
@@ -141,27 +142,9 @@ struct mock_exenv_fixture
 
 	void expect_call(cppjinja::east::var_name n, std::vector<cppjinja::east::function_parameter> p, cppjinja::east::value_term v)
 	{
+		auto val_obj= std::make_shared<cppjinja::evt::context_objects::value>(std::move(v));
 		MOCK_EXPECT(all_ctx.find).once().with(n).returns(mock_all_ctx);
-		MOCK_EXPECT(mock_all_ctx->call).once().with(p).returns(v);
-	}
-
-	cppjinja::east::value_term call_in(
-	          cppjinja::evt::context_object& obj
-	        , cppjinja::east::var_name n
-	        , std::vector<cppjinja::east::function_parameter> params)
-	{
-		auto found = obj.find(n);
-		BOOST_REQUIRE(found);
-		return found->call(std::move(params));
-	}
-
-	cppjinja::east::value_term solve_in(
-	          cppjinja::evt::context_object& obj
-	        , cppjinja::east::var_name n)
-	{
-		auto found = obj.find(n);
-		BOOST_REQUIRE(found);
-		return found->solve();
+		MOCK_EXPECT(mock_all_ctx->call).once().with(p).returns(val_obj);
 	}
 
 	void expect_call(cppjinja::evtnodes::callable* calling)

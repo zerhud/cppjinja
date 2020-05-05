@@ -8,6 +8,7 @@
 
 
 #include "user_data.hpp"
+#include "value.hpp"
 
 using namespace std::literals;
 
@@ -52,10 +53,10 @@ cppjinja::east::value_term cppjinja::evt::context_objects::user_data::solve() co
 	return provider->value(selected_name);
 }
 
-cppjinja::east::value_term cppjinja::evt::context_objects::user_data::call(std::vector<cppjinja::east::function_parameter> params) const
+std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::user_data::call(std::vector<cppjinja::east::function_parameter> params) const
 {
 	east::function_call call;
 	call.ref = selected_name;
 	call.params = std::move(params);
-	return provider->value(call);
+	return std::make_shared<value>(provider->value(call));
 }
