@@ -14,7 +14,7 @@ using namespace std::literals;
 
 cppjinja::evt::context_objects::builtins::builtins()
 {
-
+	add_child("namespace", std::make_shared<jinja_namespace>());
 }
 
 cppjinja::evt::context_objects::builtins::~builtins() noexcept
@@ -22,32 +22,6 @@ cppjinja::evt::context_objects::builtins::~builtins() noexcept
 
 }
 
-void cppjinja::evt::context_objects::builtins::add(
-          cppjinja::east::string_t n
-        , std::shared_ptr<cppjinja::evt::context_object> child)
-{
-
-}
-
-std::shared_ptr<cppjinja::evt::context_object>
-cppjinja::evt::context_objects::builtins::find(east::var_name n) const
-{
-	if(n == east::var_name{"namespace"s})
-		return std::make_shared<jinja_namespace>();
-	return nullptr;
-}
-
-cppjinja::east::value_term cppjinja::evt::context_objects::builtins::solve() const
-{
-	return "";
-}
-
-std::shared_ptr<cppjinja::evt::context_object>
-cppjinja::evt::context_objects::builtins::call(
-        std::vector<cppjinja::east::function_parameter> params) const
-{
-	return nullptr;
-}
 
 void cppjinja::evt::context_objects::builtin_function::add(
         cppjinja::east::string_t n, std::shared_ptr<cppjinja::evt::context_object> child)

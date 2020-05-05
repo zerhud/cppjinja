@@ -10,7 +10,7 @@
 
 #include <string>
 #include <unordered_map>
-#include "../context_object.hpp"
+#include "tree.hpp"
 
 namespace cppjinja::evt::context_objects {
 
@@ -26,16 +26,10 @@ public:
 	std::shared_ptr<context_object> call(std::vector<east::function_parameter> params) const override ;
 };
 
-class builtins : public context_object {
-	std::unordered_map<std::string, std::shared_ptr<context_object>> functions;
+class builtins : public tree {
 public:
 	builtins();
 	~builtins() noexcept override ;
-
-	void add(east::string_t n, std::shared_ptr<context_object> child) override ;
-	std::shared_ptr<context_object> find(east::var_name n) const override ;
-	east::value_term solve() const override ;
-	std::shared_ptr<context_object> call(std::vector<east::function_parameter> params) const override ;
 };
 
 } // namespace cppjinja::evt::context_objects

@@ -18,6 +18,8 @@ class tree : public context_object {
 	std::map<std::string, std::shared_ptr<context_object>> children;
 	std::ostream& print_solved_value(std::ostream& out, const context_object& obj) const ;
 	std::ostream& render_children_with_comma(std::ostream& out) const ;
+protected:
+	void add_child(east::string_t n, std::shared_ptr<context_object> child);
 public:
 	tree();
 	~tree() noexcept override ;

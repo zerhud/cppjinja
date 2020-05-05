@@ -31,6 +31,13 @@ std::ostream& cppjinja::evt::context_objects::tree::render_children_with_comma(s
 	return out;
 }
 
+void cppjinja::evt::context_objects::tree::add_child(
+          cppjinja::east::string_t n
+        , std::shared_ptr<cppjinja::evt::context_object> child)
+{
+	children[n] = std::move(child);
+}
+
 cppjinja::evt::context_objects::tree::tree()
 {
 
@@ -44,7 +51,7 @@ cppjinja::evt::context_objects::tree::~tree() noexcept
 void cppjinja::evt::context_objects::tree::add(
         east::string_t n, std::shared_ptr<cppjinja::evt::context_object> child)
 {
-	children[n] = std::move(child);
+	add_child(std::move(n), std::move(child));
 }
 
 std::shared_ptr<cppjinja::evt::context_object>
