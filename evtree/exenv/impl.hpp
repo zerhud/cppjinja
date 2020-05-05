@@ -15,6 +15,7 @@
 #include "callstack_impl.hpp"
 #include "context_objects/tree.hpp"
 #include "context_objects/user_data.hpp"
+#include "context_objects/builtins.hpp"
 
 namespace cppjinja::evt {
 
@@ -25,6 +26,7 @@ class exenv_impl final : public exenv {
 	callstack_impl execalls;
 	std::optional<render_info> cur_rinfo;
 	context_objects::tree global_namespace;
+	context_objects::builtins builtins;
 	result_formatter rfmt;
 public:
 	exenv_impl(const data_provider* prov, const evtree* tmpl);

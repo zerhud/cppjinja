@@ -26,6 +26,7 @@
 #include "evtree/exenv/context_objects/callable_node.hpp"
 #include "evtree/exenv/context_objects/user_data.hpp"
 #include "evtree/exenv/context_objects/delay_call.hpp"
+#include "evtree/exenv/context_objects/builtins.hpp"
 #include "evtree/nodes/callable.hpp"
 #include "parser/operators/common.hpp"
 #include "parser/grammar/tmpls.hpp"
@@ -339,6 +340,29 @@ BOOST_AUTO_TEST_CASE(call)
 	auto obj_val = std::make_shared<cppjinja::evt::context_objects::value>(evalue_term{"ok"s});
 	MOCK_EXPECT(obj->call).once().with(params).returns(obj_val);
 	BOOST_TEST(dc.call(call_params)->solve() == evalue_term{"ok"s});
+}
+BOOST_AUTO_TEST_SUITE_END() // delay_call
+BOOST_AUTO_TEST_SUITE(builtins)
+using cppjinja::east::function_parameter;
+BOOST_AUTO_TEST_CASE(context)
+{
+	using namespace cppjinja::evt::context_objects;
+	cppjinja::evt::context_objects::builtins stdlib;
+
+	auto ns = stdlib.find(var_name{"namespace"s});
+	BOOST_CHECK(dynamic_cast<jinja_namespace*>(ns.get()));
+}
+BOOST_AUTO_TEST_CASE(jinja_namespace)
+{
+	cppjinja::evt::context_objects::jinja_namespace ns;
+	BOOST_CHECK_THROW(ns.call({}), std::exception);
+	BOOST_CHECK_THROW(ns.solve(), std::exception);
+	BOOST_CHECK_THROW(ns.add("a", nullptr), std::exception);
+	BOOST_CHECK_THROW(ns.find(evar_name{"a"}), std::exception);
+
+	auto tree = ns.call({function_parameter{"a", evalue_term{"ok_a"}}});
+	BOOST_CHECK(tree);
+	BOOST_TEST(tree->find(evar_name{"a"})->solve() == evalue_term{"ok_a"s});
 }
 BOOST_AUTO_TEST_SUITE_END() // delay_call
 BOOST_AUTO_TEST_SUITE_END() // context_object
@@ -692,6 +716,14 @@ BOOST_FIXTURE_TEST_CASE(result, impl_exenv_fixture)
 	BOOST_TEST(env.result() == "");
 	ctx.out() << "test";
 	BOOST_TEST(env.result() == "test");
+}
+BOOST_FIXTURE_TEST_CASE(bintins, impl_exenv_fixture)
+{
+	mocks::callable_node node;
+	ctx.push_shadow(&node);
+	calls.push(&node, cppjinja::evt::context_objects::callable_params({},{}));
+	BOOST_CHECK(dynamic_cast<cppjinja::evt::context_objects::jinja_namespace*>(
+	                env.all_ctx().find(evar_name{"namespace"}).get()));
 }
 BOOST_FIXTURE_TEST_CASE(globals, impl_exenv_fixture)
 {
