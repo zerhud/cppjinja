@@ -163,11 +163,11 @@ struct mock_exenv_fixture
 		MOCK_EXPECT(ctx.pop).once().in(seq).with(maker);
 	}
 
-	void expect_tmpl_cxt_settings(cppjinja::evt::node* maker)
+	void expect_transporent_cxt(cppjinja::evt::node* maker)
 	{
 		mock::sequence seq;
-		MOCK_EXPECT(ctx.push).once().in(seq).with(maker);
 		MOCK_EXPECT(env.current_node).once().in(seq).with(maker);
+		MOCK_EXPECT(ctx.push).once().in(seq).with(maker);
 		MOCK_EXPECT(ctx.pop).once().in(seq).with(maker);
 	}
 

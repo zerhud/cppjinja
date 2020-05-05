@@ -21,7 +21,7 @@ class block_if : public evt::node {
 public:
 	block_if(ast::block_if nb);
 	evt::render_info rinfo() const override ;
-	void render(evt::exenv& ctx) const override ;
+	void render(evt::exenv& env) const override ;
 };
 
 } // namespace cppjinja::evtnodes

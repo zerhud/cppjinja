@@ -430,8 +430,8 @@ BOOST_FIXTURE_TEST_CASE(out, mock_impls_fixture)
 	ctx.out() << "test";
 	BOOST_TEST(ctx.result() == "test");
 	ctx.push(&node2);
-	BOOST_TEST(ctx.result() == "");
-	BOOST_TEST(&ctx.out() != out1);
+	BOOST_TEST(ctx.result() == "test");
+	BOOST_TEST(&ctx.out() == out1);
 	ctx.pop(&node2);
 	BOOST_TEST(&ctx.out() == out1);
 	BOOST_TEST(ctx.result() == "test");

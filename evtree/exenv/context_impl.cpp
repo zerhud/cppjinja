@@ -89,14 +89,12 @@ const cppjinja::evt::node* cppjinja::evt::context_impl::maker() const
 
 std::ostream& cppjinja::evt::context_impl::out()
 {
-	require_not_empty();
-	return ctx.back().out;
+	return last_shadow().out;
 }
 
 std::string cppjinja::evt::context_impl::result() const
 {
-	require_not_empty();
-	return ctx.back().out.str();
+	return last_shadow().out.str();
 }
 
 cppjinja::evt::context_object& cppjinja::evt::context_impl::cur_namespace()

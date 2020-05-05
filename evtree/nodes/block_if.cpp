@@ -62,10 +62,11 @@ cppjinja::evt::render_info block_if::rinfo() const
 	return {block.left_open.trim, block.right_close.trim};
 }
 
-void block_if::render(evt::exenv& ctx) const
+void block_if::render(evt::exenv& env) const
 {
-	ctx.current_node(this);
-	auto ifresult = evt::expr_solver(&ctx)(block.condition) == east::value_term{1};
-	if(ifresult) render_if(ctx);
-	else render_else(ctx);
+	env.current_node(this);
+	evt::raii_push_ctx ctx_holder(this, &env.ctx());
+	auto ifresult = evt::expr_solver(&env)(block.condition) == east::value_term{1};
+	if(ifresult) render_if(env);
+	else render_else(env);
 }
