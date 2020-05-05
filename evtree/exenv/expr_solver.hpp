@@ -21,8 +21,6 @@ class expr_solver final {
 	        const std::vector<ast::forward_ast<ast::value_term>>& fields) ;
 
 	east::function_parameter reduce(const ast::function_call_parameter& obj);
-	std::vector<east::function_parameter> reduce(const std::vector<ast::function_call_parameter>& obj);
-	east::var_name reduce(const boost::spirit::x3::variant<ast::var_name, ast::array_calls>& obj);
 
 	east::string_t reduce_to_string(const east::value_term& obj);
 public:
@@ -33,6 +31,8 @@ public:
 	east::var_name reduce(const ast::var_name& obj) ;
 	east::var_name reduce(const ast::array_calls& obj);
 	east::function_call reduce(const ast::function_call& obj);
+	east::var_name reduce(const boost::spirit::x3::variant<ast::var_name, ast::array_calls>& obj);
+	std::vector<east::function_parameter> reduce(const std::vector<ast::function_call_parameter>& obj);
 
 	ret_t operator()(const ast::value_term& val) ;
 

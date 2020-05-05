@@ -28,6 +28,8 @@ void op_set::render(evt::exenv& env) const
 	env.current_node(this);
 	if(op.value.var.type() == typeid(ast::var_name))
 		inject_object(env);
+	else if(op.value.var.type() == typeid(ast::function_call))
+		inject_call_object(env);
 	else inject_value(env);
 }
 
@@ -44,4 +46,11 @@ void op_set::inject_object(cppjinja::evt::exenv& env) const
 	assert(!name.empty());
 	auto obj = env.all_ctx().find(evt::expr_solver(&env).reduce(name));
 	env.locals().add(op.name, std::move(obj));
+}
+
+void op_set::inject_call_object(cppjinja::evt::exenv& env) const
+{
+	auto call = boost::get<ast::function_call>(op.value.var);
+	auto obj = env.all_ctx().find(evt::expr_solver(&env).reduce(call.ref));
+	env.locals().add(op.name, obj->call(evt::expr_solver(&env).reduce(call.params)));
 }

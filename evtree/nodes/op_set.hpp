@@ -16,6 +16,7 @@ class op_set : public evt::node {
 	ast::op_set op;
 	void inject_value(evt::exenv& env) const ;
 	void inject_object(evt::exenv& env) const ;
+	void inject_call_object(evt::exenv& env) const ;
 public:
 	op_set(ast::op_set o);
 
