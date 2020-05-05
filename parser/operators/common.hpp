@@ -13,17 +13,21 @@
 
 #include "ast/common.hpp"
 
-#define VARIANT_OPERATORS(sname, ...) \
-    namespace std { std::ostream& operator << (std::ostream& out, const sname& obj); } \
+#define DEFINE_DEFINED_OPERATORS(sname, ...) \
+	namespace cppjinja::ast { \
+	inline bool operator == (const x3::forward_ast<sname>& left, const x3::forward_ast<sname>& right) { return left.get() == right.get(); } \
+	inline bool operator != (const x3::forward_ast<sname>& left, const x3::forward_ast<sname>& right) { return !(left==right); } \
+	}\
+	namespace std { std::ostream& operator << (std::ostream& out, const sname& obj); } \
 
 #define DEFINE_OPERATORS(sname, ...) \
-    namespace cppjinja::ast { \
-    inline bool operator == (const sname& left, const sname& right) { return cppjinja::lex_eq(__VA_ARGS__); } \
-    inline bool operator != (const sname& left, const sname& right) { return !(left==right); } \
-    inline bool operator == (const x3::forward_ast<sname>& left, const x3::forward_ast<sname>& right) { return left.get() == right.get(); } \
-    inline bool operator != (const x3::forward_ast<sname>& left, const x3::forward_ast<sname>& right) { return !(left==right); } \
-    }\
-    namespace std { std::ostream& operator << (std::ostream& out, const sname& obj); }\
+	namespace cppjinja::ast { \
+	inline bool operator == (const sname& left, const sname& right) { return cppjinja::lex_eq(__VA_ARGS__); } \
+	inline bool operator != (const sname& left, const sname& right) { return !(left==right); } \
+	inline bool operator == (const x3::forward_ast<sname>& left, const x3::forward_ast<sname>& right) { return left.get() == right.get(); } \
+	inline bool operator != (const x3::forward_ast<sname>& left, const x3::forward_ast<sname>& right) { return !(left==right); } \
+	}\
+	namespace std { std::ostream& operator << (std::ostream& out, const sname& obj); }\
 
 
 namespace cppjinja::ast
@@ -84,7 +88,7 @@ DEFINE_OPERATORS(cppjinja::ast::var_name, left, right)
 DEFINE_OPERATORS(cppjinja::ast::function_call_parameter, left.name, right.name, left.value, right.value)
 DEFINE_OPERATORS(cppjinja::ast::function_call, left.ref, right.ref, left.params, right.params)
 DEFINE_OPERATORS(cppjinja::ast::array_call, left.name, right.name, left.call, right.call)
-DEFINE_OPERATORS(cppjinja::ast::array_calls, left, right)
+DEFINE_DEFINED_OPERATORS(cppjinja::ast::array_calls, left, right)
 DEFINE_OPERATORS(cppjinja::ast::binary_op, left.left, right.left, left.right, right.right)
 DEFINE_OPERATORS(cppjinja::ast::value_term, left.var, right.var)
 DEFINE_OPERATORS(cppjinja::ast::array_v, left.fields, right.fields)

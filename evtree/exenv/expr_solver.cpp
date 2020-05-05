@@ -80,8 +80,14 @@ cppjinja::east::function_call cppjinja::evt::expr_solver::reduce(const cppjinja:
 
 cppjinja::east::string_t cppjinja::evt::expr_solver::reduce_to_string(const cppjinja::east::value_term& obj)
 {
-	if(std::holds_alternative<east::string_t>(obj)) return std::get<east::string_t>(obj);
-	if(std::holds_alternative<double>(obj)) return std::to_string(std::get<double>(obj));
+	if(std::holds_alternative<east::string_t>(obj))
+		return std::get<east::string_t>(obj);
+	if(std::holds_alternative<double>(obj)) {
+		double val = std::get<double>(obj);
+		if(val == std::trunc(val))
+			return std::to_string((std::int64_t)std::trunc(val));
+		return std::to_string(val);
+	}
 	throw std::logic_error("canno solve neested array yet");
 }
 
