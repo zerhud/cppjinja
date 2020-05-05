@@ -112,6 +112,23 @@ void cppjinja::evt::tmpl_compiler::operator()(ast::forward_ast<ast::block_named>
 	if(render_in_place) result.render_tree.add_child(rnd_stack.back(), bl);
 }
 
+void cppjinja::evt::tmpl_compiler::operator()(ast::forward_ast<cppjinja::ast::block_filtered>& obj)
+{
+	// use op_out with filter as it named in obj.name
+}
+
+void cppjinja::evt::tmpl_compiler::operator()(ast::forward_ast<cppjinja::ast::block_set>& obj)
+{
+	// use op_set with content filtered
+	// !!! inside block can be place operators...
+}
+
+void cppjinja::evt::tmpl_compiler::operator()(ast::forward_ast<cppjinja::ast::block_call>& obj)
+{
+	// creates a macro, pass the created macro as first argument to calling block,
+	// call the calling block. can be parameraized (the calling can pass param).
+}
+
 bool cppjinja::evt::tmpl_compiler::can_render_in_place(
         const cppjinja::ast::block_named& obj) const
 {
@@ -130,6 +147,11 @@ void cppjinja::evt::tmpl_compiler::operator()(
 		make_content_block(
 		            make_ri_for_else(obj.get()),
 		            std::move(obj.get().else_block->content));
+}
+
+void cppjinja::evt::tmpl_compiler::operator()(ast::forward_ast<cppjinja::ast::block_for>& obj)
+{
+
 }
 
 cppjinja::evt::render_info cppjinja::evt::tmpl_compiler::make_ri_for_if(const cppjinja::ast::block_if& obj) const
@@ -184,6 +206,11 @@ void cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::op_set& obj)
 void cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::op_out& obj)
 {
 	create_rendered_node<evtnodes::op_out>(std::move(obj));
+}
+
+void cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::op_comment& obj)
+{
+	(void)obj;
 }
 
 std::string cppjinja::evt::compiled_tmpl::tmpl_name() const

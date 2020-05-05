@@ -66,18 +66,18 @@ class tmpl_compiler final {
 public:
 	compiled_tmpl operator()(ast::tmpl t) ;
 
-	template<typename T>
-	void operator()(T& obj) {
-		(void)obj;
-		std::cout << "here " << std::endl;
-	}
 	void operator()(ast::string_t& cnt);
 	void operator()(ast::op_out& obj);
+	void operator()(ast::op_comment& obj);
 	void operator()(ast::op_set& obj);
+	void operator()(ast::forward_ast<ast::block_raw>& obj);
+	void operator()(ast::forward_ast<ast::block_if>& obj);
+	void operator()(ast::forward_ast<ast::block_for>& obj);
 	void operator()(ast::forward_ast<ast::block_macro>& obj);
 	void operator()(ast::forward_ast<ast::block_named>& obj);
-	void operator()(ast::forward_ast<ast::block_if>& obj);
-	void operator()(ast::forward_ast<ast::block_raw>& obj);
+	void operator()(ast::forward_ast<ast::block_filtered>& obj);
+	void operator()(ast::forward_ast<ast::block_set>& obj);
+	void operator()(ast::forward_ast<ast::block_call>& obj);
 };
 
 template<typename L, typename R>
