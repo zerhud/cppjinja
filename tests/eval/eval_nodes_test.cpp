@@ -188,6 +188,19 @@ BOOST_FIXTURE_TEST_CASE(name, mock_exenv_fixture)
 	MOCK_EXPECT(env.current_node).once().with(&snode);
 	snode.render(env);
 }
+BOOST_FIXTURE_TEST_CASE(array_calls, mock_exenv_fixture)
+{
+	using namespace cppjinja::ast;
+
+	ast::op_set ast_node{ {1,1}, "tname", value_term{cppjinja::ast::array_calls{{array_call{var_name{"a"}, value_term{"b"s}}}}}, {{1,1},false}, {{1,1},true} };
+	evtnodes::op_set snode(ast_node);
+	auto obj = std::make_shared<mocks::context_object>();
+	expect_glp(0, 1, 0);
+	MOCK_EXPECT(all_ctx.find).with(evar_name{"a"s, "b"s}).returns(obj);
+	MOCK_EXPECT(locals.add).once().with("tname", obj);
+	MOCK_EXPECT(env.current_node).once().with(&snode);
+	snode.render(env);
+}
 BOOST_FIXTURE_TEST_CASE(call, mock_exenv_fixture)
 {
 	using namespace cppjinja::ast;
