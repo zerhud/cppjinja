@@ -27,6 +27,7 @@ cppjinja::evt::expr_solver::ret_t
 cppjinja::evt::expr_solver::operator()(const cppjinja::ast::var_name& obj)
 {
 	auto found = env->all_ctx().find(reduce(obj));
+	assert(found);
 	return found->solve();
 }
 
