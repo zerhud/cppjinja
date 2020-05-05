@@ -42,6 +42,6 @@ void op_set::inject_object(cppjinja::evt::exenv& env) const
 {
 	ast::var_name name = boost::get<ast::var_name>(op.value.var);
 	assert(!name.empty());
-	auto obj = env.locals().find(evt::expr_solver(&env).reduce(name));
+	auto obj = env.all_ctx().find(evt::expr_solver(&env).reduce(name));
 	env.locals().add(op.name, std::move(obj));
 }

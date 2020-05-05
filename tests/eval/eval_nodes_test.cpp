@@ -182,8 +182,8 @@ BOOST_FIXTURE_TEST_CASE(name, mock_exenv_fixture)
 	ast::op_set ast_node{ {1,1}, "tname", value_term{var_name{"a"}}, {{1,1},false}, {{1,1},true} };
 	evtnodes::op_set snode(ast_node);
 	auto obj = std::make_shared<mocks::context_object>();
-	expect_glp(0, 2, 0);
-	MOCK_EXPECT(locals.find).with(evar_name{"a"s}).returns(obj);
+	expect_glp(0, 1, 0);
+	MOCK_EXPECT(all_ctx.find).with(evar_name{"a"s}).returns(obj);
 	MOCK_EXPECT(locals.add).once().with("tname", obj);
 	MOCK_EXPECT(env.current_node).once().with(&snode);
 	snode.render(env);
