@@ -240,25 +240,33 @@ BOOST_AUTO_TEST_CASE(find)
 	MOCK_EXPECT(obj2.find).once().with(var_name{"a"}).returns(nullptr);
 	BOOST_TEST(q.find(var_name{"a"}) == nullptr);
 
-	MOCK_EXPECT(obj1.find).once().with(var_name{"a"}).returns(nullptr);
-	MOCK_EXPECT(obj2.find).once().with(var_name{"a"}).returns(nullptr);
-	MOCK_EXPECT(obj3->find).once().with(var_name{"a"}).returns(nullptr);
-	q.add("", obj3);
-	BOOST_TEST(q.find(var_name{"a"}) == nullptr);
-
 	auto obj4 = std::make_shared<mocks::context_object>();
 	MOCK_EXPECT(obj1.find).once().with(var_name{"a"}).returns(nullptr);
 	MOCK_EXPECT(obj2.find).once().with(var_name{"a"}).returns(obj4);
 	BOOST_TEST(q.find(var_name{"a"}) == obj4);
+
+	using cppjinja::evt::context_object;
+	MOCK_EXPECT(obj1.find).once().with(var_name{"a"}).returns(nullptr);
+	MOCK_EXPECT(obj2.find).once().with(var_name{"a"}).returns(obj4);
+	cppjinja::evt::context_objects::queue other1 =
+	{(const context_object*)&obj1,(const context_object*)&obj2};
+	cppjinja::evt::context_objects::queue other = std::move(other1);
+	BOOST_TEST(other.find(var_name{"a"}) == obj4);
 }
-BOOST_AUTO_TEST_CASE(cannot_add_twice)
+BOOST_AUTO_TEST_CASE(add)
 {
 	cppjinja::evt::context_objects::queue q;
 	auto obj1 = std::make_shared<mocks::context_object>();
-	BOOST_CHECK_THROW(q.add("a", obj1), std::exception);
 	BOOST_CHECK_THROW(q.add("", nullptr), std::exception);
-	q.add("", obj1);
-	BOOST_CHECK_THROW(q.add("", obj1), std::exception);
+	BOOST_CHECK_THROW(q.add("a", obj1), std::exception);
+
+	auto obj2 = std::make_shared<mocks::context_object>();
+	q = {(const cppjinja::evt::context_object*)obj1.get()};
+	BOOST_CHECK_THROW(q.add("a", obj1), std::exception);
+
+	q = {obj1.get(), obj2.get()};
+	MOCK_EXPECT(obj1->add).once().with("a", obj1);
+	q.add("a", obj1);
 }
 BOOST_AUTO_TEST_SUITE_END() // queue
 BOOST_AUTO_TEST_SUITE(user_data)
@@ -343,7 +351,7 @@ BOOST_FIXTURE_TEST_CASE(current_node, mock_impls_fixture)
 	BOOST_CHECK_THROW(ctx.nth_node_on_stack(0), std::exception);
 	BOOST_CHECK_THROW(ctx.current_node(&fnode1), std::exception);
 
-	ctx.push(&fnode1);
+	ctx.push_shadow(&fnode1);
 	ctx.current_node(&fnode1);
 	BOOST_TEST(ctx.nth_node_on_stack(0) == &fnode1);
 
@@ -355,34 +363,67 @@ BOOST_FIXTURE_TEST_CASE(current_node, mock_impls_fixture)
 }
 BOOST_FIXTURE_TEST_CASE(stack, mock_impls_fixture)
 {
-	mocks::node fnode1, fnode2;
+	mocks::node fnode1, fnode2, fnode3;
 	BOOST_CHECK_THROW(ctx.maker(), std::exception);
 	BOOST_CHECK_THROW(ctx.pop(&fnode1), std::exception);
+	BOOST_CHECK_THROW(ctx.push(&fnode1), std::exception);
 
-	ctx.push(&fnode1);
+	ctx.push_shadow(&fnode1);
 	BOOST_TEST(ctx.maker() == &fnode1);
 	BOOST_CHECK_THROW(ctx.pop(&fnode2), std::exception);
 
 	ctx.push(&fnode2);
-	BOOST_TEST(ctx.maker() == &fnode2);
+	BOOST_TEST(ctx.maker() == &fnode1);
+
+	ctx.push_shadow(&fnode3);
+	BOOST_TEST(ctx.maker() == &fnode3);
+
+	BOOST_CHECK_NO_THROW(ctx.pop(&fnode3));
+	BOOST_TEST(ctx.maker() == &fnode1);
 
 	BOOST_CHECK_NO_THROW(ctx.pop(&fnode2));
-	BOOST_TEST(ctx.maker() == &fnode1);
+	BOOST_CHECK_NO_THROW(ctx.pop(&fnode1));
 }
 BOOST_FIXTURE_TEST_CASE(cur_namespace, mock_impls_fixture)
 {
+	using cppjinja::evt::context_objects::value;
 	BOOST_CHECK_THROW(ctx.cur_namespace(), std::exception);
-	mocks::node maker;
-	ctx.push(&maker);
-	BOOST_CHECK_NO_THROW(ctx.cur_namespace());
-}
 
+	mocks::node maker, ctx1, ctx2;
+	auto obj_maker = std::make_shared<value>(evalue_term{"maker"});
+	auto obj_ctx1 = std::make_shared<value>(evalue_term{"ctx1"});
+	auto obj2_ctx1 = std::make_shared<value>(evalue_term{"ctx1_2"});
+	auto obj_ctx2 = std::make_shared<value>(evalue_term{"ctx2"});
+
+	ctx.push_shadow(&maker);
+	BOOST_CHECK_NO_THROW(ctx.cur_namespace());
+	ctx.cur_namespace().add("a", obj_maker);
+	ctx.push(&ctx1);
+	ctx.cur_namespace().add("b", obj_ctx1);
+	ctx.cur_namespace().add("c", obj2_ctx1);
+	BOOST_TEST(ctx.cur_namespace().find(evar_name{"c"s}) == obj2_ctx1);
+	ctx.push(&ctx2);
+	ctx.cur_namespace().add("c", obj_ctx2);
+	BOOST_TEST(ctx.cur_namespace().find(evar_name{"a"s}) == obj_maker);
+	BOOST_TEST(ctx.cur_namespace().find(evar_name{"b"s}) == obj_ctx1);
+	BOOST_TEST(ctx.cur_namespace().find(evar_name{"c"s}) == obj_ctx2);
+
+	ctx.pop(&ctx2);
+	BOOST_TEST(ctx.cur_namespace().find(evar_name{"a"s}) == obj_maker);
+	BOOST_TEST(ctx.cur_namespace().find(evar_name{"b"s}) == obj_ctx1);
+	BOOST_TEST(ctx.cur_namespace().find(evar_name{"c"s}) == obj2_ctx1);
+
+	ctx.pop(&ctx1);
+	BOOST_TEST(ctx.cur_namespace().find(evar_name{"a"s}) == obj_maker);
+	BOOST_TEST(ctx.cur_namespace().find(evar_name{"b"s}) == nullptr);
+	BOOST_TEST(ctx.cur_namespace().find(evar_name{"c"s}) == nullptr);
+}
 BOOST_FIXTURE_TEST_CASE(out, mock_impls_fixture)
 {
 	mocks::node node1, node2;
 	BOOST_CHECK_THROW(ctx.out(), std::exception);
 	BOOST_CHECK_THROW(ctx.result(), std::exception);
-	ctx.push(&node1);
+	ctx.push_shadow(&node1);
 	BOOST_REQUIRE_NO_THROW(ctx.out());
 	std::ostream* out1 = &ctx.out();
 	BOOST_TEST(ctx.result() == "");
@@ -602,7 +643,7 @@ BOOST_FIXTURE_TEST_CASE(environment, impl_exenv_fixture)
 BOOST_FIXTURE_TEST_CASE(render_shift, impl_exenv_fixture)
 {
 	mocks::node maker;
-	ctx.push(&maker);
+	ctx.push_shadow(&maker);
 	env.out() << "ok\nok"s;
 	BOOST_TEST(env.result() == "ok\nok"s);
 	env.render_format().shift_tab(1);
@@ -628,7 +669,7 @@ BOOST_FIXTURE_TEST_CASE(rinfo, impl_exenv_fixture)
 BOOST_FIXTURE_TEST_CASE(current_node, impl_exenv_fixture)
 {
 	mocks::node fnode1, fnode2;
-	ctx.push(&fnode2);
+	ctx.push_shadow(&fnode2);
 	BOOST_CHECK_NO_THROW( env.current_node(&fnode1) );
 	BOOST_TEST(ctx.nth_node_on_stack(0) == &fnode1);
 }
@@ -646,7 +687,7 @@ BOOST_FIXTURE_TEST_CASE(children, impl_exenv_fixture)
 BOOST_FIXTURE_TEST_CASE(result, impl_exenv_fixture)
 {
 	mocks::node ctxmaker;
-	ctx.push(&ctxmaker);
+	ctx.push_shadow(&ctxmaker);
 	BOOST_TEST(&env.out() == &ctx.out());
 	BOOST_TEST(env.result() == "");
 	ctx.out() << "test";
@@ -661,7 +702,7 @@ BOOST_FIXTURE_TEST_CASE(locals, impl_exenv_fixture)
 {
 	BOOST_CHECK_THROW(env.locals(), std::exception);
 	mocks::node maker;
-	ctx.push(&maker);
+	ctx.push_shadow(&maker);
 	BOOST_CHECK_NO_THROW(env.locals());
 }
 BOOST_FIXTURE_TEST_CASE(params, impl_exenv_fixture)
@@ -669,7 +710,7 @@ BOOST_FIXTURE_TEST_CASE(params, impl_exenv_fixture)
 	mocks::callable_node calling1;
 	cppjinja::evt::context_objects::callable_params params(
 	{}, {cppjinja::east::function_parameter{"p1"s, east_value_term{"ok"s}}});
-	ctx.push(&calling1);
+	ctx.push_shadow(&calling1);
 	calls.push(&calling1, params);
 	BOOST_TEST(env.params().find(evar_name{"p1"s}) != nullptr);
 }
@@ -681,7 +722,7 @@ BOOST_FIXTURE_TEST_CASE(user_data, impl_exenv_fixture)
 BOOST_FIXTURE_TEST_CASE(all_ctx, impl_exenv_fixture)
 {
 	mocks::callable_node maker;
-	ctx.push(&maker);
+	ctx.push_shadow(&maker);
 	calls.push(&maker, cppjinja::evt::context_objects::callable_params({},{}));
 	MOCK_EXPECT(data.value_var_name).with(evar_name{"a"s}).returns(evalue_term{42});
 	BOOST_TEST(env.all_ctx().find(evar_name{"a"})->solve() == evalue_term{42});
@@ -689,21 +730,39 @@ BOOST_FIXTURE_TEST_CASE(all_ctx, impl_exenv_fixture)
 BOOST_AUTO_TEST_SUITE_END() // exenv
 
 BOOST_AUTO_TEST_SUITE(raii)
-BOOST_FIXTURE_TEST_CASE(push_ctx, impl_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(push_ctx, mock_exenv_fixture)
 {
 	mocks::node maker;
-	BOOST_CHECK_THROW(ctx.maker(), std::exception);
 	{
+		mock::sequence seq;
+		MOCK_EXPECT(ctx.push).once().in(seq).with(&maker);
+		MOCK_EXPECT(ctx.pop).once().in(seq).with(&maker);
 		cppjinja::evt::raii_push_ctx pusher(&maker, &ctx);
-		BOOST_TEST(ctx.maker() == &maker);
 	}
-	BOOST_CHECK_THROW(ctx.maker(), std::exception);
 	{
+		mock::sequence seq;
+		MOCK_EXPECT(ctx.push).once().in(seq).with(&maker);
+		MOCK_EXPECT(ctx.pop).once().in(seq).with(&maker);
 		cppjinja::evt::raii_push_ctx pusher(&maker, &ctx);
 		cppjinja::evt::raii_push_ctx pusher2(std::move(pusher));
-		BOOST_TEST(ctx.maker() == &maker);
 	}
-	BOOST_CHECK_THROW(ctx.maker(), std::exception);
+}
+BOOST_FIXTURE_TEST_CASE(push_shadow_ctx, mock_exenv_fixture)
+{
+	mocks::node maker;
+	{
+		mock::sequence seq;
+		MOCK_EXPECT(ctx.push_shadow).once().in(seq).with(&maker);
+		MOCK_EXPECT(ctx.pop).once().in(seq).with(&maker);
+		cppjinja::evt::raii_push_shadow_ctx pusher(&maker, &ctx);
+	}
+	{
+		mock::sequence seq;
+		MOCK_EXPECT(ctx.push_shadow).once().in(seq).with(&maker);
+		MOCK_EXPECT(ctx.pop).once().in(seq).with(&maker);
+		cppjinja::evt::raii_push_shadow_ctx pusher(&maker, &ctx);
+		cppjinja::evt::raii_push_shadow_ctx pusher2(std::move(pusher));
+	}
 }
 BOOST_AUTO_TEST_CASE(result_formatter)
 {

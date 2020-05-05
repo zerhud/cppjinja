@@ -58,3 +58,25 @@ cppjinja::evt::raii_callstack_push::~raii_callstack_push()
 {
 	calls->pop();
 }
+
+cppjinja::evt::raii_push_shadow_ctx::raii_push_shadow_ctx(
+        cppjinja::evt::raii_push_shadow_ctx&& other) noexcept
+    : ctx(other.ctx)
+    , maker(other.maker)
+{
+	other.ctx = nullptr;
+	other.maker = nullptr;
+}
+
+cppjinja::evt::raii_push_shadow_ctx::raii_push_shadow_ctx(
+        const cppjinja::evt::node* n, cppjinja::evt::context* c)
+    : ctx(c)
+    , maker(n)
+{
+	ctx->push_shadow(maker);
+}
+
+cppjinja::evt::raii_push_shadow_ctx::~raii_push_shadow_ctx()
+{
+	if(ctx) ctx->pop(maker);
+}

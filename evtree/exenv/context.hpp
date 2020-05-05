@@ -23,6 +23,7 @@ public:
 
 	virtual void pop(const node* n)=0 ;
 	virtual void push(const node* n)=0 ;
+	virtual void push_shadow(const node* n)=0 ;
 	virtual const node* maker() const =0 ;
 
 	virtual std::ostream& out() =0 ;

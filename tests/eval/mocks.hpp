@@ -47,6 +47,7 @@ MOCK_BASE_CLASS( context, cppjinja::evt::context )
 
 	MOCK_METHOD(pop, 1)
 	MOCK_METHOD(push, 1)
+	MOCK_METHOD(push_shadow, 1)
 	MOCK_METHOD(maker, 0)
 
 	MOCK_METHOD(out, 0)
@@ -158,7 +159,7 @@ struct mock_exenv_fixture
 	{
 		mock::sequence seq;
 		MOCK_EXPECT(env.current_node).once().in(seq).with(maker);
-		MOCK_EXPECT(ctx.push).once().in(seq).with(maker);
+		MOCK_EXPECT(ctx.push_shadow).once().in(seq).with(maker);
 		MOCK_EXPECT(ctx.pop).once().in(seq).with(maker);
 	}
 

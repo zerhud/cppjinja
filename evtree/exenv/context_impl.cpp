@@ -16,6 +16,28 @@ void cppjinja::evt::context_impl::require_not_empty() const
 	if(ctx.empty()) throw std::runtime_error("context is mepty");
 }
 
+cppjinja::evt::context_impl::frame& cppjinja::evt::context_impl::last_shadow()
+{
+	for(auto pos=ctx.rbegin();pos!=ctx.rend();++pos)
+		if(pos->shadow) return *pos;
+	throw std::runtime_error("no shadow on stack");
+}
+
+const cppjinja::evt::context_impl::frame& cppjinja::evt::context_impl::last_shadow() const
+{
+	return const_cast<context_impl*>(this)->last_shadow();
+}
+
+void cppjinja::evt::context_impl::create_shadow()
+{
+	std::vector<context_object*> queue;
+	for(auto pos=ctx.rbegin();pos!=ctx.rend();++pos) {
+		queue.push_back(&pos->ns);
+		if(pos->shadow) break;
+	}
+	last_shadow().shadow = queue;
+}
+
 cppjinja::evt::context_impl::context_impl()
 {
 }
@@ -44,17 +66,25 @@ void cppjinja::evt::context_impl::pop(const cppjinja::evt::node* n)
 	if(ctx.back().maker != n)
 		throw std::runtime_error("cannot pop that wans't pushed");
 	ctx.pop_back();
+	if(!ctx.empty()) create_shadow();
 }
 
 void cppjinja::evt::context_impl::push(const cppjinja::evt::node* n)
 {
-	ctx.emplace_back(frame{n, {}, std::stringstream{}, context_objects::tree()});
+	last_shadow();
+	ctx.emplace_back(frame{n, {}, std::stringstream{}, context_objects::tree(), std::nullopt});
+	create_shadow();
+}
+
+void cppjinja::evt::context_impl::push_shadow(const cppjinja::evt::node* n)
+{
+	ctx.emplace_back(frame{n, {}, std::stringstream{}, context_objects::tree(), std::nullopt});
+	ctx.back().shadow = {&ctx.back().ns};
 }
 
 const cppjinja::evt::node* cppjinja::evt::context_impl::maker() const
 {
-	require_not_empty();
-	return ctx.back().maker;
+	return last_shadow().maker;
 }
 
 std::ostream& cppjinja::evt::context_impl::out()
@@ -71,6 +101,6 @@ std::string cppjinja::evt::context_impl::result() const
 
 cppjinja::evt::context_object& cppjinja::evt::context_impl::cur_namespace()
 {
-	require_not_empty();
-	return ctx.back().ns;
+	assert(last_shadow().shadow.has_value());
+	return *last_shadow().shadow;
 }

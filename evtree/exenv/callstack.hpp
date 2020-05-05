@@ -21,7 +21,7 @@ class callstack {
 public:
 	virtual ~callstack() noexcept =default ;
 
-	virtual context_objects::queue current_params(const node* last) const =0 ;
+	virtual const context_objects::queue current_params(const node* last) const =0 ;
 	virtual void pop() =0 ;
 	virtual void push(
 	          const evtnodes::callable* calling

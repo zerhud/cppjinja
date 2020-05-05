@@ -25,6 +25,16 @@ public:
 	~raii_push_ctx() ;
 };
 
+class raii_push_shadow_ctx final {
+	context* ctx;
+	const node* maker;
+public:
+	raii_push_shadow_ctx(raii_push_shadow_ctx&&) noexcept ;
+	raii_push_shadow_ctx(const raii_push_shadow_ctx&) =delete ;
+	raii_push_shadow_ctx(const node* n, context* c);
+	~raii_push_shadow_ctx() ;
+};
+
 class raii_result_format final {
 	result_formatter* fmt;
 	int back;

@@ -41,7 +41,7 @@ void cppjinja::evtnodes::block_named::render(evt::exenv& env) const
 cppjinja::east::string_t cppjinja::evtnodes::block_named::evaluate(cppjinja::evt::exenv& env) const
 {
 	env.current_node(this);
-	evt::raii_push_ctx ctx_maker(this, &env.ctx());
+	evt::raii_push_shadow_ctx ctx_maker(this, &env.ctx());
 	auto fmt = inner_evaluate(env);
 	return env.result();
 }

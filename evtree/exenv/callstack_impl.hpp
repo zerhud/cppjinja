@@ -21,7 +21,7 @@ class callstack_impl final : public callstack {
 	};
 	std::vector<frame> stack;
 public:
-	context_objects::queue current_params(const node* last) const override ;
+	const context_objects::queue current_params(const node* last) const override ;
 	void pop() override ;
 	void push(
 	          const evtnodes::callable* calling

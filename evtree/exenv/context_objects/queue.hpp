@@ -13,12 +13,16 @@
 namespace cppjinja::evt::context_objects {
 
 class queue : public context_object {
-	std::vector<const context_object*> content;
+	std::vector<context_object*> content;
+	std::vector<const context_object*> const_content;
 public:
 	queue();
 	queue(std::initializer_list<queue> cnt);
+	queue(std::initializer_list<context_object*> cnt);
 	queue(std::initializer_list<const context_object*> cnt);
+	queue(std::vector<context_object*> cnt);
 	queue(std::vector<const context_object*> cnt);
+
 	~queue() noexcept override ;
 
 	void add(east::string_t n, std::shared_ptr<context_object> child) override ;

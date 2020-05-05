@@ -10,7 +10,7 @@
 #include "callstack_impl.hpp"
 #include "evtree/nodes/callable.hpp"
 
-cppjinja::evt::context_objects::queue cppjinja::evt::callstack_impl::current_params(const node* last) const
+const cppjinja::evt::context_objects::queue cppjinja::evt::callstack_impl::current_params(const node* last) const
 {
 	std::vector<const context_object*> cnt;
 	for(auto pos=stack.rbegin();pos!=stack.rend();++pos) {
