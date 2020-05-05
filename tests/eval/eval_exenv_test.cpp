@@ -25,6 +25,7 @@
 #include "evtree/exenv/context_objects/value.hpp"
 #include "evtree/exenv/context_objects/callable_node.hpp"
 #include "evtree/exenv/context_objects/user_data.hpp"
+#include "evtree/exenv/context_objects/delay_call.hpp"
 #include "evtree/nodes/callable.hpp"
 #include "parser/operators/common.hpp"
 #include "parser/grammar/tmpls.hpp"
@@ -291,6 +292,45 @@ BOOST_AUTO_TEST_CASE(find_is_link)
 	BOOST_TEST(obj_b->call({p1}) == east_value_term{"ok"s});
 }
 BOOST_AUTO_TEST_SUITE_END() // user_data
+BOOST_AUTO_TEST_SUITE(delay_call)
+BOOST_AUTO_TEST_CASE(solve)
+{
+	auto obj = std::make_shared<mocks::context_object>();
+	std::vector<cppjinja::east::function_parameter> params;
+	params.emplace_back().val = evalue_term{"pval"s};
+	cppjinja::evt::context_objects::delay_call dc(obj, params);
+	MOCK_EXPECT(obj->call).once().with(params).returns(evalue_term{"ok"s});
+	BOOST_TEST(dc.solve() == evalue_term{"ok"s});
+}
+BOOST_AUTO_TEST_CASE(cannot_find_add)
+{
+	auto obj = std::make_shared<mocks::context_object>();
+	std::vector<cppjinja::east::function_parameter> params;
+	cppjinja::evt::context_objects::delay_call dc(obj, params);
+	BOOST_CHECK_THROW(dc.find(evar_name{"a"}), std::exception);
+	BOOST_CHECK_THROW(dc.add("a", obj), std::exception);
+}
+BOOST_AUTO_TEST_CASE(call)
+{
+	auto obj = std::make_shared<mocks::context_object>();
+	std::vector<cppjinja::east::function_parameter> params;
+	params.emplace_back().val = evalue_term{"pval"s};
+	params.emplace_back().name = "p3";
+	params.back().val = evalue_term{"bad"s};
+	cppjinja::evt::context_objects::delay_call dc(obj, params);
+
+	params.back().val = evalue_term{"good"s};
+	params.emplace_back().name = "p2";
+
+	std::vector<cppjinja::east::function_parameter> call_params;
+	call_params.emplace_back().name = "p2";
+	call_params.emplace_back().name = "p3";
+	call_params.back().val = evalue_term{"good"s};
+
+	MOCK_EXPECT(obj->call).once().with(params).returns(evalue_term{"ok"});
+	BOOST_TEST(dc.call(call_params) == evalue_term{"ok"s});
+}
+BOOST_AUTO_TEST_SUITE_END() // delay_call
 BOOST_AUTO_TEST_SUITE_END() // context_object
 
 BOOST_AUTO_TEST_SUITE(context)
