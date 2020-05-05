@@ -66,7 +66,10 @@ namespace cppjinja::text {
 
 	auto const function_call_parameter_def = -(single_var_name >> '=') >> value_term;
 	auto const function_call_def =
-			var_name >> x3::omit['('] >> -(!char_(')') >> function_call_parameter % ',') >> x3::omit[')']
+	           (array_calls | var_name)
+	        >> x3::omit['(']
+	        >> -(!char_(')') >> function_call_parameter % ',')
+	        >> x3::omit[')']
 		;
 
 	class quoted_string_class   : x3::annotate_on_success {};

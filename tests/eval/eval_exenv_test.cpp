@@ -33,6 +33,7 @@
 using namespace std::literals;
 namespace tdata = boost::unit_test::data;
 
+using cppjinja::ast::var_name;
 using cppjinja::ast::comparator;
 using cppjinja::ast::value_term;
 using cppjinja::evt::expr_filter;
@@ -397,13 +398,12 @@ BOOST_FIXTURE_TEST_CASE(by_var, mock_exenv_fixture)
 BOOST_FIXTURE_TEST_CASE(by_fnc, mock_exenv_fixture)
 {
 	cppjinja::ast::function_call fc;
-	fc.ref.push_back("a");
+	fc.ref = var_name{"a"s};
 	fc.params.emplace_back(value_term{42});
 	auto check = [&fc](
 	          const cppjinja::east::function_call& udfc
 	        , const east_value_term& base){
-		BOOST_TEST_REQUIRE(fc.ref.size()==1);
-		BOOST_TEST(udfc.ref[0]==fc.ref[0]);
+		BOOST_TEST(udfc.ref==fc.ref);
 		BOOST_TEST(base == east_value_term{2});
 		BOOST_TEST(udfc.params.size() == fc.params.size());
 		BOOST_TEST(udfc.params[0].name.has_value() == fc.params[0].name.has_value());

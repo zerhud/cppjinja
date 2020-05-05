@@ -38,6 +38,16 @@ struct array_v;
 // feature request
 struct i18n_string;
 
+struct array_call : x3::position_tagged
+{
+	array_call() =default ;
+	array_call(std::optional<var_name> n, const value_term& v) : name(std::move(n)), call(v) {}
+	std::optional<var_name> name;
+	forward_ast<value_term> call;
+};
+
+using array_calls = std::vector<array_call>;
+
 struct binary_op : x3::position_tagged
 {
 	binary_op() =default ;
@@ -61,20 +71,11 @@ struct function_call_parameter : x3::position_tagged
 struct function_call : x3::position_tagged
 {
 	function_call()=default ;
+	function_call(array_calls f, std::vector<function_call_parameter> p) : ref(std::move(f)), params(std::move(p)) {}
 	function_call(var_name f, std::vector<function_call_parameter> p) : ref(std::move(f)), params(std::move(p)) {}
-	var_name ref;
+	x3::variant<var_name, array_calls> ref;
 	std::vector<function_call_parameter> params;
 };
-
-struct array_call : x3::position_tagged
-{
-	array_call() =default ;
-	array_call(std::optional<var_name> n, const value_term& v) : name(std::move(n)), call(v) {}
-	std::optional<var_name> name;
-	forward_ast<value_term> call;
-};
-
-using array_calls = std::vector<array_call>;
 
 struct tuple_v : x3::position_tagged
 {

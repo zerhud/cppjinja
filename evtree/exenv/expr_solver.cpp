@@ -57,6 +57,12 @@ std::vector<cppjinja::east::function_parameter> cppjinja::evt::expr_solver::redu
 	return ret;
 }
 
+cppjinja::east::var_name cppjinja::evt::expr_solver::reduce(const boost::spirit::x3::variant<cppjinja::ast::var_name, cppjinja::ast::array_calls>& obj)
+{
+	auto r = [this](const auto& v){return reduce(v);};
+	return boost::apply_visitor(r, obj.var);
+}
+
 cppjinja::east::var_name cppjinja::evt::expr_solver::reduce(const cppjinja::ast::array_calls& obj)
 {
 	east::var_name ret;
@@ -65,6 +71,11 @@ cppjinja::east::var_name cppjinja::evt::expr_solver::reduce(const cppjinja::ast:
 		ret.emplace_back(reduce_to_string((*this)(np.call.get())));
 	}
 	return ret;
+}
+
+cppjinja::east::function_call cppjinja::evt::expr_solver::reduce(const cppjinja::ast::function_call& obj)
+{
+	return east::function_call{reduce(obj.ref), reduce(obj.params)};
 }
 
 cppjinja::east::string_t cppjinja::evt::expr_solver::reduce_to_string(const cppjinja::east::value_term& obj)

@@ -88,3 +88,14 @@ std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::array_ca
 	for(auto& v:obj) out << v;
 	return out;
 }
+
+bool cppjinja::ast::operator ==(const var_name& left, const x3::variant<var_name, array_calls>& right)
+{
+	return right == left;
+}
+
+bool cppjinja::ast::operator ==(const x3::variant<var_name, array_calls>& left, const var_name& right)
+{
+	if(left.var.type() != typeid(var_name)) return false;
+	return boost::get<var_name>(left.var) == right;
+}

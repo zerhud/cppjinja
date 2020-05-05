@@ -91,3 +91,7 @@ DEFINE_OPERATORS(cppjinja::ast::array_v, left.fields, right.fields)
 DEFINE_OPERATORS(cppjinja::ast::tuple_v, left.fields, right.fields)
 namespace std { std::ostream& operator << (std::ostream& out, const cppjinja::ast::comparator& obj); }
 namespace std { std::ostream& operator << (std::ostream& out, const boost::spirit::x3::forward_ast<cppjinja::ast::value_term>& obj); }
+namespace cppjinja::ast {
+bool operator == (const var_name& left, const x3::variant<var_name,array_calls>& right);
+bool operator == (const x3::variant<var_name,array_calls>& left, const var_name& right);
+} // namespace cppjinja::ast

@@ -50,16 +50,7 @@ cppjinja::east::value_term cppjinja::evt::expr_filter::operator()(
 cppjinja::east::value_term cppjinja::evt::expr_filter::operator()(
         const cppjinja::ast::function_call& obj)
 {
-	east::function_call call;
-	call.ref = expr_solver(user_data).reduce(obj.ref);
-	for(auto& p:obj.params)
-	{
-		east::function_parameter param;
-		param.name = p.name;
-		param.val = expr_solver(user_data)(p.value.get());
-		call.params.emplace_back(std::move(param));
-	}
-	base = user_data->data()->filter(call, base);
+	base = user_data->data()->filter(expr_solver(user_data).reduce(obj), base);
 	return base;
 }
 
