@@ -12,17 +12,11 @@
 #include <vector>
 #include <optional>
 
-#include <boost/spirit/home/x3/support/ast/variant.hpp>
 #include <boost/spirit/home/x3/support/ast/position_tagged.hpp>
 #include "../common.hpp"
 
 namespace cppjinja::ast {
 
-namespace x3 = boost::spirit::x3;
-using string_t = std::string;
-
-template<typename T>
-using forward_ast = boost::spirit::x3::forward_ast<T>;
 
 enum class comparator{ no, in, eq, neq, less, more, less_eq, more_eq };
 

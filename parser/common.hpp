@@ -13,6 +13,7 @@
 #include <string>
 #include <boost/spirit/home/x3.hpp>
 #include <boost/spirit/home/support/utf8.hpp>
+#include <boost/spirit/home/x3/support/ast/variant.hpp>
 
 namespace cppjinja {
 
@@ -30,5 +31,15 @@ struct parser_env {
 		std::string e="#>";
 	} cmt;
 };
+
+namespace ast {
+
+namespace x3 = boost::spirit::x3;
+using string_t = std::string;
+
+template<typename T>
+using forward_ast = boost::spirit::x3::forward_ast<T>;
+
+} // namespace ast
 
 } // namespace cppjinja
