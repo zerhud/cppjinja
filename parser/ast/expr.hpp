@@ -24,25 +24,42 @@ enum class logic_op { nop, op_and, op_or, op_not };
 
 struct expr;
 
+
 using term_var = x3::variant<bool, std::int64_t, double, string_t>;
 struct term : term_var {
 	using base_type::base_type;
 	using base_type::operator=;
+	term(bool v) : term_var(v) {}
+	term(double v) : term_var(v) {}
+	term(string_t v) : term_var(v) {}
+	template<typename Int>
+	term(Int v) : term_var((std::int64_t)v) {}
 };
 
 struct list { std::vector<forward_ast<expr>> items; };
 struct tuple { std::vector<forward_ast<expr>> items; };
-struct dict {
-	std::vector<forward_ast<expr>> names;
-	std::vector<forward_ast<expr>> values;
+struct dict_item { string_t name; forward_ast<expr> value; };
+struct dict { std::vector<dict_item> items; };
+
+struct single_var_name { string_t name; };
+
+struct point {
+	forward_ast<expr> left;
+	forward_ast<expr> right;
 };
 
-struct assign {
-	std::vector<forward_ast<expr>> name;
+struct lvalue : x3::variant<single_var_name, point> {
+	using base_type::base_type;
+	using base_type::operator=;
+};
+
+struct any_assign {
+	std::vector<lvalue> names;
 	forward_ast<expr> value;
 };
 
-struct in_assign : assign {};
+struct in_assign : any_assign {};
+struct eq_assign : any_assign {};
 
 struct math {
 	math_op op;
@@ -66,7 +83,7 @@ struct cmp_check {
 	forward_ast<expr> right;
 };
 
-struct login_check {
+struct log_in_check {
 	logic_op op;
 	forward_ast<expr> left;
 	forward_ast<expr> right;
@@ -88,9 +105,9 @@ struct filter {
 	std::optional<std::vector<forward_ast<expr>>> named_args;
 };
 
-struct point {
-	forward_ast<expr> left;
-	forward_ast<expr> right;
+struct filtered_val {
+	forward_ast<expr> val;
+	std::vector<filter> filters;
 };
 
 struct op_if {
@@ -100,10 +117,10 @@ struct op_if {
 };
 
 using expr_var = x3::variant<
-term, list, tuple, dict,
-assign, in_assign,
+term, single_var_name, list, tuple, dict,
+eq_assign, in_assign,
 math, concat,
-in_check, cmp_check, login_check, negate,
+in_check, cmp_check, log_in_check, negate,
 fnc_call, filter, point, op_if
 >;
 struct expr : expr_var {

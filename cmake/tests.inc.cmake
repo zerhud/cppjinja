@@ -12,7 +12,8 @@ macro(add_unit_test tname path lib)
 	target_code_coverage(${tname}_test AUTO ALL OBJECTS ${lib})
 endmacro()
 
-set(tests_parser2 parser_helpers rules_common rules_opterm rules_single rules_blocks rules_tmpls)
+set(tests_parser2 parser_helpers rules_expr
+	rules_common rules_opterm rules_single rules_blocks rules_tmpls)
 foreach(tname ${tests_parser2})
 	add_unit_test(${tname} "tests/parser/" "parser2")
 endforeach()
