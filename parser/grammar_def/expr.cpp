@@ -20,6 +20,7 @@ BOOST_SPIRIT_INSTANTIATE( decltype(single_var_name), iterator_type, context_type
 BOOST_SPIRIT_INSTANTIATE( decltype(point),     iterator_type, context_type )
 BOOST_SPIRIT_INSTANTIATE( decltype(concat),     iterator_type, context_type )
 BOOST_SPIRIT_INSTANTIATE( decltype(in_check),     iterator_type, context_type )
+BOOST_SPIRIT_INSTANTIATE( decltype(cmp_check),     iterator_type, context_type )
 
 BOOST_SPIRIT_INSTANTIATE( decltype(list),     iterator_type, context_type )
 BOOST_SPIRIT_INSTANTIATE( decltype(tuple),    iterator_type, context_type )

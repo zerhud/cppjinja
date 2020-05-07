@@ -125,15 +125,25 @@ BOOST_AUTO_TEST_CASE(assign)
 }
 BOOST_AUTO_TEST_CASE(concat)
 {
-	auto result = txt::parse(ext::concat, "a ~ 'b'");
+	auto result_bc = txt::parse(ext::concat, "'b' ~ c");
+	BOOST_TEST(result_bc.left == est::expr{est::term{"b"s}});
+	BOOST_TEST(result_bc.right == est::expr{est::single_var_name{"c"s}});
+	auto result = txt::parse(ext::concat, "a ~ 'b' ~ c");
 	BOOST_TEST(result.left == est::expr{est::single_var_name{"a"s}});
-	BOOST_TEST(result.right == est::expr{est::term{"b"s}});
+	BOOST_TEST(result.right == est::expr{result_bc});
 }
 BOOST_AUTO_TEST_CASE(in_check)
 {
 	auto result = txt::parse(ext::in_check, "a in ['b', 'c']");
 	BOOST_TEST(result.term.get() == est::expr{est::single_var_name{"a"}});
 	BOOST_TEST(result.object.get().var.type().name() == typeid(est::list).name());
+}
+BOOST_AUTO_TEST_CASE(cmp_check)
+{
+	auto result = txt::parse(ext::cmp_check, "1 < b"sv);
+	BOOST_TEST(result.op == est::cmp_op::less);
+	BOOST_TEST(result.left == est::expr{est::term{1}});
+	BOOST_TEST(result.right == est::expr{est::single_var_name{"b"s}});
 }
 
 BOOST_AUTO_TEST_SUITE(exprs)
@@ -170,6 +180,18 @@ BOOST_AUTO_TEST_CASE(concat)
 	est::math* res = &boost::get<est::math>(result.var);
 	BOOST_TEST(res->left.get().var.type().name() == typeid(est::term).name());
 	BOOST_TEST(res->right.get().var.type().name() == typeid(est::concat).name());
+}
+BOOST_AUTO_TEST_CASE(cmp_check)
+{
+	auto result = txt::parse(ext::expr, "e = 'a' * 'b' ~ c.d < b");
+	BOOST_TEST(result.var.type().name() == typeid(est::eq_assign).name());
+	est::eq_assign* res = &boost::get<est::eq_assign>(result.var);
+	BOOST_TEST(res->value.get().var.type().name() == typeid(est::cmp_check).name());
+
+	result = txt::parse(ext::expr, "e = 'a' + 'b' < b");
+	BOOST_TEST(result.var.type().name() == typeid(est::eq_assign).name());
+	res = &boost::get<est::eq_assign>(result.var);
+	BOOST_TEST(res->value.get().var.type().name() == typeid(est::cmp_check).name());
 }
 BOOST_AUTO_TEST_SUITE_END() // exprs
 

@@ -66,9 +66,15 @@ bool cppjinja::ast::expr_ops::operator == (const math& left, const math& right)
 {
 	return left.op == right.op && left.left == right.left && left.right == right.right;
 }
-bool cppjinja::ast::expr_ops::operator == (const concat& left, const concat& right){return false;}
+bool cppjinja::ast::expr_ops::operator == (const concat& left, const concat& right)
+{
+	return left.left == right.left && left.right == right.right;
+}
 bool cppjinja::ast::expr_ops::operator == (const in_check& left, const in_check& right){return false;}
-bool cppjinja::ast::expr_ops::operator == (const cmp_check& left, const cmp_check& right){return false;}
+bool cppjinja::ast::expr_ops::operator == (const cmp_check& left, const cmp_check& right)
+{
+	return left.op == right.op && left.left == right.left && left.right == right.right;
+}
 bool cppjinja::ast::expr_ops::operator == (const log_in_check& left, const log_in_check& right){return false;}
 bool cppjinja::ast::expr_ops::operator == (const negate& left, const negate& right){return false;}
 bool cppjinja::ast::expr_ops::operator == (const fnc_call& left, const fnc_call& right){return false;}
@@ -103,9 +109,12 @@ std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const any
 	return out << '=' << right.value;
 }
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const math& right){return out;}
-std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const concat& right){return out;}
+std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const concat& right){return out << right.left << '~' << right.right;}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const in_check& right){return out;}
-std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const cmp_check& right){return out;}
+std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const cmp_check& right)
+{
+	return out << right.left << " cmp" << static_cast<int>(right.op) << right.right;
+}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const log_in_check& right){return out;}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const negate& right){return out;}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const fnc_call& right){return out;}

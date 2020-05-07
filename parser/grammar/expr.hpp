@@ -58,6 +58,7 @@ const x3::rule<eq_assign_class, ast::expr_ops::eq_assign> eq_assign = "eq_assign
 const x3::rule<in_assign_class, ast::expr_ops::in_assign> in_assign = "in_assign";
 const x3::rule<concat_class, ast::expr_ops::concat> concat = "concat";
 const x3::rule<in_check_class, ast::expr_ops::in_check> in_check = "in_check";
+const x3::rule<cmp_check_class, ast::expr_ops::cmp_check> cmp_check = "cmp_check";
 
 const x3::rule<expr_class, ast::expr_ops::expr> expr = "expr";
 
@@ -73,7 +74,7 @@ BOOST_SPIRIT_DECLARE(decltype(math));
 BOOST_SPIRIT_DECLARE(decltype(mathop));
 BOOST_SPIRIT_DECLARE(decltype(concat));
 BOOST_SPIRIT_DECLARE(decltype(in_check));
-//BOOST_SPIRIT_DECLARE(decltype(cmp_check));
+BOOST_SPIRIT_DECLARE(decltype(cmp_check));
 //BOOST_SPIRIT_DECLARE(decltype(log_in_check));
 //BOOST_SPIRIT_DECLARE(decltype(negate));
 //BOOST_SPIRIT_DECLARE(decltype(fnc_call));
