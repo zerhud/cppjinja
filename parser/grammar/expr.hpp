@@ -33,6 +33,7 @@ class cmp_check_class;
 class logic_check_class;
 class negate_class;
 class fnc_call_class;
+class filter_call_class;
 class filter_class;
 class single_var_name_class;
 class point_class;
@@ -61,6 +62,7 @@ const x3::rule<cmp_check_class, ast::expr_ops::cmp_check> cmp_check = "cmp_check
 const x3::rule<logic_check_class, ast::expr_ops::logic_check> logic_check = "logic_check";
 const x3::rule<negate_class, ast::expr_ops::negate> negate = "negate";
 const x3::rule<fnc_call_class, ast::expr_ops::fnc_call> fnc_call = "fnc_call";
+const x3::rule<filter_call_class, ast::expr_ops::filter_call> filter_call = "filter_call";
 const x3::rule<filter_class, ast::expr_ops::filter> filter = "filter";
 const x3::rule<op_if_class, ast::expr_ops::op_if> op_if = "op_if";
 
@@ -82,6 +84,7 @@ BOOST_SPIRIT_DECLARE(decltype(cmp_check));
 BOOST_SPIRIT_DECLARE(decltype(logic_check));
 BOOST_SPIRIT_DECLARE(decltype(negate));
 BOOST_SPIRIT_DECLARE(decltype(fnc_call));
+BOOST_SPIRIT_DECLARE(decltype(filter_call));
 BOOST_SPIRIT_DECLARE(decltype(filter));
 BOOST_SPIRIT_DECLARE(decltype(point));
 BOOST_SPIRIT_DECLARE(decltype(single_var_name));

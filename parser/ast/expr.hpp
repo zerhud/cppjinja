@@ -98,10 +98,14 @@ struct fnc_call {
 	std::vector<forward_ast<expr>> args;
 };
 
-struct filter {
+struct filter_call {
 	forward_ast<expr> ref;
-	forward_ast<expr> base;
 	std::vector<forward_ast<expr>> args;
+};
+
+struct filter {
+	forward_ast<expr> base;
+	std::vector<filter_call> filters;
 };
 
 struct op_if {

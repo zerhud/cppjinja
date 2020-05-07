@@ -84,7 +84,11 @@ bool cppjinja::ast::expr_ops::operator == (const fnc_call& left, const fnc_call&
 {
 	return left.ref == right.ref && left.args == right.args;
 }
-bool cppjinja::ast::expr_ops::operator == (const filter& left, const filter& right){return left.ref == right.ref && left.base == right.base && left.args == right.args;}
+bool cppjinja::ast::expr_ops::operator == (const filter_call& left, const filter_call& right)
+{
+	return left.ref == right.ref && left.args == right.args;
+}
+bool cppjinja::ast::expr_ops::operator == (const filter& left, const filter& right){return left.base == right.base && left.filters == right.filters;}
 bool cppjinja::ast::expr_ops::operator == (const single_var_name& left, const single_var_name& right){return left.name == right.name;}
 bool cppjinja::ast::expr_ops::operator == (const point& left, const point& right)
 {
@@ -130,7 +134,8 @@ std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const log
 }
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const negate& right){return out << '!' << right.arg;}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const fnc_call& right){return out << right.ref << "(...)";}
-std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const filter& right){return out;}
+std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const filter_call& right){return out << right.ref << "(...)";}
+std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const filter& right){return out << right.base << '|';}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const single_var_name& v){return out << v.name;}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const point& right){return out << right.left << '.' << right.right;}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const op_if& right)
