@@ -75,16 +75,25 @@ bool cppjinja::ast::expr_ops::operator == (const cmp_check& left, const cmp_chec
 {
 	return left.op == right.op && left.left == right.left && left.right == right.right;
 }
-bool cppjinja::ast::expr_ops::operator == (const log_in_check& left, const log_in_check& right){return false;}
-bool cppjinja::ast::expr_ops::operator == (const negate& left, const negate& right){return false;}
-bool cppjinja::ast::expr_ops::operator == (const fnc_call& left, const fnc_call& right){return false;}
-bool cppjinja::ast::expr_ops::operator == (const filter& left, const filter& right){return false;}
+bool cppjinja::ast::expr_ops::operator == (const logic_check& left, const logic_check& right)
+{
+	return left.op == right.op && left.left == right.left && left.right == right.right;
+}
+bool cppjinja::ast::expr_ops::operator == (const negate& left, const negate& right){return left.arg == right.arg;}
+bool cppjinja::ast::expr_ops::operator == (const fnc_call& left, const fnc_call& right)
+{
+	return left.ref == right.ref && left.args == right.args;
+}
+bool cppjinja::ast::expr_ops::operator == (const filter& left, const filter& right){return left.ref == right.ref && left.base == right.base && left.args == right.args;}
 bool cppjinja::ast::expr_ops::operator == (const single_var_name& left, const single_var_name& right){return left.name == right.name;}
 bool cppjinja::ast::expr_ops::operator == (const point& left, const point& right)
 {
 	return left.left == right.left && left.right == right.right;
 }
-bool cppjinja::ast::expr_ops::operator == (const op_if& left, const op_if& right){return false;}
+bool cppjinja::ast::expr_ops::operator == (const op_if& left, const op_if& right)
+{
+	return left.cond == right.cond && left.term == right.term && left.alternative == right.alternative;
+}
 
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const term& right)
 {
@@ -115,10 +124,18 @@ std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const cmp
 {
 	return out << right.left << " cmp" << static_cast<int>(right.op) << right.right;
 }
-std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const log_in_check& right){return out;}
-std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const negate& right){return out;}
-std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const fnc_call& right){return out;}
+std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const logic_check& right)
+{
+	return out << "logic: " << right.left << ' ' << static_cast<int>(right.op) << ' ' << right.right;
+}
+std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const negate& right){return out << '!' << right.arg;}
+std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const fnc_call& right){return out << right.ref << "(...)";}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const filter& right){return out;}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const single_var_name& v){return out << v.name;}
-std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const point& right){return out;}
-std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const op_if& right){return out;}
+std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const point& right){return out << right.left << '.' << right.right;}
+std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const op_if& right)
+{
+	out << right.term << " if " << right.cond;
+	if(right.alternative) out << " else " << *right.alternative;
+	return out;
+}

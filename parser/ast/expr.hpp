@@ -83,7 +83,7 @@ struct cmp_check {
 	forward_ast<expr> right;
 };
 
-struct log_in_check {
+struct logic_check {
 	logic_op op;
 	forward_ast<expr> left;
 	forward_ast<expr> right;
@@ -95,19 +95,13 @@ struct negate {
 
 struct fnc_call {
 	forward_ast<expr> ref;
-	std::vector<forward_ast<expr>> pos_args;
-	std::vector<forward_ast<expr>> named_args;
+	std::vector<forward_ast<expr>> args;
 };
 
 struct filter {
 	forward_ast<expr> ref;
-	std::optional<std::vector<forward_ast<expr>>> pos_args;
-	std::optional<std::vector<forward_ast<expr>>> named_args;
-};
-
-struct filtered_val {
-	forward_ast<expr> val;
-	std::vector<filter> filters;
+	forward_ast<expr> base;
+	std::vector<forward_ast<expr>> args;
 };
 
 struct op_if {
@@ -120,7 +114,7 @@ using expr_var = x3::variant<
 term, single_var_name, list, tuple, dict,
 eq_assign, in_assign,
 math, concat,
-in_check, cmp_check, log_in_check, negate,
+in_check, cmp_check, logic_check, negate,
 fnc_call, filter, point, op_if
 >;
 struct expr : expr_var {
