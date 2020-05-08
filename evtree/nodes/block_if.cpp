@@ -66,7 +66,7 @@ void block_if::render(evt::exenv& env) const
 {
 	env.current_node(this);
 	evt::raii_push_ctx ctx_holder(this, &env.ctx());
-	auto ifresult = evt::expr_solver(&env)(block.condition) == east::value_term{1};
+	auto ifresult = evt::expr_solver(&env)(block.condition) == east::value_term{true};
 	if(ifresult) render_if(env);
 	else render_else(env);
 }

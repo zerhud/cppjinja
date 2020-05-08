@@ -15,6 +15,9 @@ namespace cppjinja::evt::expr_evals {
 template<typename T>
 class expr_eval_to_any {
 public:
+	typedef std::optional<T> ret_t;
+	typedef T result_t;
+
 	template<typename Val>
 	std::enable_if_t<!std::is_same_v<std::decay_t<Val>,T>, std::optional<T>>
 	operator()(Val&&)

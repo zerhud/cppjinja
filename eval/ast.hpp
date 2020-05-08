@@ -41,15 +41,22 @@ struct map_v final {
 
 using var_name = std::vector<string_t>;
 using value_term_var = std::variant<
-  double
-, string_t
-, array_v
-, map_v
+  bool, std::int64_t, double, string_t
+, array_v, map_v
 >;
 
 extern struct value_term : value_term_var
 {
 	using value_term_var::value_term_var;
+	using value_term_var::operator=;
+	value_term(bool v) : value_term_var(v) {}
+	value_term(double v) : value_term_var(v) {}
+	value_term(string_t v) : value_term_var(v) {}
+	value_term(array_v v) : value_term_var(v) {}
+	value_term(map_v v) : value_term_var(v) {}
+	value_term(const char* v) : value_term(string_t(v)) {}
+	template<typename Int>
+	explicit value_term(Int v) : value_term_var((std::int64_t)v) {}
 } nothing ;
 
 struct function_parameter {

@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(solve)
 {
 	using cppjinja::evt::context_objects::value;
 	BOOST_TEST(value("ok"s).solve() == east_value_term{"ok"s});
-	BOOST_TEST(value(4).solve() == east_value_term{4});
+	BOOST_TEST(value(east_value_term{4}).solve() == east_value_term{4});
 }
 BOOST_AUTO_TEST_SUITE_END() // value
 BOOST_AUTO_TEST_SUITE(callable_node)
@@ -499,8 +499,8 @@ BOOST_FIXTURE_TEST_CASE(by_var, mock_exenv_fixture)
 		return east_value_term{101};
 	};
 	MOCK_EXPECT(data.filter).exactly(2).calls(check);
-	BOOST_TEST(expr_filter(&env, 2)(vn) == east_value_term{101});
-	BOOST_TEST(expr_filter(&env, 2)(filter_call{vn}) == east_value_term{101});
+	BOOST_TEST(expr_filter(&env, east_value_term{2})(vn) == east_value_term{101});
+	BOOST_TEST(expr_filter(&env, east_value_term{2})(filter_call{vn}) == east_value_term{101});
 }
 BOOST_FIXTURE_TEST_CASE(by_fnc, mock_exenv_fixture)
 {
@@ -515,23 +515,23 @@ BOOST_FIXTURE_TEST_CASE(by_fnc, mock_exenv_fixture)
 		BOOST_TEST(udfc.params.size() == fc.params.size());
 		BOOST_TEST(udfc.params[0].name.has_value() == fc.params[0].name.has_value());
 		BOOST_CHECK(udfc.params[0].val.has_value());
-		BOOST_TEST(*udfc.params[0].val == east_value_term{42});
+		BOOST_TEST(*udfc.params[0].val == east_value_term{(double)42});
 		return east_value_term{101};
 	};
 	MOCK_EXPECT(data.filter).once().calls(check);
-	BOOST_TEST(expr_filter(&env, 2)(fc) == east_value_term{101});
+	BOOST_TEST(expr_filter(&env, east_value_term{2})(fc) == east_value_term{101});
 	MOCK_EXPECT(data.filter).once().calls(check);
-	BOOST_TEST(expr_filter(&env, 2)(value_term{fc}) == east_value_term{101});
+	BOOST_TEST(expr_filter(&env, east_value_term{2})(value_term{fc}) == east_value_term{101});
 }
 BOOST_FIXTURE_TEST_CASE(by_wrong, mock_exenv_fixture)
 {
 	using namespace cppjinja::ast;
-	BOOST_CHECK_THROW(expr_filter(nullptr, 42), std::exception);
-	BOOST_CHECK_THROW(expr_filter(&env, 42)(2), std::exception);
-	BOOST_CHECK_THROW(expr_filter(&env, 42)("str"s), std::exception);
-	BOOST_CHECK_THROW(expr_filter(&env, 42)(tuple_v{}), std::exception);
-	BOOST_CHECK_THROW(expr_filter(&env, 42)(array_v{}), std::exception);
-	BOOST_CHECK_THROW(expr_filter(&env, 42)(binary_op{}), std::exception);
+	BOOST_CHECK_THROW(expr_filter(nullptr, east_value_term{42}), std::exception);
+	BOOST_CHECK_THROW(expr_filter(&env, east_value_term{42})(2), std::exception);
+	BOOST_CHECK_THROW(expr_filter(&env, east_value_term{42})("str"s), std::exception);
+	BOOST_CHECK_THROW(expr_filter(&env, east_value_term{42})(tuple_v{}), std::exception);
+	BOOST_CHECK_THROW(expr_filter(&env, east_value_term{42})(array_v{}), std::exception);
+	BOOST_CHECK_THROW(expr_filter(&env, east_value_term{42})(binary_op{}), std::exception);
 }
 BOOST_FIXTURE_TEST_CASE(few_times, mock_exenv_fixture)
 {
@@ -546,7 +546,7 @@ BOOST_FIXTURE_TEST_CASE(few_times, mock_exenv_fixture)
 	};
 
 	MOCK_EXPECT(data.filter).calls(check);
-	expr_filter flt(&env, 40);
+	expr_filter flt(&env, east_value_term{40});
 	for(;calls_num < 45;++calls_num)
 		BOOST_TEST(flt(var_name{"a"}) == east_value_term{calls_num+1});
 	for(;calls_num < 50;++calls_num)
@@ -554,23 +554,24 @@ BOOST_FIXTURE_TEST_CASE(few_times, mock_exenv_fixture)
 }
 BOOST_FIXTURE_TEST_CASE(print, mock_exenv_fixture)
 {
-	std::stringstream out;
-	out << expr_filter(&env, 40);
-	BOOST_TEST(out.str() == "40");
+	std::stringstream out, out2;
+	out << expr_filter(&env, east_value_term{40});
+	out2 << east_value_term{40};
+	BOOST_TEST(out.str() == out2.str());
 }
 BOOST_AUTO_TEST_SUITE_END() // filter
 
 BOOST_AUTO_TEST_SUITE(solver)
 BOOST_DATA_TEST_CASE_F(mock_solver_fixture, simples_num
-       , tdata::random(-90000000.0,90000000.0)^tdata::xrange(93)
+       , tdata::random(-90000000,90000000)^tdata::xrange(3)
        , v, ind)
 {
-	BOOST_TEST(solver(value_term{v}) == east_value_term{v});
-	BOOST_TEST(solver(value_term{ind}) == east_value_term{ind});
+	BOOST_TEST(solver(value_term{v}) == east_value_term{(double)v});
+	BOOST_TEST(solver(value_term{ind}) == east_value_term{(double)ind});
 }
 BOOST_FIXTURE_TEST_CASE(simples, mock_solver_fixture)
 {
-	BOOST_TEST(solver(value_term{42}) == east_value_term{42});
+	BOOST_TEST(solver(value_term{42}) == east_value_term{(double)42});
 	BOOST_TEST(solver(value_term{"a"}) == east_value_term{"a"});
 
 	cppjinja::ast::tuple_v tuple_test_v;
@@ -578,13 +579,13 @@ BOOST_FIXTURE_TEST_CASE(simples, mock_solver_fixture)
 	tuple_test_v.fields.push_back(value_term{"a"});
 	value_term value_test{std::move(tuple_test_v)};
 	cppjinja::east::array_v tuple_right_v;
-	tuple_right_v.items.push_back(std::make_unique<east_value_term>(42));
+	tuple_right_v.items.push_back(std::make_unique<east_value_term>((double)42));
 	tuple_right_v.items.push_back(std::make_unique<east_value_term>("a"));
 	east_value_term right_array{std::move(tuple_right_v)};
 	BOOST_TEST(solver(value_test) == right_array);
 
 	cppjinja::ast::array_v array_test_v;
-	array_test_v.fields.push_back(value_term{42});
+	array_test_v.fields.push_back(value_term{(double)42});
 	array_test_v.fields.push_back(value_term{"a"});
 	value_test = value_term{std::move(array_test_v)};
 	BOOST_TEST(solver(value_test) == right_array);
@@ -596,8 +597,8 @@ BOOST_FIXTURE_TEST_CASE(from_user_data, mock_solver_fixture)
 	cppjinja::ast::function_call_parameter param1(value_term{1});
 	value_term call{cppjinja::ast::function_call{fnc_name, {param1}}};
 
-	expect_call(evar_name{"a"}, {cppjinja::east::function_parameter{std::nullopt, evalue_term{1}}}, evalue_term{42});
-	BOOST_TEST(solver(call) == east_value_term{42});
+	expect_call(evar_name{"a"}, {cppjinja::east::function_parameter{std::nullopt, evalue_term{(double)1}}}, evalue_term{(double)42});
+	BOOST_TEST(solver(call) == east_value_term{(double)42});
 }
 BOOST_FIXTURE_TEST_CASE(solve_array_call, mock_solver_fixture)
 {
@@ -614,7 +615,7 @@ BOOST_DATA_TEST_CASE_F(mock_solver_fixture, binary_ops
           , tdata::make( value_term{1}, 2, "str"s )
           ^ tdata::make( value_term{1}, 3, "str"s )
           ^ tdata::make( comparator::eq, comparator::less, comparator::eq )
-          ^ tdata::make( cppjinja::east::value_term{1}, 1, 1 )
+          ^ tdata::make( cppjinja::east::value_term{true}, true, true )
           , left, right, op, result )
 {
 	using cppjinja::ast::var_name;

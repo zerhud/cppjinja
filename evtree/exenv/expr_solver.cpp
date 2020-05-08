@@ -92,6 +92,8 @@ cppjinja::east::string_t cppjinja::evt::expr_solver::reduce_to_string(const cppj
 			return std::to_string((std::int64_t)std::trunc(val));
 		return std::to_string(val);
 	}
+	if(std::holds_alternative<std::int64_t>(obj))
+		return std::to_string(std::get<std::int64_t>(obj));
 	throw std::logic_error("canno solve neested array yet");
 }
 

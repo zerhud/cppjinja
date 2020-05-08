@@ -201,6 +201,9 @@ BOOST_AUTO_TEST_CASE(math)
 	BOOST_TEST(result.var.type().name() == typeid(est::math).name());
 	res = &boost::get<est::math>(result.var);
 	BOOST_TEST(res->op == est::math_op::pls);
+
+	auto result3 = txt::parse(ext::expr, "3+5"sv);
+	BOOST_TEST(result3.var.type().name() == typeid(est::math).name());
 }
 BOOST_AUTO_TEST_CASE(point)
 {

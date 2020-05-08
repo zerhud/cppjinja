@@ -51,36 +51,49 @@ public:
 	bool operator()(const int& v) const =delete ;
 
 	bool operator()(const bool& v) const ;
+	bool operator()(const std::int64_t& v) const ;
 	bool operator()(const double& v) const ;
 	bool operator()(const east::string_t& v) const ;
 	bool operator()(const east::array_v& v) const ;
 	bool operator()(const east::map_v& v) const ;
 
 	bool operator()(const bool& l, const bool& r) const ;
+	bool operator()(const bool& l, const std::int64_t& r) const ;
 	bool operator()(const bool& l, const double& r) const ;
 	bool operator()(const bool& l, const east::string_t& r) const ;
 	bool operator()(const bool& l, const east::array_v& r) const ;
 	bool operator()(const bool& l, const east::map_v& r) const ;
 
+	bool operator()(const std::int64_t& l, const bool& r) const ;
+	bool operator()(const std::int64_t& l, const std::int64_t& r) const ;
+	bool operator()(const std::int64_t& l, const double& r) const ;
+	bool operator()(const std::int64_t& l, const east::string_t& r) const ;
+	bool operator()(const std::int64_t& l, const east::array_v& r) const ;
+	bool operator()(const std::int64_t& l, const east::map_v& r) const ;
+
 	bool operator()(const double& l, const bool& r) const ;
+	bool operator()(const double& l, const std::int64_t& r) const ;
 	bool operator()(const double& l, const double& r) const ;
 	bool operator()(const double& l, const east::string_t& r) const ;
 	bool operator()(const double& l, const east::array_v& r) const ;
 	bool operator()(const double& l, const east::map_v& r) const ;
 
 	bool operator()(const east::string_t& l, const bool& r) const ;
+	bool operator()(const east::string_t& l, const std::int64_t& r) const ;
 	bool operator()(const east::string_t& l, const double& r) const ;
 	bool operator()(const east::string_t& l, const east::string_t& r) const ;
 	bool operator()(const east::string_t& l, const east::array_v& r) const ;
 	bool operator()(const east::string_t& l, const east::map_v& r) const ;
 
 	bool operator()(const east::array_v& l, const bool& r) const ;
+	bool operator()(const east::array_v& l, const std::int64_t& r) const ;
 	bool operator()(const east::array_v& l, const double& r) const ;
 	bool operator()(const east::array_v& l, const east::string_t& r) const ;
 	bool operator()(const east::array_v& l, const east::array_v& r) const ;
 	bool operator()(const east::array_v& l, const east::map_v& r) const ;
 
 	bool operator()(const east::map_v& l, const bool& r) const ;
+	bool operator()(const east::map_v& l, const std::int64_t& r) const ;
 	bool operator()(const east::map_v& l, const double& r) const ;
 	bool operator()(const east::map_v& l, const east::string_t& r) const ;
 	bool operator()(const east::map_v& l, const east::array_v& r) const ;

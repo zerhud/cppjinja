@@ -170,7 +170,7 @@ BOOST_FIXTURE_TEST_CASE(value, mock_exenv_fixture)
 	ast::op_set ast_node{ {1,1}, "tname", value_term{42}, {{1,1},false}, {{1,1},true} };
 	evtnodes::op_set snode(ast_node);
 	expect_glp(0, 1, 0);
-	auto check = [](std::shared_ptr<context_object> v){return v->solve() == evalue_term{42};};
+	auto check = [](std::shared_ptr<context_object> v){return v->solve() == evalue_term{(double)42};};
 	MOCK_EXPECT(env.current_node).once().with(&snode);
 	MOCK_EXPECT(locals.add).once().with("tname", check);
 	snode.render(env);
