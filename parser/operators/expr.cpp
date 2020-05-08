@@ -11,8 +11,15 @@
 
 std::ostream& cppjinja::ast::expr_ops::operator <<(std::ostream& out, cppjinja::ast::expr_ops::math_op op)
 {
-	out << static_cast<int>(op);
-	return out;
+	return out << static_cast<int>(op);
+}
+std::ostream& cppjinja::ast::expr_ops::operator <<(std::ostream& out, cppjinja::ast::expr_ops::logic_op op)
+{
+	return out << static_cast<int>(op);
+}
+std::ostream& cppjinja::ast::expr_ops::operator <<(std::ostream& out, cppjinja::ast::expr_ops::cmp_op op)
+{
+	return out << static_cast<int>(op);
 }
 
 std::ostream& cppjinja::ast::expr_ops::operator <<(std::ostream& out, const cppjinja::ast::expr_ops::expr& op)

@@ -29,6 +29,7 @@ set(tests_eval
 	eval_tabs
 	eval_completeness
 	eval_exenv
+	eval_expr
 	eval_nodes
 	eval_tmpl_compiler
 	)

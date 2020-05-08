@@ -46,6 +46,8 @@ bool operator == (const point& left, const point& right);
 bool operator == (const op_if& left, const op_if& right);
 
 std::ostream& operator << (std::ostream& out, math_op op);
+std::ostream& operator << (std::ostream& out, logic_op op);
+std::ostream& operator << (std::ostream& out, cmp_op op);
 std::ostream& operator << (std::ostream& out, const expr& op);
 std::ostream& operator << (std::ostream& out, const term& right);
 std::ostream& operator << (std::ostream& out, const list& right);

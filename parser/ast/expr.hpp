@@ -33,7 +33,7 @@ struct term : term_var {
 	term(double v) : term_var(v) {}
 	term(string_t v) : term_var(v) {}
 	template<typename Int>
-	term(Int v) : term_var((std::int64_t)v) {}
+	explicit term(Int v) : term_var((std::int64_t)v) {}
 };
 
 struct list { std::vector<forward_ast<expr>> items; };
