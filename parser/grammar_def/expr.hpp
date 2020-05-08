@@ -123,17 +123,17 @@ auto const filter_def = expr_filter >> lit('|') >> filter_call % '|';
 auto const op_if_def = expr_op_if >> lit("if") >> expr >> -(lit("else") >> expr);
 
 auto const expr_in_pan_def = lit('(') >> expr >> lit(')');
-auto const expr_def = eq_assign | op_if | logic_check | cmp_check | filter | list | tuple | math | concat | negate | fnc_call | point | single_var_name | term;
-auto const expr_op_if_def =               logic_check | cmp_check | filter | list | tuple | math | concat | negate | fnc_call | point | single_var_name | term | expr_in_pan;
-auto const expr_logic_check_def =                       cmp_check | filter | list | tuple | math | concat | negate | fnc_call | point | single_var_name | term | expr_in_pan;
-auto const expr_cmp_check_def =                                     filter | list | tuple | math | concat | negate | fnc_call | point | single_var_name | term | expr_in_pan;
-auto const expr_filter_def =                                                 list | tuple | math | concat | negate | fnc_call | point | single_var_name | term | expr_in_pan;
-auto const expr_math_right_def =                                                            math | concat | negate | fnc_call | point | single_var_name | term | expr_in_pan;
-auto const expr_math_def =                                                                 math2 | concat | negate | fnc_call | point | single_var_name | term | expr_in_pan;
-auto const expr_math2_def =                                                             math_pow | concat | negate | fnc_call | point | single_var_name | term | expr_in_pan;
-auto const expr_concat_right_def =                                                                 concat | negate | fnc_call | point | single_var_name | term | expr_in_pan;
+auto const expr_def = eq_assign | op_if | logic_check | cmp_check | filter | list | tuple | concat | math | negate | fnc_call | point | single_var_name | term;
+auto const expr_op_if_def =               logic_check | cmp_check | filter | list | tuple | concat | math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
+auto const expr_logic_check_def =                       cmp_check | filter | list | tuple | concat | math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
+auto const expr_cmp_check_def =                                     filter | list | tuple | concat | math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
+auto const expr_filter_def =                                                 list | tuple | concat | math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
+auto const expr_math_right_def =                                                            concat | math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
+auto const expr_concat_right_def =                                                          concat | math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
+auto const expr_math_def =                                                                          math2 | negate | fnc_call | point | single_var_name | term | expr_in_pan;
+auto const expr_math2_def =                                                                      math_pow | negate | fnc_call | point | single_var_name | term | expr_in_pan;
+auto const expr_concat_left_def =                                                                    math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
 auto const expr_math_pow_def =                                                                                       fnc_call | point | single_var_name | term;
-auto const expr_concat_left_def =                                                                                    fnc_call | point | single_var_name | term | expr_in_pan;
 auto const expr_fnc_call_def =                                                                                                  point | single_var_name | term;
 auto const expr_point_def =                                                                                                             single_var_name | term;
 

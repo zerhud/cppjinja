@@ -222,10 +222,18 @@ BOOST_AUTO_TEST_CASE(assign)
 BOOST_AUTO_TEST_CASE(concat)
 {
 	auto result = txt::parse(ext::expr, "'a' * 'b' ~ c.d");
-	BOOST_TEST(result.var.type().name() == typeid(est::math).name());
-	est::math* res = &boost::get<est::math>(result.var);
-	BOOST_TEST(res->left.get().var.type().name() == typeid(est::term).name());
-	BOOST_TEST(res->right.get().var.type().name() == typeid(est::concat).name());
+	BOOST_TEST(result.var.type().name() == typeid(est::concat).name());
+	est::concat* res = boost::get<est::concat>(&result.var);
+	BOOST_REQUIRE(res);
+	BOOST_TEST(res->left.get().var.type().name() == typeid(est::math).name());
+	BOOST_TEST(res->right.get().var.type().name() == typeid(est::point).name());
+
+	auto result_with_math = txt::parse(ext::expr, "3 ~ 5 ~ 10*2");
+	BOOST_TEST(result.var.type().name() == typeid(est::concat).name());
+	est::concat* res_with_math = boost::get<est::concat>(&result_with_math.var);
+	BOOST_REQUIRE(res_with_math);
+	BOOST_TEST(res_with_math->left == est::expr{est::term{3}});
+	BOOST_TEST(res_with_math->right.get().var.type().name() == typeid(est::concat).name());
 }
 BOOST_AUTO_TEST_CASE(cmp_check)
 {
