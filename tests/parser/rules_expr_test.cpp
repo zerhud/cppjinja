@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(filter)
 	auto result1 = txt::parse(ext::filter, "a.b | f1");
 	BOOST_TEST(result1.base == est::expr{txt::parse(ext::point, "a.b")});
 	BOOST_TEST(result1.filters.size() == 1);
-	BOOST_TEST(result1.filters.at(0).ref == est::expr{est::single_var_name{"f1"s}});
+	BOOST_TEST(result1.filters.at(0).ref == est::lvalue{est::single_var_name{"f1"s}});
 	auto result2 = txt::parse(ext::filter, "a.b | f1 | f2 | f3(c)");
 	BOOST_TEST(result2.base == est::expr{txt::parse(ext::point, "a.b")});
 	BOOST_TEST(result2.filters.size() == 3);

@@ -120,7 +120,7 @@ auto const negate_def = lit("!") >> expr_concat_left;
 
 auto const fnc_call_def = expr_fnc_call >> lit('(') >> -(expr % ',') >> lit(')');
 
-auto const filter_call_def = expr_fnc_call >> -( lit('(') >> -expr % ',' >> lit(')') );
+auto const filter_call_def = lvalue >> -( lit('(') >> -expr % ',' >> lit(')') );
 auto const filter_def = expr_filter >> lit('|') >> filter_call % '|';
 
 auto const op_if_def = expr_op_if >> lit("if") >> expr >> -(lit("else") >> expr);

@@ -101,7 +101,7 @@ struct fnc_call {
 };
 
 struct filter_call {
-	forward_ast<expr> ref;
+	lvalue ref;
 	std::vector<forward_ast<expr>> args;
 };
 

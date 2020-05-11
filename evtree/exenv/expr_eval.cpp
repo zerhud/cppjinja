@@ -17,6 +17,7 @@
 #include "expr/cmp_check.hpp"
 #include "expr/logic_check.hpp"
 #include "expr_reduce.hpp"
+#include "expr_filter.hpp"
 
 
 using namespace std::literals;
@@ -65,6 +66,42 @@ void cppjinja::evt::expr_eval::solve_point_arg(ast::expr_ops::expr& left) const
 void cppjinja::evt::expr_eval::solve_point_arg(cppjinja::ast::expr_ops::point& left) const
 {
 	(*this)(left);
+}
+
+cppjinja::east::function_parameter cppjinja::evt::expr_eval::make_param(cppjinja::ast::expr_ops::expr& pexpr) const
+{
+	east::function_parameter ret;
+	if(auto* asg = boost::get<ast::expr_ops::eq_assign>(&pexpr); asg) {
+		ret.name = make_param_name(asg->names.at(0));
+		ret.val = cvt(boost::apply_visitor(*this, asg->value.get()));
+	}
+	else
+		ret.val = (*this)(pexpr)->solve();
+	return ret;
+}
+
+std::optional<cppjinja::east::string_t> cppjinja::evt::expr_eval::make_param_name(ast::expr_ops::lvalue& name) const
+{
+	return boost::get<ast::expr_ops::single_var_name>(name).name;
+}
+
+void cppjinja::evt::expr_eval::filter_content(cppjinja::ast::expr_ops::filter_call& call) const
+{
+	assert(result);
+
+	auto base = result->solve();
+	result.reset();
+
+	boost::apply_visitor([this](auto& r){solve_point_arg(r);}, call.ref.get());
+	if(!result) throw std::runtime_error("cannot solve filter");
+	auto filter = result;
+	result.reset();
+
+	std::vector<east::function_parameter> params;
+	params.emplace_back(east::function_parameter{"$", std::move(base)});
+	for(auto& p:call.args) params.emplace_back(make_param(p.get()));
+
+	result = filter->call(params);
 }
 
 cppjinja::evt::expr_eval::expr_eval(const exenv* e)
@@ -130,12 +167,16 @@ cppjinja::evt::expr_eval::operator ()(ast::expr_ops::dict& t) const
 }
 
 cppjinja::evt::expr_eval::eval_type
-cppjinja::evt::expr_eval::operator ()(ast::expr_ops::eq_assign& t) const
-{ return false; }
+cppjinja::evt::expr_eval::operator ()(ast::expr_ops::eq_assign&) const
+{
+	throw std::logic_error("cannot solve eq_assign expression");
+}
 
 cppjinja::evt::expr_eval::eval_type
-cppjinja::evt::expr_eval::operator ()(ast::expr_ops::in_assign& t) const
-{ return false; }
+cppjinja::evt::expr_eval::operator ()(ast::expr_ops::in_assign&) const
+{
+	throw std::logic_error("cannot solve in_assign expression");
+}
 
 cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::math& t) const
@@ -187,13 +228,21 @@ cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::fnc_call& t) const
 {
 	boost::apply_visitor(*this, t.ref.get());
-	result = result->call({});
+	auto call_obj = result;
+	result.reset();
+	std::vector<east::function_parameter> params;
+	for(auto& p:t.args) params.emplace_back(make_param(p.get()));
+	result = call_obj->call(params);
 	return false;
 }
 
 cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::filter& t) const
-{ return false; }
+{
+	result = (*this)(t.base.get());
+	for(auto& f:t.filters) filter_content(f);
+	return false;
+}
 
 cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::point& t) const
