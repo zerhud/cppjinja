@@ -96,7 +96,7 @@ struct negate {
 };
 
 struct fnc_call {
-	forward_ast<expr> ref;
+	lvalue ref;
 	std::vector<forward_ast<expr>> args;
 };
 

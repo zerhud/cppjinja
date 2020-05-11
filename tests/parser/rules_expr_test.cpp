@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(negate)
 BOOST_AUTO_TEST_CASE(fnc_call)
 {
 	auto result1 = txt::parse(ext::fnc_call, "a.b()");
-	BOOST_TEST(result1.ref == est::expr{txt::parse(ext::point, "a.b")});
+	BOOST_TEST(result1.ref == est::lvalue{txt::parse(ext::point, "a.b")});
 	BOOST_TEST(result1.args.size() == 0);
 	auto result2 = txt::parse(ext::fnc_call, "a.b('v')");
 	BOOST_TEST(result2.ref == result1.ref);

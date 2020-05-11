@@ -91,17 +91,23 @@ void cppjinja::evt::expr_eval::filter_content(cppjinja::ast::expr_ops::filter_ca
 
 	auto base = result->solve();
 	result.reset();
-
-	boost::apply_visitor([this](auto& r){solve_point_arg(r);}, call.ref.get());
-	if(!result) throw std::runtime_error("cannot solve filter");
-	auto filter = result;
-	result.reset();
+	auto filter = solve_ref(call.ref);
 
 	std::vector<east::function_parameter> params;
 	params.emplace_back(east::function_parameter{"$", std::move(base)});
 	for(auto& p:call.args) params.emplace_back(make_param(p.get()));
 
 	result = filter->call(params);
+}
+
+std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::expr_eval::solve_ref(cppjinja::ast::expr_ops::lvalue& ref) const
+{
+	assert(!result);
+	boost::apply_visitor([this](auto& r){solve_point_arg(r);}, ref);
+	if(!result) throw std::runtime_error("cannot solve filter");
+	auto ret = result;
+	result.reset();
+	return ret;
 }
 
 cppjinja::evt::expr_eval::expr_eval(const exenv* e)
@@ -227,9 +233,7 @@ cppjinja::evt::expr_eval::operator ()(ast::expr_ops::negate& t) const
 cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::fnc_call& t) const
 {
-	boost::apply_visitor(*this, t.ref.get());
-	auto call_obj = result;
-	result.reset();
+	auto call_obj = solve_ref(t.ref);
 	std::vector<east::function_parameter> params;
 	for(auto& p:t.args) params.emplace_back(make_param(p.get()));
 	result = call_obj->call(params);

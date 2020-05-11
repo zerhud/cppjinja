@@ -31,6 +31,7 @@ class expr_eval final {
 	east::function_parameter make_param(ast::expr_ops::expr& pexpr) const ;
 	std::optional<east::string_t> make_param_name(ast::expr_ops::lvalue& name) const ;
 	void filter_content(ast::expr_ops::filter_call& call) const ;
+	std::shared_ptr<evt::context_object> solve_ref(ast::expr_ops::lvalue& ref) const ;
 public:
 	typedef ast::expr_ops::term eval_type;
 

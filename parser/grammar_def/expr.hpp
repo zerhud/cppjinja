@@ -36,7 +36,6 @@ const x3::rule<class expr_concat_left_right_class, ast::expr_ops::expr> expr_con
 const x3::rule<class expr_concat_right_class, ast::expr_ops::expr> expr_concat_right = "expr_concat_right";
 const x3::rule<class expr_cmp_check_class, ast::expr_ops::expr> expr_cmp_check = "expr_cmp_check";
 const x3::rule<class expr_logic_check_class, ast::expr_ops::expr> expr_logic_check = "expr_logic_check";
-const x3::rule<class expr_fnc_call_class, ast::expr_ops::expr> expr_fnc_call = "expr_fnc_call";
 const x3::rule<class expr_op_if_class, ast::expr_ops::expr> expr_op_if = "expr_op_if";
 const x3::rule<class expr_in_pan_class, ast::expr_ops::expr> expr_in_pan = "expr_in_pan";
 const x3::rule<class expr_filter_class, ast::expr_ops::expr> expr_filter = "expr_filter";
@@ -118,7 +117,7 @@ auto const logic_op_def =
 
 auto const negate_def = lit("!") >> expr_concat_left;
 
-auto const fnc_call_def = expr_fnc_call >> lit('(') >> -(expr % ',') >> lit(')');
+auto const fnc_call_def = lvalue >> lit('(') >> -(expr % ',') >> lit(')');
 
 auto const filter_call_def = lvalue >> -( lit('(') >> -expr % ',' >> lit(')') );
 auto const filter_def = expr_filter >> lit('|') >> filter_call % '|';
@@ -137,7 +136,6 @@ auto const expr_math_def =                                                      
 auto const expr_math2_def =                                                                             math_pow | negate | fnc_call | point | single_var_name | term | expr_in_pan;
 auto const expr_concat_left_def =                                                                           math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
 auto const expr_math_pow_def =                                                                                              fnc_call | point | single_var_name | term;
-auto const expr_fnc_call_def =                                                                                                         point | single_var_name;
 
 BOOST_SPIRIT_DEFINE( math )
 BOOST_SPIRIT_DEFINE( math1 )
@@ -184,7 +182,6 @@ BOOST_SPIRIT_DEFINE( expr_concat_right )
 BOOST_SPIRIT_DEFINE( expr_concat_left )
 BOOST_SPIRIT_DEFINE( expr_cmp_check )
 BOOST_SPIRIT_DEFINE( expr_logic_check )
-BOOST_SPIRIT_DEFINE( expr_fnc_call )
 BOOST_SPIRIT_DEFINE( expr_op_if )
 BOOST_SPIRIT_DEFINE( expr_in_pan )
 
