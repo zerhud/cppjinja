@@ -62,10 +62,10 @@ auto const quoted_string_def =
       | (x3::lexeme[lit("\"") >> -quoted_string_2_def >> lit("\"")]);
 
 auto const bool_rule_def = lit("true") >> x3::attr(true) | lit("false") >> x3::attr(false);
-auto const term_def = bool_rule | (!single_var_name >> double_) | x3::int64 | quoted_string;
-auto const keywords_def = x3::lexeme[(bool_rule|lit("if")|lit("else")|lit("in")|lit("and")|lit("or")|lit("is")) >> (x3::space|x3::eol|x3::eoi)];
+auto const term_def = bool_rule | double_ | x3::int64 | quoted_string;
+auto const keywords_def = bool_rule|lit("if")|lit("else")|lit("in")|lit("and")|lit("or")|lit("is");
 auto const single_var_name_helper_def = x3::lexeme[ !keywords_def >> x3::char_("A-Za-z_") >> *x3::char_("0-9A-Za-z_") ];
-auto const single_var_name_def = single_var_name_helper;
+auto const single_var_name_def = !keywords_def >> single_var_name_helper;
 
 auto const math_pow_def = expr_math_pow >> lit("**") >> x3::attr(ast::expr_ops::math_op::pow) >> expr_math_pow;
 

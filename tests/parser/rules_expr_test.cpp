@@ -54,6 +54,7 @@ BOOST_AUTO_TEST_CASE(single_var_name)
 {
 	BOOST_TEST(txt::parse(ext::single_var_name, "a"sv) == est::single_var_name{"a"s});
 	BOOST_TEST(txt::parse(ext::expr, "a"sv) == est::expr{est::single_var_name{"a"s}});
+	BOOST_CHECK_THROW(txt::parse(ext::single_var_name, "if"sv), std::exception);
 }
 BOOST_AUTO_TEST_CASE(math)
 {
