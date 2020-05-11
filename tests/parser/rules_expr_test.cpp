@@ -29,11 +29,12 @@ namespace txt = cppjinja::text;
 namespace ext = cppjinja::text::expr_ops;
 
 BOOST_AUTO_TEST_SUITE(phase_parse)
-BOOST_AUTO_TEST_SUITE(expr_ops)
+BOOST_AUTO_TEST_SUITE(expr_ops)//, * ut::timeout(1))
 BOOST_AUTO_TEST_CASE(qutoed_string)
 {
 	BOOST_TEST(txt::parse(ext::quoted_string, "'a\"'"sv) == "a\""s);
 	BOOST_TEST(txt::parse(ext::quoted_string, "\"a'\""sv) == "a'"s);
+	BOOST_TEST(txt::parse(ext::quoted_string, "''"sv) == ""s);
 }
 BOOST_AUTO_TEST_CASE(bool_rule)
 {
@@ -84,17 +85,17 @@ BOOST_AUTO_TEST_CASE(math)
 BOOST_AUTO_TEST_CASE(point)
 {
 	auto result = txt::parse(ext::point, "a.b");
-	BOOST_TEST(result.left == est::expr{est::single_var_name{"a"s}});
+	BOOST_TEST(result.left == est::point_element{est::single_var_name{"a"s}});
 
 	auto result2 = txt::parse(ext::point, "c.a.b");
-	BOOST_TEST(result2.left.get() == est::expr{est::single_var_name{"c"s}});
-	BOOST_TEST(result2.right.get() == est::expr{result});
+	BOOST_TEST(result2.left == est::point_element{est::single_var_name{"c"s}});
+	BOOST_TEST(result2.right == est::point_element{result});
 
 	BOOST_TEST(txt::parse(ext::expr, "c.a.b") == est::expr{result2});
 
 	result = txt::parse(ext::point, "a['b']");
-	BOOST_TEST(result.left == est::expr{est::single_var_name{"a"s}});
-	BOOST_TEST(result.right == est::expr{est::term{"b"s}});
+	BOOST_TEST(result.left == est::point_element{est::single_var_name{"a"s}});
+	BOOST_TEST(result.right == est::point_element{est::expr{est::term{"b"s}}});
 }
 BOOST_AUTO_TEST_CASE(list)
 {
@@ -150,6 +151,13 @@ BOOST_AUTO_TEST_CASE(logic_check)
 	auto result = txt::parse(ext::logic_check, "1 and 2");
 	BOOST_TEST(result.op == est::logic_op::op_and);
 	BOOST_TEST(result.left == est::expr{est::term{1}});
+
+//	result = txt::parse(ext::logic_check, "'' and ''");
+//	BOOST_TEST(result.op == est::logic_op::op_and);
+//	BOOST_TEST(result.left == est::expr{est::term{""s}});
+
+//	auto result_expr = txt::parse(ext::expr, "'' and ''");
+//	BOOST_TEST(result_expr.var.type().name() == typeid(est::logic_check).name());
 }
 BOOST_AUTO_TEST_CASE(negate)
 {
@@ -284,6 +292,11 @@ BOOST_AUTO_TEST_CASE(op_if)
 	est::op_if* right = boost::get<est::op_if>(&res->value.get().var);
 	BOOST_REQUIRE(right);
 	BOOST_TEST(right->term.get() == left_res->value.get());
+}
+BOOST_AUTO_TEST_CASE(dict)
+{
+	auto result = txt::parse(ext::expr, "{'a':1,'b':10+3}"sv);
+	BOOST_TEST(result.var.type().name() == typeid(est::dict).name());
 }
 BOOST_AUTO_TEST_SUITE_END() // exprs
 

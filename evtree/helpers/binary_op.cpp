@@ -118,17 +118,8 @@ bool binary_op_helper::operator()(const double& l, const east::array_v& r) const
 	if(cmp_ == comparator::in) return default_in(l, r);
 	throw std::runtime_error("cannot compare double and array");
 }
-bool binary_op_helper::operator()(const double& l, const east::map_v& r) const
+bool binary_op_helper::operator()(const double& , const east::map_v& ) const
 {
-	if(cmp_ == comparator::in)
-	{
-		for(const auto& [k,v]:r.items) {
-			if(!std::holds_alternative<double>(k)) continue;
-			if(std::get<double>(k)==l) return true;
-		}
-		return false;
-	}
-
 	throw std::runtime_error("cannot compare double and map");
 }
 
@@ -156,12 +147,8 @@ bool binary_op_helper::operator()(const east::string_t& l, const east::array_v& 
 }
 bool binary_op_helper::operator()(const east::string_t& l, const east::map_v& r) const
 {
-	if(cmp_ == comparator::in)
-	{
-		for(const auto& [k,v]:r.items) {
-			if(!std::holds_alternative<east::string_t>(k)) continue;
-			if(std::get<east::string_t>(k)==l) return true;
-		}
+	if(cmp_ == comparator::in) {
+		for(const auto& [k,v]:r.items) if(k==l) return true;
 		return false;
 	}
 	throw std::runtime_error("cannot compare string and array");

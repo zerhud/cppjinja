@@ -43,6 +43,7 @@ bool operator == (const filter_call& left, const filter_call& right);
 bool operator == (const filter& left, const filter& right);
 bool operator == (const single_var_name& left, const single_var_name& right);
 bool operator == (const point& left, const point& right);
+bool operator == (const point_element& left, const point_element& right);
 bool operator == (const op_if& left, const op_if& right);
 
 std::ostream& operator << (std::ostream& out, math_op op);
@@ -66,6 +67,7 @@ std::ostream& operator << (std::ostream& out, const filter_call& right);
 std::ostream& operator << (std::ostream& out, const filter& right);
 std::ostream& operator << (std::ostream& out, const single_var_name& right);
 std::ostream& operator << (std::ostream& out, const point& right);
+std::ostream& operator << (std::ostream& out, const point_element& right);
 std::ostream& operator << (std::ostream& out, const op_if& right);
 
 } // namespace cppjinja::ast::expr_ops

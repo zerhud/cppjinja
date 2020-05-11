@@ -44,7 +44,7 @@ public:
 	virtual context_object& globals() =0 ;
 	virtual const context_objects::queue params() const =0 ;
 	virtual const context_object& user_data() const =0 ;
-	virtual const context_objects::queue all_ctx() =0 ;
+	virtual const context_objects::queue all_ctx() const =0 ;
 
 	virtual callstack& calls() =0 ;
 

@@ -19,14 +19,19 @@ namespace cppjinja::evt {
 class expr_eval final {
 	const exenv* env;
 	ast::expr_ops::expr src_operation;
-	std::shared_ptr<evt::context_object> result;
+	mutable std::shared_ptr<evt::context_object> result;
 
 	east::value_term cvt(const ast::expr_ops::term& v) const ;
 	ast::string_t to_str(const ast::expr_ops::term& v) const ;
+	ast::string_t to_str(const east::value_term& v) const ;
+	void solve_point_arg(ast::expr_ops::point_element& left) const ;
+	void solve_point_arg(ast::expr_ops::single_var_name& left) const ;
+	void solve_point_arg(ast::expr_ops::expr& left) const ;
+	void solve_point_arg(ast::expr_ops::point& left) const ;
 public:
 	typedef ast::expr_ops::term eval_type;
 
-	expr_eval(exenv* e);
+	expr_eval(const exenv* e);
 
 	std::shared_ptr<evt::context_object> operator () (ast::expr_ops::expr t) const ;
 
@@ -47,6 +52,15 @@ public:
 	eval_type operator () (ast::expr_ops::filter& t) const ;
 	eval_type operator () (ast::expr_ops::point& t) const ;
 	eval_type operator () (ast::expr_ops::op_if& t) const ;
+private:
+	template<typename T>
+	eval_type visit(ast::forward_ast<T>& v) const
+	{
+		return boost::apply_visitor(*this, v.get().var);
+	}
+	std::string replace_back(std::stringstream src, char nback) const ;
+	std::ostream& print_quoted(std::stringstream& out, ast::expr_ops::term v) const ;
+	std::ostream& print_quoted(std::stringstream& out, east::value_term v) const ;
 };
 
 } // namespace cppjinja::evt

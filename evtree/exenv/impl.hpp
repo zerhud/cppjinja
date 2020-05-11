@@ -48,7 +48,7 @@ public:
 	context_object& globals() override ;
 	const context_objects::queue params() const override ;
 	const context_object& user_data() const override ;
-	const context_objects::queue all_ctx() override ;
+	const context_objects::queue all_ctx() const override ;
 
 	callstack& calls() override ;
 

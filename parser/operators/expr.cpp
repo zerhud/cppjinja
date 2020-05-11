@@ -97,6 +97,14 @@ bool cppjinja::ast::expr_ops::operator == (const filter_call& left, const filter
 }
 bool cppjinja::ast::expr_ops::operator == (const filter& left, const filter& right){return left.base == right.base && left.filters == right.filters;}
 bool cppjinja::ast::expr_ops::operator == (const single_var_name& left, const single_var_name& right){return left.name == right.name;}
+bool cppjinja::ast::expr_ops::operator == (const point_element& left, const point_element& right)
+{
+	auto cmp = [](const auto& l, const auto& r) {
+		if constexpr (std::is_same_v<decltype(l),decltype(r)>) return l == r;
+		else return false;
+	};
+	return boost::apply_visitor(cmp, left, right);
+}
 bool cppjinja::ast::expr_ops::operator == (const point& left, const point& right)
 {
 	return left.left == right.left && left.right == right.right;
@@ -145,6 +153,9 @@ std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const fil
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const filter& right){return out << right.base << '|';}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const single_var_name& v){return out << v.name;}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const point& right){return out << right.left << '.' << right.right;}
+std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const point_element& right){
+	return boost::apply_visitor([&out](const auto& v)->std::ostream&{ return out << v; }, right);
+}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const op_if& right)
 {
 	out << right.term << " if " << right.cond;

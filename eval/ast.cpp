@@ -68,11 +68,11 @@ std::ostream& cppjinja::east::operator << (
 			for(auto& i:v.items) out << *i << " ";
 		}
 		void operator()(const map_v& v){
-			auto print = [this](const auto& v){out << v;};
+			out << '{';
 			for(auto& i:v.items) {
-				std::visit(print, i.first);
-				out << ':' << *i.second << ' ';
+				out << std::quoted(i.first) << ':' << *i.second << ' ';
 			}
+			out << '}';
 		}
 	} render{out};
 	const value_term_var& stdval = val;

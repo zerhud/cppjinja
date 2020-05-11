@@ -20,7 +20,7 @@ namespace cppjinja::ast::expr_ops {
 
 enum class math_op { nop, pls, mns, mul, dev, mod, pow, trunc_dev };
 enum class cmp_op { nop, eq, neq, less, more, less_eq, more_eq };
-enum class logic_op { nop, op_and, op_or, op_not };
+enum class logic_op { nop, op_and, op_or };
 
 struct expr;
 
@@ -41,11 +41,13 @@ struct tuple { std::vector<forward_ast<expr>> items; };
 struct dict_item { string_t name; forward_ast<expr> value; };
 struct dict { std::vector<dict_item> items; };
 
+struct point;
 struct single_var_name { string_t name; };
+using point_element = x3::variant<single_var_name, forward_ast<point>, forward_ast<expr>> ;
 
 struct point {
-	forward_ast<expr> left;
-	forward_ast<expr> right;
+	point_element left;
+	point_element right;
 };
 
 struct lvalue : x3::variant<single_var_name, point> {

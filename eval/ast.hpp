@@ -36,7 +36,7 @@ struct map_v final {
 	map_v& operator = (const map_v& other);
 	map_v() noexcept =default ;
 	~map_v() noexcept =default ;
-	std::map<std::variant<double, string_t>, std::unique_ptr<value_term>> items;
+	std::map<string_t, std::unique_ptr<value_term>> items;
 };
 
 using var_name = std::vector<string_t>;

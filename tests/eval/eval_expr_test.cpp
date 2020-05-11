@@ -62,6 +62,121 @@ BOOST_FIXTURE_TEST_CASE(negate, mock_exenv_fixture)
 	eeval str_e(&env);
 	BOOST_CHECK_THROW(str_e(txt::parse(ext::expr, "!'1'")), std::runtime_error);
 }
+BOOST_FIXTURE_TEST_CASE(cmp_check, mock_exenv_fixture)
+{
+	auto res = eeval(&env)(txt::parse(ext::expr, "1 == 1"))->solve();
+	BOOST_TEST(res == cval{true});
+	res = eeval(&env)(txt::parse(ext::expr, "1 < 2"))->solve();
+	BOOST_TEST(res == cval{true});
+	res = eeval(&env)(txt::parse(ext::expr, "'cc' < 'aa'"))->solve();
+	BOOST_TEST(res == cval{false});
+}
+BOOST_FIXTURE_TEST_CASE(logic_check, mock_exenv_fixture)
+{
+	auto res = eeval(&env)(txt::parse(ext::expr, "true and true"))->solve();
+	BOOST_TEST(res == cval{true});
+	res = eeval(&env)(txt::parse(ext::expr, "true and false"))->solve();
+	BOOST_TEST(res == cval{false});
+	res = eeval(&env)(txt::parse(ext::expr, "'a' and 'b'"))->solve();
+	BOOST_TEST(res == cval{true});
+//	res = eeval(&env)(txt::parse(ext::expr, "'' and ''"))->solve();
+//	BOOST_TEST(res == cval{true});
+	res = eeval(&env)(txt::parse(ext::expr, "'b' and ''"))->solve();
+	BOOST_TEST(res == cval{false});
+}
+BOOST_FIXTURE_TEST_CASE(op_if, mock_exenv_fixture)
+{
+	auto res = eeval(&env)(txt::parse(ext::expr, "'ok' if 1==1 else 'not ok'"))->solve();
+	BOOST_TEST(res == cval{"ok"});
+	res = eeval(&env)(txt::parse(ext::expr, "'not ok' if 1==2 else 'ok'"))->solve();
+	BOOST_TEST(res == cval{"ok"});
+	res = eeval(&env)(txt::parse(ext::expr, "'not ok' if 1==2"))->solve();
+	BOOST_TEST(res == cval{""});
+}
+BOOST_FIXTURE_TEST_CASE(array, mock_exenv_fixture)
+{
+	auto res = eeval(&env)(txt::parse(ext::expr, "[1, 3, 5]"))->solve();
+	BOOST_TEST(res == cval{"[1,3,5]"});
+	eeval ev(&env);
+	BOOST_CHECK_THROW(ev(txt::parse(ext::expr, "[1, 'kuku', 5]")), std::runtime_error);
+}
+BOOST_FIXTURE_TEST_CASE(tuple, mock_exenv_fixture)
+{
+	auto res = eeval(&env)(txt::parse(ext::expr, "(1, 3, 'ok')"))->solve();
+	BOOST_TEST(res == cval{"(1,3,\"ok\")"});
+}
 BOOST_AUTO_TEST_SUITE_END() // term
+BOOST_AUTO_TEST_SUITE(reduce)
+BOOST_FIXTURE_TEST_CASE(dict, mock_exenv_fixture)
+{
+	auto res = eeval(&env)(txt::parse(ext::expr, "{'name':1,'name2':'value'}"))->solve();
+	BOOST_TEST(res == cval{"{\"name\":1,\"name2\":\"value\"}"});
+}
+BOOST_FIXTURE_TEST_CASE(single_var, mock_exenv_fixture)
+{
+	auto a = std::make_shared<mocks::context_object>();
+	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
+	auto res = eeval(&env)(txt::parse(ext::expr, "a"));
+	BOOST_TEST(res.get() == a.get());
+}
+
+BOOST_AUTO_TEST_SUITE(point)
+BOOST_FIXTURE_TEST_CASE(call_at_end, mock_exenv_fixture)
+{
+	auto a = std::make_shared<mocks::context_object>();
+	auto b = std::make_shared<mocks::context_object>();
+	auto c = std::make_shared<mocks::context_object>();
+	auto abe = std::make_shared<mocks::context_object>();
+	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
+	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"c"}).returns(c);
+	MOCK_EXPECT(a->find).with(cppjinja::east::var_name{"b"}).returns(b);
+	MOCK_EXPECT(b->find).with(cppjinja::east::var_name{"e"}).returns(abe);
+	MOCK_EXPECT(c->solve).returns("e"s);
+	auto res = eeval(&env)(txt::parse(ext::expr, "a.b[c]"));
+	BOOST_TEST(res.get() == abe.get());
+}
+BOOST_FIXTURE_TEST_CASE(two_calls, mock_exenv_fixture)
+{
+	auto a = std::make_shared<mocks::context_object>();
+	auto b = std::make_shared<mocks::context_object>();
+	auto c = std::make_shared<mocks::context_object>();
+	auto abe = std::make_shared<mocks::context_object>();
+	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
+	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"c"}).returns(c);
+	MOCK_EXPECT(c->solve).returns("e"s);
+	MOCK_EXPECT(a->find).with(cppjinja::east::var_name{"b"}).returns(b);
+	MOCK_EXPECT(b->find).with(cppjinja::east::var_name{"e"}).returns(abe);
+	auto res = eeval(&env)(txt::parse(ext::expr, "a['b'][c]"));
+	BOOST_TEST(res.get() == abe.get());
+}
+BOOST_AUTO_TEST_SUITE_END() // point
+
+BOOST_AUTO_TEST_SUITE(fnc_call)
+BOOST_FIXTURE_TEST_CASE(without_args, mock_exenv_fixture)
+{
+	std::vector<cppjinja::east::function_parameter> params;
+	auto a = std::make_shared<mocks::context_object>();
+	auto call = std::make_shared<mocks::context_object>();
+	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
+	MOCK_EXPECT(a->call).with(params).returns(call);
+	auto res = eeval(&env)(txt::parse(ext::expr, "a()"));
+	BOOST_TEST(res.get() == call.get());
+}
+BOOST_FIXTURE_TEST_CASE(with_args, mock_exenv_fixture)
+{
+	std::vector<cppjinja::east::function_parameter> params;
+	params.emplace_back(cppjinja::east::function_parameter{std::nullopt, "ok"});
+
+	auto a = std::make_shared<mocks::context_object>();
+	auto call = std::make_shared<mocks::context_object>();
+	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
+	MOCK_EXPECT(a->call).with(params).returns(call);
+	auto res = eeval(&env)(txt::parse(ext::expr, "a('ok')"));
+
+	BOOST_TEST(res.get() == call.get());
+}
+BOOST_AUTO_TEST_SUITE_END() // fnc_call
+
+BOOST_AUTO_TEST_SUITE_END() // reduce
 BOOST_AUTO_TEST_SUITE_END() // expr
 BOOST_AUTO_TEST_SUITE_END() // phase_evaluate
