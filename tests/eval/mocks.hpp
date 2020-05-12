@@ -142,6 +142,13 @@ struct mock_exenv_fixture
 		MOCK_EXPECT(mock_all_ctx->solve).once().returns(v);
 	}
 
+	void expect_call(cppjinja::east::var_name n, std::vector<cppjinja::east::function_parameter> p, cppjinja::json v)
+	{
+		auto val_obj= std::make_shared<cppjinja::evt::context_objects::value>(std::move(v), 1);
+		MOCK_EXPECT(all_ctx.find).once().with(n).returns(mock_all_ctx);
+		MOCK_EXPECT(mock_all_ctx->call).once().with(p).returns(val_obj);
+	}
+
 	void expect_call(cppjinja::east::var_name n, std::vector<cppjinja::east::function_parameter> p, cppjinja::east::value_term v)
 	{
 		auto val_obj= std::make_shared<cppjinja::evt::context_objects::value>(std::move(v));

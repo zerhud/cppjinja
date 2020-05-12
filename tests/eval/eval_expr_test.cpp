@@ -28,89 +28,86 @@ namespace txt = cppjinja::text;
 namespace ext = cppjinja::text::expr_ops;
 namespace est = cppjinja::ast::expr_ops;
 using eeval = cppjinja::evt::expr_eval;
-using cval = cppjinja::east::value_term;
 BOOST_AUTO_TEST_SUITE(term)
 BOOST_FIXTURE_TEST_CASE(string,  mock_exenv_fixture)
 {
-	auto res = eeval(&env)(txt::parse(ext::expr, "'ok'"))->solve();
-	BOOST_TEST(res == cval{"ok"s});
-	res = eeval(&env)(txt::parse(ext::expr, "1"))->solve();
-	BOOST_TEST(res == cval{1});
+	auto res = eeval(&env)(txt::parse(ext::expr, "'ok'"))->jval();
+	BOOST_TEST(res == "ok"s);
+	res = eeval(&env)(txt::parse(ext::expr, "1"))->jval();
+	BOOST_TEST(res == 1);
 }
 BOOST_FIXTURE_TEST_CASE(math,  mock_exenv_fixture)
 {
-	auto res = eeval(&env)(txt::parse(ext::expr, "3+5-1*0.5"))->solve();
-	BOOST_TEST(res == cval{7.5});
+	auto res = eeval(&env)(txt::parse(ext::expr, "3+5-1*0.5"))->jval();
+	BOOST_TEST(res == 7.5);
 	eeval str_e(&env);
 	BOOST_CHECK_THROW(str_e(txt::parse(ext::expr, "0.5+'1'")), std::runtime_error);
 
-	res = eeval(&env)(txt::parse(ext::expr, "'ok' + 'ok'"))->solve();
-	BOOST_TEST(res == cval{"okok"});
+	res = eeval(&env)(txt::parse(ext::expr, "'ok' + 'ok'"))->jval();
+	BOOST_TEST(res == "okok"s);
 
 	eeval str2_e(&env);
 	BOOST_CHECK_THROW(str2_e(txt::parse(ext::expr, "'ok'-'ups'")), std::runtime_error);
 }
 BOOST_FIXTURE_TEST_CASE(concat, mock_exenv_fixture)
 {
-	auto res = eeval(&env)(txt::parse(ext::expr, "3~5~10*2"))->solve();
-	BOOST_TEST(res == cval{"3520"});
+	auto res = eeval(&env)(txt::parse(ext::expr, "3~5~10*2"))->jval();
+	BOOST_TEST(res == "3520"s);
 }
 BOOST_FIXTURE_TEST_CASE(negate, mock_exenv_fixture)
 {
-	auto res = eeval(&env)(txt::parse(ext::expr, "!!true"))->solve();
-	BOOST_TEST(res == cval{true});
+	auto res = eeval(&env)(txt::parse(ext::expr, "!!true"))->jval();
+	BOOST_TEST(res == true);
 	eeval str_e(&env);
 	BOOST_CHECK_THROW(str_e(txt::parse(ext::expr, "!'1'")), std::runtime_error);
 }
 BOOST_FIXTURE_TEST_CASE(cmp_check, mock_exenv_fixture)
 {
-	auto res = eeval(&env)(txt::parse(ext::expr, "1 == 1"))->solve();
-	BOOST_TEST(res == cval{true});
-	res = eeval(&env)(txt::parse(ext::expr, "1 < 2"))->solve();
-	BOOST_TEST(res == cval{true});
-	res = eeval(&env)(txt::parse(ext::expr, "'cc' < 'aa'"))->solve();
-	BOOST_TEST(res == cval{false});
+	auto res = eeval(&env)(txt::parse(ext::expr, "1 == 1"))->jval();
+	BOOST_TEST(res == true);
+	res = eeval(&env)(txt::parse(ext::expr, "1 < 2"))->jval();
+	BOOST_TEST(res == true);
+	res = eeval(&env)(txt::parse(ext::expr, "'cc' < 'aa'"))->jval();
+	BOOST_TEST(res == false);
 }
 BOOST_FIXTURE_TEST_CASE(logic_check, mock_exenv_fixture)
 {
-	auto res = eeval(&env)(txt::parse(ext::expr, "true and true"))->solve();
-	BOOST_TEST(res == cval{true});
-	res = eeval(&env)(txt::parse(ext::expr, "true and false"))->solve();
-	BOOST_TEST(res == cval{false});
-	res = eeval(&env)(txt::parse(ext::expr, "'a' and 'b'"))->solve();
-	BOOST_TEST(res == cval{true});
-//	res = eeval(&env)(txt::parse(ext::expr, "'' and ''"))->solve();
-//	BOOST_TEST(res == cval{true});
-	res = eeval(&env)(txt::parse(ext::expr, "'b' and ''"))->solve();
-	BOOST_TEST(res == cval{false});
+	auto res = eeval(&env)(txt::parse(ext::expr, "true and true"))->jval();
+	BOOST_TEST(res == true);
+	res = eeval(&env)(txt::parse(ext::expr, "true and false"))->jval();
+	BOOST_TEST(res == false);
+	res = eeval(&env)(txt::parse(ext::expr, "'a' and 'b'"))->jval();
+	BOOST_TEST(res == true);
+//	res = eeval(&env)(txt::parse(ext::expr, "'' and ''"))->jval();
+//	BOOST_TEST(res == true);
+	res = eeval(&env)(txt::parse(ext::expr, "'b' and ''"))->jval();
+	BOOST_TEST(res == false);
 }
 BOOST_FIXTURE_TEST_CASE(op_if, mock_exenv_fixture)
 {
-	auto res = eeval(&env)(txt::parse(ext::expr, "'ok' if 1==1 else 'not ok'"))->solve();
-	BOOST_TEST(res == cval{"ok"});
-	res = eeval(&env)(txt::parse(ext::expr, "'not ok' if 1==2 else 'ok'"))->solve();
-	BOOST_TEST(res == cval{"ok"});
-	res = eeval(&env)(txt::parse(ext::expr, "'not ok' if 1==2"))->solve();
-	BOOST_TEST(res == cval{""});
+	auto res = eeval(&env)(txt::parse(ext::expr, "'ok' if 1==1 else 'not ok'"))->jval();
+	BOOST_TEST(res == "ok");
+	res = eeval(&env)(txt::parse(ext::expr, "'not ok' if 1==2 else 'ok'"))->jval();
+	BOOST_TEST(res == "ok");
+	res = eeval(&env)(txt::parse(ext::expr, "'not ok' if 1==2"))->jval();
+	BOOST_TEST(res == nullptr);
 }
 BOOST_FIXTURE_TEST_CASE(array, mock_exenv_fixture)
 {
-	auto res = eeval(&env)(txt::parse(ext::expr, "[1, 3, 5]"))->solve();
-	BOOST_TEST(res == cval{"[1,3,5]"});
-	eeval ev(&env);
-	BOOST_CHECK_THROW(ev(txt::parse(ext::expr, "[1, 'kuku', 5]")), std::runtime_error);
+	auto res = eeval(&env)(txt::parse(ext::expr, "[1, 3, 5]"))->jval();
+	BOOST_TEST(res.dump() == "[1,3,5]");
 }
 BOOST_FIXTURE_TEST_CASE(tuple, mock_exenv_fixture)
 {
-	auto res = eeval(&env)(txt::parse(ext::expr, "(1, 3, 'ok')"))->solve();
-	BOOST_TEST(res == cval{"(1,3,\"ok\")"});
+	auto res = eeval(&env)(txt::parse(ext::expr, "(1, 3, 'ok')"))->jval();
+	BOOST_TEST(res.dump() == "[1,3,\"ok\"]");
 }
 BOOST_AUTO_TEST_SUITE_END() // term
 BOOST_AUTO_TEST_SUITE(reduce)
 BOOST_FIXTURE_TEST_CASE(dict, mock_exenv_fixture)
 {
-	auto res = eeval(&env)(txt::parse(ext::expr, "{'name':1,'name2':'value'}"))->solve();
-	BOOST_TEST(res == cval{"{\"name\":1,\"name2\":\"value\"}"});
+	auto res = eeval(&env)(txt::parse(ext::expr, "{'name':1,'name2':'value'}"))->jval();
+	BOOST_TEST(res.dump() == "{\"name\":1,\"name2\":\"value\"}");
 }
 BOOST_FIXTURE_TEST_CASE(single_var, mock_exenv_fixture)
 {
@@ -131,7 +128,7 @@ BOOST_FIXTURE_TEST_CASE(call_at_end, mock_exenv_fixture)
 	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"c"}).returns(c);
 	MOCK_EXPECT(a->find).with(cppjinja::east::var_name{"b"}).returns(b);
 	MOCK_EXPECT(b->find).with(cppjinja::east::var_name{"e"}).returns(abe);
-	MOCK_EXPECT(c->solve).returns("e"s);
+	MOCK_EXPECT(c->jval).returns("e"s);
 	auto res = eeval(&env)(txt::parse(ext::expr, "a.b[c]"));
 	BOOST_TEST(res.get() == abe.get());
 }
@@ -143,7 +140,7 @@ BOOST_FIXTURE_TEST_CASE(two_calls, mock_exenv_fixture)
 	auto abe = std::make_shared<mocks::context_object>();
 	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
 	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"c"}).returns(c);
-	MOCK_EXPECT(c->solve).returns("e"s);
+	MOCK_EXPECT(c->jval).returns("e"s);
 	MOCK_EXPECT(a->find).with(cppjinja::east::var_name{"b"}).returns(b);
 	MOCK_EXPECT(b->find).with(cppjinja::east::var_name{"e"}).returns(abe);
 	auto res = eeval(&env)(txt::parse(ext::expr, "a['b'][c]"));
@@ -165,20 +162,26 @@ BOOST_FIXTURE_TEST_CASE(without_args, mock_exenv_fixture)
 BOOST_FIXTURE_TEST_CASE(with_args, mock_exenv_fixture)
 {
 	std::vector<cppjinja::east::function_parameter> params;
-	params.emplace_back(cppjinja::east::function_parameter{std::nullopt, "ok"});
+	params.emplace_back(cppjinja::east::function_parameter{std::nullopt, std::nullopt, "ok"});
 
 	auto a = std::make_shared<mocks::context_object>();
 	auto call = std::make_shared<mocks::context_object>();
 	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
-	MOCK_EXPECT(a->call).with(params).returns(call);
-	auto res = eeval(&env)(txt::parse(ext::expr, "a('ok')"));
+	MOCK_EXPECT(a->call).calls([call](std::vector<cppjinja::east::function_parameter> params){
+		BOOST_TEST(params.size() == 1);
+		BOOST_TEST(params.at(0).name.has_value() == false);
+		BOOST_TEST(params.at(0).jval.has_value() == true);
+		BOOST_TEST(*params.at(0).jval == "ok");
+		return call;
+	});
 
+	auto res = eeval(&env)(txt::parse(ext::expr, "a('ok')"));
 	BOOST_TEST(res.get() == call.get());
 }
 BOOST_FIXTURE_TEST_CASE(points, mock_exenv_fixture)
 {
 	std::vector<cppjinja::east::function_parameter> params;
-	params.emplace_back(cppjinja::east::function_parameter{std::nullopt, "ok"});
+	params.emplace_back(cppjinja::east::function_parameter{std::nullopt, std::nullopt, "ok"});
 
 	auto a = std::make_shared<mocks::context_object>();
 	auto b = std::make_shared<mocks::context_object>();
@@ -190,7 +193,7 @@ BOOST_FIXTURE_TEST_CASE(points, mock_exenv_fixture)
 	MOCK_EXPECT(a->find).with(cppjinja::east::var_name{"b"}).returns(b);
 	MOCK_EXPECT(c->find).with(cppjinja::east::var_name{"d"}).returns(d);
 	MOCK_EXPECT(b->call).with(params).returns(call);
-	MOCK_EXPECT(d->solve).returns("ok");
+	MOCK_EXPECT(d->jval).returns("ok");
 
 	auto res = eeval(&env)(txt::parse(ext::expr, "a.b(c.d)"));
 	BOOST_TEST(res.get() == call.get());
@@ -200,18 +203,17 @@ BOOST_AUTO_TEST_SUITE_END() // fnc_call
 BOOST_AUTO_TEST_SUITE(filter_call)
 BOOST_FIXTURE_TEST_CASE(without_args, mock_exenv_fixture)
 {
-	std::vector<cppjinja::east::function_parameter> params;
 	auto a = std::make_shared<mocks::context_object>();
 	auto b = std::make_shared<mocks::context_object>();
 	auto result = std::make_shared<mocks::context_object>();
 	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
 	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"b"}).returns(b);
-	MOCK_EXPECT(a->solve).returns("ok");
+	MOCK_EXPECT(a->jval).returns("ok");
 
 	MOCK_EXPECT(b->call).calls([result](std::vector<cppjinja::east::function_parameter> params){
 		BOOST_TEST_REQUIRE(params.size() == 1);
 		BOOST_TEST(*params[0].name == "$");
-		BOOST_TEST(*params[0].val == cppjinja::east::value_term{"ok"s});
+		BOOST_TEST(*params[0].jval == "ok"s);
 		return result;
 	});
 
@@ -220,7 +222,6 @@ BOOST_FIXTURE_TEST_CASE(without_args, mock_exenv_fixture)
 }
 BOOST_FIXTURE_TEST_CASE(with_args, mock_exenv_fixture)
 {
-	std::vector<cppjinja::east::function_parameter> params;
 	auto a = std::make_shared<mocks::context_object>();
 	auto b = std::make_shared<mocks::context_object>();
 	auto c = std::make_shared<mocks::context_object>();
@@ -228,14 +229,14 @@ BOOST_FIXTURE_TEST_CASE(with_args, mock_exenv_fixture)
 	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
 	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"b"}).returns(b);
 	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"c"}).returns(c);
-	MOCK_EXPECT(a->solve).returns("ok");
-	MOCK_EXPECT(c->solve).returns("cslv");
+	MOCK_EXPECT(a->jval).returns("ok");
+	MOCK_EXPECT(c->jval).returns("cslv");
 
 	MOCK_EXPECT(b->call).calls([result](std::vector<cppjinja::east::function_parameter> params){
 		BOOST_TEST_REQUIRE(params.size() == 2);
 		BOOST_TEST(*params[0].name == "$");
-		BOOST_TEST(*params[0].val == cppjinja::east::value_term{"ok"s});
-		BOOST_TEST(*params[1].val == cppjinja::east::value_term{"cslv"s});
+		BOOST_TEST(*params[0].jval == "ok"s);
+		BOOST_TEST(*params[1].jval == "cslv"s);
 		return result;
 	});
 

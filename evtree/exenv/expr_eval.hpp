@@ -21,9 +21,11 @@ class expr_eval final {
 	ast::expr_ops::expr src_operation;
 	mutable std::shared_ptr<evt::context_object> result;
 
-	east::value_term cvt(const ast::expr_ops::term& v) const ;
+	cppjinja::json cvt(const ast::expr_ops::term& v) const ;
 	ast::string_t to_str(const ast::expr_ops::term& v) const ;
-	ast::string_t to_str(const east::value_term& v) const ;
+	ast::string_t to_str(const cppjinja::json& v) const ;
+	ast::expr_ops::term to_term(const json& j) const ;
+
 	void solve_point_arg(ast::expr_ops::point_element& left) const ;
 	void solve_point_arg(ast::expr_ops::single_var_name& left) const ;
 	void solve_point_arg(ast::expr_ops::expr& left) const ;
@@ -33,7 +35,7 @@ class expr_eval final {
 	void filter_content(ast::expr_ops::filter_call& call) const ;
 	std::shared_ptr<evt::context_object> solve_ref(ast::expr_ops::lvalue& ref) const ;
 public:
-	typedef ast::expr_ops::term eval_type;
+	typedef cppjinja::json eval_type;
 
 	expr_eval(const exenv* e);
 

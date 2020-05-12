@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "evtree/declarations.hpp"
 #include "parser/ast/expr.hpp"
 
 namespace cppjinja::evt::expr_evals {

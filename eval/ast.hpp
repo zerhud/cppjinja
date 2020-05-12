@@ -14,6 +14,7 @@
 #include <vector>
 #include <variant>
 #include <optional>
+#include <json.hpp>
 
 namespace cppjinja::east {
 
@@ -62,6 +63,7 @@ extern struct value_term : value_term_var
 struct function_parameter {
 	std::optional<string_t> name;
 	std::optional<value_term> val;
+	std::optional<nlohmann::json> jval;
 };
 
 struct function_call {
