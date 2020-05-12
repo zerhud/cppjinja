@@ -28,15 +28,6 @@ cppjinja::json cppjinja::evt::expr_eval::cvt(const cppjinja::ast::expr_ops::term
 	return boost::apply_visitor(cvt, v);
 }
 
-cppjinja::ast::string_t cppjinja::evt::expr_eval::to_str(const cppjinja::ast::expr_ops::term& v) const
-{
-	auto cvt = [](const auto& v) {
-		if constexpr(std::is_same_v<std::decay_t<decltype(v)>, ast::string_t>) return v;
-		else return std::to_string(v);
-	};
-	return boost::apply_visitor(cvt, v.var);
-}
-
 cppjinja::ast::string_t cppjinja::evt::expr_eval::to_str(const json& v) const
 {
 	if(v.is_string()) return v.get<std::string>();
@@ -268,32 +259,4 @@ cppjinja::evt::expr_eval::operator ()(ast::expr_ops::op_if& t) const
 	if(result_cond) return visit(t.term);
 	if(t.alternative) return visit(*t.alternative);
 	return nullptr;
-}
-
-std::string cppjinja::evt::expr_eval::replace_back(std::stringstream src, char nback) const
-{
-	auto ret = src.str();
-	if(ret.empty()) ret = ']';
-	else ret.back() = nback;
-	return ret;
-}
-
-std::ostream& cppjinja::evt::expr_eval::print_quoted(std::stringstream& out, ast::expr_ops::term v) const
-{
-	auto prt = [&out](auto& v) -> std::ostream& {
-		if constexpr (std::is_same_v<std::decay_t<decltype(v)>, ast::string_t>)
-		        return out << std::quoted(v);
-		else return out << v;
-	};
-	return boost::apply_visitor(prt, v);
-}
-
-std::ostream& cppjinja::evt::expr_eval::print_quoted(std::stringstream& out, east::value_term v) const
-{
-	auto prt = [&out](auto& v) -> std::ostream& {
-		if constexpr (std::is_same_v<std::decay_t<decltype(v)>, ast::string_t>)
-		        return out << std::quoted(v);
-		else return out << v;
-	};
-	return std::visit(prt, (east::value_term_var&)v);
 }

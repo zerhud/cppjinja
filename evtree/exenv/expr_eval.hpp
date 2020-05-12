@@ -22,7 +22,6 @@ class expr_eval final {
 	mutable std::shared_ptr<evt::context_object> result;
 
 	cppjinja::json cvt(const ast::expr_ops::term& v) const ;
-	ast::string_t to_str(const ast::expr_ops::term& v) const ;
 	ast::string_t to_str(const cppjinja::json& v) const ;
 	ast::expr_ops::term to_term(const json& j) const ;
 
@@ -63,9 +62,6 @@ private:
 	{
 		return boost::apply_visitor(*this, v.get().var);
 	}
-	std::string replace_back(std::stringstream src, char nback) const ;
-	std::ostream& print_quoted(std::stringstream& out, ast::expr_ops::term v) const ;
-	std::ostream& print_quoted(std::stringstream& out, east::value_term v) const ;
 };
 
 } // namespace cppjinja::evt
