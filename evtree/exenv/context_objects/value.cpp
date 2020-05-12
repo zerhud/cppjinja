@@ -8,6 +8,11 @@
 
 #include "value.hpp"
 
+cppjinja::evt::context_objects::value::value(cppjinja::json j, int)
+    : jcnt(std::move(j))
+{
+}
+
 cppjinja::evt::context_objects::value::value(cppjinja::east::value_term c)
     : content(std::move(c))
 {
@@ -36,6 +41,11 @@ cppjinja::evt::context_objects::value::find(cppjinja::east::var_name n) const
 cppjinja::east::value_term cppjinja::evt::context_objects::value::solve() const
 {
 	return content;
+}
+
+cppjinja::json cppjinja::evt::context_objects::value::jval() const
+{
+	return jcnt;
 }
 
 std::shared_ptr<cppjinja::evt::context_object>

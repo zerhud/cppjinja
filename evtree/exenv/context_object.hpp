@@ -9,6 +9,8 @@
 #pragma once
 
 #include <memory>
+#include "evtree/declarations.hpp"
+#include "eval/eval.hpp"
 #include "eval/ast.hpp"
 
 namespace cppjinja::evt {
@@ -19,6 +21,7 @@ public:
 	virtual void add(east::string_t n, std::shared_ptr<context_object> child) =0 ;
 	virtual std::shared_ptr<context_object> find(east::var_name n) const =0 ;
 	virtual east::value_term solve() const =0 ;
+	virtual json jval() const =0 ;
 	virtual std::shared_ptr<context_object> call(std::vector<east::function_parameter> params) const =0 ;
 };
 

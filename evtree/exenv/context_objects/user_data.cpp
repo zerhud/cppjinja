@@ -53,6 +53,11 @@ cppjinja::east::value_term cppjinja::evt::context_objects::user_data::solve() co
 	return provider->value(selected_name);
 }
 
+cppjinja::json cppjinja::evt::context_objects::user_data::jval() const
+{
+	throw std::logic_error("not ready yet");
+}
+
 std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::user_data::call(std::vector<cppjinja::east::function_parameter> params) const
 {
 	east::function_call call;

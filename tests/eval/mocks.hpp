@@ -61,6 +61,7 @@ MOCK_BASE_CLASS(context_object, cppjinja::evt::context_object)
 	MOCK_METHOD(add, 2)
 	MOCK_METHOD(find, 1)
 	MOCK_METHOD(solve, 0)
+	MOCK_METHOD(jval, 0)
 	MOCK_METHOD(call, 1)
 };
 

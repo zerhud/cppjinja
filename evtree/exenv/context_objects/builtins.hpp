@@ -19,6 +19,7 @@ public:
 	void add(east::string_t n, std::shared_ptr<context_object> child) override ;
 	std::shared_ptr<context_object> find(east::var_name n) const override ;
 	east::value_term solve() const override ;
+	json jval() const override;
 };
 
 class jinja_namespace : public builtin_function {

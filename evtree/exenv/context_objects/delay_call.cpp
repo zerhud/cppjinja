@@ -37,6 +37,11 @@ cppjinja::east::value_term cppjinja::evt::context_objects::delay_call::solve() c
 	return obj->call(params)->solve();
 }
 
+cppjinja::json cppjinja::evt::context_objects::delay_call::jval() const
+{
+	return obj->call(params)->jval();
+}
+
 std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::delay_call::call(
         std::vector<cppjinja::east::function_parameter> params) const
 {

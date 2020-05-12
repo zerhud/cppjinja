@@ -48,6 +48,11 @@ cppjinja::east::value_term cppjinja::evt::context_objects::callable_node::solve(
 	throw std::runtime_error("cannot solve an callable node");
 }
 
+cppjinja::json cppjinja::evt::context_objects::callable_node::jval() const
+{
+	throw std::logic_error("not ready yet");
+}
+
 std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::callable_node::call(
         std::vector<cppjinja::east::function_parameter> params) const
 {

@@ -66,6 +66,11 @@ cppjinja::east::value_term cppjinja::evt::context_objects::queue::solve() const
 	throw std::runtime_error("cannot solve in queue context object");
 }
 
+cppjinja::json cppjinja::evt::context_objects::queue::jval() const
+{
+	throw std::runtime_error("cannot solve in queue context object");
+}
+
 std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::queue::call(
         std::vector<cppjinja::east::function_parameter> params) const
 {

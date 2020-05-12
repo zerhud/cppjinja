@@ -43,6 +43,11 @@ cppjinja::east::value_term cppjinja::evt::context_objects::builtin_function::sol
 	throw std::runtime_error("cannot solve builtin function");
 }
 
+cppjinja::json cppjinja::evt::context_objects::builtin_function::jval() const
+{
+	throw std::runtime_error("cannot solve builtin function");
+}
+
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::jinja_namespace::call(
         std::vector<cppjinja::east::function_parameter> params) const

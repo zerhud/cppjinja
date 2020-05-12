@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <json.hpp>
 #include "parser/ast/tmpls.hpp"
 #include "ast.hpp"
 

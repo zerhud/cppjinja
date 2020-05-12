@@ -73,6 +73,11 @@ cppjinja::east::value_term cppjinja::evt::context_objects::tree::solve() const
 	return ret.size() == 2 ? ret : ret.erase(ret.size()-2, 1);
 }
 
+cppjinja::json cppjinja::evt::context_objects::tree::jval() const
+{
+	throw std::logic_error("not ready yet");
+}
+
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::tree::call(std::vector<cppjinja::east::function_parameter> params) const
 {
