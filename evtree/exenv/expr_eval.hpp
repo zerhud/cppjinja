@@ -48,7 +48,6 @@ public:
 	eval_type operator () (ast::expr_ops::in_assign& t) const ;
 	eval_type operator () (ast::expr_ops::math& t) const ;
 	eval_type operator () (ast::expr_ops::concat& t) const ;
-	eval_type operator () (ast::expr_ops::in_check& t) const ;
 	eval_type operator () (ast::expr_ops::cmp_check& t) const ;
 	eval_type operator () (ast::expr_ops::logic_check& t) const ;
 	eval_type operator () (ast::expr_ops::negate& t) const ;

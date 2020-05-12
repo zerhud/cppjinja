@@ -24,9 +24,3 @@ cppjinja::east::map_v cppjinja::evt::expr_reduce::operator()(cppjinja::ast::expr
 	}
 	return ret;
 }
-
-cppjinja::east::var_name cppjinja::evt::expr_reduce::operator()(cppjinja::ast::expr_ops::point v) const
-{
-	east::var_name ret;
-	return ret;
-}

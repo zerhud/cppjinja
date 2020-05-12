@@ -120,7 +120,7 @@ using expr_var = x3::variant<
 term, single_var_name, list, tuple, dict,
 eq_assign, in_assign,
 math, concat,
-in_check, cmp_check, logic_check, negate,
+cmp_check, logic_check, negate,
 fnc_call, filter, point, op_if
 >;
 struct expr : expr_var {

@@ -200,10 +200,6 @@ cppjinja::evt::expr_eval::operator ()(ast::expr_ops::concat& t) const
 }
 
 cppjinja::evt::expr_eval::eval_type
-cppjinja::evt::expr_eval::operator ()(ast::expr_ops::in_check& t) const
-{ return false; }
-
-cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::cmp_check& t) const
 {
 	eval_type left = boost::apply_visitor(*this, t.left.get().var);

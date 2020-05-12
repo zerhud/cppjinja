@@ -20,7 +20,6 @@ public:
 	expr_reduce(const exenv* e);
 
 	east::map_v operator()(ast::expr_ops::dict v) const ;
-	east::var_name operator()(ast::expr_ops::point v) const ;
 };
 
 } // namespace cppjinja::evt
