@@ -34,6 +34,7 @@ namespace tdata = boost::unit_test::data;
 using evt_node = cppjinja::evt::node;
 namespace evtnodes = cppjinja::evtnodes;
 namespace ast = cppjinja::ast;
+namespace aps = cppjinja::ast::expr_ops;
 using ast::value_term;
 using mocks::mock_exenv_fixture; // qtcreator cannot parse test with namespace
 
@@ -158,7 +159,7 @@ BOOST_AUTO_TEST_SUITE_END() // tmpl
 BOOST_AUTO_TEST_SUITE(op_set)
 BOOST_AUTO_TEST_CASE(getters)
 {
-	ast::op_set ast_node{ {1,1}, "tname", value_term{42}, {{1,1},false}, {{1,1},true} };
+	ast::op_set ast_node{ {1,1}, aps::eq_assign{}, {{1,1},false}, {{1,1},true} };
 	evtnodes::op_set snode(ast_node);
 	BOOST_TEST(snode.rinfo().trim_left == false);
 	BOOST_TEST(snode.rinfo().trim_right == true);
@@ -167,10 +168,13 @@ BOOST_AUTO_TEST_SUITE(render)
 using cppjinja::evt::context_object;
 BOOST_FIXTURE_TEST_CASE(value, mock_exenv_fixture)
 {
-	ast::op_set ast_node{ {1,1}, "tname", value_term{42}, {{1,1},false}, {{1,1},true} };
+	aps::eq_assign op;
+	op.value = aps::expr{aps::term{42}};
+	op.names.emplace_back(aps::single_var_name{"tname"s});
+	ast::op_set ast_node{ {1,1}, std::move(op), {{1,1},false}, {{1,1},true} };
 	evtnodes::op_set snode(ast_node);
 	expect_glp(0, 1, 0);
-	auto check = [](std::shared_ptr<context_object> v){return v->solve() == evalue_term{(double)42};};
+	auto check = [](std::shared_ptr<context_object> v){return v->jval() == 42.0;};
 	MOCK_EXPECT(env.current_node).once().with(&snode);
 	MOCK_EXPECT(locals.add).once().with("tname", check);
 	snode.render(env);
@@ -179,7 +183,10 @@ BOOST_FIXTURE_TEST_CASE(name, mock_exenv_fixture)
 {
 	using namespace cppjinja::ast;
 
-	ast::op_set ast_node{ {1,1}, "tname", value_term{var_name{"a"}}, {{1,1},false}, {{1,1},true} };
+	aps::eq_assign op;
+	op.value = aps::expr{aps::single_var_name{"a"s}};
+	op.names.emplace_back(aps::single_var_name{"tname"s});
+	ast::op_set ast_node{ {1,1}, op, {{1,1},false}, {{1,1},true} };
 	evtnodes::op_set snode(ast_node);
 	auto obj = std::make_shared<mocks::context_object>();
 	expect_glp(0, 1, 0);
@@ -188,24 +195,14 @@ BOOST_FIXTURE_TEST_CASE(name, mock_exenv_fixture)
 	MOCK_EXPECT(env.current_node).once().with(&snode);
 	snode.render(env);
 }
-BOOST_FIXTURE_TEST_CASE(array_calls, mock_exenv_fixture)
-{
-	using namespace cppjinja::ast;
-
-	ast::op_set ast_node{ {1,1}, "tname", value_term{cppjinja::ast::array_calls{{array_call{var_name{"a"}, value_term{"b"s}}}}}, {{1,1},false}, {{1,1},true} };
-	evtnodes::op_set snode(ast_node);
-	auto obj = std::make_shared<mocks::context_object>();
-	expect_glp(0, 1, 0);
-	MOCK_EXPECT(all_ctx.find).with(evar_name{"a"s, "b"s}).returns(obj);
-	MOCK_EXPECT(locals.add).once().with("tname", obj);
-	MOCK_EXPECT(env.current_node).once().with(&snode);
-	snode.render(env);
-}
 BOOST_FIXTURE_TEST_CASE(call, mock_exenv_fixture)
 {
 	using namespace cppjinja::ast;
 
-	ast::op_set ast_node{ {1,1}, "tname", value_term{function_call(var_name{"a"}, {})}, {{1,1},false}, {{1,1},true} };
+	aps::eq_assign op;
+	op.value = aps::expr{aps::fnc_call{aps::lvalue{aps::single_var_name{"a"s}}, {}}};
+	op.names.emplace_back(aps::single_var_name{"tname"s});
+	ast::op_set ast_node{ {1,1}, op, {{1,1},false}, {{1,1},true} };
 	evtnodes::op_set snode(ast_node);
 	auto obj = std::make_shared<mocks::context_object>();
 	auto gotten_obj = std::make_shared<mocks::context_object>();

@@ -21,6 +21,7 @@ using namespace std::literals;
 namespace txt = cppjinja::text;
 namespace ast = cppjinja::ast;
 namespace utd = boost::unit_test::data;
+namespace aps = cppjinja::ast::expr_ops;
 
 template<typename R>
 R& emp_back(R& cnt){ return cnt; }
@@ -120,9 +121,9 @@ BOOST_DATA_TEST_CASE(
         op_set
       , utd::make("1"s, "a"s, "'a'"s)
       ^ utd::make(
-              ast::value_term{1}
-            , ast::var_name{ "a"s }
-            , "a"s
+              aps::expr{aps::term{1}}
+            , aps::single_var_name{ "a"s }
+            , aps::term{"a"s}
             )
       , data, good_result)
 {
@@ -132,8 +133,9 @@ BOOST_DATA_TEST_CASE(
 	BOOST_TEST_CONTEXT("TEXT = " << text)
 	BOOST_CHECK_NO_THROW( result = txt::parse(txt::op_set, text) );
 
-	BOOST_TEST(result.name == "x"s);
-	BOOST_TEST(result.value == good_result);
+	BOOST_TEST(result.value.names.size() == 1);
+	BOOST_TEST(result.value.names.at(0) == aps::lvalue{aps::single_var_name{"x"s}});
+	BOOST_TEST(result.value.value.get() == good_result);
 }
 
 BOOST_DATA_TEST_CASE(

@@ -20,7 +20,7 @@ std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::op_comme
 
 std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::op_set& obj)
 {
-	return out << obj.name << '=' << obj.value;
+	return out << obj.value;
 }
 
 std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::op_include& obj)

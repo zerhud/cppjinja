@@ -39,6 +39,7 @@ public:
 	expr_eval(const exenv* e);
 
 	std::shared_ptr<evt::context_object> operator () (ast::expr_ops::expr t) const ;
+	std::shared_ptr<evt::context_object> operator () (ast::expr_ops::lvalue ref) const ;
 
 	eval_type operator () (ast::expr_ops::term& t) const ;
 	eval_type operator () (ast::expr_ops::single_var_name& t) const ;

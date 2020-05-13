@@ -15,7 +15,7 @@
 
 DEFINE_OPERATORS(cppjinja::ast::op_out,     left.value, right.value, left.open, right.open, left.close, right.close, left.filters, right.filters)
 DEFINE_OPERATORS(cppjinja::ast::op_comment, left.value, right.value, left.open, right.open, left.close, right.close)
-DEFINE_OPERATORS(cppjinja::ast::op_set,     left.value, right.value, left.open, right.open, left.close, right.close, left.name, right.name)
+DEFINE_OPERATORS(cppjinja::ast::op_set,     left.value, right.value, left.open, right.open, left.close, right.close)
 DEFINE_OPERATORS(cppjinja::ast::op_include, left.filename, right.filename, left.ignore_missing, right.ignore_missing, left.with_context, right.with_context)
 
 DEFINE_OPERATORS(cppjinja::ast::filter_call, left.var, right.var)

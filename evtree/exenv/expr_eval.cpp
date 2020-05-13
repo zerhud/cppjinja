@@ -127,6 +127,13 @@ cppjinja::evt::expr_eval::operator ()(cppjinja::ast::expr_ops::expr t) const
 	return std::make_shared<context_objects::value>(solved,1);
 }
 
+std::shared_ptr<cppjinja::evt::context_object>
+cppjinja::evt::expr_eval::operator () (ast::expr_ops::lvalue ref) const
+{
+	result.reset();
+	return solve_ref(ref);
+}
+
 cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(cppjinja::ast::expr_ops::term& t) const
 {

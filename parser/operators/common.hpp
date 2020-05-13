@@ -12,6 +12,7 @@
 #include <boost/spirit/home/x3/support/ast/variant.hpp>
 
 #include "ast/common.hpp"
+#include "expr.hpp"
 
 #define DEFINE_DEFINED_OPERATORS(sname, ...) \
 	namespace cppjinja::ast { \

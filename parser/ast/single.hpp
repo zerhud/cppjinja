@@ -10,6 +10,7 @@
 
 #include "common.hpp"
 #include "opterm.hpp"
+#include "expr.hpp"
 
 namespace cppjinja::ast {
 
@@ -36,8 +37,7 @@ struct op_comment : x3::position_tagged
 
 struct op_set : x3::position_tagged
 {
-	string_t name;
-	value_term value;
+	expr_ops::eq_assign value;
 	op_term_start open;
 	op_term_end close;
 };
