@@ -7,6 +7,7 @@
  *************************************************************************/
 
 #include "block_with_name.hpp"
+#include "evtree/exenv/expr_eval.hpp"
 #include "evtree/exenv/expr_solver.hpp"
 
 cppjinja::evt::render_info cppjinja::evtnodes::block_with_name::inner_ri() const
@@ -52,8 +53,11 @@ std::vector<cppjinja::east::function_parameter> cppjinja::evtnodes::block_with_n
 	for(auto& p:cur_ast().params){
 		auto& i = ret.emplace_back();
 		i.name = p.name;
-		if(p.value)
-			i.val = slv(*p.value);
+		if(p.value) {
+			std::stringstream out;
+			out << slv(*p.value);
+			i.jval = out.str();
+		}
 	}
 	return ret;
 }

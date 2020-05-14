@@ -50,7 +50,6 @@ cppjinja::east::function_parameter cppjinja::evt::expr_solver::reduce(const cppj
 {
 	east::function_parameter ret;
 	ret.name = obj.name;
-	ret.val = (*this)(obj.value.get());
 	return ret;
 }
 

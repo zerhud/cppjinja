@@ -8,9 +8,7 @@
 
 #include <string>
 #include "op_out.hpp"
-#include "evtree/exenv/expr_solver.hpp"
-#include "evtree/exenv/expr_filter.hpp"
-#include "evtree/exenv/callstack.hpp"
+#include "evtree/exenv/expr_eval.hpp"
 
 using namespace std::literals;
 
@@ -27,7 +25,5 @@ cppjinja::evt::render_info cppjinja::evtnodes::op_out::rinfo() const
 void cppjinja::evtnodes::op_out::render(evt::exenv& env) const
 {
 	env.current_node(this);
-	evt::expr_filter flt(&env, evt::expr_solver(&env)(op.value));
-	for(auto& f:op.filters) flt(f);
-	env.out() << flt;
+	env.out() << evt::expr_eval(&env)(op.value)->solve();
 }

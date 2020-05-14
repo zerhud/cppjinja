@@ -11,16 +11,9 @@
 #include "ast/single.hpp"
 #include <boost/fusion/include/adapt_struct.hpp>
 
-BOOST_FUSION_ADAPT_STRUCT(
-		cppjinja::ast::op_out,
-		open, value, filters, close)
-
-BOOST_FUSION_ADAPT_STRUCT(
-		cppjinja::ast::op_comment,
-		open, value, close)
-
+BOOST_FUSION_ADAPT_STRUCT( cppjinja::ast::op_out, open, value, close)
+BOOST_FUSION_ADAPT_STRUCT( cppjinja::ast::op_comment, open, value, close)
 BOOST_FUSION_ADAPT_STRUCT(cppjinja::ast::op_set, open, value, close)
-
 BOOST_FUSION_ADAPT_STRUCT(
 		cppjinja::ast::op_include,
 		open, filename, ignore_missing, with_context, close)

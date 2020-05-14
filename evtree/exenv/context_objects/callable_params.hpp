@@ -21,7 +21,7 @@ class callable_params : public context_object {
 	void add_not_passed_defaults();
 	void replace_named(east::function_parameter p);
 	void replace_placed(std::size_t place, east::function_parameter p);
-	void add_value(std::string name, east::value_term val);
+	void add_value(std::string name, json val);
 public:
 	callable_params(std::vector<east::function_parameter> expected, std::vector<east::function_parameter> called);
 	~callable_params() noexcept override ;

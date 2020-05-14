@@ -55,6 +55,6 @@ cppjinja::evt::context_objects::jinja_namespace::call(
 	if(params.empty()) throw std::runtime_error("cannot create empty namespace");
 	auto ret = std::make_shared<tree>();
 	for(auto& p:params)
-		ret->add(*p.name, std::make_shared<value>(*p.val));
+		ret->add(*p.name, std::make_shared<value>(*p.jval,1));
 	return ret;
 }

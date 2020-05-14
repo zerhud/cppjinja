@@ -52,7 +52,7 @@ std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::d
 			auto check_name = [&ip](auto p){return p.name == ip.name;};
 			auto pos = std::find_if(result.begin(),result.end(),check_name);
 			if(pos == result.end()) ins = ip;
-			else pos->val = ip.val;
+			else pos->jval = ip.jval;
 		}
 	}
 	return obj->call(result);

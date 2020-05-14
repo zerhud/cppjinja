@@ -127,9 +127,9 @@ BOOST_DATA_TEST_CASE(
 	, utd::make("t"s, "<=a=>"s, "ttt<#c#>"s, "t<#cmt#><=a=>"s)
 	^ utd::make(
 		  ast::make_content( "t"s )
-		, ast::make_content( ast::make_out(ast::var_name{"a"s}))
+		, ast::make_content( ast::make_out("a"s))
 		, ast::make_content( "ttt"s, ast::make_comment("c"s))
-		, ast::make_content( "t"s, ast::make_comment("cmt"s), ast::make_out(ast::var_name{"a"s}))
+		, ast::make_content( "t"s, ast::make_comment("cmt"s), ast::make_out("a"s))
 	  )
 	, data, good_result)
 {

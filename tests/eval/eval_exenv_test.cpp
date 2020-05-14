@@ -163,11 +163,11 @@ BOOST_FIXTURE_TEST_CASE(call, mock_exenv_fixture)
 	mocks::callable_node node;
 	cppjinja::evt::context_objects::callable_node val(&env, &node);
 	mock::sequence seq;
-	cppjinja::east::function_parameter p1{"a"s, east_value_term{"ok"s}};
+	cppjinja::east::function_parameter p1{"a"s, "ok"s};
 	MOCK_EXPECT(calls.push).once().in(seq).calls([&node,&p1](auto*n, auto params){
 		BOOST_TEST(n == &node);
 		auto sp1 = params.find(var_name{"a"});
-		BOOST_TEST(sp1->solve() == *p1.val);
+		BOOST_TEST(sp1->jval() == *p1.jval);
 	});
 	MOCK_EXPECT(node.evaluate)
 	        .once()
@@ -190,22 +190,22 @@ BOOST_AUTO_TEST_CASE(cannot_add_solve_call)
 BOOST_AUTO_TEST_CASE(params)
 {
 	using cppjinja::east::function_parameter;
-	function_parameter c1{std::nullopt, east_value_term{41}};
-	function_parameter c2{"p2"s, east_value_term{42}};
-	function_parameter c3{"p3"s, east_value_term{43}};
-	function_parameter c4{std::nullopt, east_value_term{44}};
+	function_parameter c1{std::nullopt, 41};
+	function_parameter c2{"p2"s, 42};
+	function_parameter c3{"p3"s, 43};
+	function_parameter c4{std::nullopt, 44};
 
 	function_parameter p1{"p1", std::nullopt};
-	function_parameter p2{"p2", east_value_term{52}};
-	function_parameter p4{"p4", east_value_term{54}};
-	function_parameter p5{"p5", east_value_term{55}};
+	function_parameter p2{"p2", 52};
+	function_parameter p4{"p4", 54};
+	function_parameter p5{"p5", 55};
 
 	cppjinja::evt::context_objects::callable_params obj({p1, p2, p4, p5}, {c1, c2, c4, c3});
-	BOOST_TEST(obj.find(var_name{"p1"})->solve() == east_value_term{41});
-	BOOST_TEST(obj.find(var_name{"p2"})->solve() == east_value_term{42});
-	BOOST_TEST(obj.find(var_name{"p3"})->solve() == east_value_term{43});
-	BOOST_TEST(obj.find(var_name{"p4"})->solve() == east_value_term{44});
-	BOOST_TEST(obj.find(var_name{"p5"})->solve() == east_value_term{55});
+	BOOST_TEST(obj.find(var_name{"p1"})->jval() == 41);
+	BOOST_TEST(obj.find(var_name{"p2"})->jval() == 42);
+	BOOST_TEST(obj.find(var_name{"p3"})->jval() == 43);
+	BOOST_TEST(obj.find(var_name{"p4"})->jval() == 44);
+	BOOST_TEST(obj.find(var_name{"p5"})->jval() == 55);
 	BOOST_TEST(obj.find(var_name{"P1"}) == nullptr);
 }
 BOOST_AUTO_TEST_SUITE_END() // callable_params
@@ -284,7 +284,7 @@ BOOST_AUTO_TEST_CASE(find_is_link)
 	auto obj_a = obj.find(var_name{"a"s});
 	BOOST_REQUIRE(obj_a);
 	MOCK_EXPECT(prov.value_var_name).with(var_name{"a"s}).returns(east_value_term{"ok"s});
-	BOOST_TEST(obj_a->solve() == east_value_term{"ok"s});
+	BOOST_TEST(obj_a->jval() == "ok"s);
 
 	auto obj_b = obj.find(var_name{"b"s});
 	MOCK_EXPECT(prov.value_function_call).calls([](auto call){
@@ -292,13 +292,24 @@ BOOST_AUTO_TEST_CASE(find_is_link)
 		BOOST_TEST(call.ref.at(0) == "b");
 		BOOST_TEST(call.params.size() == 1);
 		BOOST_TEST(*call.params.at(0).name == "p1"s);
-		BOOST_TEST(*call.params.at(0).val == east_value_term{"p1_val"s});
+		BOOST_TEST(*call.params.at(0).jval == "p1_val"s);
 		return east_value_term{"ok"s};
 	} );
-	cppjinja::east::function_parameter p1;
-	p1.name = "p1"s;
-	p1.val = east_value_term{"p1_val"s};
-	BOOST_TEST(obj_b->call({p1})->solve() == east_value_term{"ok"s});
+	cppjinja::east::function_parameter p1{"p1"s, "p1_val"s};
+	BOOST_TEST(obj_b->call({p1})->jval() == "ok"s);
+}
+BOOST_AUTO_TEST_CASE(name_combination)
+{
+	mocks::data_provider prov;
+	cppjinja::evt::context_objects::user_data obj(&prov);
+	auto obj_a = obj.find(var_name{"a"s});
+	BOOST_REQUIRE(obj_a);
+	MOCK_EXPECT(prov.value_var_name).with(var_name{"a"s}).returns(east_value_term{"ok"s});
+	BOOST_TEST(obj_a->jval() == "ok"s);
+
+	auto obj_ab = obj_a->find(var_name{"b"});
+	MOCK_EXPECT(prov.value_var_name).with(var_name{"a"s, "b"s}).returns(east_value_term{"ok2"s});
+	BOOST_TEST(obj_ab->jval() == "ok2"s);
 }
 BOOST_AUTO_TEST_SUITE_END() // user_data
 BOOST_AUTO_TEST_SUITE(delay_call)
@@ -306,7 +317,7 @@ BOOST_AUTO_TEST_CASE(solve)
 {
 	auto obj = std::make_shared<mocks::context_object>();
 	std::vector<cppjinja::east::function_parameter> params;
-	params.emplace_back().val = evalue_term{"pval"s};
+	params.emplace_back().jval = "pval"s;
 	cppjinja::evt::context_objects::delay_call dc(obj, params);
 	auto obj_val = std::make_shared<cppjinja::evt::context_objects::value>(evalue_term{"ok"s});
 	MOCK_EXPECT(obj->call).once().with(params).returns(obj_val);
@@ -324,18 +335,18 @@ BOOST_AUTO_TEST_CASE(call)
 {
 	auto obj = std::make_shared<mocks::context_object>();
 	std::vector<cppjinja::east::function_parameter> params;
-	params.emplace_back().val = evalue_term{"pval"s};
+	params.emplace_back().jval = "pval"s;
 	params.emplace_back().name = "p3";
-	params.back().val = evalue_term{"bad"s};
+	params.back().jval = "bad"s;
 	cppjinja::evt::context_objects::delay_call dc(obj, params);
 
-	params.back().val = evalue_term{"good"s};
+	params.back().jval = "good"s;
 	params.emplace_back().name = "p2";
 
 	std::vector<cppjinja::east::function_parameter> call_params;
 	call_params.emplace_back().name = "p2";
 	call_params.emplace_back().name = "p3";
-	call_params.back().val = evalue_term{"good"s};
+	call_params.back().jval = "good"s;
 
 	auto obj_val = std::make_shared<cppjinja::evt::context_objects::value>(evalue_term{"ok"s});
 	MOCK_EXPECT(obj->call).once().with(params).returns(obj_val);
@@ -360,9 +371,9 @@ BOOST_AUTO_TEST_CASE(jinja_namespace)
 	BOOST_CHECK_THROW(ns.add("a", nullptr), std::exception);
 	BOOST_CHECK_THROW(ns.find(evar_name{"a"}), std::exception);
 
-	auto tree = ns.call({function_parameter{"a", evalue_term{"ok_a"}}});
+	auto tree = ns.call({function_parameter{"a", "ok_a"}});
 	BOOST_CHECK(tree);
-	BOOST_TEST(tree->find(evar_name{"a"})->solve() == evalue_term{"ok_a"s});
+	BOOST_TEST(tree->find(evar_name{"a"})->jval() =="ok_a"s);
 }
 BOOST_AUTO_TEST_SUITE_END() // delay_call
 BOOST_AUTO_TEST_SUITE_END() // context_object
@@ -514,8 +525,8 @@ BOOST_FIXTURE_TEST_CASE(by_fnc, mock_exenv_fixture)
 		BOOST_TEST(base == east_value_term{2});
 		BOOST_TEST(udfc.params.size() == fc.params.size());
 		BOOST_TEST(udfc.params[0].name.has_value() == fc.params[0].name.has_value());
-		BOOST_CHECK(udfc.params[0].val.has_value());
-		BOOST_TEST(*udfc.params[0].val == east_value_term{(double)42});
+		BOOST_CHECK(udfc.params[0].jval.has_value());
+		BOOST_TEST(*udfc.params[0].jval == 42.0);
 		return east_value_term{101};
 	};
 	MOCK_EXPECT(data.filter).once().calls(check);
@@ -597,7 +608,7 @@ BOOST_FIXTURE_TEST_CASE(from_user_data, mock_solver_fixture)
 	cppjinja::ast::function_call_parameter param1(value_term{1});
 	value_term call{cppjinja::ast::function_call{fnc_name, {param1}}};
 
-	expect_call(evar_name{"a"}, {cppjinja::east::function_parameter{std::nullopt, evalue_term{(double)1}}}, evalue_term{(double)42});
+	expect_call(evar_name{"a"}, {cppjinja::east::function_parameter{std::nullopt, 1.0}}, evalue_term{(double)42});
 	BOOST_TEST(solver(call) == east_value_term{(double)42});
 }
 BOOST_FIXTURE_TEST_CASE(solve_array_call, mock_solver_fixture)
@@ -742,7 +753,7 @@ BOOST_FIXTURE_TEST_CASE(params, impl_exenv_fixture)
 {
 	mocks::callable_node calling1;
 	cppjinja::evt::context_objects::callable_params params(
-	{}, {cppjinja::east::function_parameter{"p1"s, east_value_term{"ok"s}}});
+	{}, {cppjinja::east::function_parameter{"p1"s, "ok"s}});
 	ctx.push_shadow(&calling1);
 	calls.push(&calling1, params);
 	BOOST_TEST(env.params().find(evar_name{"p1"s}) != nullptr);

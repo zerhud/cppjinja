@@ -162,7 +162,7 @@ BOOST_FIXTURE_TEST_CASE(without_args, mock_exenv_fixture)
 BOOST_FIXTURE_TEST_CASE(with_args, mock_exenv_fixture)
 {
 	std::vector<cppjinja::east::function_parameter> params;
-	params.emplace_back(cppjinja::east::function_parameter{std::nullopt, std::nullopt, "ok"});
+	params.emplace_back(cppjinja::east::function_parameter{std::nullopt, "ok"});
 
 	auto a = std::make_shared<mocks::context_object>();
 	auto call = std::make_shared<mocks::context_object>();
@@ -181,7 +181,7 @@ BOOST_FIXTURE_TEST_CASE(with_args, mock_exenv_fixture)
 BOOST_FIXTURE_TEST_CASE(points, mock_exenv_fixture)
 {
 	std::vector<cppjinja::east::function_parameter> params;
-	params.emplace_back(cppjinja::east::function_parameter{std::nullopt, std::nullopt, "ok"});
+	params.emplace_back(cppjinja::east::function_parameter{std::nullopt, "ok"});
 
 	auto a = std::make_shared<mocks::context_object>();
 	auto b = std::make_shared<mocks::context_object>();

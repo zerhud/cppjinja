@@ -75,7 +75,7 @@ auto block_macro_data =
 auto rvterm_data = tdata::make(
             "data"sv, "<= 'data' =>"sv, "<= 42 =>"sv, "<= ['one', 'two'] =>"sv
             ) ^ tdata::make(
-            "data"sv, "data"sv,         "42"sv,       "one two "sv );
+            "data"sv, "data"sv,         "42"sv,       "[\"one\",\"two\"]"sv );
 BOOST_DATA_TEST_CASE_F(mock_data_provider_fixture, render_vterm
          , rvterm_data , code, result)
 {
@@ -83,7 +83,6 @@ BOOST_DATA_TEST_CASE_F(mock_data_provider_fixture, render_vterm
 }
 
 BOOST_AUTO_TEST_SUITE(var_name)
-
 	BOOST_FIXTURE_TEST_CASE(not_setted, mock_data_provider_fixture)
 	{
 		MOCK_EXPECT(data->value_var_name)
@@ -98,17 +97,6 @@ BOOST_AUTO_TEST_SUITE(var_name)
 	{
 		auto pdata = "<% set d='test' %><= d =>"sv;
 		BOOST_TEST(parse_single(pdata, *data) == "test"sv );
-	}
-
-	BOOST_FIXTURE_TEST_CASE(only_single_name_search, mock_data_provider_fixture)
-	{
-		MOCK_EXPECT(data->value_var_name)
-		        .once()
-		        .with(east::var_name{"a"s,"d"s})
-		        .returns(east::value_term{"up"})
-		        ;
-		auto pdata = "<% set d='test' %><= a.d =>"sv;
-		BOOST_TEST(parse_single(pdata, *data) == "up"sv );
 	}
 
 BOOST_AUTO_TEST_SUITE_END() //var_name
@@ -131,14 +119,14 @@ BOOST_AUTO_TEST_CASE(filter)
 	        .with(east::var_name{"a"s})
 	        .returns(east::value_term{"not ok"})
 	        ;
-	MOCK_EXPECT(data->filter)
+	MOCK_EXPECT(data->value_function_call)
 	        .once()
-	        .calls([](const east::function_call& c, const east::value_term& b){
+	        .calls([](const east::function_call& c){
 				BOOST_TEST( c.ref.size() == 1 );
 				BOOST_TEST( c.ref[0] == "filter"s );
-				BOOST_TEST( c.params.empty() );
-				BOOST_TEST_REQUIRE( std::holds_alternative<east::string_t>(b) );
-				BOOST_TEST( std::get<east::string_t>(b) == "not ok"s );
+				BOOST_TEST( c.params.size() == 1 );
+				BOOST_TEST( *c.params.at(0).name == "$" );
+				BOOST_TEST( *c.params.at(0).jval == "not ok"s );
 				return "ok"s;
 			});
 

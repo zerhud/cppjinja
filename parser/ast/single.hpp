@@ -22,8 +22,7 @@ struct filter_call : x3::variant<var_name, function_call>
 
 struct op_out : x3::position_tagged
 {
-	value_term value;
-	std::vector<filter_call> filters;
+	expr_ops::expr value;
 	op_term_start open;
 	op_term_end close;
 };

@@ -98,7 +98,7 @@ void cppjinja::evt::expr_eval::filter_content(cppjinja::ast::expr_ops::filter_ca
 	auto filter = solve_ref(call.ref);
 
 	std::vector<east::function_parameter> params;
-	params.emplace_back(east::function_parameter{"$", std::nullopt, std::move(base)});
+	params.emplace_back(east::function_parameter{"$", std::move(base)});
 	for(auto& p:call.args) params.emplace_back(make_param(p.get()));
 
 	result = filter->call(params);

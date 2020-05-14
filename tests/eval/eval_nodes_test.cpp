@@ -219,30 +219,17 @@ BOOST_AUTO_TEST_SUITE_END() // op_set
 BOOST_AUTO_TEST_SUITE(op_out)
 BOOST_AUTO_TEST_CASE(getters)
 {
-	ast::op_out ast_out{ {1,1}, value_term{42}, {}, {{1,1},false}, {{1,1},true} };
+	ast::op_out ast_out{ {1,1}, aps::expr{aps::term{42}}, {{1,1},false}, {{1,1},true} };
 	evtnodes::op_out snode(ast_out);
 	BOOST_TEST(snode.rinfo().trim_left == false);
 	BOOST_TEST(snode.rinfo().trim_right == true);
 }
 BOOST_FIXTURE_TEST_CASE(render, mock_exenv_fixture)
 {
-	ast::op_out ast_out{ {1,1}, value_term{42}, {}, {{1,1},false}, {{1,1},true} };
+	ast::op_out ast_out{ {1,1}, aps::expr{aps::term{42}}, {{1,1},false}, {{1,1},true} };
 	evtnodes::op_out snode(ast_out);
 	MOCK_EXPECT(env.current_node).once().with(&snode);
 	BOOST_CHECK_NO_THROW(snode.render(env));
-}
-BOOST_FIXTURE_TEST_CASE(render_with_filters, mock_exenv_fixture)
-{
-	ast::op_out ast_out{ {1,1}, value_term{42}, {}, {{1,1},false}, {{1,1},true} };
-	ast_out.filters.push_back(ast::filter_call{ast::var_name{"a"}});
-	ast_out.filters.push_back(ast::filter_call{ast::function_call(ast::var_name{"fnc"}, {})});
-	evtnodes::op_out snode(ast_out);
-	MOCK_EXPECT(env.current_node).once().with(&snode);
-	mock::sequence filter_seq;
-	MOCK_EXPECT(data.filter).once().in(filter_seq).returns("first");
-	MOCK_EXPECT(data.filter).once().in(filter_seq).returns("ok");
-	BOOST_CHECK_NO_THROW(snode.render(env));
-	BOOST_TEST(out.str() == "ok");
 }
 BOOST_AUTO_TEST_SUITE_END() // op_out
 
@@ -432,8 +419,8 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(sovled_params, T, callable_list, mock_callable_
 	BOOST_TEST_REQUIRE(solved.size() == 2);
 	BOOST_TEST(*solved[0].name == "a"s);
 	BOOST_TEST(*solved[1].name == "b"s);
-	BOOST_TEST(*solved[0].val == cppjinja::east::value_term{"a"});
-	BOOST_TEST(*solved[1].val == cppjinja::east::value_term{"b"});
+	BOOST_TEST(*solved[0].jval == "a"s);
+	BOOST_TEST(*solved[1].jval == "b"s);
 }
 BOOST_AUTO_TEST_SUITE_END() // callables
 

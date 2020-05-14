@@ -84,5 +84,5 @@ bool cppjinja::east::operator ==(
           const cppjinja::east::function_parameter& left
         , const cppjinja::east::function_parameter& right)
 {
-	return left.name == right.name && left.val == right.val;
+	return left.name == right.name && left.jval == right.jval;
 }

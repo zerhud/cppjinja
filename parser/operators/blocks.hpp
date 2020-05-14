@@ -54,7 +54,7 @@ std::vector<block_content> make_content(Args&&... args)
 
 inline op_comment make_comment(std::string v) { op_comment ret; ret.value=v; return ret; }
 
-inline op_out make_out(var_name v) { op_out ret; ret.value=v; return ret; }
+inline op_out make_out(std::string v) { op_out ret; ret.value=expr_ops::expr{expr_ops::single_var_name{v}}; return ret; }
 
 inline block_for make_for(std::vector<std::string> vars, boost::spirit::x3::variant<cppjinja::ast::var_name, cppjinja::ast::function_call> val, bool recurs=false)
 {
