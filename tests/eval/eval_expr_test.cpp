@@ -245,6 +245,16 @@ BOOST_FIXTURE_TEST_CASE(with_args, mock_exenv_fixture)
 }
 BOOST_AUTO_TEST_SUITE_END() // filter_call
 
+BOOST_FIXTURE_TEST_CASE(expr_bool, mock_exenv_fixture)
+{
+	BOOST_TEST(eeval(&env)(txt::parse(ext::expr_bool, "'a'")) == true);
+	BOOST_TEST(eeval(&env)(txt::parse(ext::expr_bool, "''")) == false);
+	BOOST_TEST(eeval(&env)(txt::parse(ext::expr_bool, "false")) == false);
+	BOOST_TEST(eeval(&env)(txt::parse(ext::expr_bool, "true")) == true);
+	BOOST_TEST(eeval(&env)(txt::parse(ext::expr_bool, "1")) == true);
+	BOOST_TEST(eeval(&env)(txt::parse(ext::expr_bool, "0.0")) == false);
+}
+
 BOOST_AUTO_TEST_SUITE_END() // reduce
 BOOST_AUTO_TEST_SUITE_END() // expr
 BOOST_AUTO_TEST_SUITE_END() // phase_evaluate

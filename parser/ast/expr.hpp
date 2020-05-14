@@ -128,4 +128,15 @@ struct expr : expr_var {
 	using base_type::operator=;
 };
 
+using expr_bool_var = x3::variant<
+term, single_var_name, list, tuple, dict,
+math, concat,
+cmp_check, logic_check, negate,
+fnc_call, filter, point, op_if
+>;
+struct expr_bool : expr_bool_var {
+	using base_type::base_type;
+	using base_type::operator=;
+};
+
 } // namespace cppjinja::ast::expr_ops

@@ -34,5 +34,6 @@ BOOST_SPIRIT_INSTANTIATE( decltype(eq_assign),iterator_type, context_type )
 BOOST_SPIRIT_INSTANTIATE( decltype(in_assign),iterator_type, context_type )
 
 BOOST_SPIRIT_INSTANTIATE( decltype(expr), iterator_type, context_type )
+BOOST_SPIRIT_INSTANTIATE( decltype(expr_bool), iterator_type, context_type )
 
 } // namespace cppjinja::text::expr_ops

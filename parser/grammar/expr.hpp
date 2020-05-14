@@ -40,6 +40,7 @@ class point_class;
 class op_if_class;
 
 class expr_class;
+class expr_bool_class;
 
 const x3::rule<bool_class, bool> bool_rule = "bool_rule";
 const x3::rule<term_class, ast::expr_ops::term> term = "term";
@@ -67,6 +68,7 @@ const x3::rule<filter_class, ast::expr_ops::filter> filter = "filter";
 const x3::rule<op_if_class, ast::expr_ops::op_if> op_if = "op_if";
 
 const x3::rule<expr_class, ast::expr_ops::expr> expr = "expr";
+const x3::rule<expr_bool_class, ast::expr_ops::expr_bool> expr_bool = "expr_bool";
 
 BOOST_SPIRIT_DECLARE(decltype(term))
 BOOST_SPIRIT_DECLARE(decltype(bool_rule));
@@ -91,5 +93,6 @@ BOOST_SPIRIT_DECLARE(decltype(single_var_name));
 BOOST_SPIRIT_DECLARE(decltype(op_if));
 
 BOOST_SPIRIT_DECLARE(decltype(expr));
+BOOST_SPIRIT_DECLARE(decltype(expr_bool));
 
 } // namespace cppjinja::text::expr_ops

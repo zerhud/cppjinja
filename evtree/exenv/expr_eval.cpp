@@ -38,6 +38,16 @@ cppjinja::ast::string_t cppjinja::evt::expr_eval::to_str(const json& v) const
 	return v.dump();
 }
 
+bool cppjinja::evt::expr_eval::to_bool(const cppjinja::json& v) const
+{
+	if(v.is_string()) return !v.get<std::string>().empty();
+	if(v.is_number_integer()) return !!v.get<std::int64_t>();
+	if(v.is_number_float()) return !!v.get<double>();
+	if(v.is_boolean()) return v.get<bool>();
+	if(v.is_null()) throw std::runtime_error("cannot convert null to bool");
+	return false;
+}
+
 cppjinja::ast::expr_ops::term cppjinja::evt::expr_eval::to_term(const cppjinja::json& j) const
 {
 	using ast::expr_ops::term;
@@ -132,6 +142,15 @@ cppjinja::evt::expr_eval::operator () (ast::expr_ops::lvalue ref) const
 {
 	result.reset();
 	return solve_ref(ref);
+}
+
+bool cppjinja::evt::expr_eval::operator()(ast::expr_ops::expr_bool e) const
+{
+	result.reset();
+	auto val = boost::apply_visitor(*this, e);
+	if(result) val = result->jval();
+	result.reset();
+	return to_bool(val);
 }
 
 cppjinja::evt::expr_eval::eval_type
