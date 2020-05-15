@@ -77,7 +77,10 @@ bool cppjinja::ast::expr_ops::operator == (const concat& left, const concat& rig
 {
 	return left.left == right.left && left.right == right.right;
 }
-bool cppjinja::ast::expr_ops::operator == (const in_check& left, const in_check& right){return false;}
+bool cppjinja::ast::expr_ops::operator == (const in_check& left, const in_check& right)
+{
+	return left.term.get() == right.term.get() && left.object.get() == right.object.get();
+}
 bool cppjinja::ast::expr_ops::operator == (const cmp_check& left, const cmp_check& right)
 {
 	return left.op == right.op && left.left == right.left && left.right == right.right;
@@ -131,6 +134,12 @@ std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const lis
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const tuple& right) { return out; }
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const dict& right) { return out; }
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const lvalue& right){return out << right.var;}
+std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const expr_bool& op)
+{
+	out << "expr_bool " << op.var.type().name() << ": ";
+	auto prt = [&out](const auto& v)->std::ostream&{return out << v;};
+	return boost::apply_visitor(prt, op.var);
+}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const any_assign& right)
 {
 	for(auto&n:right.names) out << n << ',';
@@ -138,7 +147,7 @@ std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const any
 }
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const math& right){return out;}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const concat& right){return out << right.left << '~' << right.right;}
-std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const in_check& right){return out;}
+std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const in_check& right){return out << right.term.get() << " in " << right.object.get();}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const cmp_check& right)
 {
 	return out << right.left << " cmp" << static_cast<int>(right.op) << right.right;

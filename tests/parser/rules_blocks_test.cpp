@@ -15,6 +15,7 @@
 #include <boost/spirit/home/x3/support/ast/variant.hpp>
 
 #include "parser/parse.hpp"
+#include "parser/operators/expr.hpp"
 #include "parser/operators/blocks.hpp"
 #include "parser/grammar/expr.hpp"
 #include "parser/grammar/blocks.hpp"
