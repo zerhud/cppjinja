@@ -22,7 +22,6 @@ MOCK_BASE_CLASS( data_provider, cppjinja::data_provider)
 {
 	MOCK_METHOD( value, 1, cppjinja::east::value_term(const cppjinja::east::var_name& val), value_var_name )
 	MOCK_METHOD( value, 1, cppjinja::east::value_term(const cppjinja::east::function_call& val), value_function_call )
-	MOCK_METHOD( filter, 2 )
 };
 
 MOCK_BASE_CLASS( node, cppjinja::evt::node )

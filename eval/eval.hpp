@@ -20,10 +20,6 @@ public:
 
 	virtual east::value_term value(const east::var_name& val) const =0 ;
 	virtual east::value_term value(const east::function_call& val) const =0 ;
-
-	virtual east::value_term filter(
-	        const east::function_call& val,
-	        const east::value_term& base) const =0 ;
 };
 
 class evaluator {
