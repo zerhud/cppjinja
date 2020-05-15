@@ -9,7 +9,6 @@
 #include <istream>
 #include "block_macro.hpp"
 #include "../evtree.hpp"
-#include "evtree/exenv/expr_solver.hpp"
 
 const cppjinja::ast::block_with_name& cppjinja::evtnodes::block_macro::cur_ast() const
 {

@@ -9,7 +9,6 @@
 #include "op_set.hpp"
 #include "exenv.hpp"
 #include "evtree/exenv/expr_eval.hpp"
-#include "evtree/exenv/expr_solver.hpp"
 #include "evtree/exenv/context_objects/value.hpp"
 
 using namespace cppjinja::evtnodes;

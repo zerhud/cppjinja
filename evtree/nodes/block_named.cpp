@@ -7,11 +7,8 @@
  *************************************************************************/
 
 #include "block_named.hpp"
-#include "parser/helpers.hpp"
-#include "../evtree.hpp"
+#include "evtree/evtree.hpp"
 #include "evtree/exenv/context_objects/callable_params.hpp"
-#include "evtree/exenv/callstack.hpp"
-#include "evtree/exenv/expr_solver.hpp"
 
 const cppjinja::ast::block_with_name& cppjinja::evtnodes::block_named::cur_ast() const
 {
