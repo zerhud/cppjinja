@@ -63,7 +63,7 @@ struct else_thread
 
 struct block_if : block
 {
-	binary_op condition;
+	expr_ops::expr_bool condition;
 	std::vector<block_content> content;
 	std::optional<else_thread> else_block;
 };

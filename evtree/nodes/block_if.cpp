@@ -8,7 +8,7 @@
 
 #include "block_if.hpp"
 #include "../evtree.hpp"
-#include "../exenv/expr_solver.hpp"
+#include "../exenv/expr_eval.hpp"
 
 using namespace std::literals;
 using namespace cppjinja::evtnodes;
@@ -66,7 +66,7 @@ void block_if::render(evt::exenv& env) const
 {
 	env.current_node(this);
 	evt::raii_push_ctx ctx_holder(this, &env.ctx());
-	auto ifresult = evt::expr_solver(&env)(block.condition) == east::value_term{true};
+	auto ifresult = evt::expr_eval(&env)(block.condition);
 	if(ifresult) render_if(env);
 	else render_else(env);
 }

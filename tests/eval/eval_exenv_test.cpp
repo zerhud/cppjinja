@@ -525,7 +525,7 @@ BOOST_FIXTURE_TEST_CASE(by_fnc, mock_exenv_fixture)
 		BOOST_TEST(base == east_value_term{2});
 		BOOST_TEST(udfc.params.size() == fc.params.size());
 		BOOST_TEST(udfc.params[0].name.has_value() == fc.params[0].name.has_value());
-		BOOST_CHECK(udfc.params[0].jval.has_value());
+		BOOST_REQUIRE(udfc.params[0].jval.has_value());
 		BOOST_TEST(*udfc.params[0].jval == 42.0);
 		return east_value_term{101};
 	};

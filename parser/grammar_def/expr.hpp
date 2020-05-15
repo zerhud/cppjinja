@@ -122,10 +122,11 @@ auto const fnc_call_def = lvalue >> lit('(') >> -(expr % ',') >> lit(')');
 auto const filter_call_def = lvalue >> -( lit('(') >> -expr % ',' >> lit(')') );
 auto const filter_def = expr_filter >> lit('|') >> filter_call % '|';
 
-auto const op_if_def = expr_op_if >> lit("if") >> expr >> -(lit("else") >> expr);
+auto const op_if_def = expr_op_if >> lit("if") >> expr_bool >> -(lit("else") >> expr);
 
 auto const expr_in_pan_def = lit('(') >> expr >> lit(')');
-auto const expr_bool_def =        op_if | logic_check | cmp_check | filter | list | tuple | dict | concat | math | negate | fnc_call | point | single_var_name | term;
+auto const expr_bool_def =
+                       op_if | in_check | logic_check | cmp_check | filter | list | tuple | dict | concat | math | negate | fnc_call | point | single_var_name | term;
 auto const expr_def = eq_assign | op_if | logic_check | cmp_check | filter | list | tuple | dict | concat | math | negate | fnc_call | point | single_var_name | term;
 auto const expr_op_if_def =               logic_check | cmp_check | filter | list | tuple | dict | concat | math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
 auto const expr_logic_check_def =                       cmp_check | filter | list | tuple | dict | concat | math | negate | fnc_call | point | single_var_name | term | expr_in_pan;

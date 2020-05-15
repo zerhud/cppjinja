@@ -162,3 +162,13 @@ std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const op_
 	if(right.alternative) out << " else " << *right.alternative;
 	return out;
 }
+
+bool cppjinja::ast::expr_ops::operator ==(const cppjinja::ast::expr_ops::expr_bool& left, const cppjinja::ast::expr_ops::expr_bool& right)
+{
+	auto cmp = [](const auto& l, const auto& r)
+	{
+		if constexpr(std::is_same_v<decltype(l), decltype(r)>) return l == r;
+		else return false;
+	};
+	return boost::apply_visitor(cmp, left.var, right.var);
+}

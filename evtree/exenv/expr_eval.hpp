@@ -23,8 +23,8 @@ class expr_eval final {
 
 	cppjinja::json cvt(const ast::expr_ops::term& v) const ;
 	ast::string_t to_str(const cppjinja::json& v) const ;
-        bool to_bool(const cppjinja::json& v) const ;
-        ast::expr_ops::term to_term(const json& j) const ;
+	bool to_bool(const cppjinja::json& v) const ;
+	ast::expr_ops::term to_term(const json& j) const ;
 
 	void solve_point_arg(ast::expr_ops::point_element& left) const ;
 	void solve_point_arg(ast::expr_ops::single_var_name& left) const ;
@@ -41,7 +41,7 @@ public:
 
 	std::shared_ptr<evt::context_object> operator () (ast::expr_ops::expr t) const ;
 	std::shared_ptr<evt::context_object> operator () (ast::expr_ops::lvalue ref) const ;
-        bool operator() (ast::expr_ops::expr_bool e) const ;
+	bool operator() (ast::expr_ops::expr_bool e) const ;
 
 	eval_type operator () (ast::expr_ops::term& t) const ;
 	eval_type operator () (ast::expr_ops::single_var_name& t) const ;
@@ -52,6 +52,7 @@ public:
 	eval_type operator () (ast::expr_ops::in_assign& t) const ;
 	eval_type operator () (ast::expr_ops::math& t) const ;
 	eval_type operator () (ast::expr_ops::concat& t) const ;
+	eval_type operator () (ast::expr_ops::in_check& t) const ;
 	eval_type operator () (ast::expr_ops::cmp_check& t) const ;
 	eval_type operator () (ast::expr_ops::logic_check& t) const ;
 	eval_type operator () (ast::expr_ops::negate& t) const ;
@@ -64,6 +65,15 @@ private:
 	eval_type visit(ast::forward_ast<T>& v) const
 	{
 		return boost::apply_visitor(*this, v.get().var);
+	}
+
+	template<typename T>
+	eval_type eval(ast::forward_ast<T>& v) const
+	{
+		if(result) result.reset();
+		auto ret = boost::apply_visitor(*this, v.get().var);
+		if(result) return result->jval();
+		return ret;
 	}
 };
 

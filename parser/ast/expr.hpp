@@ -23,7 +23,7 @@ enum class cmp_op { nop, eq, neq, less, more, less_eq, more_eq };
 enum class logic_op { nop, op_and, op_or };
 
 struct expr;
-
+struct expr_bool;
 
 using term_var = x3::variant<bool, std::int64_t, double, string_t>;
 struct term : term_var {
@@ -112,7 +112,7 @@ struct filter {
 
 struct op_if {
 	forward_ast<expr> term;
-	forward_ast<expr> cond;
+	forward_ast<expr_bool> cond;
 	std::optional<forward_ast<expr>> alternative;
 };
 
@@ -131,7 +131,7 @@ struct expr : expr_var {
 using expr_bool_var = x3::variant<
 term, single_var_name, list, tuple, dict,
 math, concat,
-cmp_check, logic_check, negate,
+in_check, cmp_check, logic_check, negate,
 fnc_call, filter, point, op_if
 >;
 struct expr_bool : expr_bool_var {

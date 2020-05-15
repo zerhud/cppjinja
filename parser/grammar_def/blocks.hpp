@@ -56,7 +56,7 @@ namespace cppjinja::text {
 		>> lit("endraw") >> block_term_end;
 
 	const auto block_if_def =
-		   block_term_start >> omit[lit("if")] >> binary_op
+		   block_term_start >> omit[lit("if")] >> expr_ops::expr_bool
 		>> block_term_end_cnt >> *block_content
 		>> -else_thread >> block_term_start
 		>> lit("endif") >> block_term_end

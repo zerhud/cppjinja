@@ -437,7 +437,7 @@ BOOST_FIXTURE_TEST_CASE(getters, mock_exenv_fixture)
 BOOST_FIXTURE_TEST_CASE(render_true, mock_callable_fixture)
 {
 	ast::block_if ast_bl;
-	ast_bl.condition = ast::binary_op(value_term{1}, ast::comparator::eq, value_term{1});
+	ast_bl.condition = ast::expr_ops::expr_bool{ast::expr_ops::term{true}};
 	prepare_for_render_two_childrend(ast_bl);
 	evtnodes::block_if bl(ast_bl);
 	expect_transporent_cxt(&bl);
@@ -451,7 +451,7 @@ BOOST_FIXTURE_TEST_CASE(render_true, mock_callable_fixture)
 BOOST_FIXTURE_TEST_CASE(render_false_we, mock_callable_fixture)
 {
 	ast::block_if ast_bl;
-	ast_bl.condition = ast::binary_op(value_term{2}, ast::comparator::eq, value_term{1});
+	ast_bl.condition = ast::expr_ops::expr_bool{ast::expr_ops::term{false}};
 	prepare_for_render_two_childrend(ast_bl);
 	evtnodes::block_if bl(ast_bl);
 	expect_transporent_cxt(&bl);
@@ -462,7 +462,7 @@ BOOST_FIXTURE_TEST_CASE(render_false_we, mock_callable_fixture)
 BOOST_FIXTURE_TEST_CASE(render_false, mock_callable_fixture)
 {
 	ast::block_if ast_bl;
-	ast_bl.condition = ast::binary_op(value_term{2}, ast::comparator::eq, value_term{1});
+	ast_bl.condition = ast::expr_ops::expr_bool{ast::expr_ops::term{false}};
 	ast_bl.else_block.emplace().left_open.trim = true;
 	prepare_for_render_two_childrend(ast_bl);
 	evtnodes::block_if bl(ast_bl);
@@ -476,7 +476,7 @@ BOOST_FIXTURE_TEST_CASE(render_false, mock_callable_fixture)
 BOOST_FIXTURE_TEST_CASE(render_if_rinfo, mock_callable_fixture)
 {
 	ast::block_if ast_bl;
-	ast_bl.condition = ast::binary_op(value_term{1}, ast::comparator::eq, value_term{1});
+	ast_bl.condition = ast::expr_ops::expr_bool{ast::expr_ops::term{true}};
 	ast_bl.left_close.trim = true;
 	ast_bl.right_open.trim = false;
 	evtnodes::block_if cnt(ast_bl);
@@ -501,7 +501,7 @@ BOOST_FIXTURE_TEST_CASE(render_if_rinfo, mock_callable_fixture)
 	expect_transporent_cxt(&cnt);
 	cnt.render(env);
 
-	ast_bl.condition = ast::binary_op(value_term{2}, ast::comparator::eq, value_term{1});
+	ast_bl.condition = ast::expr_ops::expr_bool{ast::expr_ops::term{false}};
 	cnt = evtnodes::block_if(ast_bl);
 	MOCK_EXPECT(child2.render).once();
 	MOCK_EXPECT(env.rinfo).once().calls([](std::optional<cppjinja::evt::render_info> ri){
@@ -515,7 +515,7 @@ BOOST_FIXTURE_TEST_CASE(render_if_rinfo, mock_callable_fixture)
 BOOST_FIXTURE_TEST_CASE(render_if_tabshift, mock_callable_fixture)
 {
 	ast::block_if ast_bl;
-	ast_bl.condition = ast::binary_op(value_term{1}, ast::comparator::eq, value_term{1});
+	ast_bl.condition = ast::expr_ops::expr_bool{ast::expr_ops::term{true}};
 	ast_bl.left_close.bsign = 2;
 	ast_bl.right_open.bsign = -1;
 	evtnodes::block_if cnt(ast_bl);
@@ -540,7 +540,7 @@ BOOST_FIXTURE_TEST_CASE(render_if_tabshift, mock_callable_fixture)
 BOOST_FIXTURE_TEST_CASE(render_else_tabshift, mock_callable_fixture)
 {
 	ast::block_if ast_bl;
-	ast_bl.condition = ast::binary_op(value_term{2}, ast::comparator::eq, value_term{1});
+	ast_bl.condition = ast::expr_ops::expr_bool{ast::expr_ops::term{false}};
 	ast_bl.else_block.emplace().left_close.bsign = 2;
 	ast_bl.right_open.bsign = -1;
 	evtnodes::block_if cnt(ast_bl);

@@ -28,9 +28,10 @@ inline bool operator == (const x3::forward_ast<Left>& left, const Right& right){
 bool operator == (const expr& left, const expr& right);
 bool operator == (const term& left, const term& right);
 bool operator == (const list& left, const list& right);
-bool operator == (const tuple& left, const tuple& right);
 bool operator == (const dict& left, const dict& right);
+bool operator == (const tuple& left, const tuple& right);
 bool operator == (const lvalue& left, const lvalue& right);
+bool operator == (const expr_bool& left, const expr_bool& right);
 bool operator == (const any_assign& left, const any_assign& right);
 bool operator == (const math& left, const math& right);
 bool operator == (const concat& left, const concat& right);

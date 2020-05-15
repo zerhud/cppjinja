@@ -219,6 +219,18 @@ cppjinja::evt::expr_eval::operator ()(ast::expr_ops::concat& t) const
 }
 
 cppjinja::evt::expr_eval::eval_type
+cppjinja::evt::expr_eval::operator ()(ast::expr_ops::in_check& t) const
+{
+	auto term = eval(t.term);
+	auto object = eval(t.object);
+	if(object.is_array()) {
+		for(auto& i:object) if(i==term) return true;
+		return false;
+	}
+	return object.contains(term);
+}
+
+cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::cmp_check& t) const
 {
 	return cvt(boost::apply_visitor(
@@ -278,11 +290,7 @@ cppjinja::evt::expr_eval::operator ()(ast::expr_ops::point& t) const
 cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::op_if& t) const
 {
-	auto cond = visit(t.cond);
-	bool result_cond = false;
-	if(cond.is_boolean()) result_cond = cond.get<bool>();
-	else if(cond.is_number()) result_cond = cond.get<double>();
-	if(result_cond) return visit(t.term);
+	if((*this)(t.cond.get())) return visit(t.term);
 	if(t.alternative) return visit(*t.alternative);
 	return nullptr;
 }
