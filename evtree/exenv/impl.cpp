@@ -12,8 +12,6 @@
 #include "callstack.hpp"
 
 #include "helpers/binary_op.hpp"
-#include "exenv/expr_solver.hpp"
-#include "exenv/expr_filter.hpp"
 
 std::ostream& cppjinja::evt::operator << (std::ostream& out, const render_info& ri)
 {

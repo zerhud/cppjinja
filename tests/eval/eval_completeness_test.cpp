@@ -81,16 +81,18 @@ BOOST_DATA_TEST_CASE(get_var_filter
 {
 	namespace east = cppjinja::east;
 	int cur_count = 0;
-	auto filter = [&cur_count]( east::function_call fnc, east::value_term v){
-		BOOST_TEST_REQUIRE( std::holds_alternative<east::string_t>(v) );
-		BOOST_TEST( fnc.params.size() == 0 );
+	auto filter = [&cur_count]( east::function_call fnc){
+		BOOST_TEST_REQUIRE( fnc.params.size() == 1 );
+		BOOST_REQUIRE( fnc.params.at(0).name.has_value() && fnc.params.at(0).jval.has_value() );
+		BOOST_TEST(*fnc.params.at(0).name == "$");
+		auto v = *fnc.params.at(0).jval;
+
+		BOOST_REQUIRE( v.is_string() );
+
 		BOOST_TEST( fnc.ref.size() == 1 );
 		if( cur_count == 1 ) BOOST_TEST( fnc.ref[0] == "b"s );
 		if( cur_count == 0 ) BOOST_TEST( fnc.ref[0] == "a"s );
-		else {
-			BOOST_TEST( std::get<east::string_t>(v) ==
-			            "filter"s+std::to_string(cur_count) );
-		}
+		BOOST_TEST( v.get<std::string>() == "filter"s+std::to_string(cur_count) );
 		return "filter"s+std::to_string(++cur_count);
 	};
 	auto make_var = [&cur_count](east::var_name v){
@@ -102,7 +104,7 @@ BOOST_DATA_TEST_CASE(get_var_filter
 
 	mocks::data_provider prov;
 	MOCK_EXPECT(prov.value_var_name).once().calls(make_var);
-	MOCK_EXPECT(prov.filter).exactly(count).calls(filter);
+	MOCK_EXPECT(prov.value_function_call).exactly(count).calls(filter);
 	BOOST_TEST( parse_single(data, prov)=="filter"s+std::to_string(cur_count) );
 }
 
