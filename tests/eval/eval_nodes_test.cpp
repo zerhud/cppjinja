@@ -47,8 +47,8 @@ struct mock_callable_fixture : mock_exenv_fixture {
 	template<typename Ast>
 	void prepare_ast_for_params(Ast& ast_bl)
 	{
-		ast_bl.params.emplace_back(ast::macro_parameter{"p1", value_term{41}});
-		ast_bl.params.emplace_back(ast::macro_parameter{"p2", value_term{42}});
+		ast_bl.params.emplace_back(ast::macro_parameter{"p1", aps::expr{aps::term{41}}});
+		ast_bl.params.emplace_back(ast::macro_parameter{"p2", aps::expr{aps::term{42}}});
 		ast_bl.params.emplace_back(ast::macro_parameter{"p3", std::nullopt});
 	}
 
@@ -392,28 +392,29 @@ BOOST_AUTO_TEST_SUITE_END() // block_macro
 
 BOOST_AUTO_TEST_SUITE(callables)
 typedef std::tuple<
-  std::tuple<ast::block_named, evtnodes::block_named>
-, std::tuple<ast::block_macro, evtnodes::block_macro>
+  std::tuple<ast::block_named*, evtnodes::block_named*>
+, std::tuple<ast::block_macro*, evtnodes::block_macro*>
 > callable_list;
 BOOST_FIXTURE_TEST_CASE_TEMPLATE(getters, T, callable_list, mock_callable_fixture)
 {
-	std::tuple_element_t<0, T> ast_bl;
+	std::remove_pointer_t<std::tuple_element_t<0, T>> ast_bl;
 	ast_bl.name = "test_name";
-	std::tuple_element_t<1, T> bl(ast_bl);
+	std::remove_pointer_t<std::tuple_element_t<1, T>> bl(ast_bl);
 	check_getters(bl, ast_bl);
 }
 BOOST_FIXTURE_TEST_CASE_TEMPLATE(sovled_params, T, callable_list, mock_callable_fixture)
 {
-	std::tuple_element_t<0, T> ast_bl;
+	std::remove_pointer_t<std::tuple_element_t<0, T>> ast_bl;
 	ast_bl.name = "test_name";
-	std::tuple_element_t<1, T> bl(ast_bl);
+	std::remove_pointer_t<std::tuple_element_t<1, T>> bl(ast_bl);
 
 	using cppjinja::ast::var_name;
-	ast_bl.params = {{"a", value_term{"a"s}}, {"b", value_term{var_name{"a"s}}}};
-	std::tuple_element_t<1, T> blp(ast_bl);
+	ast_bl.params.emplace_back(ast::macro_parameter{"a", aps::expr{aps::term{"a"s}}});
+	ast_bl.params.emplace_back(ast::macro_parameter{"b", aps::expr{aps::single_var_name{"a"s}}});
+	std::remove_pointer_t<std::tuple_element_t<1, T>> blp(ast_bl);
 	auto obj = std::make_shared<mocks::context_object>();
 	MOCK_EXPECT(all_ctx.find).with(evar_name{"a"s}).returns(obj);
-	MOCK_EXPECT(obj->solve).returns("b");
+	MOCK_EXPECT(obj->jval).returns("b");
 
 	auto solved = blp.solved_params(env);
 	BOOST_TEST_REQUIRE(solved.size() == 2);

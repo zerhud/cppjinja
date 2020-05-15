@@ -24,6 +24,7 @@
 using namespace std::literals;
 namespace txt = cppjinja::text;
 namespace ast = cppjinja::ast;
+namespace est = cppjinja::ast::expr_ops;
 namespace utd = boost::unit_test::data;
 
 BOOST_AUTO_TEST_SUITE(phase_parse)
@@ -169,7 +170,7 @@ BOOST_DATA_TEST_CASE(
 	^ utd::make(
 		  ast::make_macro("m"s, {})
 		, ast::make_macro("m"s, {})
-		, ast::make_macro("m"s, {ast::macro_parameter{"n",{}}, ast::macro_parameter{"n", ast::value_term{ast::var_name{"v"}}}})
+		, ast::make_macro("m"s, {ast::macro_parameter{"n",{}}, ast::macro_parameter{"n", est::expr{est::single_var_name{"v"}}}})
 		)
 	, data, good_result)
 {

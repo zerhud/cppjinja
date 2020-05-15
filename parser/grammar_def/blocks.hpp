@@ -84,8 +84,7 @@ namespace cppjinja::text {
 		>> lit("endset") >> block_term_end
 		;
 
-	const auto call_parameter_def =
-		-(single_var_name >> '=') >> value_term ;
+	const auto call_parameter_def = -(single_var_name >> '=') >> expr_ops::expr;
 	const auto block_call_def =
 		   block_term_start
 		>> lit("call") >> single_var_name
@@ -96,8 +95,7 @@ namespace cppjinja::text {
 		>> lit("endcall") >> block_term_end
 		;
 
-	const auto macro_parameter_def =
-		single_var_name >> -('=' >> value_term);
+	const auto macro_parameter_def = single_var_name >> -('=' >> expr_ops::expr);
 	const auto macro_parameters_def =
 		single_var_name >> -('(' >> -(macro_parameter % ',') >> ')');
 	const auto block_macro_def =

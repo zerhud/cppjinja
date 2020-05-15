@@ -81,7 +81,7 @@ struct block_for : block
 struct macro_parameter
 {
 	string_t name;
-	std::optional<value_term> value;
+	std::optional<expr_ops::expr> value;
 };
 
 struct block_with_name : block

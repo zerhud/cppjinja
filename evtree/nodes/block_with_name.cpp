@@ -49,15 +49,11 @@ cppjinja::ast::string_t cppjinja::evtnodes::block_with_name::name() const
 std::vector<cppjinja::east::function_parameter> cppjinja::evtnodes::block_with_name::solved_params(cppjinja::evt::exenv& env) const
 {
 	std::vector<cppjinja::east::function_parameter> ret;
-	evt::expr_solver slv(&env);
+	evt::expr_eval slv(&env);
 	for(auto& p:cur_ast().params){
 		auto& i = ret.emplace_back();
 		i.name = p.name;
-		if(p.value) {
-			std::stringstream out;
-			out << slv(*p.value);
-			i.jval = out.str();
-		}
+		if(p.value) i.jval = slv(*p.value)->jval();
 	}
 	return ret;
 }
