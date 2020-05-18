@@ -213,6 +213,35 @@ BOOST_FIXTURE_TEST_CASE(call, mock_exenv_fixture)
 	MOCK_EXPECT(env.current_node).once().with(&snode);
 	snode.render(env);
 }
+BOOST_FIXTURE_TEST_CASE(few_names, mock_exenv_fixture)
+{
+	aps::eq_assign op;
+	op.value = aps::expr{aps::tuple{{aps::expr{aps::term{3}}, aps::expr{aps::term{5}}}}};
+	op.names.emplace_back(aps::single_var_name{"a"s});
+	op.names.emplace_back(aps::single_var_name{"b"s});
+	ast::op_set ast_node{ {1,1}, op, {{1,1},false}, {{1,1},true} };
+	evtnodes::op_set snode(ast_node);
+	mock::sequence seq;
+	expect_glp(0, 1, 0);
+	MOCK_EXPECT(locals.add)
+	        .in(seq).once()
+	        .calls([](std::string n, std::shared_ptr<cppjinja::evt::context_object> obj)
+	{
+		BOOST_TEST(n == "a");
+	});
+	MOCK_EXPECT(locals.add)
+	        .in(seq).once()
+	        .calls([](std::string n, std::shared_ptr<cppjinja::evt::context_object> obj)
+	{
+		BOOST_TEST(n == "b");
+	});
+	MOCK_EXPECT(env.current_node).once().with(&snode);
+	snode.render(env);
+}
+BOOST_FIXTURE_TEST_CASE(no_names, mock_exenv_fixture)
+{
+	BOOST_CHECK_THROW(evtnodes::op_set(ast::op_set{}), std::exception);
+}
 BOOST_AUTO_TEST_SUITE_END() // render
 BOOST_AUTO_TEST_SUITE_END() // op_set
 
