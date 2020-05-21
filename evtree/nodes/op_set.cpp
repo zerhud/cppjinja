@@ -14,12 +14,19 @@
 using namespace cppjinja::evtnodes;
 using namespace std::literals;
 
-void op_set::set_names(const cppjinja::ast::expr_ops::tuple& tval) const
+void op_set::set_names(evt::exenv& env, const cppjinja::ast::expr_ops::tuple& tval) const
 {
+	for(std::size_t i=0;i<op.value.names.size();++i) {
+		const auto& name =
+		        boost::get<ast::expr_ops::single_var_name>(op.value.names[i]);
+		env.locals().add(name.name, evt::expr_eval(&env)(tval.items.at(i)));
+	}
 }
 
 op_set::op_set(cppjinja::ast::op_set o) : op(std::move(o))
 {
+	if(op.value.names.empty())
+		throw std::runtime_error("no names in set");
 }
 
 cppjinja::evt::render_info op_set::rinfo() const
@@ -32,7 +39,7 @@ void op_set::render(evt::exenv& env) const
 	env.current_node(this);
 	const ast::expr_ops::tuple* tval =
 	        boost::get<ast::expr_ops::tuple>(&op.value.value.get());
-	if(tval) set_names(*tval);
+	if(tval) set_names(env, *tval);
 	else {
 		const ast::expr_ops::single_var_name& name =
 		        boost::get<ast::expr_ops::single_var_name>(op.value.names.at(0));

@@ -14,7 +14,7 @@ namespace cppjinja::evtnodes {
 
 class op_set : public evt::node {
 	ast::op_set op;
-	void set_names(const ast::expr_ops::tuple& tval) const ;
+	void set_names(evt::exenv& env, const ast::expr_ops::tuple& tval) const ;
 public:
 	op_set(ast::op_set o);
 
