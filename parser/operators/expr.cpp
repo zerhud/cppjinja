@@ -8,6 +8,7 @@
 
 
 #include "expr.hpp"
+#include <iomanip>
 
 std::ostream& cppjinja::ast::expr_ops::operator <<(std::ostream& out, cppjinja::ast::expr_ops::math_op op)
 {
@@ -131,8 +132,18 @@ std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const lis
 	for(auto& i:right.items) out << i.get() << ',';
 	return out << ']';
 }
-std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const tuple& right) { return out; }
-std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const dict& right) { return out; }
+std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const tuple& right)
+{
+	out << '(';
+	for(auto& i:right.items) out << i << ',';
+	return out << ')';
+}
+std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const dict& right)
+{
+	out << '{';
+	for(auto& i:right.items) out << std::quoted(i.name) << ":" << i.value << ',';
+	return out << '}';
+}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const lvalue& right){return out << right.var;}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const expr_bool& op)
 {
@@ -145,7 +156,7 @@ std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const any
 	for(auto&n:right.names) out << n << ',';
 	return out << '=' << right.value;
 }
-std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const math& right){return out;}
+std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const math& right){return out << right.left << ' ' << right.op << ' ' << right.right;}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const concat& right){return out << right.left << '~' << right.right;}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const in_check& right){return out << right.term.get() << " in " << right.object.get();}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const cmp_check& right)

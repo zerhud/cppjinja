@@ -159,7 +159,9 @@ BOOST_AUTO_TEST_SUITE_END() // tmpl
 BOOST_AUTO_TEST_SUITE(op_set)
 BOOST_AUTO_TEST_CASE(getters)
 {
-	ast::op_set ast_node{ {1,1}, aps::eq_assign{}, {{1,1},false}, {{1,1},true} };
+	aps::eq_assign asg;
+	asg.names.emplace_back(aps::single_var_name{"a"s});
+	ast::op_set ast_node{ {1,1}, asg, {{1,1},false}, {{1,1},true} };
 	evtnodes::op_set snode(ast_node);
 	BOOST_TEST(snode.rinfo().trim_left == false);
 	BOOST_TEST(snode.rinfo().trim_right == true);
@@ -228,12 +230,14 @@ BOOST_FIXTURE_TEST_CASE(few_names, mock_exenv_fixture)
 	        .calls([](std::string n, std::shared_ptr<cppjinja::evt::context_object> obj)
 	{
 		BOOST_TEST(n == "a");
+		BOOST_TEST(obj->jval() == 3);
 	});
 	MOCK_EXPECT(locals.add)
 	        .in(seq).once()
 	        .calls([](std::string n, std::shared_ptr<cppjinja::evt::context_object> obj)
 	{
 		BOOST_TEST(n == "b");
+		BOOST_TEST(obj->jval() == 5);
 	});
 	MOCK_EXPECT(env.current_node).once().with(&snode);
 	snode.render(env);
