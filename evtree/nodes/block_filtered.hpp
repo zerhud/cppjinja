@@ -14,6 +14,7 @@ namespace cppjinja::evtnodes {
 
 class block_filtered : public evt::node {
 	ast::block_filtered ast;
+	evt::render_info inner_ri() const ;
 public:
 	block_filtered(ast::block_filtered nb);
 	void render(evt::exenv& env) const override ;

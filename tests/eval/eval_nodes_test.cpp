@@ -23,6 +23,7 @@
 #include "evtree/nodes/block_named.hpp"
 #include "evtree/nodes/block_macro.hpp"
 #include "evtree/nodes/block_if.hpp"
+#include "evtree/nodes/block_filtered.hpp"
 #include "evtree/evtree.hpp"
 #include "parser/operators/blocks.hpp"
 
@@ -588,6 +589,39 @@ BOOST_FIXTURE_TEST_CASE(render_else_tabshift, mock_callable_fixture)
 	BOOST_TEST(rfmt("\na"s) == "\n\ta"s);
 }
 BOOST_AUTO_TEST_SUITE_END() // block_if
+
+BOOST_AUTO_TEST_SUITE(block_filter)
+BOOST_FIXTURE_TEST_CASE(getters, mock_callable_fixture)
+{
+	ast::block_filtered ast_bl;
+	ast_bl.left_open.trim = true;
+	ast_bl.right_close.trim = true;
+	cppjinja::evtnodes::block_filtered block(ast_bl);
+	BOOST_TEST(block.rinfo().trim_left == true);
+	BOOST_TEST(block.rinfo().trim_right == true);
+}
+BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
+{
+	ast::block_filtered ast_bl;
+	ast_bl.left_close.trim = true;
+	ast_bl.right_open.trim = true;
+	ast_bl.flt = ast::expr_ops::filter_call{ast::expr_ops::lvalue{ast::expr_ops::single_var_name{"flt"}}, {}};
+	ast_bl.content.emplace_back(ast::block_content{"base"s});
+	cppjinja::evtnodes::block_filtered block(ast_bl);
+
+	mocks::node child;
+	MOCK_EXPECT(child.render).once();
+	MOCK_EXPECT(env.result).once().returns("base"s);
+
+	expect_transporent_cxt(&block);
+	expect_children({&child});
+	expect_call(cppjinja::east::var_name{"flt"s}, {cppjinja::east::function_parameter{"$"s, "base"s}}, "after"s);
+	MOCK_EXPECT(env.rinfo).with(cppjinja::evt::render_info{true, true});
+	MOCK_EXPECT(env.current_node);
+	block.render(env);
+	BOOST_TEST(out.str() == "after"s);
+}
+BOOST_AUTO_TEST_SUITE_END() // block_filter
 
 BOOST_AUTO_TEST_SUITE_END() // nodes
 BOOST_AUTO_TEST_SUITE_END() // phase_evaluate

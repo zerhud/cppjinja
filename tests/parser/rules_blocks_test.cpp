@@ -208,4 +208,11 @@ BOOST_AUTO_TEST_CASE(block_call)
 	BOOST_CHECK_NO_THROW( result = txt::parse(txt::block_call, data) );
 }
 
+BOOST_AUTO_TEST_CASE(filtered)
+{
+	std::string data = "<% filter name %>cnt<%endfilter%>"s;
+	ast::block_filtered result;
+	BOOST_CHECK_NO_THROW( result = txt::parse(txt::block_filtered, data) );
+}
+
 BOOST_AUTO_TEST_SUITE_END() // phase_parse

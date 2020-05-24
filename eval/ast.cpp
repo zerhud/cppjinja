@@ -86,3 +86,11 @@ bool cppjinja::east::operator ==(
 {
 	return left.name == right.name && left.jval == right.jval;
 }
+
+std::ostream& cppjinja::east::operator <<(std::ostream& out, const cppjinja::east::function_parameter& val)
+{
+	using namespace std::literals;
+	return out << (val.name.has_value() ? *val.name : "[]"s)
+	           << "="s
+	           << (val.jval.has_value() ? *val.jval : "[]"_json);
+}
