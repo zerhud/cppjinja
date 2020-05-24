@@ -93,7 +93,12 @@ struct block_with_name : block
 
 struct block_macro : block_with_name { };
 struct block_named : block_with_name { };
-struct block_filtered : block_with_name { };
+
+struct block_filtered : block
+{
+	expr_ops::filter_call flt;
+	std::vector<block_content> content;
+};
 
 struct block_call : block
 {

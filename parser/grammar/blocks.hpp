@@ -46,7 +46,7 @@ namespace cppjinja::text {
 	const x3::rule<block_call_class, ast::block_call> block_call = "block_call";
 	const x3::rule<block_macro_class, ast::block_macro> block_macro = "block_macro";
 	const x3::rule<block_named_class, ast::block_named> block_named = "block_named";
-	const x3::rule<block_filtered_class, ast::block_named> block_filtered = "block_filtered";
+	const x3::rule<block_filtered_class, ast::block_filtered> block_filtered = "block_filtered";
 	const x3::rule<call_parameter_class, ast::macro_parameter> call_parameter = "call_parameter";
 	const x3::rule<macro_parameter_class, ast::macro_parameter> macro_parameter = "macro_parameter";
 

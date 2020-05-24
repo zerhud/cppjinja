@@ -48,8 +48,8 @@ BOOST_FUSION_ADAPT_STRUCT(
 
 BOOST_FUSION_ADAPT_STRUCT(
 		cppjinja::ast::block_filtered,
-		left_open, name, params, left_close,
-		content, content,
+		left_open, flt, left_close,
+		content,
 		right_open, right_close)
 
 BOOST_FUSION_ADAPT_STRUCT(

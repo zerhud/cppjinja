@@ -111,10 +111,9 @@ namespace cppjinja::text {
 		>> block_term_end
 		;
 	const auto block_filtered_def =
-		   block_term_start >> lit("filter") >> macro_parameters_def
-		>> block_term_end_cnt >> *block_content >> block_term_start
-		>> lexeme[lit("endfilter") >> -omit[+space >> single_var_name]]
-		>> block_term_end
+	       block_term_start >> lit("filter") >> expr_ops::filter_call
+	    >> block_term_end >> *block_content >> block_term_start
+	    >> lit("endfilter") >> block_term_end
 		;
 
 	class block_if_class          : x3::annotate_on_success {};
