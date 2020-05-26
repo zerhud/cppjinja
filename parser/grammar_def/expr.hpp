@@ -8,6 +8,8 @@
 
 #pragma once
 
+//#define BOOST_SPIRIT_X3_DEBUG
+
 #include <iostream>
 #include <boost/spirit/home/x3/support/utility/annotate_on_success.hpp>
 #include <boost/spirit/home/support/utf8.hpp>
@@ -39,6 +41,7 @@ const x3::rule<class expr_logic_check_class, ast::expr_ops::expr> expr_logic_che
 const x3::rule<class expr_op_if_class, ast::expr_ops::expr> expr_op_if = "expr_op_if";
 const x3::rule<class expr_in_pan_class, ast::expr_ops::expr> expr_in_pan = "expr_in_pan";
 const x3::rule<class expr_filter_class, ast::expr_ops::expr> expr_filter = "expr_filter";
+const x3::rule<class expr_ipoint_class, ast::expr_ops::expr> expr_ipoint = "expr_ipoint";
 
 BOOST_SPIRIT_DECLARE(decltype(math1));
 BOOST_SPIRIT_DECLARE(decltype(math2));
@@ -55,53 +58,53 @@ BOOST_SPIRIT_DECLARE(decltype(expr_concat_right));
 
 using boost::spirit::x3::lit;
 
-auto const quoted_string_1_def = *(x3::char_ >> !lit('\'') | lit("\\'") >> x3::attr('\'')) >> x3::char_;
-auto const quoted_string_2_def = *(x3::char_ >> !lit('"') | lit("\\\"") >> x3::attr('"')) >> x3::char_;
-auto const quoted_string_def =
+static auto const quoted_string_1_def = *(x3::char_ >> !lit('\'') | lit("\\'") >> x3::attr('\'')) >> x3::char_;
+static auto const quoted_string_2_def = *(x3::char_ >> !lit('"') | lit("\\\"") >> x3::attr('"')) >> x3::char_;
+static auto const quoted_string_def =
         (x3::lexeme[lit("'") >> -quoted_string_1_def >> lit("'")])
       | (x3::lexeme[lit("\"") >> -quoted_string_2_def >> lit("\"")]);
 
-auto const bool_rule_def = lit("true") >> x3::attr(true) | lit("false") >> x3::attr(false);
-auto const term_def = bool_rule | double_ | x3::int64 | quoted_string;
-auto const keywords_def = bool_rule|lit("if")|lit("else")|lit("in")|lit("and")|lit("or")|lit("is");
-auto const single_var_name_helper_def = x3::lexeme[ !keywords_def >> x3::char_("A-Za-z_") >> *x3::char_("0-9A-Za-z_") ];
-auto const single_var_name_def = !keywords_def >> single_var_name_helper;
+static auto const bool_rule_def = lit("true") >> x3::attr(true) | lit("false") >> x3::attr(false);
+static auto const term_def = bool_rule | double_ | x3::int64 | quoted_string;
+static auto const keywords_def = bool_rule|lit("if")|lit("else")|lit("in")|lit("and")|lit("or")|lit("is");
+static auto const single_var_name_helper_def = x3::lexeme[ !keywords_def >> x3::char_("A-Za-z_") >> *x3::char_("0-9A-Za-z_") ];
+static auto const single_var_name_def = !keywords_def >> single_var_name_helper;
 
-auto const math_pow_def = expr_math_pow >> lit("**") >> x3::attr(ast::expr_ops::math_op::pow) >> expr_math_pow;
+static auto const math_pow_def = expr_math_pow >> lit("**") >> x3::attr(ast::expr_ops::math_op::pow) >> expr_math_pow;
 
-auto const math_def = math1 | math2 | math_pow ;
-auto const math1_def = expr_math >> mathop >> expr_math_right;
-auto const math2_def = expr_math2 >> mathop2 >> expr_math;
-auto const mathop_def =
+static auto const math_def = math1 | math2 | math_pow ;
+static auto const math1_def = expr_math >> mathop >> expr_math_right;
+static auto const math2_def = expr_math2 >> mathop2 >> expr_math;
+static auto const mathop_def =
         lit("+") >> x3::attr(ast::expr_ops::math_op::pls)
       | lit("-") >> x3::attr(ast::expr_ops::math_op::mns)
                     ;
-auto const mathop2_def =
+static auto const mathop2_def =
         lit("*") >> x3::attr(ast::expr_ops::math_op::mul)
       | lit("/") >> x3::attr(ast::expr_ops::math_op::dev)
       | lit("%") >> x3::attr(ast::expr_ops::math_op::mod)
       | lit("//") >> x3::attr(ast::expr_ops::math_op::trunc_dev)
                     ;
 
-auto const point_element_def = single_var_name | (lit('[') >> expr >> lit(']'));
-auto const point_element_right_def = point | (lit('[') >> expr >> lit(']')) | single_var_name;
-auto const point_def = point_element >> -lit('.') >> point_element_right ;
+static auto const point_element_def = single_var_name | (lit('[') >> expr_ipoint >> lit(']'));
+static auto const point_element_right_def = point | (lit('[') >> expr_ipoint >> lit(']')) | single_var_name;
+static auto const point_def = point_element >> -lit('.') >> point_element_right ;
 
-auto const list_def = lit("[") >> expr % ',' >> lit("]");
-auto const tuple_def = lit("(") >> expr % ',' >> lit(")"); ;
-auto const dict_item_def = quoted_string >> lit(':') >> expr;
-auto const dict_def = lit("{") >> dict_item % ',' >> lit("}"); ;
+static auto const list_def = lit("[") >> expr % ',' >> lit("]");
+static auto const tuple_def = lit("(") >> expr % ',' >> lit(")"); ;
+static auto const dict_item_def = quoted_string >> lit(':') >> expr;
+static auto const dict_def = lit("{") >> dict_item % ',' >> lit("}"); ;
 
-auto const lvalue_def = point | single_var_name;
-auto const eq_assign_def = lvalue % ',' >> lit('=') >> expr ;
-auto const in_assign_def = lvalue % ',' >> lit("in") >> expr ;
+static auto const lvalue_def = point | single_var_name;
+static auto const eq_assign_def = lvalue % ',' >> lit('=') >> expr ;
+static auto const in_assign_def = lvalue % ',' >> lit("in") >> expr ;
 
-auto const concat_def = expr_concat_left >> lit('~') >> expr_concat_right;
+static auto const concat_def = expr_concat_left >> lit('~') >> expr_concat_right;
 
-auto const in_check_def = expr >> lit("in") >> expr;
+static auto const in_check_def = expr >> lit("in") >> expr;
 
-auto const cmp_check_def = expr_cmp_check >> cmp_op >> expr_logic_check;
-auto const cmp_op_def =
+static auto const cmp_check_def = expr_cmp_check >> cmp_op >> expr_logic_check;
+static auto const cmp_op_def =
         lit("==") >> x3::attr(ast::expr_ops::cmp_op::eq)
       | lit("is") >> x3::attr(ast::expr_ops::cmp_op::eq)
       | lit("!=") >> x3::attr(ast::expr_ops::cmp_op::neq)
@@ -110,34 +113,36 @@ auto const cmp_op_def =
       | lit("<=") >> x3::attr(ast::expr_ops::cmp_op::less_eq)
       | lit(">=") >> x3::attr(ast::expr_ops::cmp_op::more_eq) ;
 
-auto const logic_check_def = expr_logic_check >> logic_op >> expr_op_if;
-auto const logic_op_def =
+static auto const logic_check_def = expr_logic_check >> logic_op >> expr_op_if;
+static auto const logic_op_def =
         lit("and") >> x3::attr(ast::expr_ops::logic_op::op_and)
       | lit("or") >> x3::attr(ast::expr_ops::logic_op::op_or) ;
 
-auto const negate_def = lit("!") >> expr_concat_left;
+static auto const negate_def = lit("!") >> expr_concat_left;
 
-auto const fnc_call_def = lvalue >> lit('(') >> -(expr % ',') >> lit(')');
+static auto const fnc_call_def = lvalue >> lit('(') >> -(expr % ',') >> lit(')');
 
-auto const filter_call_def = lvalue >> -( lit('(') >> -expr % ',' >> lit(')') );
-auto const filter_def = expr_filter >> lit('|') >> filter_call % '|';
+static auto const filter_call_def = lvalue >> -( lit('(') >> -expr % ',' >> lit(')') );
+static auto const filter_def = expr_filter >> lit('|') >> filter_call % '|';
 
-auto const op_if_def = expr_op_if >> lit("if") >> expr_bool >> -(lit("else") >> expr);
+static auto const op_if_def = expr_op_if >> lit("if") >> expr_bool >> -(lit("else") >> expr);
 
-auto const expr_in_pan_def = lit('(') >> expr >> lit(')');
-auto const expr_bool_def =
+static auto const expr_in_pan_def = lit('(') >> expr >> lit(')');
+static auto const expr_bool_def =
                        op_if | in_check | logic_check | cmp_check | filter | list | tuple | dict | concat | math | negate | fnc_call | point | single_var_name | term;
-auto const expr_def = eq_assign | op_if | logic_check | cmp_check | filter | list | tuple | dict | concat | math | negate | fnc_call | point | single_var_name | term;
-auto const expr_op_if_def =               logic_check | cmp_check | filter | list | tuple | dict | concat | math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
-auto const expr_logic_check_def =                       cmp_check | filter | list | tuple | dict | concat | math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
-auto const expr_cmp_check_def =                                     filter | list | tuple | dict | concat | math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
-auto const expr_filter_def =                                                 list | tuple | dict | concat | math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
-auto const expr_math_right_def =                                                                   concat | math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
-auto const expr_concat_right_def =                                                                 concat | math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
-auto const expr_math_def =                                                                                 math2 | negate | fnc_call | point | single_var_name | term | expr_in_pan;
-auto const expr_math2_def =                                                                             math_pow | negate | fnc_call | point | single_var_name | term | expr_in_pan;
-auto const expr_concat_left_def =                                                                           math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
-auto const expr_math_pow_def =                                                                                              fnc_call | point | single_var_name | term;
+static auto const expr_ipoint_def = filter | concat | math | fnc_call | point | single_var_name | term;
+
+static auto const expr_def = eq_assign | op_if | logic_check | cmp_check | filter | list | tuple | dict | concat | math | negate | fnc_call | point | single_var_name | term;
+static auto const expr_op_if_def =               logic_check | cmp_check | filter | list | tuple | dict | concat | math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
+static auto const expr_logic_check_def =                       cmp_check | filter | list | tuple | dict | concat | math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
+static auto const expr_cmp_check_def =                                     filter | list | tuple | dict | concat | math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
+static auto const expr_filter_def =                                                 list | tuple | dict | concat | math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
+static auto const expr_math_right_def =                                                                   concat | math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
+static auto const expr_concat_right_def =                                                                 concat | math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
+static auto const expr_math_def =                                                                                 math2 | negate | fnc_call | point | single_var_name | term | expr_in_pan;
+static auto const expr_math2_def =                                                                             math_pow | negate | fnc_call | point | single_var_name | term | expr_in_pan;
+static auto const expr_concat_left_def =                                                                           math | negate | fnc_call | point | single_var_name | term | expr_in_pan;
+static auto const expr_math_pow_def =                                                                                              fnc_call | point | single_var_name | term;
 
 BOOST_SPIRIT_DEFINE( math )
 BOOST_SPIRIT_DEFINE( math1 )
@@ -187,5 +192,6 @@ BOOST_SPIRIT_DEFINE( expr_cmp_check )
 BOOST_SPIRIT_DEFINE( expr_logic_check )
 BOOST_SPIRIT_DEFINE( expr_op_if )
 BOOST_SPIRIT_DEFINE( expr_in_pan )
+BOOST_SPIRIT_DEFINE( expr_ipoint )
 
 } // namespace cppjinja::text::expr_ops
