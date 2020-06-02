@@ -281,10 +281,10 @@ BOOST_AUTO_TEST_CASE(fnc_call)
 }
 BOOST_AUTO_TEST_CASE(op_if)
 {
-	auto left_result = txt::parse(ext::expr, "z = 'a' * 'b' ~ c.d('v') < b and !f('v')"sv);
+	auto left_result = txt::parse(ext::expr, "z = 'a' * 'b' ~ c.d('v')"sv);
 	est::eq_assign* left_res = boost::get<est::eq_assign>(&left_result.var);
 
-	auto result = txt::parse(ext::expr, "z = 'a' * 'b' ~ c.d('v') < b and !f('v') if c"sv);
+	auto result = txt::parse(ext::expr, "z = 'a' * 'b' ~ c.d('v') if c"sv);
 	BOOST_TEST(result.var.type().name() == typeid(est::eq_assign).name());
 	est::eq_assign* res = boost::get<est::eq_assign>(&result.var);
 	BOOST_REQUIRE(res);

@@ -125,7 +125,7 @@ static auto const fnc_call_def = lvalue >> lit('(') >> -(expr % ',') >> lit(')')
 static auto const filter_call_def = lvalue >> -( lit('(') >> -expr % ',' >> lit(')') );
 static auto const filter_def = expr_filter >> lit('|') >> filter_call % '|';
 
-static auto const op_if_def = expr_op_if >> lit("if") >> expr_bool >> -(lit("else") >> expr);
+static auto const op_if_def = expr_cmp_check >> lit("if") >> expr_bool >> -(lit("else") >> expr_cmp_check);
 
 static auto const expr_in_pan_def = lit('(') >> expr >> lit(')');
 static auto const expr_bool_def =
