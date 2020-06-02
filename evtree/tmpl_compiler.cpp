@@ -16,6 +16,7 @@
 #include "nodes/block_macro.hpp"
 #include "nodes/block_if.hpp"
 #include "nodes/content_block.hpp"
+#include "nodes/block_filtered.hpp"
 
 typedef std::unique_ptr<cppjinja::evt::node> node_ptr;
 typedef std::vector<node_ptr> vec_type;
@@ -114,7 +115,9 @@ void cppjinja::evt::tmpl_compiler::operator()(ast::forward_ast<ast::block_named>
 
 void cppjinja::evt::tmpl_compiler::operator()(ast::forward_ast<cppjinja::ast::block_filtered>& obj)
 {
-	// use op_out with filter as it named in obj.name
+	assert(!ctx_stack.empty());
+	assert(!rnd_stack.empty());
+	create_rendered_node<evtnodes::block_filtered>(std::move(obj.get()));
 }
 
 void cppjinja::evt::tmpl_compiler::operator()(ast::forward_ast<cppjinja::ast::block_set>& obj)

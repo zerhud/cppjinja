@@ -298,6 +298,12 @@ BOOST_AUTO_TEST_CASE(tmpl_name)
 	BOOST_TEST(*tree.extends[0].tmpl_name == "base");
 }
 
+BOOST_AUTO_TEST_CASE(block_filtred)
+{
+	compiled_tmpl tree = build_tree("<% filter kuku %>c<%endfilter%>"sv);
+	BOOST_TEST(make_node_seq_str(tree.main_block(), tree.render_tree.all_tree()) == "block_named,block_filtered..");
+}
+
 BOOST_AUTO_TEST_SUITE_END() // tmpl_compiler
 
 BOOST_AUTO_TEST_SUITE_END() // phase_compilation
