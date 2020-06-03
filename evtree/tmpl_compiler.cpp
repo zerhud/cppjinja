@@ -17,6 +17,7 @@
 #include "nodes/block_if.hpp"
 #include "nodes/content_block.hpp"
 #include "nodes/block_filtered.hpp"
+#include "nodes/block_set.hpp"
 
 typedef std::unique_ptr<cppjinja::evt::node> node_ptr;
 typedef std::vector<node_ptr> vec_type;
@@ -106,27 +107,36 @@ void cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::string_t& cnt)
 	create_rendered_node<evtnodes::content>(std::move(cnt));
 }
 
-void cppjinja::evt::tmpl_compiler::operator()(ast::forward_ast<ast::block_named>& obj)
+void cppjinja::evt::tmpl_compiler::operator()(
+        ast::forward_ast<ast::block_named>& obj)
 {
 	const bool render_in_place = can_render_in_place(obj.get());
 	auto bl = add_block(obj.get());
 	if(render_in_place) result.render_tree.add_child(rnd_stack.back(), bl);
 }
 
-void cppjinja::evt::tmpl_compiler::operator()(ast::forward_ast<cppjinja::ast::block_filtered>& obj)
+void cppjinja::evt::tmpl_compiler::operator()(
+        ast::forward_ast<cppjinja::ast::block_filtered>& obj)
 {
 	assert(!ctx_stack.empty());
 	assert(!rnd_stack.empty());
-	create_rendered_node<evtnodes::block_filtered>(std::move(obj.get()));
+	auto cnt = std::move(obj.get().content);
+	auto node = create_rendered_node<evtnodes::block_filtered>(
+	            std::move(obj.get()));
+	compile_content(node, cnt);
 }
 
-void cppjinja::evt::tmpl_compiler::operator()(ast::forward_ast<cppjinja::ast::block_set>& obj)
+void cppjinja::evt::tmpl_compiler::operator()(
+        ast::forward_ast<cppjinja::ast::block_set>& obj)
 {
-	// use op_set with content filtered
-	// !!! inside block can be place operators...
+	assert(!rnd_stack.empty());
+	auto cnt = std::move(obj.get().content);
+	auto node = create_rendered_node<evtnodes::block_set>(std::move(obj.get()));
+	compile_content(node, cnt);
 }
 
-void cppjinja::evt::tmpl_compiler::operator()(ast::forward_ast<cppjinja::ast::block_call>& obj)
+void cppjinja::evt::tmpl_compiler::operator()(
+        ast::forward_ast<cppjinja::ast::block_call>& obj)
 {
 	// creates a macro, pass the created macro as first argument to calling block,
 	// call the calling block. can be parameraized (the calling can pass param).
