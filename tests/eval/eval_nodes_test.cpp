@@ -24,6 +24,7 @@
 #include "evtree/nodes/block_macro.hpp"
 #include "evtree/nodes/block_if.hpp"
 #include "evtree/nodes/block_filtered.hpp"
+#include "evtree/nodes/block_set.hpp"
 #include "evtree/evtree.hpp"
 #include "parser/operators/blocks.hpp"
 
@@ -615,13 +616,51 @@ BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
 
 	expect_transporent_cxt(&block);
 	expect_children({&child});
-	expect_call(cppjinja::east::var_name{"flt"s}, {cppjinja::east::function_parameter{"$"s, "base"s}}, "after"s);
+	expect_call(
+	              cppjinja::east::var_name{"flt"s}
+	            , {cppjinja::east::function_parameter{"$"s, "base"s}}
+	            , "after"s);
 	MOCK_EXPECT(env.rinfo).with(cppjinja::evt::render_info{true, true});
-	MOCK_EXPECT(env.current_node);
 	block.render(env);
 	BOOST_TEST(out.str() == "after"s);
 }
 BOOST_AUTO_TEST_SUITE_END() // block_filter
+
+BOOST_AUTO_TEST_SUITE(block_set)
+using cppjinja::evt::context_object;
+BOOST_FIXTURE_TEST_CASE(getters, mock_callable_fixture)
+{
+	ast::block_set ast_bl;
+	ast_bl.left_open.trim = true;
+	ast_bl.right_close.trim = true;
+	cppjinja::evtnodes::block_set block(ast_bl);
+	BOOST_TEST(block.rinfo().trim_left == true);
+	BOOST_TEST(block.rinfo().trim_right == true);
+}
+BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
+{
+	ast::block_set ast_bl;
+	ast_bl.left_close.trim = true;
+	ast_bl.right_open.trim = true;
+	ast_bl.name = "tname"s;
+	cppjinja::evtnodes::block_set block(ast_bl);
+
+	mocks::node child;
+	expect_glp(0, 1, 0);
+	expect_children({&child});
+	expect_transporent_cxt(&block);
+	MOCK_EXPECT(env.rinfo).once().with(cppjinja::evt::render_info{true, true});
+	MOCK_EXPECT(child.render).once().calls([](auto& e){e.out() << "kuku";});
+	MOCK_EXPECT(env.result).returns("ok");
+
+	auto check = [](std::shared_ptr<context_object> v){
+		return v->solve() == evalue_term{"ok"s};};
+	MOCK_EXPECT(locals.add).once().with("tname", check);
+
+	block.render(env);
+	BOOST_TEST(out.str() == "kuku"s);
+}
+BOOST_AUTO_TEST_SUITE_END() // block_set
 
 BOOST_AUTO_TEST_SUITE_END() // nodes
 BOOST_AUTO_TEST_SUITE_END() // phase_evaluate

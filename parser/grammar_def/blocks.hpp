@@ -79,7 +79,7 @@ namespace cppjinja::text {
 
 	const auto block_set_def =
 		   block_term_start
-		>> lit("set") >> single_var_name >> -('|' >> filter_call % '|')
+		>> lit("set") >> single_var_name >> -('|' >> expr_ops::filter_call % '|')
 		>> block_term_end_cnt >> *block_content >> block_term_start
 		>> lit("endset") >> block_term_end
 		;

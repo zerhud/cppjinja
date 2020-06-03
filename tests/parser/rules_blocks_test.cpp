@@ -191,7 +191,9 @@ BOOST_AUTO_TEST_CASE(block_set)
 	std::string data = "<% set name|e %>content<%endset%>"s;
 	ast::block_set good_result;
 	good_result.name = "name"s;
-	good_result.filters.emplace_back(ast::filter_call{ast::var_name{"e"s}});
+	good_result.filters.emplace_back(
+	            ast::expr_ops::filter_call{
+	                est::lvalue{est::single_var_name{"e"s}}, {}});
 	good_result.content.emplace_back("content"s);
 
 	ast::block_set result;
