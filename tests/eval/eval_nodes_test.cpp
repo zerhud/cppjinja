@@ -25,6 +25,7 @@
 #include "evtree/nodes/block_if.hpp"
 #include "evtree/nodes/block_filtered.hpp"
 #include "evtree/nodes/block_set.hpp"
+#include "evtree/nodes/block_call.hpp"
 #include "evtree/evtree.hpp"
 #include "parser/operators/blocks.hpp"
 
@@ -661,6 +662,25 @@ BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
 	BOOST_TEST(out.str() == "kuku"s);
 }
 BOOST_AUTO_TEST_SUITE_END() // block_set
+
+BOOST_AUTO_TEST_SUITE(block_call)
+BOOST_FIXTURE_TEST_CASE(getters, mock_callable_fixture)
+{
+	ast::block_call ast_bl;
+	ast_bl.left_open.trim = true;
+	ast_bl.right_close.trim = true;
+	cppjinja::evtnodes::block_call block(ast_bl);
+	BOOST_TEST(block.rinfo().trim_left == true);
+	BOOST_TEST(block.rinfo().trim_right == true);
+}
+BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
+{
+	mocks::callable_node calling;
+	// calls other block
+	// first parameter is callable
+	// calling this object is calling the block
+}
+BOOST_AUTO_TEST_SUITE_END() // block_call
 
 BOOST_AUTO_TEST_SUITE_END() // nodes
 BOOST_AUTO_TEST_SUITE_END() // phase_evaluate

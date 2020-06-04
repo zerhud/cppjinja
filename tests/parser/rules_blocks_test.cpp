@@ -203,11 +203,17 @@ BOOST_AUTO_TEST_CASE(block_set)
 
 BOOST_AUTO_TEST_CASE(block_call)
 {
-	std::string data = "<% call name(kuku) lala(name=1) %>content<%endcall%>"s;
+	std::string data = "<% call(kuku) lala(name=1) %>content<%endcall%>"s;
 	ast::block_call result ;
 	BOOST_CHECK_NO_THROW( result = txt::parse(txt::block_call, data) );
+	BOOST_TEST(result.name == "lala"s);
+	BOOST_TEST(result.params.size() == 1);
+	BOOST_TEST(result.call_params.size() == 1);
 	data = "<% call name %>content<%endcall%>"s;
 	BOOST_CHECK_NO_THROW( result = txt::parse(txt::block_call, data) );
+	BOOST_TEST(result.name == "name"s);
+	BOOST_TEST(result.params.size() == 0);
+	BOOST_TEST(result.call_params.size() == 0);
 }
 
 BOOST_AUTO_TEST_CASE(filtered)

@@ -38,8 +38,8 @@ DEFINE_OPERATORS(cppjinja::ast::block_filtered, left.flt, right.flt, left.conten
 DEFINE_OPERATORS(cppjinja::ast::block_set, left.name, right.name, left.filters, right.filters, left.content, right.content,
                  left.left_open, right.left_open, left.left_close, right.left_close,
                  left.right_open, right.right_open, left.right_close, right.right_close)
-DEFINE_OPERATORS(cppjinja::ast::block_call, left.name, right.name, left.call_name, right.call_name, left.content, right.content,
-                 left.params, right.params, left.call_values, right.call_values,
+DEFINE_OPERATORS(cppjinja::ast::block_call, left.name, right.name, left.content, right.content,
+                 left.params, right.params, left.call_params, right.call_params,
                  left.left_open, right.left_open, left.left_close, right.left_close,
                  left.right_open, right.right_open, left.right_close, right.right_close)
 

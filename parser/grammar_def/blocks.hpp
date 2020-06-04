@@ -84,17 +84,6 @@ namespace cppjinja::text {
 		>> lit("endset") >> block_term_end
 		;
 
-	const auto call_parameter_def = -(single_var_name >> '=') >> expr_ops::expr;
-	const auto block_call_def =
-		   block_term_start
-		>> lit("call") >> single_var_name
-		>> -(omit['('] >> (macro_parameter % ',') >> omit[')'])
-		>> -single_var_name
-		>> -(omit['('] >> (call_parameter % ',') >> omit[')'])
-		>> block_term_end_cnt >> *block_content >> block_term_start
-		>> lit("endcall") >> block_term_end
-		;
-
 	const auto macro_parameter_def = single_var_name >> -('=' >> expr_ops::expr);
 	const auto macro_parameters_def =
 		single_var_name >> -('(' >> -(macro_parameter % ',') >> ')');
@@ -115,6 +104,17 @@ namespace cppjinja::text {
 	    >> block_term_end >> *block_content >> block_term_start
 	    >> lit("endfilter") >> block_term_end
 		;
+
+	const auto call_parameter_def = -(single_var_name >> '=') >> expr_ops::expr;
+	const auto block_call_def =
+	       block_term_start
+	    >> lit("call")
+	    >> -(omit['('] >> (macro_parameter % ',') >> omit[')'])
+	    >> single_var_name
+	    >> -(omit['('] >> (call_parameter % ',') >> omit[')'])
+	    >> block_term_end_cnt >> *block_content >> block_term_start
+	    >> lit("endcall") >> block_term_end
+	    ;
 
 	class block_if_class          : x3::annotate_on_success {};
 	class block_for_class         : x3::annotate_on_success {};
