@@ -67,10 +67,11 @@ cppjinja::evt::context_objects::callable_params::~callable_params() noexcept
 }
 
 void cppjinja::evt::context_objects::callable_params::add(
-          cppjinja::east::string_t
-        , std::shared_ptr<cppjinja::evt::context_object>)
+          cppjinja::east::string_t n
+        , std::shared_ptr<cppjinja::evt::context_object> child)
 {
-	throw std::runtime_error("cannot add child to callable_params");
+	if(!child) throw std::runtime_error("cannot add nullptr as a child");
+	params[n] = std::move(child);
 }
 
 std::shared_ptr<cppjinja::evt::context_object>

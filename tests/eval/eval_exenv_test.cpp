@@ -174,9 +174,17 @@ BOOST_AUTO_TEST_SUITE(callable_params)
 BOOST_AUTO_TEST_CASE(cannot_add_solve_call)
 {
 	cppjinja::evt::context_objects::callable_params obj({}, {});
-	BOOST_CHECK_THROW(obj.add("a", nullptr), std::exception);
 	BOOST_CHECK_THROW(obj.call({}), std::exception);
 	BOOST_CHECK_THROW(obj.solve(), std::exception);
+}
+BOOST_AUTO_TEST_CASE(add)
+{
+	cppjinja::evt::context_objects::callable_params obj({}, {});
+	BOOST_CHECK_THROW(obj.add("a", nullptr), std::exception);
+	auto par = std::make_shared<mocks::context_object>();
+	BOOST_TEST(obj.find(var_name{"a"}) == nullptr);
+	obj.add("a", par);
+	BOOST_TEST(obj.find(var_name{"a"}) == par);
 }
 BOOST_AUTO_TEST_CASE(params)
 {

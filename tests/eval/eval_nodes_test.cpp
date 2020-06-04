@@ -693,7 +693,7 @@ BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
 	// first parameter is callable
 	// calling the object is calling the block
 
-	block.render(env);
+//	block.render(env);
 }
 BOOST_AUTO_TEST_SUITE_END() // block_call
 
