@@ -66,6 +66,14 @@ cppjinja::evt::context_objects::callable_params::~callable_params() noexcept
 {
 }
 
+void cppjinja::evt::context_objects::callable_params::add_placed(
+        std::size_t ind, std::shared_ptr<cppjinja::evt::context_object> param)
+{
+	auto name = declared.at(ind).name;
+	assert(name);
+	params[*name] = std::move(param);
+}
+
 void cppjinja::evt::context_objects::callable_params::add(
           cppjinja::east::string_t n
         , std::shared_ptr<cppjinja::evt::context_object> child)

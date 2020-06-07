@@ -186,6 +186,19 @@ BOOST_AUTO_TEST_CASE(add)
 	obj.add("a", par);
 	BOOST_TEST(obj.find(var_name{"a"}) == par);
 }
+BOOST_AUTO_TEST_CASE(add_placed)
+{
+	auto param = std::make_shared<mocks::context_object>();
+	cppjinja::evt::context_objects::callable_params obj1({}, {});
+	BOOST_CHECK_THROW(obj1.add_placed(0, param), std::exception);
+
+	using cppjinja::east::function_parameter;
+	std::vector<function_parameter> expected;
+	expected.emplace_back(function_parameter{"name", "orig"s});
+	cppjinja::evt::context_objects::callable_params obj2(expected, {});
+	obj2.add_placed(0, param);
+	BOOST_TEST(obj2.find(var_name{"name"}) == param);
+}
 BOOST_AUTO_TEST_CASE(params)
 {
 	using cppjinja::east::function_parameter;

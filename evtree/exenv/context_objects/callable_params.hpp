@@ -26,6 +26,7 @@ public:
 	callable_params(std::vector<east::function_parameter> expected, std::vector<east::function_parameter> called);
 	~callable_params() noexcept override ;
 
+        void add_placed(std::size_t ind, std::shared_ptr<context_object> param);
 	void add(east::string_t n, std::shared_ptr<context_object> child) override ;
 	std::shared_ptr<context_object> find(east::var_name n) const override ;
 	east::value_term solve() const override ;
