@@ -24,7 +24,7 @@ public:
 
 class jinja_namespace : public builtin_function {
 public:
-	std::shared_ptr<context_object> call(std::vector<east::function_parameter> params) const override ;
+	std::shared_ptr<context_object> call(std::vector<function_parameter> params) const override ;
 };
 
 class builtins : public tree {

@@ -65,11 +65,15 @@ cppjinja::json cppjinja::evt::context_objects::user_data::jval() const
 
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::user_data::call(
-        std::vector<cppjinja::east::function_parameter> params) const
+        std::vector<function_parameter> params) const
 {
 	east::function_call call;
 	call.ref = selected_name;
-	call.params = std::move(params);
+	for(auto& p:params) {
+		east::function_parameter& cur = call.params.emplace_back();
+		cur.name = p.name;
+		cur.jval = p.value->jval();
+	}
 
 	std::stringstream out;
 	out << provider->value(call);

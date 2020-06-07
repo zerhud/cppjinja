@@ -30,7 +30,7 @@ class expr_eval final {
 	void solve_point_arg(ast::expr_ops::single_var_name& left) const ;
 	void solve_point_arg(ast::expr_ops::expr& left) const ;
 	void solve_point_arg(ast::expr_ops::point& left) const ;
-	east::function_parameter make_param(ast::expr_ops::expr& pexpr) const ;
+	context_object::function_parameter make_param(ast::expr_ops::expr& pexpr) const ;
 	std::optional<east::string_t> make_param_name(ast::expr_ops::lvalue& name) const ;
 	void filter_content(ast::expr_ops::filter_call& call) const ;
 	std::shared_ptr<evt::context_object> solve_ref(ast::expr_ops::lvalue& ref) const ;

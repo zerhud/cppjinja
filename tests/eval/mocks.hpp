@@ -141,14 +141,20 @@ struct mock_exenv_fixture
 		MOCK_EXPECT(mock_all_ctx->solve).once().returns(v);
 	}
 
-	void expect_call(cppjinja::east::var_name n, std::vector<cppjinja::east::function_parameter> p, cppjinja::json v)
+	void expect_call(
+	        cppjinja::east::var_name n,
+	        std::vector<cppjinja::evt::context_object::function_parameter> p,
+	        cppjinja::json v)
 	{
+		using namespace std::literals;
 		auto val_obj= std::make_shared<cppjinja::evt::context_objects::value>(std::move(v), 1);
 		MOCK_EXPECT(all_ctx.find).once().with(n).returns(mock_all_ctx);
 		MOCK_EXPECT(mock_all_ctx->call).once().calls([val_obj,p](auto params){
 			BOOST_TEST(params.size()==p.size());
-			for(std::size_t i=0;i<params.size();++i)
-				BOOST_TEST(params.at(i) == p.at(i));
+			for(std::size_t i=0;i<params.size();++i) {
+				BOOST_TEST(params.at(i).name.value_or(""s) == p.at(i).name.value_or(""s));
+				BOOST_TEST(params.at(i).value->jval() == p.at(i).value->jval());
+			}
 			return val_obj;
 		});
 	}

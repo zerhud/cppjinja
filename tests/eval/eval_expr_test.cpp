@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_SUITE_END() // point
 BOOST_AUTO_TEST_SUITE(fnc_call)
 BOOST_FIXTURE_TEST_CASE(without_args, mock_exenv_fixture)
 {
-	std::vector<cppjinja::east::function_parameter> params;
+	std::vector<cppjinja::evt::context_object::function_parameter> params;
 	auto a = std::make_shared<mocks::context_object>();
 	auto call = std::make_shared<mocks::context_object>();
 	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
@@ -170,17 +170,14 @@ BOOST_FIXTURE_TEST_CASE(without_args, mock_exenv_fixture)
 }
 BOOST_FIXTURE_TEST_CASE(with_args, mock_exenv_fixture)
 {
-	std::vector<cppjinja::east::function_parameter> params;
-	params.emplace_back(cppjinja::east::function_parameter{std::nullopt, "ok"});
-
 	auto a = std::make_shared<mocks::context_object>();
 	auto call = std::make_shared<mocks::context_object>();
 	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
-	MOCK_EXPECT(a->call).calls([call](std::vector<cppjinja::east::function_parameter> params){
+	MOCK_EXPECT(a->call).calls([call](std::vector<cppjinja::evt::context_object::function_parameter> params){
 		BOOST_TEST(params.size() == 1);
 		BOOST_TEST(params.at(0).name.has_value() == false);
-		BOOST_TEST(params.at(0).jval.has_value() == true);
-		BOOST_TEST(*params.at(0).jval == "ok");
+		BOOST_REQUIRE(params.at(0).value);
+		BOOST_TEST(params.at(0).value->jval() == "ok");
 		return call;
 	});
 
@@ -189,8 +186,11 @@ BOOST_FIXTURE_TEST_CASE(with_args, mock_exenv_fixture)
 }
 BOOST_FIXTURE_TEST_CASE(points, mock_exenv_fixture)
 {
-	std::vector<cppjinja::east::function_parameter> params;
-	params.emplace_back(cppjinja::east::function_parameter{std::nullopt, "ok"});
+	auto p1_val = std::make_shared<mocks::context_object>();
+	std::vector<cppjinja::evt::context_object::function_parameter> params;
+	params.emplace_back(cppjinja::evt::context_object::function_parameter{
+	                        std::nullopt, p1_val});
+	MOCK_EXPECT(p1_val->jval).returns("ok"s);
 
 	auto a = std::make_shared<mocks::context_object>();
 	auto b = std::make_shared<mocks::context_object>();
@@ -217,12 +217,11 @@ BOOST_FIXTURE_TEST_CASE(without_args, mock_exenv_fixture)
 	auto result = std::make_shared<mocks::context_object>();
 	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
 	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"b"}).returns(b);
-	MOCK_EXPECT(a->jval).returns("ok");
 
-	MOCK_EXPECT(b->call).calls([result](std::vector<cppjinja::east::function_parameter> params){
+	MOCK_EXPECT(b->call).calls([result,a](std::vector<cppjinja::evt::context_object::function_parameter> params){
 		BOOST_TEST_REQUIRE(params.size() == 1);
 		BOOST_TEST(*params[0].name == "$");
-		BOOST_TEST(*params[0].jval == "ok"s);
+		BOOST_TEST(params[0].value == a);
 		return result;
 	});
 
@@ -238,14 +237,12 @@ BOOST_FIXTURE_TEST_CASE(with_args, mock_exenv_fixture)
 	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
 	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"b"}).returns(b);
 	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"c"}).returns(c);
-	MOCK_EXPECT(a->jval).returns("ok");
-	MOCK_EXPECT(c->jval).returns("cslv");
 
-	MOCK_EXPECT(b->call).calls([result](std::vector<cppjinja::east::function_parameter> params){
+	MOCK_EXPECT(b->call).calls([result,a,c](std::vector<cppjinja::evt::context_object::function_parameter> params){
 		BOOST_TEST_REQUIRE(params.size() == 2);
 		BOOST_TEST(*params[0].name == "$");
-		BOOST_TEST(*params[0].jval == "ok"s);
-		BOOST_TEST(*params[1].jval == "cslv"s);
+		BOOST_TEST(params[0].value == a);
+		BOOST_TEST(params[1].value == c);
 		return result;
 	});
 

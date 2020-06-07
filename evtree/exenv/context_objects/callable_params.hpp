@@ -37,7 +37,7 @@ public:
 	east::value_term solve() const override ;
 	json jval() const override;
 	std::shared_ptr<context_object> call(
-	        std::vector<east::function_parameter> params) const override ;
+	        std::vector<function_parameter> params) const override ;
 };
 
 } // namespace cppjinja::evt::context_objects

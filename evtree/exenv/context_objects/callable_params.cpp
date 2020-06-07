@@ -136,7 +136,7 @@ cppjinja::json cppjinja::evt::context_objects::callable_params::jval() const
 }
 
 std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::callable_params::call(
-        std::vector<cppjinja::east::function_parameter>) const
+        std::vector<function_parameter>) const
 {
 	throw std::runtime_error("cannot cannot call a callable_params");
 }

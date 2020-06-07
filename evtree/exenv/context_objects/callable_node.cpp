@@ -54,11 +54,11 @@ cppjinja::json cppjinja::evt::context_objects::callable_node::jval() const
 }
 
 std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::callable_node::call(
-        std::vector<cppjinja::east::function_parameter> params) const
+        std::vector<function_parameter> params) const
 {
 	assert(env);
 	assert(node);
-	context_objects::callable_params cparams(node->solved_params(*env), std::move(params), 1);
+	context_objects::callable_params cparams(node->solved_params(*env), std::move(params));
 	evt::raii_callstack_push pusher(&env->calls(), node, std::move(cparams));
 	return std::make_shared<value>(node->evaluate(*env));
 }

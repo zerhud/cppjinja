@@ -72,7 +72,7 @@ cppjinja::json cppjinja::evt::context_objects::queue::jval() const
 }
 
 std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::queue::call(
-        std::vector<cppjinja::east::function_parameter> params) const
+        std::vector<function_parameter> params) const
 {
 	(void)params;
 	throw std::runtime_error("cannot call in queue context object");

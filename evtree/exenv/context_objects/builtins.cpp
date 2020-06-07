@@ -50,11 +50,11 @@ cppjinja::json cppjinja::evt::context_objects::builtin_function::jval() const
 
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::jinja_namespace::call(
-        std::vector<cppjinja::east::function_parameter> params) const
+        std::vector<function_parameter> params) const
 {
 	if(params.empty()) throw std::runtime_error("cannot create empty namespace");
 	auto ret = std::make_shared<tree>();
 	for(auto& p:params)
-		ret->add(*p.name, std::make_shared<value>(*p.jval,1));
+		ret->add(*p.name, p.value);
 	return ret;
 }

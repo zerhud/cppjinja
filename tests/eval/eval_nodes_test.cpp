@@ -619,7 +619,7 @@ BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
 	expect_children({&child});
 	expect_call(
 	              cppjinja::east::var_name{"flt"s}
-	            , {cppjinja::east::function_parameter{"$"s, "base"s}}
+	            , {cppjinja::evt::context_object::function_parameter{"$"s, std::make_shared<cppjinja::evt::context_objects::value>("base"s, 1)}}
 	            , "after"s);
 	MOCK_EXPECT(env.rinfo).with(cppjinja::evt::render_info{true, true});
 	block.render(env);

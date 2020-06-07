@@ -153,11 +153,11 @@ BOOST_FIXTURE_TEST_CASE(call, mock_exenv_fixture)
 	mocks::callable_node node;
 	cppjinja::evt::context_objects::callable_node val(&env, &node);
 	mock::sequence seq;
-	cppjinja::east::function_parameter p1{"a"s, "ok"s};
+	cppjinja::evt::context_object::function_parameter p1{"a"s, std::make_shared<mocks::context_object>()};
 	MOCK_EXPECT(calls.push).once().in(seq).calls([&node,&p1](auto*n, auto params){
 		BOOST_TEST(n == &node);
 		auto sp1 = params.find(var_name{"a"});
-		BOOST_TEST(sp1->jval() == *p1.jval);
+		BOOST_TEST(sp1 == p1.value);
 	});
 	MOCK_EXPECT(node.evaluate)
 	        .once()
@@ -329,7 +329,9 @@ BOOST_AUTO_TEST_CASE(find_is_link)
 		BOOST_TEST(*call.params.at(0).jval == "p1_val"s);
 		return east_value_term{"ok"s};
 	} );
-	cppjinja::east::function_parameter p1{"p1"s, "p1_val"s};
+	auto p1_val = std::make_shared<mocks::context_object>();
+	MOCK_EXPECT(p1_val->jval).returns("p1_val"s);
+	cppjinja::evt::context_object::function_parameter p1{"p1"s, p1_val};
 	BOOST_TEST(obj_b->call({p1})->jval() == "ok"s);
 }
 BOOST_AUTO_TEST_CASE(name_combination)
@@ -347,7 +349,7 @@ BOOST_AUTO_TEST_CASE(name_combination)
 }
 BOOST_AUTO_TEST_SUITE_END() // user_data
 BOOST_AUTO_TEST_SUITE(builtins)
-using cppjinja::east::function_parameter;
+using function_parameter = cppjinja::evt::context_object::function_parameter;
 BOOST_AUTO_TEST_CASE(context)
 {
 	using namespace cppjinja::evt::context_objects;
@@ -364,9 +366,10 @@ BOOST_AUTO_TEST_CASE(jinja_namespace)
 	BOOST_CHECK_THROW(ns.add("a", nullptr), std::exception);
 	BOOST_CHECK_THROW(ns.find(evar_name{"a"}), std::exception);
 
-	auto tree = ns.call({function_parameter{"a", "ok_a"}});
+	auto pval = std::make_shared<mocks::context_object>();
+	auto tree = ns.call({function_parameter{"a", pval}});
 	BOOST_CHECK(tree);
-	BOOST_TEST(tree->find(evar_name{"a"})->jval() =="ok_a"s);
+	BOOST_TEST(tree->find(evar_name{"a"}) == pval);
 }
 BOOST_AUTO_TEST_SUITE_END() // delay_call
 BOOST_AUTO_TEST_SUITE_END() // context_object

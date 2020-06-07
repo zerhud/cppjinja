@@ -27,7 +27,19 @@ public:
 	virtual std::shared_ptr<context_object> find(east::var_name n) const =0 ;
 	virtual east::value_term solve() const =0 ;
 	virtual json jval() const =0 ;
-	virtual std::shared_ptr<context_object> call(std::vector<east::function_parameter> params) const =0 ;
+	virtual std::shared_ptr<context_object> call(
+	        std::vector<function_parameter> params) const =0 ;
 };
+
+inline bool operator == (
+        const context_object::function_parameter& l,
+        const context_object::function_parameter& r)
+{
+	return
+	           l.name.has_value() == r.name.has_value()
+	        && l.name.value_or("") == r.name.value_or("")
+	        && l.value->jval() == r.value->jval()
+	        ;
+}
 
 } // namespace cppjinja::evt

@@ -79,7 +79,7 @@ cppjinja::json cppjinja::evt::context_objects::tree::jval() const
 }
 
 std::shared_ptr<cppjinja::evt::context_object>
-cppjinja::evt::context_objects::tree::call(std::vector<cppjinja::east::function_parameter> params) const
+cppjinja::evt::context_objects::tree::call(std::vector<function_parameter> params) const
 {
 	(void)params;
 	throw std::runtime_error("cannot call a tree");

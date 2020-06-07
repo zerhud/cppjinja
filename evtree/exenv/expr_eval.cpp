@@ -79,15 +79,16 @@ void cppjinja::evt::expr_eval::solve_point_arg(cppjinja::ast::expr_ops::point& l
 	(*this)(left);
 }
 
-cppjinja::east::function_parameter cppjinja::evt::expr_eval::make_param(cppjinja::ast::expr_ops::expr& pexpr) const
+cppjinja::evt::context_object::function_parameter
+cppjinja::evt::expr_eval::make_param(cppjinja::ast::expr_ops::expr& pexpr) const
 {
-	east::function_parameter ret;
+	context_object::function_parameter ret;
 	if(auto* asg = boost::get<ast::expr_ops::eq_assign>(&pexpr); asg) {
 		ret.name = make_param_name(asg->names.at(0));
-		ret.jval = (*this)(asg->value.get())->jval();
+		ret.value = (*this)(asg->value.get());
 	}
 	else
-		ret.jval = (*this)(pexpr)->jval();
+		ret.value = (*this)(pexpr);
 	return ret;
 }
 
@@ -100,12 +101,12 @@ void cppjinja::evt::expr_eval::filter_content(cppjinja::ast::expr_ops::filter_ca
 {
 	assert(result);
 
-	auto base = result->jval();
+	auto base = result;
 	result.reset();
 	auto filter = solve_ref(call.ref);
 
-	std::vector<east::function_parameter> params;
-	params.emplace_back(east::function_parameter{"$", std::move(base)});
+	std::vector<context_object::function_parameter> params;
+	params.emplace_back(context_object::function_parameter{"$", std::move(base)});
 	for(auto& p:call.args) params.emplace_back(make_param(p.get()));
 
 	result = filter->call(params);
@@ -260,7 +261,7 @@ cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::fnc_call& t) const
 {
 	auto call_obj = solve_ref(t.ref);
-	std::vector<east::function_parameter> params;
+	std::vector<context_object::function_parameter> params;
 	for(auto& p:t.args) params.emplace_back(make_param(p.get()));
 	result = call_obj->call(params);
 	return false;

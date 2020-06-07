@@ -62,7 +62,7 @@ cppjinja::json cppjinja::evt::context_objects::value::jval() const
 
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::value::call(
-        std::vector<cppjinja::east::function_parameter> params) const
+        std::vector<function_parameter> params) const
 {
 	(void)params;
 	throw std::runtime_error("cannot call a value");
