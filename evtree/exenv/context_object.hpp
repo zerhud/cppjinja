@@ -17,6 +17,11 @@ namespace cppjinja::evt {
 
 class context_object {
 public:
+	struct function_parameter {
+		std::optional<east::string_t> name;
+		std::shared_ptr<context_object> value;
+	};
+
 	virtual ~context_object() noexcept =default ;
 	virtual void add(east::string_t n, std::shared_ptr<context_object> child) =0 ;
 	virtual std::shared_ptr<context_object> find(east::var_name n) const =0 ;

@@ -23,7 +23,6 @@
 #include "evtree/exenv/context_objects/value.hpp"
 #include "evtree/exenv/context_objects/callable_node.hpp"
 #include "evtree/exenv/context_objects/user_data.hpp"
-#include "evtree/exenv/context_objects/delay_call.hpp"
 #include "evtree/exenv/context_objects/builtins.hpp"
 #include "evtree/nodes/callable.hpp"
 #include "parser/operators/common.hpp"
@@ -324,47 +323,6 @@ BOOST_AUTO_TEST_CASE(name_combination)
 	BOOST_TEST(obj_ab->jval() == "ok2"s);
 }
 BOOST_AUTO_TEST_SUITE_END() // user_data
-BOOST_AUTO_TEST_SUITE(delay_call)
-BOOST_AUTO_TEST_CASE(solve)
-{
-	auto obj = std::make_shared<mocks::context_object>();
-	std::vector<cppjinja::east::function_parameter> params;
-	params.emplace_back().jval = "pval"s;
-	cppjinja::evt::context_objects::delay_call dc(obj, params);
-	auto obj_val = std::make_shared<cppjinja::evt::context_objects::value>(evalue_term{"ok"s});
-	MOCK_EXPECT(obj->call).once().with(params).returns(obj_val);
-	BOOST_TEST(dc.solve() == evalue_term{"ok"s});
-}
-BOOST_AUTO_TEST_CASE(cannot_find_add)
-{
-	auto obj = std::make_shared<mocks::context_object>();
-	std::vector<cppjinja::east::function_parameter> params;
-	cppjinja::evt::context_objects::delay_call dc(obj, params);
-	BOOST_CHECK_THROW(dc.find(evar_name{"a"}), std::exception);
-	BOOST_CHECK_THROW(dc.add("a", obj), std::exception);
-}
-BOOST_AUTO_TEST_CASE(call)
-{
-	auto obj = std::make_shared<mocks::context_object>();
-	std::vector<cppjinja::east::function_parameter> params;
-	params.emplace_back().jval = "pval"s;
-	params.emplace_back().name = "p3";
-	params.back().jval = "bad"s;
-	cppjinja::evt::context_objects::delay_call dc(obj, params);
-
-	params.back().jval = "good"s;
-	params.emplace_back().name = "p2";
-
-	std::vector<cppjinja::east::function_parameter> call_params;
-	call_params.emplace_back().name = "p2";
-	call_params.emplace_back().name = "p3";
-	call_params.back().jval = "good"s;
-
-	auto obj_val = std::make_shared<cppjinja::evt::context_objects::value>(evalue_term{"ok"s});
-	MOCK_EXPECT(obj->call).once().with(params).returns(obj_val);
-	BOOST_TEST(dc.call(call_params)->solve() == evalue_term{"ok"s});
-}
-BOOST_AUTO_TEST_SUITE_END() // delay_call
 BOOST_AUTO_TEST_SUITE(builtins)
 using cppjinja::east::function_parameter;
 BOOST_AUTO_TEST_CASE(context)

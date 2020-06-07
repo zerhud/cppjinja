@@ -43,7 +43,8 @@ void cppjinja::evt::context_objects::user_data::add(
 	throw std::runtime_error("cannot add something to user data");
 }
 
-std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::user_data::find(cppjinja::east::var_name n) const
+std::shared_ptr<cppjinja::evt::context_object>
+cppjinja::evt::context_objects::user_data::find(cppjinja::east::var_name n) const
 {
 	auto nsel = selected_name;
 	nsel.insert(nsel.end(), n.begin(), n.end());
@@ -62,7 +63,9 @@ cppjinja::json cppjinja::evt::context_objects::user_data::jval() const
 	return out.str();
 }
 
-std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::user_data::call(std::vector<cppjinja::east::function_parameter> params) const
+std::shared_ptr<cppjinja::evt::context_object>
+cppjinja::evt::context_objects::user_data::call(
+        std::vector<cppjinja::east::function_parameter> params) const
 {
 	east::function_call call;
 	call.ref = selected_name;
