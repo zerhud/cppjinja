@@ -58,7 +58,7 @@ std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::c
 {
 	assert(env);
 	assert(node);
-	context_objects::callable_params cparams(node->solved_params(*env), std::move(params));
+	context_objects::callable_params cparams(node->solved_params(*env), std::move(params), 1);
 	evt::raii_callstack_push pusher(&env->calls(), node, std::move(cparams));
 	return std::make_shared<value>(node->evaluate(*env));
 }
