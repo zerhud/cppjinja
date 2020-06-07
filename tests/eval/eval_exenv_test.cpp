@@ -198,27 +198,6 @@ BOOST_AUTO_TEST_CASE(add_placed)
 	obj2.add_placed(0, param);
 	BOOST_TEST(obj2.find(var_name{"name"}) == param);
 }
-BOOST_AUTO_TEST_CASE(params)
-{
-	using cppjinja::east::function_parameter;
-	function_parameter c1{std::nullopt, 41};
-	function_parameter c2{"p2"s, 42};
-	function_parameter c3{"p3"s, 43};
-	function_parameter c4{std::nullopt, 44};
-
-	function_parameter p1{"p1", std::nullopt};
-	function_parameter p2{"p2", 52};
-	function_parameter p4{"p4", 54};
-	function_parameter p5{"p5", 55};
-
-	cppjinja::evt::context_objects::callable_params obj({p1, p2, p4, p5}, {c1, c2, c4, c3}, 1);
-	BOOST_TEST(obj.find(var_name{"p1"})->jval() == 41);
-	BOOST_TEST(obj.find(var_name{"p2"})->jval() == 42);
-	BOOST_TEST(obj.find(var_name{"p3"})->jval() == 43);
-	BOOST_TEST(obj.find(var_name{"p4"})->jval() == 44);
-	BOOST_TEST(obj.find(var_name{"p5"})->jval() == 55);
-	BOOST_TEST(obj.find(var_name{"P1"}) == nullptr);
-}
 BOOST_AUTO_TEST_CASE(params_objects)
 {
 	using cppjinja::east::function_parameter;
@@ -584,11 +563,12 @@ BOOST_FIXTURE_TEST_CASE(locals, impl_exenv_fixture)
 BOOST_FIXTURE_TEST_CASE(params, impl_exenv_fixture)
 {
 	mocks::callable_node calling1;
+	auto p1_val = std::make_shared<mocks::context_object>();
 	cppjinja::evt::context_objects::callable_params params(
-	{}, {cppjinja::east::function_parameter{"p1"s, "ok"s}}, 1);
+	{}, {cppjinja::evt::context_object::function_parameter{"p1"s, p1_val}});
 	ctx.push_shadow(&calling1);
 	calls.push(&calling1, params);
-	BOOST_TEST(env.params().find(evar_name{"p1"s}) != nullptr);
+	BOOST_TEST(env.params().find(evar_name{"p1"s}) == p1_val);
 }
 BOOST_FIXTURE_TEST_CASE(user_data, impl_exenv_fixture)
 {

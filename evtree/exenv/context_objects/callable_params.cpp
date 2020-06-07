@@ -24,16 +24,6 @@ void cppjinja::evt::context_objects::callable_params::add_not_passed_defaults()
 }
 
 void cppjinja::evt::context_objects::callable_params::replace_named(
-        cppjinja::east::function_parameter p)
-{
-	assert(p.name.has_value());
-	assert(p.jval.has_value());
-	add_value(*p.name, std::move(*p.jval));
-	auto pos = std::find_if(declared.begin(),declared.end(),[&p](auto& d){return p.name == d.name;});
-	if(pos!=declared.end()) pos->jval.reset();
-}
-
-void cppjinja::evt::context_objects::callable_params::replace_named(
         function_parameter p)
 {
 	assert(p.value);
@@ -42,15 +32,6 @@ void cppjinja::evt::context_objects::callable_params::replace_named(
 	auto pos = std::find_if(declared.begin(),declared.end(),
 	                        [&p](auto& d){return p.name == d.name;});
 	if(pos!=declared.end()) pos->jval.reset();
-}
-
-void cppjinja::evt::context_objects::callable_params::replace_placed(
-        std::size_t place, cppjinja::east::function_parameter p)
-{
-	assert(p.jval.has_value());
-	assert(declared.at(place).name.has_value());
-	add_value(*declared.at(place).name, std::move(*p.jval));
-	declared[place].jval.reset();
 }
 
 void cppjinja::evt::context_objects::callable_params::replace_placed(
@@ -68,19 +49,6 @@ void cppjinja::evt::context_objects::callable_params::add_value(
         , cppjinja::json val)
 {
 	params[name] = std::make_shared<value>(std::move(val), 1);
-}
-
-cppjinja::evt::context_objects::callable_params::callable_params(
-          std::vector<east::function_parameter> expected
-        , std::vector<east::function_parameter> called, int
-        )
-    : declared(std::move(expected))
-{
-	for(std::size_t i=0;i<called.size();++i) {
-		if(called[i].name.has_value()) replace_named(std::move(called[i]));
-		else replace_placed(i, std::move(called[i]));
-	}
-	add_not_passed_defaults();
 }
 
 cppjinja::evt::context_objects::callable_params::callable_params(
