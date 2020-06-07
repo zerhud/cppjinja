@@ -65,7 +65,7 @@ struct mock_callable_fixture : mock_exenv_fixture {
 	template<typename B, typename Ast>
 	void check_getters(const B& bl, const Ast& ast_bl)
 	{
-		BOOST_TEST(bl.name() == ast_bl.name);
+		BOOST_TEST(bl.name().substr(0, ast_bl.name.size()) == ast_bl.name);
 		BOOST_TEST(bl.rinfo().trim_left == ast_bl.left_open.trim);
 		BOOST_TEST(bl.rinfo().trim_right == ast_bl.right_close.trim);
 	}
@@ -430,6 +430,7 @@ BOOST_AUTO_TEST_SUITE(callables)
 typedef std::tuple<
   std::tuple<ast::block_named*, evtnodes::block_named*>
 , std::tuple<ast::block_macro*, evtnodes::block_macro*>
+, std::tuple<ast::block_call*, evtnodes::block_call*>
 > callable_list;
 BOOST_FIXTURE_TEST_CASE_TEMPLATE(getters, T, callable_list, mock_callable_fixture)
 {
@@ -664,36 +665,43 @@ BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
 BOOST_AUTO_TEST_SUITE_END() // block_set
 
 BOOST_AUTO_TEST_SUITE(block_call)
-BOOST_FIXTURE_TEST_CASE(getters, mock_callable_fixture)
+BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
 {
 	ast::block_call ast_bl;
 	ast_bl.name = "test";
-	ast_bl.left_open.trim = true;
-	ast_bl.right_close.trim = true;
+	ast_bl.call_params.emplace_back(
+	            cppjinja::ast::macro_parameter{
+	                "cp1n"s,
+	                cppjinja::ast::expr_ops::expr{cppjinja::ast::expr_ops::term{"cp1v"s}}
+	            });
 	cppjinja::evtnodes::block_call block(ast_bl);
-	BOOST_TEST(block.rinfo().trim_left == true);
-	BOOST_TEST(block.rinfo().trim_right == true);
-	BOOST_TEST(block.name() == "call_test");
+
+	// calls other block
+	auto calling_result = std::make_shared<mocks::context_object>();
+	auto calling = std::make_shared<mocks::context_object>();
+	MOCK_EXPECT(all_ctx.find).once().with(evar_name{"test"s}).returns(calling);
+	MOCK_EXPECT(calling_result->solve).returns("calling_result"s);
+	MOCK_EXPECT(calling->call).once().calls([&block,calling_result](auto params){
+		BOOST_TEST_REQUIRE(params.size()==2);
+		BOOST_TEST(params[1].name.value_or(""s) == "cp1n"s);
+		BOOST_TEST(params[1].value->jval() == "cp1v"s);
+		auto* fp = dynamic_cast<cppjinja::evt::context_objects::callable_node*>(params[0].value.get());
+		BOOST_REQUIRE(fp);
+		BOOST_CHECK(fp->is_it(&block));
+		return calling_result;
+	});
+
+	block.render(env);
+	BOOST_TEST(out.str() == "calling_result"s);
 }
-BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
+BOOST_FIXTURE_TEST_CASE(evaluate, mock_callable_fixture)
 {
 	ast::block_call ast_bl;
 	ast_bl.name = "test";
 	ast_bl.left_close.trim = true;
 	ast_bl.right_open.trim = true;
 	cppjinja::evtnodes::block_call block(ast_bl);
-
-	// calls other block
-	auto calling_result = std::make_shared<mocks::context_object>();
-	auto calling = std::make_shared<mocks::context_object>();
-//	MOCK_EXPECT(all_ctx.find).once().with("test").returns(calling);
-//	MOCK_EXPECT(calling->call).once().calls([](auto params){
-//		BOOST_TEST(params.size()==2);
-//	});
-	// first parameter is callable
-	// calling the object is calling the block
-
-//	block.render(env);
+	block.evaluate(env);
 }
 BOOST_AUTO_TEST_SUITE_END() // block_call
 
