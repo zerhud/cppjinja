@@ -18,6 +18,7 @@
 #include "nodes/content_block.hpp"
 #include "nodes/block_filtered.hpp"
 #include "nodes/block_set.hpp"
+#include "nodes/block_call.hpp"
 
 typedef std::unique_ptr<cppjinja::evt::node> node_ptr;
 typedef std::vector<node_ptr> vec_type;
@@ -138,8 +139,10 @@ void cppjinja::evt::tmpl_compiler::operator()(
 void cppjinja::evt::tmpl_compiler::operator()(
         ast::forward_ast<cppjinja::ast::block_call>& obj)
 {
-	// creates a macro, pass the created macro as first argument to calling block,
-	// call the calling block. can be parameraized (the calling can pass param).
+	assert(!rnd_stack.empty());
+	auto cnt = std::move(obj.get().content);
+	auto node = create_rendered_node<evtnodes::block_call>(std::move(obj.get()));
+	compile_content(node, cnt);
 }
 
 bool cppjinja::evt::tmpl_compiler::can_render_in_place(
