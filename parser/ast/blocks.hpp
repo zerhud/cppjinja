@@ -100,12 +100,9 @@ struct block_filtered : block
 	std::vector<block_content> content;
 };
 
-struct block_call : block
+struct block_call : block_with_name
 {
-	string_t name;
-	std::vector<macro_parameter> params;
 	std::vector<macro_parameter> call_params;
-	std::vector<block_content> content;
 };
 
 struct block_set : block

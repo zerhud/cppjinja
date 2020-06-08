@@ -12,9 +12,9 @@
 
 using namespace std::literals;
 
-cppjinja::evt::render_info cppjinja::evtnodes::block_call::inner_ri() const
+const cppjinja::ast::block_with_name& cppjinja::evtnodes::block_call::cur_ast() const
 {
-	return evt::render_info{ ast.left_close.trim, ast.right_open.trim };
+	return ast;
 }
 
 cppjinja::evtnodes::block_call::block_call(cppjinja::ast::block_call nb)
@@ -37,28 +37,13 @@ void cppjinja::evtnodes::block_call::render(cppjinja::evt::exenv& env) const
 	env.out() << obj->call(params)->solve();
 }
 
-cppjinja::evt::render_info cppjinja::evtnodes::block_call::rinfo() const
-{
-	return {ast.left_open.trim, ast.right_close.trim};
-}
-
 cppjinja::east::string_t cppjinja::evtnodes::block_call::evaluate(
         cppjinja::evt::exenv& env) const
 {
-	return "";
-}
-
-std::vector<cppjinja::east::function_parameter>
-cppjinja::evtnodes::block_call::solved_params(cppjinja::evt::exenv& env) const
-{
-	std::vector<cppjinja::east::function_parameter> ret;
-	evt::expr_eval slv(&env);
-	for(auto& p:ast.params){
-		auto& i = ret.emplace_back();
-		i.name = p.name;
-		if(p.value) i.jval = slv(*p.value)->jval();
-	}
-	return ret;
+	env.current_node(this);
+	evt::raii_push_shadow_ctx ctx_maker(this, &env.ctx());
+	auto fmt = inner_evaluate(env);
+	return env.result();
 }
 
 cppjinja::ast::string_t cppjinja::evtnodes::block_call::name() const

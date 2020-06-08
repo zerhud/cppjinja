@@ -701,7 +701,10 @@ BOOST_FIXTURE_TEST_CASE(evaluate, mock_callable_fixture)
 	ast_bl.left_close.trim = true;
 	ast_bl.right_open.trim = true;
 	cppjinja::evtnodes::block_call block(ast_bl);
-	block.evaluate(env);
+	expect_cxt_settings(&block);
+	prepare_for_render_two_childrend();
+	MOCK_EXPECT(env.result).once().returns("result"s);
+	BOOST_TEST(block.evaluate(env) == "result"s);
 }
 BOOST_AUTO_TEST_SUITE_END() // block_call
 
