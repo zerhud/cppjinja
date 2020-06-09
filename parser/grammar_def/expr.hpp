@@ -30,6 +30,13 @@ const x3::rule<class logic_op_class, ast::expr_ops::logic_op> logic_op = "logic_
 const x3::rule<class point_element_class, ast::expr_ops::point_element> point_element = "point_element";
 const x3::rule<class point_right_element_class, ast::expr_ops::point_element> point_element_right = "point_right_element";
 
+const x3::rule<class cmp_test_class, ast::expr_ops::expr> cmp_test_right_expr = "cmp_test_right_expr";
+const x3::rule<class cmp_test_fnc1_class, ast::expr_ops::fnc_call> cmp_test_fnc1 = "cmp_test_fnc1";
+const x3::rule<class cmp_test_fnc2_class, ast::expr_ops::fnc_call> cmp_test_fnc2 = "cmp_test_fnc2";
+const x3::rule<class cmp_test_fnc_expr_class, ast::expr_ops::expr> cmp_test_fnc_expr = "cmp_test_fnc_expr";
+const x3::rule<class cmp_check1_class, ast::expr_ops::cmp_check> cmp_check1 = "cmp_check1";
+const x3::rule<class cmp_check2_class, ast::expr_ops::cmp_check> cmp_check2 = "cmp_check2";
+
 const x3::rule<class expr_math_class, ast::expr_ops::expr> expr_math = "expr_math";
 const x3::rule<class expr_math_right_class, ast::expr_ops::expr> expr_math_right = "expr_math_right";
 const x3::rule<class expr_math2_class, ast::expr_ops::expr> expr_math2 = "expr_math";
@@ -103,10 +110,17 @@ static auto const concat_def = expr_concat_left >> lit('~') >> expr_concat_right
 
 static auto const in_check_def = expr >> lit("in") >> expr;
 
-static auto const cmp_check_def = expr_cmp_check >> cmp_op >> expr_logic_check;
+static auto const cmp_test_fnc1_def = lvalue >> expr_math_pow % ' ';
+static auto const cmp_test_fnc2_def = lvalue >> lit('(') >> expr % ',' >> lit(')');
+static auto const cmp_test_fnc_expr_def = cmp_test_fnc1 | cmp_test_fnc2;
+static auto const cmp_test_right_expr_def = cmp_test_fnc_expr | expr_logic_check ;
+static auto const cmp_check1_def = expr_cmp_check >> cmp_op >> expr_logic_check;
+static auto const cmp_check2_def = expr_cmp_check
+        >> lit("is") >> x3::attr(ast::expr_ops::cmp_op::test)
+        >> cmp_test_right_expr;
+static auto const cmp_check_def = cmp_check1 | cmp_check2;
 static auto const cmp_op_def =
         lit("==") >> x3::attr(ast::expr_ops::cmp_op::eq)
-      | lit("is") >> x3::attr(ast::expr_ops::cmp_op::eq)
       | lit("!=") >> x3::attr(ast::expr_ops::cmp_op::neq)
       | lit("<") >> x3::attr(ast::expr_ops::cmp_op::less)
       | lit(">") >> x3::attr(ast::expr_ops::cmp_op::more)
@@ -164,7 +178,13 @@ BOOST_SPIRIT_DEFINE( point_element_right )
 BOOST_SPIRIT_DEFINE( concat )
 BOOST_SPIRIT_DEFINE( in_check )
 BOOST_SPIRIT_DEFINE( cmp_check )
+BOOST_SPIRIT_DEFINE( cmp_check1 )
+BOOST_SPIRIT_DEFINE( cmp_check2 )
 BOOST_SPIRIT_DEFINE( cmp_op )
+BOOST_SPIRIT_DEFINE( cmp_test_right_expr )
+BOOST_SPIRIT_DEFINE( cmp_test_fnc1 )
+BOOST_SPIRIT_DEFINE( cmp_test_fnc2 )
+BOOST_SPIRIT_DEFINE( cmp_test_fnc_expr )
 BOOST_SPIRIT_DEFINE( logic_check )
 BOOST_SPIRIT_DEFINE( logic_op )
 BOOST_SPIRIT_DEFINE( negate )

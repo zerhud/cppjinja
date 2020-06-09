@@ -19,7 +19,7 @@
 namespace cppjinja::ast::expr_ops {
 
 enum class math_op { nop, pls, mns, mul, dev, mod, pow, trunc_dev };
-enum class cmp_op { nop, eq, neq, less, more, less_eq, more_eq };
+enum class cmp_op { nop, eq, neq, less, more, less_eq, more_eq, test };
 enum class logic_op { nop, op_and, op_or };
 
 struct expr;

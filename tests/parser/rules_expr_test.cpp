@@ -146,6 +146,17 @@ BOOST_AUTO_TEST_CASE(cmp_check)
 	BOOST_TEST(result.op == est::cmp_op::less);
 	BOOST_TEST(result.left == est::expr{est::term{1}});
 	BOOST_TEST(result.right == est::expr{est::single_var_name{"b"s}});
+
+	result = txt::parse(ext::cmp_check, "6 is divisibleby 3");
+	BOOST_TEST(result.op == est::cmp_op::test);
+	BOOST_TEST(result.left == est::expr{est::term{6}});
+	est::fnc_call right;
+	right.ref = est::single_var_name{"divisibleby"};
+	right.args.emplace_back(est::expr{est::term{3}});
+	BOOST_TEST(result.right == est::expr{right});
+
+	auto result2 = txt::parse(ext::cmp_check, "6 is divisibleby(3)");
+	BOOST_TEST(result == result2);
 }
 BOOST_AUTO_TEST_CASE(logic_check)
 {
