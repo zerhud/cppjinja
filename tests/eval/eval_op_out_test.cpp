@@ -216,13 +216,13 @@ BOOST_AUTO_TEST_SUITE(binary_ops)
 BOOST_AUTO_TEST_CASE(simple_if)
 {
 	auto data = std::make_unique<mocks::data_provider>();
-	auto pdata = "<% if 1 is 1 %>simple<% endif %>"sv;
+	auto pdata = "<% if 1 == 1 %>simple<% endif %>"sv;
 	BOOST_TEST(parse_single(pdata, *data) == "simple"sv );
 	pdata = "<% if 1 == 1 %>simple<% endif %>"sv;
 	BOOST_TEST(parse_single(pdata, *data) == "simple"sv );
 	pdata = "<% if 1 != 1 %>simple<% endif %>"sv;
 	BOOST_TEST(parse_single(pdata, *data) == ""sv );
-	pdata = "<% if 1 is 2 %>not ok<% else %>ok<% endif %>"sv;
+	pdata = "<% if 1 == 2 %>not ok<% else %>ok<% endif %>"sv;
 	BOOST_TEST(parse_single(pdata, *data) == "ok"sv );
 }
 BOOST_AUTO_TEST_SUITE_END() // binary_ops
