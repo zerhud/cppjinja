@@ -10,11 +10,14 @@
 #include "tree.hpp"
 #include "value.hpp"
 
+#include "builtins/tests.hpp"
+
 using namespace std::literals;
 
 cppjinja::evt::context_objects::builtins::builtins()
 {
 	add_child("namespace", std::make_shared<jinja_namespace>());
+	add_child("callable", std::make_shared<builtins_objs::callable>());
 }
 
 cppjinja::evt::context_objects::builtins::~builtins() noexcept

@@ -23,7 +23,6 @@
 #include "evtree/exenv/context_objects/value.hpp"
 #include "evtree/exenv/context_objects/callable_node.hpp"
 #include "evtree/exenv/context_objects/user_data.hpp"
-#include "evtree/exenv/context_objects/builtins.hpp"
 #include "evtree/nodes/callable.hpp"
 #include "parser/operators/common.hpp"
 #include "parser/grammar/tmpls.hpp"
@@ -327,30 +326,6 @@ BOOST_AUTO_TEST_CASE(name_combination)
 	BOOST_TEST(obj_ab->jval() == "ok2"s);
 }
 BOOST_AUTO_TEST_SUITE_END() // user_data
-BOOST_AUTO_TEST_SUITE(builtins)
-using function_parameter = cppjinja::evt::context_object::function_parameter;
-BOOST_AUTO_TEST_CASE(context)
-{
-	using namespace cppjinja::evt::context_objects;
-	cppjinja::evt::context_objects::builtins stdlib;
-
-	auto ns = stdlib.find(var_name{"namespace"s});
-	BOOST_CHECK(dynamic_cast<jinja_namespace*>(ns.get()));
-}
-BOOST_AUTO_TEST_CASE(jinja_namespace)
-{
-	cppjinja::evt::context_objects::jinja_namespace ns;
-	BOOST_CHECK_THROW(ns.call({}), std::exception);
-	BOOST_CHECK_THROW(ns.solve(), std::exception);
-	BOOST_CHECK_THROW(ns.add("a", nullptr), std::exception);
-	BOOST_CHECK_THROW(ns.find(evar_name{"a"}), std::exception);
-
-	auto pval = std::make_shared<mocks::context_object>();
-	auto tree = ns.call({function_parameter{"a", pval}});
-	BOOST_CHECK(tree);
-	BOOST_TEST(tree->find(evar_name{"a"}) == pval);
-}
-BOOST_AUTO_TEST_SUITE_END() // delay_call
 BOOST_AUTO_TEST_SUITE_END() // context_object
 
 BOOST_AUTO_TEST_SUITE(context)
