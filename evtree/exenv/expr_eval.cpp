@@ -122,6 +122,21 @@ std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::expr_eval::solve_r
 	return ret;
 }
 
+cppjinja::json cppjinja::evt::expr_eval::perform_test(cppjinja::ast::expr_ops::cmp_check& t) const
+{
+	assert(t.op == ast::expr_ops::cmp_op::test);
+	auto* check_fnc = boost::get<ast::expr_ops::fnc_call>(&t.right.get());
+	auto* check_vas = boost::get<ast::expr_ops::single_var_name>(&t.right.get());
+	auto* check_var = boost::get<ast::expr_ops::point>(&t.right.get());
+	assert(check_fnc || check_vas || check_var);
+	ast::expr_ops::fnc_call check;
+	if(check_fnc) check = *check_fnc;
+	else if(check_vas) check.ref = *check_vas;
+	else check.ref = *check_var;
+	check.args.insert(check.args.begin(), t.left);
+	return (*this)(check);
+}
+
 cppjinja::evt::expr_eval::expr_eval(const exenv* e)
     : env(e)
 {
@@ -231,6 +246,7 @@ cppjinja::evt::expr_eval::operator ()(ast::expr_ops::in_check& t) const
 cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::cmp_check& t) const
 {
+	if(t.op == ast::expr_ops::cmp_op::test) return perform_test(t);
 	return cvt(boost::apply_visitor(
 	            expr_evals::cmp_check(t.op),
 	            to_term(visit(t.left)),

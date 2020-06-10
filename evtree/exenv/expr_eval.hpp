@@ -34,6 +34,7 @@ class expr_eval final {
 	std::optional<east::string_t> make_param_name(ast::expr_ops::lvalue& name) const ;
 	void filter_content(ast::expr_ops::filter_call& call) const ;
 	std::shared_ptr<evt::context_object> solve_ref(ast::expr_ops::lvalue& ref) const ;
+	cppjinja::json perform_test(ast::expr_ops::cmp_check& t) const ;
 public:
 	typedef cppjinja::json eval_type;
 

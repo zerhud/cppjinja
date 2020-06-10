@@ -267,8 +267,13 @@ BOOST_AUTO_TEST_SUITE(tests)
 BOOST_FIXTURE_TEST_CASE(wihout_args, mock_exenv_fixture)
 {
 	auto int_check = std::make_shared<mocks::context_object>();
-	MOCK_EXPECT(all_ctx.find).once().with(cppjinja::east::var_name{"integer"}).returns(int_check);
+	auto check_result = std::make_shared<mocks::context_object>();
+	MOCK_EXPECT(all_ctx.find).exactly(2).with(cppjinja::east::var_name{"integer"}).returns(int_check);
+	MOCK_EXPECT(int_check->call).returns(check_result);
+	MOCK_EXPECT(check_result->jval).once().returns(true);
 	BOOST_TEST(eeval(&env)(txt::parse(ext::expr, "7 if 2 is integer"))->jval() == 7);
+	MOCK_EXPECT(check_result->jval).once().returns(false);
+	BOOST_TEST(eeval(&env)(txt::parse(ext::expr, "7 if 2 is integer else 5"))->jval() == 5);
 }
 BOOST_AUTO_TEST_SUITE_END() // tests
 
