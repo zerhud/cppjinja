@@ -71,9 +71,9 @@ static auto const quoted_string_def =
         (x3::lexeme[lit("'") >> -quoted_string_1_def >> lit("'")])
       | (x3::lexeme[lit("\"") >> -quoted_string_2_def >> lit("\"")]);
 
-static auto const bool_rule_def = lit("true") >> x3::attr(true) | lit("false") >> x3::attr(false);
+static auto const bool_rule_def = x3::lexeme[(lit("true") >> x3::attr(true) | lit("false") >> x3::attr(false)) >> !x3::alpha];
 static auto const term_def = bool_rule | double_ | x3::int64 | quoted_string;
-static auto const keywords_def = bool_rule|lit("if")|lit("else")|lit("in")|lit("and")|lit("or")|lit("is");
+static auto const keywords_def = bool_rule|x3::lexeme[(lit("if")|lit("else")|lit("in")|lit("and")|lit("or")|lit("is")) >> !x3::alpha];
 static auto const single_var_name_helper_def = x3::lexeme[ !keywords_def >> x3::char_("A-Za-z_") >> *x3::char_("0-9A-Za-z_") ];
 static auto const single_var_name_def = !keywords_def >> single_var_name_helper;
 
@@ -112,13 +112,13 @@ static auto const in_check_def = expr >> lit("in") >> expr;
 
 static auto const cmp_test_fnc1_def = lvalue >> expr_math_pow % ' ';
 static auto const cmp_test_fnc2_def = lvalue >> lit('(') >> expr % ',' >> lit(')');
-static auto const cmp_test_fnc_expr_def = cmp_test_fnc1 | cmp_test_fnc2;
-static auto const cmp_test_right_expr_def = cmp_test_fnc_expr | expr_logic_check ;
+static auto const cmp_test_fnc_expr_def = cmp_test_fnc2 | cmp_test_fnc1;
+static auto const cmp_test_right_expr_def = cmp_test_fnc_expr | single_var_name ;
 static auto const cmp_check1_def = expr_cmp_check >> cmp_op >> expr_logic_check;
 static auto const cmp_check2_def = expr_cmp_check
         >> lit("is") >> x3::attr(ast::expr_ops::cmp_op::test)
         >> cmp_test_right_expr;
-static auto const cmp_check_def = cmp_check1 | cmp_check2;
+static auto const cmp_check_def = cmp_check2 | cmp_check1;
 static auto const cmp_op_def =
         lit("==") >> x3::attr(ast::expr_ops::cmp_op::eq)
       | lit("!=") >> x3::attr(ast::expr_ops::cmp_op::neq)

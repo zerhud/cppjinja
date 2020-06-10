@@ -207,6 +207,23 @@ BOOST_AUTO_TEST_CASE(op_if)
 {
 	auto result1 = txt::parse(ext::op_if, "a.b if c else 'd'");
 	BOOST_TEST(result1.term == est::expr{txt::parse(ext::point, "a.b")});
+	auto result2 = txt::parse(ext::op_if, "7 if 1 is integer else 3");
+	BOOST_TEST(result2.term == est::expr{est::term{7}});
+	est::cmp_check result2_right;
+	result2_right.op = est::cmp_op::test;
+	result2_right.left = est::expr{est::term{1}};
+	result2_right.right = est::expr{est::single_var_name{"integer"}};
+	BOOST_TEST(result2.cond == est::expr_bool{result2_right});
+	BOOST_CHECK(result2.alternative.has_value());
+}
+BOOST_AUTO_TEST_CASE(expr_bool)
+{
+	auto result1 = txt::parse(ext::expr_bool, "1 is interger");
+	est::cmp_check rr1;
+	rr1.left = est::expr{est::term{1}};
+	rr1.op = est::cmp_op::test;
+	rr1.right = est::expr{est::single_var_name{"interger"}};
+	BOOST_TEST(result1 == est::expr_bool{rr1});
 }
 
 BOOST_AUTO_TEST_SUITE(exprs)
