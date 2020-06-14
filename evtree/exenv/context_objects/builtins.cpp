@@ -32,11 +32,18 @@ cppjinja::evt::context_objects::builtins::~builtins() noexcept
 
 
 std::shared_ptr<cppjinja::evt::context_object>
-cppjinja::evt::context_objects::builtin_function::bool_result(bool res) const
+cppjinja::evt::context_objects::builtin_function::result_bool(bool res) const
 {
 	static auto res_true = std::make_shared<value>(true, 1);
 	static auto res_false = std::make_shared<value>(false, 1);
 	return res ? res_true : res_false;
+}
+
+std::shared_ptr<cppjinja::evt::context_object>
+cppjinja::evt::context_objects::builtin_function::result_none() const
+{
+	static auto res = std::make_shared<value>(nullptr, 1);
+	return res;
 }
 
 void cppjinja::evt::context_objects::builtin_function::add(

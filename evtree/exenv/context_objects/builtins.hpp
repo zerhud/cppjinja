@@ -16,7 +16,8 @@ namespace cppjinja::evt::context_objects {
 
 class builtin_function : public context_object {
 protected:
-        std::shared_ptr<context_object> bool_result(bool res) const ;
+	std::shared_ptr<context_object> result_bool(bool res) const ;
+	std::shared_ptr<context_object> result_none() const ;
 public:
 	void add(east::string_t n, std::shared_ptr<context_object> child) override ;
 	std::shared_ptr<context_object> find(east::var_name n) const override ;

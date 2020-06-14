@@ -18,6 +18,7 @@
 #include "evtree/exenv/context_objects/builtins.hpp"
 #include "evtree/exenv/context_objects/callable_node.hpp"
 #include "evtree/exenv/context_objects/builtins/tests.hpp"
+#include "evtree/exenv/context_objects/builtins/lambda.hpp"
 #include "evtree/exenv/context_objects/tree.hpp"
 
 using namespace std::literals;
@@ -53,6 +54,18 @@ BOOST_AUTO_TEST_CASE(jinja_namespace)
 	auto tree = ns.call({function_parameter{"a", pval}});
 	BOOST_CHECK(tree);
 	BOOST_TEST(tree->find(var_name{"a"}) == pval);
+}
+BOOST_AUTO_TEST_CASE(lambda)
+{
+	using cppjinja::evt::context_objects::lambda_function;
+	auto obj = std::make_shared<mocks::context_object>();
+	lambda_function::fnc_type empty_fnc;
+	BOOST_TEST((lambda_function(empty_fnc)).call({})->jval() == nullptr);
+	BOOST_TEST((lambda_function([obj](auto){return obj;})).call({}) == obj);
+	BOOST_TEST((lambda_function([obj](auto p){
+		BOOST_TEST(p.size()==2);
+		return obj;
+	})).call({function_parameter{}, function_parameter{}}) == obj);
 }
 BOOST_AUTO_TEST_SUITE(tests)
 BOOST_FIXTURE_TEST_CASE(callable, mock_exenv_fixture)
