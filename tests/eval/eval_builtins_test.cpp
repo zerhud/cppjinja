@@ -18,6 +18,7 @@
 #include "evtree/exenv/context_objects/builtins.hpp"
 #include "evtree/exenv/context_objects/callable_node.hpp"
 #include "evtree/exenv/context_objects/builtins/tests.hpp"
+#include "evtree/exenv/context_objects/tree.hpp"
 
 using namespace std::literals;
 namespace tdata = boost::unit_test::data;
@@ -84,6 +85,41 @@ BOOST_FIXTURE_TEST_CASE(sameas, mock_exenv_fixture)
 	auto nca2 = std::make_shared<mocks::context_object>();
 	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca1}, fnc_param{std::nullopt, nca2}})->jval() == false);
 	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca1}, fnc_param{std::nullopt, nca1}})->jval() == true);
+}
+BOOST_FIXTURE_TEST_CASE(upper, mock_exenv_fixture)
+{
+	cppjinja::evt::context_objects::builtins_tests::upper obj;
+	auto nca_up = std::make_shared<mocks::context_object>();
+	auto nca_low = std::make_shared<mocks::context_object>();
+	MOCK_EXPECT(nca_up->jval).returns("UP"s);
+	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca_up}})->jval() == true);
+	MOCK_EXPECT(nca_low->jval).returns("low"s);
+	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca_low}})->jval() == false);
+}
+BOOST_FIXTURE_TEST_CASE(lower, mock_exenv_fixture)
+{
+	cppjinja::evt::context_objects::builtins_tests::lower obj;
+	auto nca_up = std::make_shared<mocks::context_object>();
+	auto nca_low = std::make_shared<mocks::context_object>();
+	MOCK_EXPECT(nca_up->jval).returns("UP"s);
+	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca_up}})->jval() == false);
+	MOCK_EXPECT(nca_low->jval).returns("low"s);
+	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca_low}})->jval() == true);
+}
+BOOST_FIXTURE_TEST_CASE(iterable, mock_exenv_fixture)
+{
+	using cppjinja::evt::context_objects::tree;
+	cppjinja::evt::context_objects::builtins_tests::iterable obj;
+	auto nca_ar = std::make_shared<mocks::context_object>();
+	auto nca_obj = std::make_shared<mocks::context_object>();
+	auto nca_str = std::make_shared<mocks::context_object>();
+	MOCK_EXPECT(nca_ar->jval).returns(cppjinja::json::array());
+	MOCK_EXPECT(nca_obj->jval).returns(cppjinja::json::object());
+	MOCK_EXPECT(nca_str->jval).returns("test"s);
+	BOOST_TEST(obj.call({fnc_param{std::nullopt, std::make_shared<tree>()}})->jval() == true);
+	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca_ar}})->jval() == true);
+	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca_obj}})->jval() == true);
+	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca_str}})->jval() == false);
 }
 BOOST_AUTO_TEST_SUITE_END() // tests
 BOOST_AUTO_TEST_SUITE_END() // builtins
