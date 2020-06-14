@@ -130,9 +130,12 @@ cppjinja::json cppjinja::evt::expr_eval::perform_test(cppjinja::ast::expr_ops::c
 	auto* check_var = boost::get<ast::expr_ops::point>(&t.right.get());
 	assert(check_fnc || check_vas || check_var);
 	ast::expr_ops::fnc_call check;
-	if(check_fnc) check = *check_fnc;
-	else if(check_vas) check.ref = *check_vas;
-	else check.ref = *check_var;
+	ast::expr_ops::point ref;
+	ref.left = ast::expr_ops::single_var_name{"$tests"s};
+	if(check_fnc) boost::apply_visitor([&ref](auto&v){ref.right = v;}, check_fnc->ref);
+	else if(check_vas) ref.right = *check_vas;
+	else ref.right = *check_var;
+	check.ref = ref;
 	check.args.insert(check.args.begin(), t.left);
 	return (*this)(check);
 }

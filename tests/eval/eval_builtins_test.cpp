@@ -35,10 +35,10 @@ BOOST_AUTO_TEST_CASE(context)
 	cppjinja::evt::context_objects::builtins stdlib;
 
 	BOOST_CHECK(dynamic_cast<jinja_namespace*>(stdlib.find(var_name{"namespace"s}).get()));
-	BOOST_CHECK(dynamic_cast<builtins_tests::callable*>(stdlib.find(var_name{"callable"s}).get()));
-	BOOST_CHECK(dynamic_cast<builtins_tests::defined*>(stdlib.find(var_name{"defined"s}).get()));
-	BOOST_CHECK(dynamic_cast<builtins_tests::undefined*>(stdlib.find(var_name{"undefined"s}).get()));
-	BOOST_CHECK(dynamic_cast<builtins_tests::sameas*>(stdlib.find(var_name{"sameas"s}).get()));
+	BOOST_CHECK(dynamic_cast<builtins_tests::callable*>(stdlib.find(var_name{"$tests"s, "callable"s}).get()));
+	BOOST_CHECK(dynamic_cast<builtins_tests::defined*>(stdlib.find(var_name{"$tests"s, "defined"s}).get()));
+	BOOST_CHECK(dynamic_cast<builtins_tests::undefined*>(stdlib.find(var_name{"$tests"s, "undefined"s}).get()));
+	BOOST_CHECK(dynamic_cast<builtins_tests::sameas*>(stdlib.find(var_name{"$tests"s, "sameas"s}).get()));
 }
 BOOST_AUTO_TEST_CASE(jinja_namespace)
 {
@@ -53,6 +53,7 @@ BOOST_AUTO_TEST_CASE(jinja_namespace)
 	BOOST_CHECK(tree);
 	BOOST_TEST(tree->find(var_name{"a"}) == pval);
 }
+BOOST_AUTO_TEST_SUITE(tests)
 BOOST_FIXTURE_TEST_CASE(callable, mock_exenv_fixture)
 {
 	cppjinja::evt::context_objects::builtins_tests::callable obj;
@@ -84,6 +85,7 @@ BOOST_FIXTURE_TEST_CASE(sameas, mock_exenv_fixture)
 	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca1}, fnc_param{std::nullopt, nca2}})->jval() == false);
 	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca1}, fnc_param{std::nullopt, nca1}})->jval() == true);
 }
+BOOST_AUTO_TEST_SUITE_END() // tests
 BOOST_AUTO_TEST_SUITE_END() // builtins
 BOOST_AUTO_TEST_SUITE_END() // context_object
 BOOST_AUTO_TEST_SUITE_END() // phase_evaluate
