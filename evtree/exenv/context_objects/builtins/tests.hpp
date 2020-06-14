@@ -10,9 +10,24 @@
 
 #include "../builtins.hpp"
 
-namespace cppjinja::evt::context_objects::builtins_objs {
+namespace cppjinja::evt::context_objects::builtins_tests {
 
 class callable : public builtin_function {
+public:
+	std::shared_ptr<context_object> call(std::vector<function_parameter> params) const override ;
+};
+
+class defined : public builtin_function {
+public:
+	std::shared_ptr<context_object> call(std::vector<function_parameter> params) const override ;
+};
+
+class undefined : public builtin_function {
+public:
+	std::shared_ptr<context_object> call(std::vector<function_parameter> params) const override ;
+};
+
+class sameas : public builtin_function {
 public:
 	std::shared_ptr<context_object> call(std::vector<function_parameter> params) const override ;
 };

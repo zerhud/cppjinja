@@ -17,7 +17,9 @@ using namespace std::literals;
 cppjinja::evt::context_objects::builtins::builtins()
 {
 	add_child("namespace", std::make_shared<jinja_namespace>());
-	add_child("callable", std::make_shared<builtins_objs::callable>());
+	add_child("callable", std::make_shared<builtins_tests::callable>());
+	add_child("defined", std::make_shared<builtins_tests::defined>());
+	add_child("undefined", std::make_shared<builtins_tests::undefined>());
 }
 
 cppjinja::evt::context_objects::builtins::~builtins() noexcept

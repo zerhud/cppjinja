@@ -35,7 +35,10 @@ BOOST_AUTO_TEST_CASE(context)
 	cppjinja::evt::context_objects::builtins stdlib;
 
 	BOOST_CHECK(dynamic_cast<jinja_namespace*>(stdlib.find(var_name{"namespace"s}).get()));
-	BOOST_CHECK(dynamic_cast<builtins_objs::callable*>(stdlib.find(var_name{"callable"s}).get()));
+	BOOST_CHECK(dynamic_cast<builtins_tests::callable*>(stdlib.find(var_name{"callable"s}).get()));
+	BOOST_CHECK(dynamic_cast<builtins_tests::defined*>(stdlib.find(var_name{"defined"s}).get()));
+	BOOST_CHECK(dynamic_cast<builtins_tests::undefined*>(stdlib.find(var_name{"undefined"s}).get()));
+	BOOST_CHECK(dynamic_cast<builtins_tests::sameas*>(stdlib.find(var_name{"sameas"s}).get()));
 }
 BOOST_AUTO_TEST_CASE(jinja_namespace)
 {
@@ -52,12 +55,34 @@ BOOST_AUTO_TEST_CASE(jinja_namespace)
 }
 BOOST_FIXTURE_TEST_CASE(callable, mock_exenv_fixture)
 {
-	cppjinja::evt::context_objects::builtins_objs::callable obj;
+	cppjinja::evt::context_objects::builtins_tests::callable obj;
 	mocks::callable_node canode;
 	auto nca = std::make_shared<mocks::context_object>();
 	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca}})->jval() == false);
 	auto caobj = std::make_shared<cppjinja::evt::context_objects::callable_node>(&env, &canode);
 	BOOST_TEST(obj.call({fnc_param{std::nullopt, caobj}})->jval() == true);
+}
+BOOST_FIXTURE_TEST_CASE(defined, mock_exenv_fixture)
+{
+	cppjinja::evt::context_objects::builtins_tests::defined obj;
+	auto nca = std::make_shared<mocks::context_object>();
+	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca}})->jval() == true);
+	BOOST_TEST(obj.call({fnc_param{std::nullopt, nullptr}})->jval() == false);
+}
+BOOST_FIXTURE_TEST_CASE(undefined, mock_exenv_fixture)
+{
+	cppjinja::evt::context_objects::builtins_tests::undefined obj;
+	auto nca = std::make_shared<mocks::context_object>();
+	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca}})->jval() == false);
+	BOOST_TEST(obj.call({fnc_param{std::nullopt, nullptr}})->jval() == true);
+}
+BOOST_FIXTURE_TEST_CASE(sameas, mock_exenv_fixture)
+{
+	cppjinja::evt::context_objects::builtins_tests::sameas obj;
+	auto nca1 = std::make_shared<mocks::context_object>();
+	auto nca2 = std::make_shared<mocks::context_object>();
+	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca1}, fnc_param{std::nullopt, nca2}})->jval() == false);
+	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca1}, fnc_param{std::nullopt, nca1}})->jval() == true);
 }
 BOOST_AUTO_TEST_SUITE_END() // builtins
 BOOST_AUTO_TEST_SUITE_END() // context_object
