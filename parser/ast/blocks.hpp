@@ -76,6 +76,7 @@ struct block_for : block
 	bool recursive=false;
 	std::vector<string_t> vars;
 	std::vector<block_content> content;
+	std::optional<else_thread> else_block;
 };
 
 struct macro_parameter

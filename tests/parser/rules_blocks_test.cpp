@@ -161,7 +161,18 @@ BOOST_DATA_TEST_CASE(
 		BOOST_TEST( result.content.size() == good_result.content.size() );
 		BOOST_TEST( result.content == good_result.content );
 		BOOST_TEST( result == good_result );
+		BOOST_CHECK( !result.else_block.has_value() );
 	}
+}
+
+BOOST_AUTO_TEST_CASE(block_for_else)
+{
+	ast::block_for result;
+	std::string text = "<% for key in keys %>f<% else %>e<%endfor%>"s;
+	result = txt::parse(txt::block_for, text);
+	BOOST_CHECK( result.else_block.has_value() );
+	BOOST_TEST( result.content.size() == 1);
+	BOOST_TEST( result.else_block->content.size() == 1);
 }
 
 BOOST_DATA_TEST_CASE(

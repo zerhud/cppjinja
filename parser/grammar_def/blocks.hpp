@@ -73,7 +73,9 @@ namespace cppjinja::text {
 		>> lit("for") >> (single_var_name % ',')
 		>> lit("in") >> ( function_call | var_name )
 		>> -(lit("recursive") >> x3::attr(true))
-		>> block_term_end_cnt >> *block_content >> block_term_start
+		>> block_term_end_cnt >> *block_content
+		>> -else_thread
+		>> block_term_start
 		>> lit("endfor") >> block_term_end
 		;
 
