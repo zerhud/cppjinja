@@ -26,6 +26,7 @@
 #include "evtree/nodes/block_filtered.hpp"
 #include "evtree/nodes/block_set.hpp"
 #include "evtree/nodes/block_call.hpp"
+#include "evtree/nodes/block_for.hpp"
 #include "evtree/evtree.hpp"
 #include "parser/operators/blocks.hpp"
 
@@ -707,6 +708,24 @@ BOOST_FIXTURE_TEST_CASE(evaluate, mock_callable_fixture)
 	BOOST_TEST(block.evaluate(env) == "result"s);
 }
 BOOST_AUTO_TEST_SUITE_END() // block_call
+
+BOOST_AUTO_TEST_SUITE(block_for)
+BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
+{
+	ast::block_for ast_bl;
+	ast_bl.vars.emplace_back("a"s);
+	ast_bl.value;
+	cppjinja::evtnodes::block_for block(ast_bl);
+
+	mocks::node child;
+
+	expect_transporent_cxt(&block);
+	block.render(env);
+	expect_children({&child});
+	MOCK_EXPECT(child.render).exactly(2);
+	BOOST_TEST(out.str() == ""s);
+}
+BOOST_AUTO_TEST_SUITE_END() // block_for
 
 BOOST_AUTO_TEST_SUITE_END() // nodes
 BOOST_AUTO_TEST_SUITE_END() // phase_evaluate

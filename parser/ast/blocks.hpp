@@ -72,7 +72,7 @@ struct block_for : block
 {
 	typedef x3::variant<var_name, function_call> value_t;
 
-	value_t value;
+	expr_ops::expr value;
 	bool recursive=false;
 	std::vector<string_t> vars;
 	std::vector<block_content> content;

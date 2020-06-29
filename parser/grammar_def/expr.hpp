@@ -73,7 +73,7 @@ static auto const quoted_string_def =
 
 static auto const bool_rule_def = x3::lexeme[(lit("true") >> x3::attr(true) | lit("false") >> x3::attr(false)) >> !x3::alpha];
 static auto const term_def = bool_rule | double_ | x3::int64 | quoted_string;
-static auto const keywords_def = bool_rule|x3::lexeme[(lit("if")|lit("else")|lit("in")|lit("and")|lit("or")|lit("is")) >> !x3::alpha];
+static auto const keywords_def = bool_rule|x3::lexeme[(lit("if")|lit("else")|lit("in")|lit("and")|lit("or")|lit("is")|lit("recursive")) >> !x3::alpha];
 static auto const single_var_name_helper_def = x3::lexeme[ !keywords_def >> x3::char_("A-Za-z_") >> *x3::char_("0-9A-Za-z_") ];
 static auto const single_var_name_def = !keywords_def >> single_var_name_helper;
 
