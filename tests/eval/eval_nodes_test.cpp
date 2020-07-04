@@ -29,6 +29,8 @@
 #include "evtree/nodes/block_for.hpp"
 #include "evtree/evtree.hpp"
 #include "parser/operators/blocks.hpp"
+#include "parser/parse.hpp"
+#include "parser/grammar/expr.hpp"
 
 #include "evtree/exenv/context_objects/callable_node.hpp"
 
@@ -811,6 +813,20 @@ BOOST_FIXTURE_TEST_CASE(render_two, mock_callable_fixture)
 	});
 	block.render(env);
 	BOOST_TEST(out.str() == ""s);
+}
+BOOST_FIXTURE_TEST_CASE(no_value_no_else, mock_callable_fixture)
+{
+	ast::block_for ast_bl;
+	ast_bl.vars.emplace_back("a"s);
+	ast_bl.value = cppjinja::text::parse(cppjinja::text::expr_ops::expr, "3 if 0==1" );
+	cppjinja::evtnodes::block_for block(ast_bl);
+	expect_transporent_cxt(&block);
+	block.render(env);
+
+	ast_bl.vars.emplace_back("a"s);
+	cppjinja::evtnodes::block_for block1(ast_bl);
+	expect_transporent_cxt(&block1);
+	block1.render(env);
 }
 BOOST_AUTO_TEST_SUITE_END() // block_for
 

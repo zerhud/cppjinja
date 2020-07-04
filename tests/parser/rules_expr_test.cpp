@@ -309,6 +309,10 @@ BOOST_AUTO_TEST_CASE(fnc_call)
 }
 BOOST_AUTO_TEST_CASE(op_if)
 {
+	est::expr simple_result = txt::parse(ext::expr, "2 if 1 == 1"sv);
+	est::op_if* simple_if = boost::get<est::op_if>(&simple_result.var);
+	BOOST_REQUIRE(simple_if);
+
 	auto left_result = txt::parse(ext::expr, "z = 'a' * 'b' ~ c.d('v')"sv);
 	est::eq_assign* left_res = boost::get<est::eq_assign>(&left_result.var);
 
