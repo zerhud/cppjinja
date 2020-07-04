@@ -710,19 +710,106 @@ BOOST_FIXTURE_TEST_CASE(evaluate, mock_callable_fixture)
 BOOST_AUTO_TEST_SUITE_END() // block_call
 
 BOOST_AUTO_TEST_SUITE(block_for)
-BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
+BOOST_FIXTURE_TEST_CASE(one_or_two, mock_callable_fixture)
+{
+	ast::block_for ast_bl;
+	ast_bl.value = aps::expr{aps::single_var_name{"list"}};
+	BOOST_CHECK_THROW(cppjinja::evtnodes::block_for{ast_bl}, std::exception);
+	ast_bl.vars.emplace_back("a"s);
+	BOOST_CHECK_NO_THROW(cppjinja::evtnodes::block_for{ast_bl});
+	ast_bl.vars.emplace_back("b"s);
+	BOOST_CHECK_NO_THROW(cppjinja::evtnodes::block_for{ast_bl});
+	ast_bl.vars.emplace_back("c"s);
+	BOOST_CHECK_THROW(cppjinja::evtnodes::block_for{ast_bl}, std::exception);
+}
+BOOST_FIXTURE_TEST_CASE(render_one, mock_callable_fixture)
 {
 	ast::block_for ast_bl;
 	ast_bl.vars.emplace_back("a"s);
-	ast_bl.value;
+	ast_bl.value = aps::expr{aps::single_var_name{"list"}};
 	cppjinja::evtnodes::block_for block(ast_bl);
 
 	mocks::node child;
+	auto list = std::make_shared<mocks::context_object>();
+	auto list_val = "[1, 2]"_json;
+	MOCK_EXPECT(all_ctx.find).with(evar_name{"list"}).returns(list);
+	MOCK_EXPECT(list->jval).returns(list_val);
 
-	expect_transporent_cxt(&block);
-	block.render(env);
+	int iteration = 0;
+	expect_glp(0, 2, 0);
 	expect_children({&child});
+	expect_transporent_cxt(&block);
+	MOCK_EXPECT(env.rinfo);
 	MOCK_EXPECT(child.render).exactly(2);
+	MOCK_EXPECT(locals.add)
+	        .exactly(2)
+	        .calls( [&iteration](
+	            cppjinja::east::string_t n
+	          , std::shared_ptr<cppjinja::evt::context_object> child){
+		BOOST_TEST(n=="a");
+		BOOST_REQUIRE(child);
+		BOOST_TEST(child->jval() == ++iteration);
+	});
+	block.render(env);
+	BOOST_TEST(out.str() == ""s);
+}
+BOOST_FIXTURE_TEST_CASE(render_two, mock_callable_fixture)
+{
+	ast::block_for ast_bl;
+	ast_bl.vars.emplace_back("k"s);
+	ast_bl.vars.emplace_back("v"s);
+	ast_bl.value = aps::expr{aps::single_var_name{"list"}};
+	cppjinja::evtnodes::block_for block(ast_bl);
+
+	mocks::node child;
+	auto list = std::make_shared<mocks::context_object>();
+	auto list_val = "{\"one\":1, \"two\":2}"_json;
+	MOCK_EXPECT(all_ctx.find).with(evar_name{"list"}).returns(list);
+	MOCK_EXPECT(list->jval).returns(list_val);
+
+	mock::sequence locals_add_seq;
+	expect_glp(0, 2, 0);
+	expect_children({&child});
+	expect_transporent_cxt(&block);
+	MOCK_EXPECT(env.rinfo);
+	MOCK_EXPECT(child.render).exactly(2);
+	MOCK_EXPECT(locals.add)
+	        .once().in(locals_add_seq)
+	        .calls( [](
+	            cppjinja::east::string_t n
+	          , std::shared_ptr<cppjinja::evt::context_object> child){
+		BOOST_TEST(n=="k");
+		BOOST_REQUIRE(child);
+		BOOST_TEST(child->jval() == "one"s);
+	});
+	MOCK_EXPECT(locals.add)
+	        .once().in(locals_add_seq)
+	        .calls( [](
+	            cppjinja::east::string_t n
+	          , std::shared_ptr<cppjinja::evt::context_object> child){
+		BOOST_TEST(n=="v");
+		BOOST_REQUIRE(child);
+		BOOST_TEST(child->jval() == 1);
+	});
+	MOCK_EXPECT(locals.add)
+	        .once().in(locals_add_seq)
+	        .calls( [](
+	            cppjinja::east::string_t n
+	          , std::shared_ptr<cppjinja::evt::context_object> child){
+		BOOST_TEST(n=="k");
+		BOOST_REQUIRE(child);
+		BOOST_TEST(child->jval() == "two"s);
+	});
+	MOCK_EXPECT(locals.add)
+	        .once().in(locals_add_seq)
+	        .calls( [](
+	            cppjinja::east::string_t n
+	          , std::shared_ptr<cppjinja::evt::context_object> child){
+		BOOST_TEST(n=="v");
+		BOOST_REQUIRE(child);
+		BOOST_TEST(child->jval() == 2);
+	});
+	block.render(env);
 	BOOST_TEST(out.str() == ""s);
 }
 BOOST_AUTO_TEST_SUITE_END() // block_for

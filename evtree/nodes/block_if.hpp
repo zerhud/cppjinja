@@ -14,10 +14,10 @@ namespace cppjinja::evtnodes {
 
 class block_if : public evt::node {
 	ast::block_if block;
-        void render_if(evt::exenv& ctx) const ;
-        void render_else(evt::exenv& ctx) const ;
-        [[nodiscard]] evt::raii_result_format raii_if_formatter(evt::exenv& ctx) const ;
-        [[nodiscard]] evt::raii_result_format raii_else_formatter(evt::exenv& ctx) const ;
+	void render_if(evt::exenv& ctx) const ;
+	void render_else(evt::exenv& ctx) const ;
+	[[nodiscard]] evt::raii_result_format raii_if_formatter(evt::exenv& ctx) const ;
+	[[nodiscard]] evt::raii_result_format raii_else_formatter(evt::exenv& ctx) const ;
 public:
 	block_if(ast::block_if nb);
 	evt::render_info rinfo() const override ;
