@@ -316,6 +316,12 @@ BOOST_AUTO_TEST_CASE(block_call)
 	BOOST_TEST(make_node_seq_str(tree.main_block(), tree.render_tree.all_tree()) == "block_named,block_call,content...");
 }
 
+BOOST_AUTO_TEST_CASE(block_for)
+{
+	compiled_tmpl tree = build_tree("<% for a in b %>c<%else%>e<%endfor%>"sv);
+	BOOST_TEST(make_node_seq_str(tree.main_block(), tree.render_tree.all_tree()) == "block_named,block_for,content_block,content..,content_block,content....");
+}
+
 BOOST_AUTO_TEST_SUITE_END() // tmpl_compiler
 
 BOOST_AUTO_TEST_SUITE_END() // phase_compilation

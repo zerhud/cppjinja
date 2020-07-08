@@ -61,8 +61,10 @@ class tmpl_compiler final {
 	void make_content_block(
 	        evt::render_info ri, std::vector<ast::block_content> children);
 
-	evt::render_info make_ri_for_if(const ast::block_if& obj) const ;
-	evt::render_info make_ri_for_else(const ast::block_if& obj) const ;
+	template<typename B>
+	evt::render_info make_ri_for_if(const B& obj) const ;
+	template<typename B>
+	evt::render_info make_ri_for_else(const B& obj) const ;
 public:
 	compiled_tmpl operator()(ast::tmpl t) ;
 

@@ -19,6 +19,7 @@
 #include "nodes/block_filtered.hpp"
 #include "nodes/block_set.hpp"
 #include "nodes/block_call.hpp"
+#include "nodes/block_for.hpp"
 
 typedef std::unique_ptr<cppjinja::evt::node> node_ptr;
 typedef std::vector<node_ptr> vec_type;
@@ -167,10 +168,17 @@ void cppjinja::evt::tmpl_compiler::operator()(
 
 void cppjinja::evt::tmpl_compiler::operator()(ast::forward_ast<cppjinja::ast::block_for>& obj)
 {
-
+	auto for_node = create_rendered_node<evtnodes::block_for>(obj.get());
+	details::push_pop_raii rnd_raii(rnd_stack, for_node);
+	make_content_block(make_ri_for_if(obj.get()), std::move(obj.get().content));
+	if(obj.get().else_block)
+		make_content_block(
+		            make_ri_for_else(obj.get()),
+		            std::move(obj.get().else_block->content));
 }
 
-cppjinja::evt::render_info cppjinja::evt::tmpl_compiler::make_ri_for_if(const cppjinja::ast::block_if& obj) const
+template<typename B>
+cppjinja::evt::render_info cppjinja::evt::tmpl_compiler::make_ri_for_if(const B& obj) const
 {
 	return evt::render_info{
 		obj.left_close.trim,
@@ -179,7 +187,8 @@ cppjinja::evt::render_info cppjinja::evt::tmpl_compiler::make_ri_for_if(const cp
 		            obj.right_open.trim};
 }
 
-cppjinja::evt::render_info cppjinja::evt::tmpl_compiler::make_ri_for_else(const cppjinja::ast::block_if& obj) const
+template<typename B>
+cppjinja::evt::render_info cppjinja::evt::tmpl_compiler::make_ri_for_else(const B& obj) const
 {
 	assert(obj.else_block.has_value());
 	return evt::render_info{obj.else_block->left_close.trim, obj.right_open.trim};
