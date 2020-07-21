@@ -60,7 +60,9 @@ BOOST_FIXTURE_TEST_CASE(render_one, mock_for_fixture)
 	int iteration = 0;
 	expect_glp(0, 2, 0);
 	expect_children({&child});
-	expect_transporent_cxt(&block);
+	MOCK_EXPECT(env.current_node);
+	MOCK_EXPECT(ctx.pop).with(&block);
+	MOCK_EXPECT(ctx.push).with(&block);
 	MOCK_EXPECT(env.rinfo);
 	MOCK_EXPECT(child.render).exactly(2);
 	MOCK_EXPECT(locals.add)
@@ -92,9 +94,10 @@ BOOST_FIXTURE_TEST_CASE(render_two, mock_for_fixture)
 	mock::sequence locals_add_seq;
 	expect_glp(0, 2, 0);
 	expect_children({&child});
-	expect_transporent_cxt(&block);
 	MOCK_EXPECT(env.rinfo);
 	MOCK_EXPECT(child.render).exactly(2);
+	MOCK_EXPECT(env.current_node).with(&block);
+	MOCK_EXPECT(ctx.push).once().in(locals_add_seq).with(&block);
 	MOCK_EXPECT(locals.add)
 	        .once().in(locals_add_seq)
 	        .calls( [](
@@ -113,6 +116,8 @@ BOOST_FIXTURE_TEST_CASE(render_two, mock_for_fixture)
 		BOOST_REQUIRE(child);
 		BOOST_TEST(child->jval() == 1);
 	});
+	MOCK_EXPECT(ctx.pop).once().in(locals_add_seq).with(&block);
+	MOCK_EXPECT(ctx.push).once().in(locals_add_seq).with(&block);
 	MOCK_EXPECT(locals.add)
 	        .once().in(locals_add_seq)
 	        .calls( [](
@@ -131,6 +136,7 @@ BOOST_FIXTURE_TEST_CASE(render_two, mock_for_fixture)
 		BOOST_REQUIRE(child);
 		BOOST_TEST(child->jval() == 2);
 	});
+	MOCK_EXPECT(ctx.pop).once().in(locals_add_seq).with(&block);
 	block.render(env);
 	BOOST_TEST(out.str() == ""s);
 }
@@ -144,7 +150,7 @@ BOOST_FIXTURE_TEST_CASE(no_value_no_else1, mock_for_fixture)
 	mocks::node child_main;
 
 	expect_children({&child_main});
-	expect_transporent_cxt(&block);
+	MOCK_EXPECT(env.current_node);
 	block.render(env);
 }
 BOOST_FIXTURE_TEST_CASE(no_value_no_else2, mock_for_fixture)
@@ -158,7 +164,7 @@ BOOST_FIXTURE_TEST_CASE(no_value_no_else2, mock_for_fixture)
 	mocks::node child_main;
 
 	expect_children({&child_main});
-	expect_transporent_cxt(&block);
+	MOCK_EXPECT(env.current_node);
 	block.render(env);
 }
 BOOST_FIXTURE_TEST_CASE(no_value_else1, mock_for_fixture)
@@ -171,7 +177,7 @@ BOOST_FIXTURE_TEST_CASE(no_value_else1, mock_for_fixture)
 	mocks::node child_main, child_else;
 
 	expect_children({&child_main, &child_else});
-	expect_transporent_cxt(&block);
+	MOCK_EXPECT(env.current_node);
 	MOCK_EXPECT(child_else.render).once();
 	block.render(env);
 }
@@ -186,7 +192,7 @@ BOOST_FIXTURE_TEST_CASE(no_value_else2, mock_for_fixture)
 	mocks::node child_main, child_else;
 
 	expect_children({&child_main, &child_else});
-	expect_transporent_cxt(&block);
+	MOCK_EXPECT(env.current_node);
 	MOCK_EXPECT(child_else.render).once();
 	block.render(env);
 }

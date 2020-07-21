@@ -27,7 +27,6 @@ cppjinja::evt::render_info cppjinja::evtnodes::block_for::rinfo() const
 void cppjinja::evtnodes::block_for::render(cppjinja::evt::exenv& env) const
 {
 	env.current_node(this);
-	evt::raii_push_ctx ctx(this, &env.ctx());
 	auto value = evt::expr_eval(&env)(abl.value);
 	assert(value);
 	assert(abl.vars.size()==1 || abl.vars.size()==2);
@@ -41,6 +40,7 @@ void cppjinja::evtnodes::block_for::add_single(evt::exenv& env, cppjinja::json v
 	bool need_else = true;
 	auto children = env.children(this);
 	for(auto& lvar:val) {
+		evt::raii_push_ctx ctx(this, &env.ctx());
 		need_else = false;
 		env.locals().add(abl.vars[0], std::make_shared<obj_val>(lvar, 1));
 		children.at(0)->render(env);
@@ -56,6 +56,7 @@ void cppjinja::evtnodes::block_for::add_two(cppjinja::evt::exenv& env, cppjinja:
 	bool need_else = true;
 	auto children = env.children(this);
 	for(auto& lvar:val.items()) {
+		evt::raii_push_ctx ctx(this, &env.ctx());
 		need_else = false;
 		env.locals().add(abl.vars[0], std::make_shared<obj_val>(lvar.key(), 1));
 		env.locals().add(abl.vars[1], std::make_shared<obj_val>(lvar.value(), 1));
