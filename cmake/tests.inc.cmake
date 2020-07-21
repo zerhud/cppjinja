@@ -31,6 +31,7 @@ set(tests_eval
 	eval_exenv
 	eval_expr
 	eval_nodes
+	eval_node_for
 	eval_tmpl_compiler
 	eval_builtins
 	)
