@@ -38,18 +38,30 @@ void cppjinja::evtnodes::block_for::render(cppjinja::evt::exenv& env) const
 void cppjinja::evtnodes::block_for::add_single(evt::exenv& env, cppjinja::json val) const
 {
 	assert(abl.vars.size() == 1);
+	bool need_else = true;
+	auto children = env.children(this);
 	for(auto& lvar:val) {
+		need_else = false;
 		env.locals().add(abl.vars[0], std::make_shared<obj_val>(lvar, 1));
-		env.children(this).at(0)->render(env);
+		children.at(0)->render(env);
 	}
+
+	if(need_else && children.size()==2)
+		children[1]->render(env);
 }
 
 void cppjinja::evtnodes::block_for::add_two(cppjinja::evt::exenv& env, cppjinja::json val) const
 {
 	assert(abl.vars.size() == 2);
+	bool need_else = true;
+	auto children = env.children(this);
 	for(auto& lvar:val.items()) {
+		need_else = false;
 		env.locals().add(abl.vars[0], std::make_shared<obj_val>(lvar.key(), 1));
 		env.locals().add(abl.vars[1], std::make_shared<obj_val>(lvar.value(), 1));
-		env.children(this).at(0)->render(env);
+		children.at(0)->render(env);
 	}
+
+	if(need_else && children.size()==2)
+		children[1]->render(env);
 }

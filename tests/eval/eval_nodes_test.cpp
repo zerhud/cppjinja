@@ -814,19 +814,61 @@ BOOST_FIXTURE_TEST_CASE(render_two, mock_callable_fixture)
 	block.render(env);
 	BOOST_TEST(out.str() == ""s);
 }
-BOOST_FIXTURE_TEST_CASE(no_value_no_else, mock_callable_fixture)
+BOOST_FIXTURE_TEST_CASE(no_value_no_else1, mock_callable_fixture)
 {
 	ast::block_for ast_bl;
 	ast_bl.vars.emplace_back("a"s);
 	ast_bl.value = cppjinja::text::parse(cppjinja::text::expr_ops::expr, "3 if 0==1" );
 	cppjinja::evtnodes::block_for block(ast_bl);
+
+	mocks::node child_main;
+
+	expect_children({&child_main});
 	expect_transporent_cxt(&block);
 	block.render(env);
-
+}
+BOOST_FIXTURE_TEST_CASE(no_value_no_else2, mock_callable_fixture)
+{
+	ast::block_for ast_bl;
 	ast_bl.vars.emplace_back("a"s);
-	cppjinja::evtnodes::block_for block1(ast_bl);
-	expect_transporent_cxt(&block1);
-	block1.render(env);
+	ast_bl.vars.emplace_back("b"s);
+	ast_bl.value = cppjinja::text::parse(cppjinja::text::expr_ops::expr, "3 if 0==1" );
+	cppjinja::evtnodes::block_for block(ast_bl);
+
+	mocks::node child_main;
+
+	expect_children({&child_main});
+	expect_transporent_cxt(&block);
+	block.render(env);
+}
+BOOST_FIXTURE_TEST_CASE(no_value_else1, mock_callable_fixture)
+{
+	ast::block_for ast_bl;
+	ast_bl.vars.emplace_back("a"s);
+	ast_bl.value = cppjinja::text::parse(cppjinja::text::expr_ops::expr, "3 if 0==1" );
+	cppjinja::evtnodes::block_for block(ast_bl);
+
+	mocks::node child_main, child_else;
+
+	expect_children({&child_main, &child_else});
+	expect_transporent_cxt(&block);
+	MOCK_EXPECT(child_else.render).once();
+	block.render(env);
+}
+BOOST_FIXTURE_TEST_CASE(no_value_else2, mock_callable_fixture)
+{
+	ast::block_for ast_bl;
+	ast_bl.vars.emplace_back("a"s);
+	ast_bl.vars.emplace_back("b"s);
+	ast_bl.value = cppjinja::text::parse(cppjinja::text::expr_ops::expr, "3 if 0==1" );
+	cppjinja::evtnodes::block_for block(ast_bl);
+
+	mocks::node child_main, child_else;
+
+	expect_children({&child_main, &child_else});
+	expect_transporent_cxt(&block);
+	MOCK_EXPECT(child_else.render).once();
+	block.render(env);
 }
 BOOST_AUTO_TEST_SUITE_END() // block_for
 
