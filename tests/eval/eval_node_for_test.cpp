@@ -197,6 +197,15 @@ BOOST_FIXTURE_TEST_CASE(no_value_else2, mock_for_fixture)
 	block.render(env);
 }
 
+BOOST_AUTO_TEST_SUITE(ctxobj)
+BOOST_AUTO_TEST_CASE(cannot_add)
+{
+	evtnodes::block_for_object obj;
+	auto child = std::make_shared<mocks::context_object>();
+	BOOST_CHECK_THROW(obj.add("ok"s, child), std::exception);
+}
+BOOST_AUTO_TEST_SUITE_END() // ctxobj
+
 BOOST_AUTO_TEST_SUITE_END() // block_for
 BOOST_AUTO_TEST_SUITE_END() // nodes
 BOOST_AUTO_TEST_SUITE_END() // phase_evaluate

@@ -10,6 +10,7 @@
 #include "../exenv/expr_eval.hpp"
 #include "evtree/exenv/context_objects/value.hpp"
 
+using namespace std::literals;
 using obj_val = cppjinja::evt::context_objects::value;
 
 cppjinja::evtnodes::block_for::block_for(cppjinja::ast::block_for ast_bl)
@@ -65,4 +66,33 @@ void cppjinja::evtnodes::block_for::add_two(cppjinja::evt::exenv& env, cppjinja:
 
 	if(need_else && children.size()==2)
 		children[1]->render(env);
+}
+
+void cppjinja::evtnodes::block_for_object::add(
+        cppjinja::east::string_t, std::shared_ptr<cppjinja::evt::context_object>)
+{
+	throw std::runtime_error("cannot add something to loop");
+}
+
+std::shared_ptr<cppjinja::evt::context_object>
+cppjinja::evtnodes::block_for_object::find(cppjinja::east::var_name n) const
+{
+	return nullptr;
+}
+
+cppjinja::east::value_term cppjinja::evtnodes::block_for_object::solve() const
+{
+	return ""s;
+}
+
+cppjinja::json cppjinja::evtnodes::block_for_object::jval() const
+{
+	return ""s;
+}
+
+std::shared_ptr<cppjinja::evt::context_object>
+cppjinja::evtnodes::block_for_object::call(
+	std::vector<function_parameter> params) const
+{
+	return nullptr;
 }
