@@ -205,7 +205,24 @@ BOOST_AUTO_TEST_CASE(cannot_add_solve)
 	BOOST_CHECK_THROW(obj.solve(), std::exception);
 	BOOST_CHECK_THROW(obj.add("ok"s, child), std::exception);
 }
-BOOST_FIXTURE_TEST_CASE(
+BOOST_FIXTURE_TEST_CASE(index, mock_for_fixture)
+{
+	ast::block_for ast_bl;
+	ast_bl.vars.emplace_back("a"s);
+	ast_bl.value = cppjinja::text::parse(cppjinja::text::expr_ops::expr, "[1,2,3] if 0==1" );
+	cppjinja::evtnodes::block_for block(ast_bl);
+
+	mocks::node child_main;
+	expect_children({&child_main});
+	MOCK_EXPECT(env.current_node);
+
+	MOCK_EXPECT(child_main.render)
+		.calls([](cppjinja::evt::exenv& e){
+			;
+		});
+
+	block.render(env);
+}
 BOOST_AUTO_TEST_SUITE_END() // ctxobj
 
 BOOST_AUTO_TEST_SUITE_END() // block_for

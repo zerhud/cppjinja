@@ -82,7 +82,7 @@ cppjinja::evtnodes::block_for_object::find(cppjinja::east::var_name n) const
 
 cppjinja::east::value_term cppjinja::evtnodes::block_for_object::solve() const
 {
-	return ""s;
+	throw std::runtime_error("cannot find something in loop");
 }
 
 cppjinja::json cppjinja::evtnodes::block_for_object::jval() const
