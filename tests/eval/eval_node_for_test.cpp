@@ -209,17 +209,26 @@ BOOST_FIXTURE_TEST_CASE(index, mock_for_fixture)
 {
 	ast::block_for ast_bl;
 	ast_bl.vars.emplace_back("a"s);
-	ast_bl.value = cppjinja::text::parse(cppjinja::text::expr_ops::expr, "[1,2,3] if 0==1" );
+	ast_bl.value = cppjinja::text::parse(cppjinja::text::expr_ops::expr, "[1,2] if 0==0" );
 	cppjinja::evtnodes::block_for block(ast_bl);
 
 	mocks::node child_main;
+	mock::sequence ctx_seq;
+	expect_glp(0, 4, 0);
 	expect_children({&child_main});
-	MOCK_EXPECT(env.current_node);
+	MOCK_EXPECT(env.rinfo);
+	MOCK_EXPECT(env.current_node).with(&block);
+	MOCK_EXPECT(child_main.render).exactly(2);
 
-	MOCK_EXPECT(child_main.render)
-		.calls([](cppjinja::evt::exenv& e){
-			;
-		});
+	MOCK_EXPECT(ctx.push).once().in(ctx_seq).with(&block);
+	MOCK_EXPECT(locals.add).once().in(ctx_seq).with("a"s, mock::any);
+	MOCK_EXPECT(locals.add).once().in(ctx_seq).with("loop"s, mock::any);
+	MOCK_EXPECT(ctx.pop).once().in(ctx_seq);
+
+	MOCK_EXPECT(ctx.push).once().in(ctx_seq).with(&block);
+	MOCK_EXPECT(locals.add).once().in(ctx_seq).with("a"s, mock::any);
+	MOCK_EXPECT(locals.add).once().in(ctx_seq).with("loop"s, mock::any);
+	MOCK_EXPECT(ctx.pop).once().in(ctx_seq);
 
 	block.render(env);
 }

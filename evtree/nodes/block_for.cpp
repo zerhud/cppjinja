@@ -44,6 +44,7 @@ void cppjinja::evtnodes::block_for::add_single(evt::exenv& env, cppjinja::json v
 		evt::raii_push_ctx ctx(this, &env.ctx());
 		need_else = false;
 		env.locals().add(abl.vars[0], std::make_shared<obj_val>(lvar, 1));
+		add_loop(env);
 		children.at(0)->render(env);
 	}
 
@@ -56,16 +57,23 @@ void cppjinja::evtnodes::block_for::add_two(cppjinja::evt::exenv& env, cppjinja:
 	assert(abl.vars.size() == 2);
 	bool need_else = true;
 	auto children = env.children(this);
+	assert(!children.empty());
 	for(auto& lvar:val.items()) {
 		evt::raii_push_ctx ctx(this, &env.ctx());
 		need_else = false;
 		env.locals().add(abl.vars[0], std::make_shared<obj_val>(lvar.key(), 1));
 		env.locals().add(abl.vars[1], std::make_shared<obj_val>(lvar.value(), 1));
-		children.at(0)->render(env);
+		add_loop(env);
+		children[0]->render(env);
 	}
 
 	if(need_else && children.size()==2)
 		children[1]->render(env);
+}
+
+void cppjinja::evtnodes::block_for::add_loop(cppjinja::evt::exenv& env) const
+{
+	env.locals().add("loop", nullptr);
 }
 
 void cppjinja::evtnodes::block_for_object::add(
