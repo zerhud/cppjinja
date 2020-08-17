@@ -13,8 +13,7 @@ namespace cppjinja::evtnodes {
 
 class block_for : public evt::node {
 	ast::block_for abl;
-	void add_single(evt::exenv& env, json val) const ;
-	void add_two(evt::exenv& env, json val) const ;
+	void eval_for(evt::exenv& env, json val) const ;
 	void add_loop(evt::exenv& env) const ;
 public:
 	block_for(ast::block_for ast_bl);

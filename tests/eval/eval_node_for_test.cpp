@@ -66,11 +66,12 @@ BOOST_FIXTURE_TEST_CASE(render_one, mock_for_fixture)
 	MOCK_EXPECT(env.rinfo);
 	MOCK_EXPECT(child.render).exactly(2);
 	MOCK_EXPECT(locals.add)
-	        .exactly(2)
+	        .exactly(2 + 2)
 	        .calls( [&iteration](
 	            cppjinja::east::string_t n
 	          , std::shared_ptr<cppjinja::evt::context_object> child){
-		BOOST_TEST(n=="a");
+		if(n=="loop"s) return;
+		BOOST_TEST(n=="a"s);
 		BOOST_REQUIRE(child);
 		BOOST_TEST(child->jval() == ++iteration);
 	});
@@ -116,6 +117,7 @@ BOOST_FIXTURE_TEST_CASE(render_two, mock_for_fixture)
 		BOOST_REQUIRE(child);
 		BOOST_TEST(child->jval() == 1);
 	});
+	MOCK_EXPECT(locals.add).once().in(locals_add_seq).with("loop"s, mock::any);
 	MOCK_EXPECT(ctx.pop).once().in(locals_add_seq).with(&block);
 	MOCK_EXPECT(ctx.push).once().in(locals_add_seq).with(&block);
 	MOCK_EXPECT(locals.add)
@@ -136,6 +138,7 @@ BOOST_FIXTURE_TEST_CASE(render_two, mock_for_fixture)
 		BOOST_REQUIRE(child);
 		BOOST_TEST(child->jval() == 2);
 	});
+	MOCK_EXPECT(locals.add).once().in(locals_add_seq).with("loop"s, mock::any);
 	MOCK_EXPECT(ctx.pop).once().in(locals_add_seq).with(&block);
 	block.render(env);
 	BOOST_TEST(out.str() == ""s);
