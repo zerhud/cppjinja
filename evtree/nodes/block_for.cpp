@@ -38,6 +38,7 @@ void cppjinja::evtnodes::block_for::eval_for(evt::exenv& env, cppjinja::json val
 {
 	bool need_else = true;
 	auto children = env.children(this);
+	auto loop = std::make_shared<block_for_object>();
 	for(auto& lvar:val.items()) {
 		evt::raii_push_ctx ctx(this, &env.ctx());
 		need_else = false;
@@ -48,17 +49,18 @@ void cppjinja::evtnodes::block_for::eval_for(evt::exenv& env, cppjinja::json val
 		env.locals().add(
 		          abl.vars[abl.vars.size()-1]
 		        , std::make_shared<obj_val>(lvar.value(), 1));
-		add_loop(env);
+		env.locals().add("loop", loop);
 		children.at(0)->render(env);
+		loop->next();
 	}
 
 	if(need_else && children.size()==2)
 		children[1]->render(env);
 }
 
-void cppjinja::evtnodes::block_for::add_loop(cppjinja::evt::exenv& env) const
+void cppjinja::evtnodes::block_for_object::next()
 {
-	env.locals().add("loop", nullptr);
+	++cur_iter;
 }
 
 void cppjinja::evtnodes::block_for_object::add(
@@ -70,6 +72,10 @@ void cppjinja::evtnodes::block_for_object::add(
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evtnodes::block_for_object::find(cppjinja::east::var_name n) const
 {
+	if(n==east::var_name{"index"s})
+		return std::make_shared<evt::context_objects::value>(cur_iter+1,1);
+	if(n==east::var_name{"index0"s} || n==east::var_name{"ind"s})
+		return std::make_shared<evt::context_objects::value>(cur_iter,1);
 	return nullptr;
 }
 

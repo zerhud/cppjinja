@@ -19,6 +19,7 @@
 #include "parser/grammar/expr.hpp"
 
 namespace ast = cppjinja::ast;
+namespace east = cppjinja::east;
 namespace aps = cppjinja::ast::expr_ops;
 namespace evtnodes = cppjinja::evtnodes;
 
@@ -225,12 +226,34 @@ BOOST_FIXTURE_TEST_CASE(index, mock_for_fixture)
 
 	MOCK_EXPECT(ctx.push).once().in(ctx_seq).with(&block);
 	MOCK_EXPECT(locals.add).once().in(ctx_seq).with("a"s, mock::any);
-	MOCK_EXPECT(locals.add).once().in(ctx_seq).with("loop"s, mock::any);
+	MOCK_EXPECT(locals.add).once().in(ctx_seq).calls(
+	            [](east::string_t n, std::shared_ptr<cppjinja::evt::context_object> loop){
+		BOOST_TEST(n=="loop"s);
+		BOOST_REQUIRE(loop);
+		auto ind = loop->find({"index"s});
+		BOOST_REQUIRE(ind);
+		BOOST_TEST(ind->jval() == 1);
+		ind = loop->find({"index0"s});
+		BOOST_REQUIRE(ind);
+		BOOST_TEST(ind->jval() == 0);
+		BOOST_TEST(ind->jval() == loop->find({"ind"s})->jval());
+	});
 	MOCK_EXPECT(ctx.pop).once().in(ctx_seq);
 
 	MOCK_EXPECT(ctx.push).once().in(ctx_seq).with(&block);
 	MOCK_EXPECT(locals.add).once().in(ctx_seq).with("a"s, mock::any);
-	MOCK_EXPECT(locals.add).once().in(ctx_seq).with("loop"s, mock::any);
+	MOCK_EXPECT(locals.add).once().in(ctx_seq).calls(
+	            [](east::string_t n, std::shared_ptr<cppjinja::evt::context_object> loop){
+		BOOST_TEST(n=="loop"s);
+		BOOST_REQUIRE(loop);
+		auto ind = loop->find({"index"s});
+		BOOST_REQUIRE(ind);
+		BOOST_TEST(ind->jval() == 2);
+		ind = loop->find({"index0"s});
+		BOOST_REQUIRE(ind);
+		BOOST_TEST(ind->jval() == 1);
+		BOOST_TEST(ind->jval() == loop->find({"ind"s})->jval());
+	});
 	MOCK_EXPECT(ctx.pop).once().in(ctx_seq);
 
 	block.render(env);
