@@ -60,6 +60,7 @@ add_custom_command(OUTPUT "${lohman_json_file}"
 file(GLOB_RECURSE parser2_src LIST_DIRECTORIES false "parser/*.cpp")
 file(GLOB_RECURSE parser2_hdr LIST_DIRECTORIES false "parser/*.hpp")
 add_library(parser2 STATIC ${parser2_src} ${parser2_hdr})
+set_target_properties(parser2 PROPERTIES PUBLIC_HEADER "${parser2_hdr}")
 target_include_directories(parser2 PRIVATE "${Boost_INCLUDE_DIRS}" PUBLIC "${config_files_dir}" "parser")
 set_target_properties(parser2 PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
@@ -67,6 +68,7 @@ set_target_properties(parser2 PROPERTIES POSITION_INDEPENDENT_CODE ON)
 file(GLOB_RECURSE loader_src LIST_DIRECTORIES false "loader/*.cpp")
 file(GLOB_RECURSE loader_hdr LIST_DIRECTORIES false "loader/*.hpp")
 add_library(loader SHARED ${loader_src} ${loader_hdr})
+set_target_properties(loader PROPERTIES PUBLIC_HEADER "${loader_hdr}")
 target_include_directories(loader PRIVATE "${Boost_INCLUDE_DIRS}" "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(loader PUBLIC stdc++fs PRIVATE parser2)
 
@@ -75,9 +77,11 @@ file(GLOB_RECURSE eval_src LIST_DIRECTORIES false "eval/*.cpp")
 file(GLOB_RECURSE eval_hdr LIST_DIRECTORIES false "eval/*.hpp")
 file(GLOB_RECURSE evaluator_src LIST_DIRECTORIES false "evtree/*.cpp")
 file(GLOB_RECURSE evaluator_hdr LIST_DIRECTORIES false "evtree/*.hpp")
-#file(GLOB_RECURSE evaluator_src LIST_DIRECTORIES false "evaluator/*.cpp")
-#file(GLOB_RECURSE evaluator_hdr LIST_DIRECTORIES false "evaluator/*.hpp")
-add_library(evaluator SHARED ${lohman_json_file} ${eval_src} ${eval_hdr} ${evaluator_src} ${evaluator_hdr})
+list(APPEND eval_headers ${lohman_json_file})
+list(APPEND eval_headers ${evaluator_hdr})
+list(APPEND eval_headers ${eval_hdr})
+add_library(evaluator SHARED ${eval_src} ${evaluator_src} ${eval_headers})
+set_target_properties(evaluator PROPERTIES PUBLIC_HEADER "${eval_headers}")
 target_include_directories(evaluator
         PRIVATE
                 "${Boost_INCLUDE_DIRS}"
@@ -92,3 +96,6 @@ if(ENABLE_TESTS)
 	include(cmake/tests.inc.cmake)
 endif()
 
+install(TARGETS parser2 loader evaluator
+    LIBRARY DESTINATION lib
+    PUBLIC_HEADER DESTINATION include)
