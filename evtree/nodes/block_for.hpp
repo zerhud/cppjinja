@@ -21,8 +21,10 @@ public:
 };
 
 class block_for_object : public evt::context_object {
+	std::size_t length;
 	std::size_t cur_iter = 0;
 public:
+	block_for_object(std::size_t sz);
 	void next();
 
 	void add(east::string_t n, std::shared_ptr<context_object> child) override ;

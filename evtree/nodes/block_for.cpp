@@ -9,6 +9,7 @@
 #include "block_for.hpp"
 #include "../exenv/expr_eval.hpp"
 #include "evtree/exenv/context_objects/value.hpp"
+#include "evtree/exenv/context_objects/builtins/lambda.hpp"
 
 using namespace std::literals;
 using obj_val = cppjinja::evt::context_objects::value;
@@ -38,7 +39,7 @@ void cppjinja::evtnodes::block_for::eval_for(evt::exenv& env, cppjinja::json val
 {
 	bool need_else = true;
 	auto children = env.children(this);
-	auto loop = std::make_shared<block_for_object>();
+	auto loop = std::make_shared<block_for_object>(val.size());
 	for(auto& lvar:val.items()) {
 		evt::raii_push_ctx ctx(this, &env.ctx());
 		need_else = false;
@@ -56,6 +57,11 @@ void cppjinja::evtnodes::block_for::eval_for(evt::exenv& env, cppjinja::json val
 
 	if(need_else && children.size()==2)
 		children[1]->render(env);
+}
+
+cppjinja::evtnodes::block_for_object::block_for_object(std::size_t sz)
+    : length(sz)
+{
 }
 
 void cppjinja::evtnodes::block_for_object::next()
@@ -76,6 +82,15 @@ cppjinja::evtnodes::block_for_object::find(cppjinja::east::var_name n) const
 		return std::make_shared<evt::context_objects::value>(cur_iter+1,1);
 	if(n==east::var_name{"index0"s} || n==east::var_name{"ind"s})
 		return std::make_shared<evt::context_objects::value>(cur_iter,1);
+	if(n == east::var_name{"length"s})
+		return std::make_shared<evt::context_objects::value>(length, 1);
+	if(n == east::var_name{"cycle"})
+		return std::make_shared<evt::context_objects::lambda_function>(
+		[cur_iter=cur_iter](auto params) -> std::shared_ptr<evt::context_object>{
+			json param_val = params.at(0).value->jval();
+			auto val = param_val[cur_iter % param_val.size()];
+			return std::make_shared<evt::context_objects::value>(val, 1);
+		});
 	return nullptr;
 }
 
