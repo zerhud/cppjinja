@@ -36,6 +36,7 @@ BOOST_AUTO_TEST_CASE(context)
 	using namespace cppjinja::evt::context_objects;
 	cppjinja::evt::context_objects::builtins stdlib;
 
+	BOOST_CHECK(dynamic_cast<join*>(stdlib.find(var_name{"join"s}).get()));
 	BOOST_CHECK(dynamic_cast<jinja_namespace*>(stdlib.find(var_name{"namespace"s}).get()));
 	BOOST_CHECK(dynamic_cast<builtins_tests::callable*>(stdlib.find(var_name{"$tests"s, "callable"s}).get()));
 	BOOST_CHECK(dynamic_cast<builtins_tests::defined*>(stdlib.find(var_name{"$tests"s, "defined"s}).get()));
@@ -54,6 +55,24 @@ BOOST_AUTO_TEST_CASE(jinja_namespace)
 	auto tree = ns.call({function_parameter{"a", pval}});
 	BOOST_CHECK(tree);
 	BOOST_TEST(tree->find(var_name{"a"}) == pval);
+}
+BOOST_AUTO_TEST_CASE(join)
+{
+	cppjinja::evt::context_objects::join j;
+	auto sep = std::make_shared<cppjinja::evt::context_objects::value>(","s,1);
+	auto o1 = std::make_shared<cppjinja::evt::context_objects::value>("1"s,1);
+	auto o2 = std::make_shared<cppjinja::evt::context_objects::value>("2"s,1);
+	std::vector<function_parameter> params = {
+	     function_parameter{"$"s, sep}
+	    ,function_parameter{std::nullopt, o1}
+	};
+
+	auto c1 = j.call(params);
+	BOOST_TEST(c1->jval() == "1");
+
+	params.push_back(function_parameter{std::nullopt, o2});
+	auto c2 = j.call(params);
+	BOOST_TEST(c2->jval() == "1,2");
 }
 BOOST_AUTO_TEST_CASE(lambda)
 {

@@ -30,6 +30,11 @@ public:
 	std::shared_ptr<context_object> call(std::vector<function_parameter> params) const override ;
 };
 
+class join : public builtin_function {
+public:
+	std::shared_ptr<context_object> call(std::vector<function_parameter> params) const override ;
+};
+
 class builtins : public tree {
 public:
 	builtins();

@@ -16,6 +16,7 @@ using namespace std::literals;
 
 cppjinja::evt::context_objects::builtins::builtins()
 {
+	add_child("join", std::make_shared<join>());
 	add_child("namespace", std::make_shared<jinja_namespace>());
 	auto tests = std::make_shared<tree>();
 	add_child("$tests", tests);
@@ -80,4 +81,21 @@ cppjinja::evt::context_objects::jinja_namespace::call(
 	for(auto& p:params)
 		ret->add(*p.name, p.value);
 	return ret;
+}
+
+std::shared_ptr<cppjinja::evt::context_object>
+cppjinja::evt::context_objects::join::call(
+        std::vector<function_parameter> params) const
+{
+	if(params.size() < 2) return std::make_shared<value>(""s,0);
+
+	east::string_t ret;
+	auto sep = params[0].value->jval().get<std::string>();
+
+	std::size_t ind = 0;
+	while(ind!=params.size()-2)
+		ret += params[++ind].value->jval().get<std::string>() + sep;
+	ret += params[++ind].value->jval().get<std::string>();
+
+	return std::make_shared<value>(ret, 0);
 }
