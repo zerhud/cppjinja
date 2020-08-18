@@ -24,10 +24,13 @@ find_package(Boost COMPONENTS unit_test_framework system REQUIRED)
 set(Boost_LIBRARIES "libboost_program_options.so;libboost_unit_test_framework.so;libboost_system.so")
 
 find_package(Threads REQUIRED)
+find_package(cmake_helpers COMPONENTS config define_library build_includes REQUIRED)
 include(CheckCXXSourceCompiles)
 include(cmake/target_sources_local.cmake)
 include(cmake/flags.cmake)
 include(cmake/code-coverage.cmake)
+
+DEFINE_LIBRARY_SET_PROPS("-dev" "" "Hudyaev Alexy <hudyaev.alexy@gmail.com>" "" "")
 
 add_code_coverage()
 add_code_coverage_all_targets(EXCLUDE tests/*)
@@ -43,8 +46,8 @@ set(main_config_file "${config_files_dir}/config.hpp")
 configure_file("config.hpp.in" "${main_config_file}")
 set(settings_dir ".")
 
-set(inst_incdir "include/${PROJECT_NAME}")
-set(inst_rtdir "lib")
+set(inst_incdir "include/${PROJECT_NAME}/")
+set(inst_rtdir "lib/${PROJECT_NAME}/")
 
 
 # lohman json
@@ -63,7 +66,10 @@ add_custom_command(OUTPUT "${lohman_json_file}"
 file(GLOB_RECURSE parser2_src LIST_DIRECTORIES false "parser/*.cpp")
 file(GLOB_RECURSE parser2_hdr LIST_DIRECTORIES false "parser/*.hpp")
 add_library(parser2 STATIC ${parser2_src} ${parser2_hdr})
-target_include_directories(parser2 PRIVATE "${Boost_INCLUDE_DIRS}" PUBLIC "${config_files_dir}" "parser")
+target_include_directories(parser2
+	PRIVATE "${Boost_INCLUDE_DIRS}"
+	PUBLIC "$<BUILD_INTERFACE:${config_files_dir}>" "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/parser>"
+	)
 set_target_properties(parser2 PROPERTIES POSITION_INDEPENDENT_CODE ON)
 install(DIRECTORY parser DESTINATION "${inst_incdir}" COMPONENT dev FILES_MATCHING PATTERN "*.hpp")
 
@@ -90,7 +96,7 @@ target_include_directories(evaluator
                 "${Boost_INCLUDE_DIRS}"
                 "${CMAKE_CURRENT_SOURCE_DIR}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/evtree"
-        SYSTEM PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/nlohman"
+	SYSTEM PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>/nlohman"
         )
 target_link_libraries(evaluator PUBLIC stdc++fs PRIVATE loader)
 install(DIRECTORY eval DESTINATION "${inst_incdir}" COMPONENT dev FILES_MATCHING PATTERN "*.hpp")
@@ -101,6 +107,20 @@ if(ENABLE_TESTS)
 	target_code_coverage(evaluator)
 endif()
 
-install(TARGETS parser2 loader evaluator
-    LIBRARY DESTINATION "${inst_rtdir}"
-    PUBLIC_HEADER COMPONENT dev DESTINATION "${inst_incdir}")
+set(config_file_dir "${CMAKE_CURRENT_BINARY_DIR}/configs/")
+WRITE_CONFIGURE_FILE(OUTPUT "${config_file_dir}" DEFAULT_MODS bin AVAIBLE_MODS bin dev)
+install(
+	TARGETS parser2 loader evaluator
+	EXPORT "${PROJECT_NAME}-export"
+	ARCHIVE DESTINATION "${inst_rtdir}"
+	LIBRARY DESTINATION "${inst_rtdir}"
+	INCLUDES DESTINATION "${inst_incdir}"
+	PUBLIC_HEADER COMPONENT dev   DESTINATION "${inst_incdir}")
+install(EXPORT ${PROJECT_NAME}-export DESTINATION "${inst_rtdir}" COMPONENT dev)
+install(
+	FILES
+		"${config_file_dir}/${PROJECT_NAME}-config.cmake"
+		"${config_file_dir}/${PROJECT_NAME}-config-version.cmake"
+	COMPONENT dev
+	DESTINATION "${inst_incdir}")
+
