@@ -43,6 +43,9 @@ set(main_config_file "${config_files_dir}/config.hpp")
 configure_file("config.hpp.in" "${main_config_file}")
 set(settings_dir ".")
 
+set(inst_incdir "include/${PROJECT_NAME}")
+set(inst_rtdir "lib")
+
 
 # lohman json
 set(lohman_json_file "${CMAKE_CURRENT_BINARY_DIR}/nlohman/json.hpp")
@@ -60,17 +63,17 @@ add_custom_command(OUTPUT "${lohman_json_file}"
 file(GLOB_RECURSE parser2_src LIST_DIRECTORIES false "parser/*.cpp")
 file(GLOB_RECURSE parser2_hdr LIST_DIRECTORIES false "parser/*.hpp")
 add_library(parser2 STATIC ${parser2_src} ${parser2_hdr})
-set_target_properties(parser2 PROPERTIES PUBLIC_HEADER "${parser2_hdr}")
 target_include_directories(parser2 PRIVATE "${Boost_INCLUDE_DIRS}" PUBLIC "${config_files_dir}" "parser")
 set_target_properties(parser2 PROPERTIES POSITION_INDEPENDENT_CODE ON)
+install(DIRECTORY parser DESTINATION "${inst_incdir}" COMPONENT dev FILES_MATCHING PATTERN "*.hpp")
 
 #loader
 file(GLOB_RECURSE loader_src LIST_DIRECTORIES false "loader/*.cpp")
 file(GLOB_RECURSE loader_hdr LIST_DIRECTORIES false "loader/*.hpp")
 add_library(loader SHARED ${loader_src} ${loader_hdr})
-set_target_properties(loader PROPERTIES PUBLIC_HEADER "${loader_hdr}")
 target_include_directories(loader PRIVATE "${Boost_INCLUDE_DIRS}" "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(loader PUBLIC stdc++fs PRIVATE parser2)
+install(DIRECTORY loader DESTINATION "${inst_incdir}" COMPONENT dev FILES_MATCHING PATTERN "*.hpp")
 
 #evaluator
 file(GLOB_RECURSE eval_src LIST_DIRECTORIES false "eval/*.cpp")
@@ -81,7 +84,7 @@ list(APPEND eval_headers ${lohman_json_file})
 list(APPEND eval_headers ${evaluator_hdr})
 list(APPEND eval_headers ${eval_hdr})
 add_library(evaluator SHARED ${eval_src} ${evaluator_src} ${eval_headers})
-set_target_properties(evaluator PROPERTIES PUBLIC_HEADER "${eval_headers}")
+set_target_properties(evaluator PROPERTIES PUBLIC_HEADER "${lohman_json_file}")
 target_include_directories(evaluator
         PRIVATE
                 "${Boost_INCLUDE_DIRS}"
@@ -90,12 +93,14 @@ target_include_directories(evaluator
         SYSTEM PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/nlohman"
         )
 target_link_libraries(evaluator PUBLIC stdc++fs PRIVATE loader)
-target_code_coverage(evaluator)
+install(DIRECTORY eval DESTINATION "${inst_incdir}" COMPONENT dev FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY evtree DESTINATION "${inst_incdir}" COMPONENT dev FILES_MATCHING PATTERN "*.hpp")
 
 if(ENABLE_TESTS)
 	include(cmake/tests.inc.cmake)
+	target_code_coverage(evaluator)
 endif()
 
 install(TARGETS parser2 loader evaluator
-    LIBRARY DESTINATION lib
-    PUBLIC_HEADER DESTINATION include)
+    LIBRARY DESTINATION "${inst_rtdir}"
+    PUBLIC_HEADER COMPONENT dev DESTINATION "${inst_incdir}")
