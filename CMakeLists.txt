@@ -9,9 +9,11 @@ option(ENABLE_TODO "enable todo warnings in debug mode" ON)
 option(ENABLE_TESTS "enable tests.. it depends on turtle library" ON)
 option(LOW_MEMORY "assume we don't have efough memroty for complie grammars (gcc optimizations)" ON)
 option(CODE_COVERAGE "enable code coverage generation" OFF)
+option(USE_LIBCXX_DEBUG "enable glibcxx debug" OFF)
 
-if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    add_compile_definitions(_GLIBCXX_DEBUG _GLIBCXX_DEBUG_PEDANTIC)
+if(USE_LIBCXX_DEBUG AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+	message("=== use debug version of libcxx")
+	add_compile_definitions(_GLIBCXX_DEBUG _GLIBCXX_DEBUG_PEDANTIC)
 endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -24,16 +26,16 @@ find_package(Boost COMPONENTS unit_test_framework system REQUIRED)
 set(Boost_LIBRARIES "libboost_program_options.so;libboost_unit_test_framework.so;libboost_system.so")
 
 find_package(Threads REQUIRED)
-find_package(cmake_helpers COMPONENTS config define_library build_includes REQUIRED)
 include(CheckCXXSourceCompiles)
+include(CMakePackageConfigHelpers)
 include(cmake/target_sources_local.cmake)
 include(cmake/flags.cmake)
-include(cmake/code-coverage.cmake)
 
-DEFINE_LIBRARY_SET_PROPS("-dev" "" "Hudyaev Alexy <hudyaev.alexy@gmail.com>" "" "")
-
-add_code_coverage()
-add_code_coverage_all_targets(EXCLUDE tests/*)
+if(CODE_COVERAGE)
+	include(cmake/code-coverage.cmake)
+	add_code_coverage()
+	add_code_coverage_all_targets(EXCLUDE tests/*)
+endif()
 
 
 CHECK_CXX_SOURCE_COMPILES("#include <filesystem>\nint main(int,char**){return 0;}" HAVE_FILESYSTEM)
@@ -71,7 +73,7 @@ target_include_directories(parser2
 	PUBLIC "$<BUILD_INTERFACE:${config_files_dir}>" "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/parser>"
 	)
 set_target_properties(parser2 PROPERTIES POSITION_INDEPENDENT_CODE ON)
-install(DIRECTORY parser DESTINATION "${inst_incdir}" COMPONENT dev FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY parser DESTINATION "${inst_incdir}" FILES_MATCHING PATTERN "*.hpp")
 
 #loader
 file(GLOB_RECURSE loader_src LIST_DIRECTORIES false "loader/*.cpp")
@@ -79,7 +81,7 @@ file(GLOB_RECURSE loader_hdr LIST_DIRECTORIES false "loader/*.hpp")
 add_library(loader SHARED ${loader_src} ${loader_hdr})
 target_include_directories(loader PRIVATE "${Boost_INCLUDE_DIRS}" "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(loader PUBLIC stdc++fs PRIVATE parser2)
-install(DIRECTORY loader DESTINATION "${inst_incdir}" COMPONENT dev FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY loader DESTINATION "${inst_incdir}" FILES_MATCHING PATTERN "*.hpp")
 
 #evaluator
 file(GLOB_RECURSE eval_src LIST_DIRECTORIES false "eval/*.cpp")
@@ -96,31 +98,44 @@ target_include_directories(evaluator
                 "${Boost_INCLUDE_DIRS}"
                 "${CMAKE_CURRENT_SOURCE_DIR}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/evtree"
-	SYSTEM PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>/nlohman"
+	SYSTEM PUBLIC
+		"$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/nlohman>"
         )
 target_link_libraries(evaluator PUBLIC stdc++fs PRIVATE loader)
-install(DIRECTORY eval DESTINATION "${inst_incdir}" COMPONENT dev FILES_MATCHING PATTERN "*.hpp")
-install(DIRECTORY evtree DESTINATION "${inst_incdir}" COMPONENT dev FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY eval DESTINATION "${inst_incdir}" FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY evtree DESTINATION "${inst_incdir}" FILES_MATCHING PATTERN "*.hpp")
 
 if(ENABLE_TESTS)
 	include(cmake/tests.inc.cmake)
-	target_code_coverage(evaluator)
+	if(CODE_COVERAGE)
+		target_code_coverage(evaluator)
+	endif()
 endif()
 
 set(config_file_dir "${CMAKE_CURRENT_BINARY_DIR}/configs/")
-WRITE_CONFIGURE_FILE(OUTPUT "${config_file_dir}" DEFAULT_MODS bin AVAIBLE_MODS bin dev)
+configure_package_config_file(
+	"${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.cmake.in"
+	"${config_file_dir}/${PROJECT_NAME}-config.cmake"
+	INSTALL_DESTINATION "${inst_rtdir}")
+write_basic_package_version_file(
+	"${config_file_dir}/${PROJECT_NAME}-version.cmake"
+	COMPATIBILITY AnyNewerVersion)
 install(
 	TARGETS parser2 loader evaluator
 	EXPORT "${PROJECT_NAME}-export"
-	ARCHIVE DESTINATION "${inst_rtdir}"
-	LIBRARY DESTINATION "${inst_rtdir}"
-	INCLUDES DESTINATION "${inst_incdir}"
+	ARCHIVE DESTINATION "${inst_rtdir}" COMPONENT bin
+	LIBRARY DESTINATION "${inst_rtdir}" COMPONENT dev
+	INCLUDES DESTINATION "${inst_incdir}/../" "${inst_incdir}/"
 	PUBLIC_HEADER COMPONENT dev   DESTINATION "${inst_incdir}")
-install(EXPORT ${PROJECT_NAME}-export DESTINATION "${inst_rtdir}" COMPONENT dev)
+install(
+	EXPORT ${PROJECT_NAME}-export
+	NAMESPACE ${PROJECT_NAME}::
+	DESTINATION "${inst_rtdir}"
+	COMPONENT dev)
 install(
 	FILES
 		"${config_file_dir}/${PROJECT_NAME}-config.cmake"
 		"${config_file_dir}/${PROJECT_NAME}-config-version.cmake"
 	COMPONENT dev
-	DESTINATION "${inst_incdir}")
+	DESTINATION "${inst_rtdir}")
 
