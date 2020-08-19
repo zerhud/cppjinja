@@ -118,7 +118,7 @@ configure_package_config_file(
 	"${config_file_dir}/${PROJECT_NAME}-config.cmake"
 	INSTALL_DESTINATION "${inst_rtdir}")
 write_basic_package_version_file(
-	"${config_file_dir}/${PROJECT_NAME}-version.cmake"
+	"${config_file_dir}/${PROJECT_NAME}-config-version.cmake"
 	COMPATIBILITY AnyNewerVersion)
 install(
 	TARGETS parser2 loader evaluator
