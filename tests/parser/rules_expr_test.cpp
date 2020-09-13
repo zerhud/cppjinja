@@ -43,11 +43,11 @@ BOOST_AUTO_TEST_CASE(bool_rule)
 }
 BOOST_AUTO_TEST_CASE(term)
 {
-	BOOST_TEST(txt::parse(ext::term, "1"sv).var == est::term{1}.var);
+	BOOST_TEST(txt::parse(ext::term, "1"sv) == est::term{1});
 	BOOST_TEST(txt::parse(ext::term, "1"sv).var.type().name() == typeid(std::int64_t).name());
-	BOOST_TEST(txt::parse(ext::term, "1.1"sv).var == est::term{1.1}.var);
-	BOOST_TEST(txt::parse(ext::term, "true"sv).var == est::term{true}.var);
-	BOOST_TEST(txt::parse(ext::term, "'ok'"sv).var == est::term{"ok"s}.var);
+	BOOST_TEST(txt::parse(ext::term, "1.1"sv) == est::term{1.1});
+	BOOST_TEST(txt::parse(ext::term, "true"sv) == est::term{true});
+	BOOST_TEST(txt::parse(ext::term, "'ok'"sv) == est::term{"ok"s});
 	BOOST_TEST(txt::parse(ext::expr, "true"sv) == est::expr{est::term{true}});
 }
 BOOST_AUTO_TEST_CASE(single_var_name)

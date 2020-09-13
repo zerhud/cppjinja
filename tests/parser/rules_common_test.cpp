@@ -31,8 +31,8 @@ BOOST_AUTO_TEST_SUITE(common)
 
 BOOST_DATA_TEST_CASE(
         quoted1_string
-      ,   utd::make(u8"'kuku'"s, u8"'ku ku'"s, u8"''"s, u8"'привет'"s, u8"'k\\k'"s, u8"'ok\\'ok'"s)
-        ^ utd::make(u8"kuku"s,   u8"ku ku"s,   u8""s,   u8"привет"s  , u8"k\\k"s,   u8"ok'ok"s)
+      ,   utd::make("'kuku'"s, "'ku ku'"s, "''"s, "'привет'"s, "'k\\k'"s, "'ok\\'ok'"s)
+        ^ utd::make("kuku"s,   "ku ku"s,   ""s,   "привет"s  , "k\\k"s,   "ok'ok"s)
       , data, good_result
       )
 {
