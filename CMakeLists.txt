@@ -67,6 +67,7 @@ add_custom_command(OUTPUT "${lohman_json_file}"
 #parser2
 file(GLOB_RECURSE parser2_src LIST_DIRECTORIES false "parser/*.cpp")
 file(GLOB_RECURSE parser2_hdr LIST_DIRECTORIES false "parser/*.hpp")
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${parser2_src} ${parser2_hdr})
 add_library(parser2 STATIC ${parser2_src} ${parser2_hdr})
 target_include_directories(parser2
 	PRIVATE "${Boost_INCLUDE_DIRS}"
@@ -78,6 +79,7 @@ install(DIRECTORY parser DESTINATION "${inst_incdir}" FILES_MATCHING PATTERN "*.
 #loader
 file(GLOB_RECURSE loader_src LIST_DIRECTORIES false "loader/*.cpp")
 file(GLOB_RECURSE loader_hdr LIST_DIRECTORIES false "loader/*.hpp")
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${loader_src} ${loader_hdr})
 add_library(loader SHARED ${loader_src} ${loader_hdr})
 target_include_directories(loader PRIVATE "${Boost_INCLUDE_DIRS}" "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(loader PUBLIC stdc++fs PRIVATE parser2)
@@ -88,6 +90,9 @@ file(GLOB_RECURSE eval_src LIST_DIRECTORIES false "eval/*.cpp")
 file(GLOB_RECURSE eval_hdr LIST_DIRECTORIES false "eval/*.hpp")
 file(GLOB_RECURSE evaluator_src LIST_DIRECTORIES false "evtree/*.cpp")
 file(GLOB_RECURSE evaluator_hdr LIST_DIRECTORIES false "evtree/*.hpp")
+source_group(
+    TREE "${CMAKE_CURRENT_SOURCE_DIR}"
+    FILES ${eval_src} ${eval_hdr} ${evaluator_src} ${evaluator_hdr})
 list(APPEND eval_headers ${lohman_json_file})
 list(APPEND eval_headers ${evaluator_hdr})
 list(APPEND eval_headers ${eval_hdr})
@@ -98,8 +103,8 @@ target_include_directories(evaluator
                 "${Boost_INCLUDE_DIRS}"
                 "${CMAKE_CURRENT_SOURCE_DIR}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/evtree"
-	SYSTEM PUBLIC
-		"$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/nlohman>"
+        SYSTEM PUBLIC
+                "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/nlohman>"
         )
 target_link_libraries(evaluator PUBLIC stdc++fs PRIVATE loader)
 install(DIRECTORY eval DESTINATION "${inst_incdir}" FILES_MATCHING PATTERN "*.hpp")
