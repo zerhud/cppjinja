@@ -25,7 +25,7 @@ std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::function
 
 std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::function_call& obj)
 {
-	out << obj.ref << '(';
+	out << obj.ref.var << '(';
 	//TODO: print params
 	return out << ')';
 }

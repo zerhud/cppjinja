@@ -27,6 +27,12 @@ static std::string close_block(const cppjinja::ast::block& obj)
 	return block_trim_to_str(obj.right_open) + block_trim_to_str(obj.right_close);
 }
 
+std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::block_content& obj)
+{
+	boost::apply_visitor([&out](const auto& obj){out << obj;}, obj);
+	return out;
+}
+
 std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::block_raw& obj)
 {
 	return out << "raw: " << obj.value;
@@ -56,4 +62,28 @@ std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::block_se
 		<< ' ' << obj.filters.size()
 		<< ' ' << obj.content.size()
 		;
+}
+
+std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::block_call& obj)
+{
+	(void)obj;
+	return out << "block_call"sv;
+}
+
+std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::block_filtered& obj)
+{
+	(void)obj;
+	return out << "block_filtered"sv;
+}
+
+std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::block_if& obj)
+{
+	(void)obj;
+	return out << "block_if"sv;
+}
+
+std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::block_named& obj)
+{
+	(void)obj;
+	return out << "block_named"sv;
 }

@@ -33,6 +33,30 @@
 
 namespace cppjinja::ast
 {
+
+#ifndef __clang__
+template<typename T, typename O>
+concept left_shifted_type = requires(O& out, const T& obj)
+{
+    {out << obj} -> O&;
+};
+
+template<typename T>
+concept printable_type = left_shifted_type<T, std::ostream>;
+#endif
+
+#ifdef __clang__
+template<typename T>
+#else
+template<printable_type T>
+#endif
+std::ostream& operator << (std::ostream& out, const std::vector<T>& vec)
+{
+    using namespace std::literals;
+    for(const auto& v:vec) out << v << ',';
+    out << ". "sv;
+    return out;
+}
 } // namespace cppjinja::ast
 
 namespace cppjinja {
