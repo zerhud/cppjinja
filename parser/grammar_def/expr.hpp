@@ -50,16 +50,16 @@ const x3::rule<class expr_in_pan_class, ast::expr_ops::expr> expr_in_pan = "expr
 const x3::rule<class expr_filter_class, ast::expr_ops::expr> expr_filter = "expr_filter";
 const x3::rule<class expr_ipoint_class, ast::expr_ops::expr> expr_ipoint = "expr_ipoint";
 
-BOOST_SPIRIT_DECLARE(decltype(math1));
-BOOST_SPIRIT_DECLARE(decltype(math2));
-BOOST_SPIRIT_DECLARE(decltype(math_pow));
-BOOST_SPIRIT_DECLARE(decltype(mathop2));
-BOOST_SPIRIT_DECLARE(decltype(single_var_name_helper));
-BOOST_SPIRIT_DECLARE(decltype(dict_item));
-BOOST_SPIRIT_DECLARE(decltype(lvalue));
+BOOST_SPIRIT_DECLARE(decltype(math1))
+BOOST_SPIRIT_DECLARE(decltype(math2))
+BOOST_SPIRIT_DECLARE(decltype(math_pow))
+BOOST_SPIRIT_DECLARE(decltype(mathop2))
+BOOST_SPIRIT_DECLARE(decltype(single_var_name_helper))
+BOOST_SPIRIT_DECLARE(decltype(dict_item))
+BOOST_SPIRIT_DECLARE(decltype(lvalue))
 
-BOOST_SPIRIT_DECLARE(decltype(expr_math));
-BOOST_SPIRIT_DECLARE(decltype(expr_concat_right));
+BOOST_SPIRIT_DECLARE(decltype(expr_math))
+BOOST_SPIRIT_DECLARE(decltype(expr_concat_right))
 
 
 
@@ -98,9 +98,9 @@ static auto const point_element_right_def = point | (lit('[') >> expr_ipoint >> 
 static auto const point_def = point_element >> -lit('.') >> point_element_right ;
 
 static auto const list_def = lit("[") >> expr % ',' >> lit("]");
-static auto const tuple_def = lit("(") >> expr % ',' >> lit(")"); ;
+static auto const tuple_def = lit("(") >> expr % ',' >> lit(")");
 static auto const dict_item_def = quoted_string >> lit(':') >> expr;
-static auto const dict_def = lit("{") >> dict_item % ',' >> lit("}"); ;
+static auto const dict_def = lit("{") >> dict_item % ',' >> lit("}");
 
 static auto const lvalue_def = point | single_var_name;
 static auto const eq_assign_def = lvalue % ',' >> lit('=') >> expr ;
@@ -169,9 +169,9 @@ BOOST_SPIRIT_DEFINE( term )
 BOOST_SPIRIT_DEFINE( quoted_string )
 
 BOOST_SPIRIT_DEFINE( single_var_name )
-BOOST_SPIRIT_DEFINE( single_var_name_helper );
-BOOST_SPIRIT_DEFINE( dict_item );
-BOOST_SPIRIT_DEFINE( lvalue );
+BOOST_SPIRIT_DEFINE( single_var_name_helper )
+BOOST_SPIRIT_DEFINE( dict_item )
+BOOST_SPIRIT_DEFINE( lvalue )
 BOOST_SPIRIT_DEFINE( point )
 BOOST_SPIRIT_DEFINE( point_element )
 BOOST_SPIRIT_DEFINE( point_element_right )

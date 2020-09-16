@@ -74,6 +74,7 @@ target_include_directories(parser2
 	PUBLIC "$<BUILD_INTERFACE:${config_files_dir}>" "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/parser>"
 	)
 set_target_properties(parser2 PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_compile_definitions(parser2 PRIVATE -DPARSER_PRIVATE)
 install(DIRECTORY parser DESTINATION "${inst_incdir}" FILES_MATCHING PATTERN "*.hpp")
 
 #loader

@@ -38,7 +38,7 @@ namespace cppjinja::ast
 template<typename T, typename O>
 concept left_shifted_type = requires(O& out, const T& obj)
 {
-    {out << obj} -> O&;
+    {out << obj} -> std::same_as<O&>;
 };
 
 template<typename T>

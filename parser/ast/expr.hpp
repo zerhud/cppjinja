@@ -113,7 +113,7 @@ struct filter {
 struct op_if {
 	forward_ast<expr> term;
 	forward_ast<expr_bool> cond;
-	std::optional<forward_ast<expr>> alternative;
+	boost::optional<forward_ast<expr>> alternative;
 };
 
 using expr_var = x3::variant<

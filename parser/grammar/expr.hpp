@@ -71,28 +71,28 @@ const x3::rule<expr_class, ast::expr_ops::expr> expr = "expr";
 const x3::rule<expr_bool_class, ast::expr_ops::expr_bool> expr_bool = "expr_bool";
 
 BOOST_SPIRIT_DECLARE(decltype(term))
-BOOST_SPIRIT_DECLARE(decltype(bool_rule));
-BOOST_SPIRIT_DECLARE(decltype(quoted_string));
-BOOST_SPIRIT_DECLARE(decltype(list));
-BOOST_SPIRIT_DECLARE(decltype(tuple));
-BOOST_SPIRIT_DECLARE(decltype(dict));
-BOOST_SPIRIT_DECLARE(decltype(eq_assign));
-BOOST_SPIRIT_DECLARE(decltype(in_assign));
-BOOST_SPIRIT_DECLARE(decltype(math));
-BOOST_SPIRIT_DECLARE(decltype(mathop));
-BOOST_SPIRIT_DECLARE(decltype(concat));
-BOOST_SPIRIT_DECLARE(decltype(in_check));
-BOOST_SPIRIT_DECLARE(decltype(cmp_check));
-BOOST_SPIRIT_DECLARE(decltype(logic_check));
-BOOST_SPIRIT_DECLARE(decltype(negate));
-BOOST_SPIRIT_DECLARE(decltype(fnc_call));
-BOOST_SPIRIT_DECLARE(decltype(filter_call));
-BOOST_SPIRIT_DECLARE(decltype(filter));
-BOOST_SPIRIT_DECLARE(decltype(point));
-BOOST_SPIRIT_DECLARE(decltype(single_var_name));
-BOOST_SPIRIT_DECLARE(decltype(op_if));
+BOOST_SPIRIT_DECLARE(decltype(bool_rule))
+BOOST_SPIRIT_DECLARE(decltype(quoted_string))
+BOOST_SPIRIT_DECLARE(decltype(list))
+BOOST_SPIRIT_DECLARE(decltype(tuple))
+BOOST_SPIRIT_DECLARE(decltype(dict))
+BOOST_SPIRIT_DECLARE(decltype(eq_assign))
+BOOST_SPIRIT_DECLARE(decltype(in_assign))
+BOOST_SPIRIT_DECLARE(decltype(math))
+BOOST_SPIRIT_DECLARE(decltype(mathop))
+BOOST_SPIRIT_DECLARE(decltype(concat))
+BOOST_SPIRIT_DECLARE(decltype(in_check))
+BOOST_SPIRIT_DECLARE(decltype(cmp_check))
+BOOST_SPIRIT_DECLARE(decltype(logic_check))
+BOOST_SPIRIT_DECLARE(decltype(negate))
+BOOST_SPIRIT_DECLARE(decltype(fnc_call))
+BOOST_SPIRIT_DECLARE(decltype(filter_call))
+BOOST_SPIRIT_DECLARE(decltype(filter))
+BOOST_SPIRIT_DECLARE(decltype(point))
+BOOST_SPIRIT_DECLARE(decltype(single_var_name))
+BOOST_SPIRIT_DECLARE(decltype(op_if))
 
-BOOST_SPIRIT_DECLARE(decltype(expr));
-BOOST_SPIRIT_DECLARE(decltype(expr_bool));
+BOOST_SPIRIT_DECLARE(decltype(expr))
+BOOST_SPIRIT_DECLARE(decltype(expr_bool))
 
 } // namespace cppjinja::text::expr_ops

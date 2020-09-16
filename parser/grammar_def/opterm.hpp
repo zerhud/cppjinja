@@ -8,6 +8,10 @@
 
 #pragma once
 
+#ifndef PARSER_PRIVATE
+#error this file is private file for parser2 library
+#endif
+
 #include "grammar/opterm.hpp"
 #include "common.hpp"
 
@@ -16,20 +20,20 @@ namespace cppjinja::text {
 	// ---
 	// helpers function
 	// ---
-	auto get_data = [](auto& ctx){ return x3::get<parser_env>(ctx); };
-	auto check_if_term_start    = [](auto& ctx){
+	constexpr auto get_data = [](auto& ctx){ return x3::get<parser_env>(ctx); };
+	const auto check_if_term_start    = [](auto& ctx){
 		_pass(ctx) = _attr(ctx) == get_data(ctx).output.b; };
-	auto check_if_term_end      = [](auto& ctx){
+	const auto check_if_term_end      = [](auto& ctx){
 		_pass(ctx) = _attr(ctx) == get_data(ctx).output.e; };
-	auto check_if_block_start   = [](auto& ctx){
+	const auto check_if_block_start   = [](auto& ctx){
 		_pass(ctx) = _attr(ctx) == get_data(ctx).term.b; };
-	auto check_if_block_end     = [](auto& ctx){
+	const auto check_if_block_end     = [](auto& ctx){
 		_pass(ctx) = _attr(ctx) == get_data(ctx).term.e; };
-	auto check_if_comment_start = [](auto& ctx){
+	const auto check_if_comment_start = [](auto& ctx){
 		_pass(ctx) = _attr(ctx) == get_data(ctx).cmt.b; };
-	auto check_if_comment_end   = [](auto& ctx){
+	const auto check_if_comment_end   = [](auto& ctx){
 		_pass(ctx) = _attr(ctx) == get_data(ctx).cmt.e; };
-	auto set_trim = [](auto& c){
+	const auto set_trim = [](auto& c){
 		if constexpr (
 			!std::is_same_v<
 				 std::decay_t<decltype(_val(c))>
@@ -37,7 +41,7 @@ namespace cppjinja::text {
 			>)
 		_val(c).trim=true;
 	};
-	auto set_bsign = [](auto& c){
+	const auto set_bsign = [](auto& c){
 		_val(c).bsign=_attr(c);
 		if(_val(c).bsign && *_val(c).bsign < 0)
 			_val(c).trim = true;
