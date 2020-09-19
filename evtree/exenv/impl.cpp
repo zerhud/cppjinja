@@ -105,8 +105,9 @@ const cppjinja::evt::context_object& cppjinja::evt::exenv_impl::user_data() cons
 
 const cppjinja::evt::context_objects::queue cppjinja::evt::exenv_impl::all_ctx() const
 {
+	using context_objects::queue;
 	const auto& l = const_cast<exenv_impl*>(this)->locals();
-	return {params(), {&l, &global_namespace, &builtins, &user_data()}};
+	return {params(), queue::clist{&l, &global_namespace, &builtins, &user_data()}};
 }
 
 cppjinja::evt::callstack& cppjinja::evt::exenv_impl::calls()

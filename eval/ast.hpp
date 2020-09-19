@@ -56,7 +56,7 @@ extern struct value_term : value_term_var
 	value_term(array_v v) : value_term_var(v) {}
 	value_term(map_v v) : value_term_var(v) {}
 	value_term(const char* v) : value_term(string_t(v)) {}
-	template<typename Int>
+	template<std::integral Int>
 	explicit value_term(Int v) : value_term_var((std::int64_t)v) {}
 } nothing ;
 

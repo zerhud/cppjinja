@@ -16,12 +16,14 @@ class queue : public context_object {
 	std::vector<context_object*> content;
 	std::vector<const context_object*> const_content;
 public:
+	using list = std::vector<context_object*>;
+	using clist = std::vector<const context_object*>;
+
 	queue();
 	queue(std::initializer_list<queue> cnt);
-	queue(std::initializer_list<context_object*> cnt);
-	queue(std::initializer_list<const context_object*> cnt);
-	queue(std::vector<context_object*> cnt);
-	queue(std::vector<const context_object*> cnt);
+	queue(context_object* cnt);
+	queue(list cnt);
+	queue(clist cnt);
 
 	~queue() noexcept override ;
 

@@ -35,7 +35,7 @@ void cppjinja::evt::context_impl::create_shadow()
 		queue.push_back(&pos->ns);
 		if(pos->shadow) break;
 	}
-	last_shadow().shadow = queue;
+	last_shadow().shadow.emplace(queue);
 }
 
 cppjinja::evt::context_impl::context_impl()
@@ -79,7 +79,7 @@ void cppjinja::evt::context_impl::push(const cppjinja::evt::node* n)
 void cppjinja::evt::context_impl::push_shadow(const cppjinja::evt::node* n)
 {
 	ctx.emplace_back(frame{n, {}, std::stringstream{}, context_objects::tree(), std::nullopt});
-	ctx.back().shadow = {&ctx.back().ns};
+	ctx.back().shadow = context_objects::queue(&ctx.back().ns);
 }
 
 const cppjinja::evt::node* cppjinja::evt::context_impl::maker() const

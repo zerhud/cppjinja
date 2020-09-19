@@ -32,7 +32,7 @@ struct term : term_var {
 	term(bool v) : term_var(v) {}
 	term(double v) : term_var(v) {}
 	term(string_t v) : term_var(v) {}
-	template<typename Int>
+	template<std::integral Int>
 	explicit term(Int v) : term_var((std::int64_t)v) {}
 };
 
@@ -53,6 +53,7 @@ struct point {
 struct lvalue : x3::variant<single_var_name, point> {
 	using base_type::base_type;
 	using base_type::operator=;
+	lvalue& operator = (const lvalue&) =default ;
 };
 
 struct any_assign {

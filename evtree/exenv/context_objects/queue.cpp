@@ -20,17 +20,12 @@ cppjinja::evt::context_objects::queue::queue(std::initializer_list<cppjinja::evt
 	for(auto& c:cnt) for(auto& oc:c.const_content) const_content.emplace_back(oc);
 }
 
-cppjinja::evt::context_objects::queue::queue(std::initializer_list<context_object*> cnt)
-    : queue(std::vector<cppjinja::evt::context_object*>(std::move(cnt)))
+cppjinja::evt::context_objects::queue::queue(context_object* cnt)
+    : content({cnt})
 {
 }
 
-cppjinja::evt::context_objects::queue::queue(std::initializer_list<const cppjinja::evt::context_object*> cnt)
-    : queue(std::vector<const cppjinja::evt::context_object*>(std::move(cnt)))
-{
-}
-
-cppjinja::evt::context_objects::queue::queue(std::vector<context_object*> cnt)
+cppjinja::evt::context_objects::queue::queue(std::vector<cppjinja::evt::context_object*> cnt)
     : content(std::move(cnt))
 {
 }

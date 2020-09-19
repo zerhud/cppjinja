@@ -7,6 +7,7 @@
  *************************************************************************/
 
 #define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_NO_OLD_TOOLS
 #define BOOST_TEST_MODULE evaluator exenv
 
 #include <boost/test/unit_test.hpp>
@@ -259,22 +260,23 @@ BOOST_AUTO_TEST_CASE(find)
 	BOOST_TEST(q.find(var_name{"a"}) == obj4);
 
 	using cppjinja::evt::context_object;
+	using cppjinja::evt::context_objects::queue;
 	MOCK_EXPECT(obj1.find).once().with(var_name{"a"}).returns(nullptr);
 	MOCK_EXPECT(obj2.find).once().with(var_name{"a"}).returns(obj4);
-	cppjinja::evt::context_objects::queue other1 =
-	{(const context_object*)&obj1,(const context_object*)&obj2};
+	queue other1 = queue::clist{&obj1, &obj2};
 	cppjinja::evt::context_objects::queue other = std::move(other1);
 	BOOST_TEST(other.find(var_name{"a"}) == obj4);
 }
 BOOST_AUTO_TEST_CASE(add)
 {
-	cppjinja::evt::context_objects::queue q;
+	using cppjinja::evt::context_objects::queue;
+	queue q;
 	auto obj1 = std::make_shared<mocks::context_object>();
 	BOOST_CHECK_THROW(q.add("", nullptr), std::exception);
 	BOOST_CHECK_THROW(q.add("a", obj1), std::exception);
 
 	auto obj2 = std::make_shared<mocks::context_object>();
-	q = {(const cppjinja::evt::context_object*)obj1.get()};
+	q = queue::clist{obj1.get()};
 	BOOST_CHECK_THROW(q.add("a", obj1), std::exception);
 
 	q = {obj1.get(), obj2.get()};
@@ -482,7 +484,7 @@ BOOST_FIXTURE_TEST_CASE(rinfo, impl_exenv_fixture)
 	BOOST_CHECK(!env.rinfo().has_value());
 	BOOST_CHECK_NO_THROW(env.rinfo(ri));
 	std::optional<render_info> val_after_set = env.rinfo();
-	BOOST_REQUIRE(val_after_set);
+	BOOST_REQUIRE(val_after_set.has_value());
 	bool ltrim = val_after_set->trim_left;
 	bool rtrim = val_after_set->trim_right;
 	BOOST_TEST(ltrim == true);
