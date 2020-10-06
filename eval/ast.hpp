@@ -46,17 +46,30 @@ using value_term_var = std::variant<
 , array_v, map_v
 >;
 
+template<typename T>
+concept ValueTermInt =
+           std::integral<T>
+        && !std::is_same_v<std::decay_t<T>, bool>
+        && !std::is_same_v<std::decay_t<T>, double>;
+template<typename T>
+concept ValueTermForward =
+           std::is_same_v<std::decay_t<T>, bool>
+        || std::is_same_v<std::decay_t<T>, double>
+        || std::is_same_v<std::decay_t<T>, string_t>
+        || std::is_same_v<std::decay_t<T>, array_v>
+        || std::is_same_v<std::decay_t<T>, map_v>;
+template<typename T>
+concept ValueTermForwardCopy = std::is_same_v<std::decay_t<T>, value_term>;
+
 extern struct value_term : value_term_var
 {
-	using value_term_var::value_term_var;
 	using value_term_var::operator=;
-	value_term(bool v) : value_term_var(v) {}
-	value_term(double v) : value_term_var(v) {}
-	value_term(string_t v) : value_term_var(v) {}
-	value_term(array_v v) : value_term_var(v) {}
-	value_term(map_v v) : value_term_var(v) {}
-	value_term(const char* v) : value_term(string_t(v)) {}
-	template<std::integral Int>
+	value_term() = default ;
+	template<ValueTermForward T>
+	explicit value_term(T v) : value_term_var(std::move(v)) {}
+	template<ValueTermForwardCopy T>
+	explicit value_term(T v) : value_term_var(v) {}
+	template<ValueTermInt Int>
 	explicit value_term(Int v) : value_term_var((std::int64_t)v) {}
 } nothing ;
 

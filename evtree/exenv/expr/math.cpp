@@ -59,6 +59,6 @@ cppjinja::ast::expr_ops::term cppjinja::evt::expr_evals::math::operator()(const 
 { throw_int_and_string_op(); }
 cppjinja::ast::expr_ops::term cppjinja::evt::expr_evals::math::operator()(const ast::string_t& l, const ast::string_t& r) const
 {
-	if(op_ == ast::expr_ops::math_op::pls) return l + r;
+	if(op_ == ast::expr_ops::math_op::pls) return term{l + r};
 	throw std::runtime_error("for strings only + operation is avaible");
 }

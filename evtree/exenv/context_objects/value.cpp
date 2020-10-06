@@ -51,7 +51,7 @@ cppjinja::evt::context_objects::value::find(cppjinja::east::var_name n) const
 
 cppjinja::east::value_term cppjinja::evt::context_objects::value::solve() const
 {
-	if(jcnt != nullptr) return tmp_debug_to_str(jcnt);
+	if(jcnt != nullptr) return east::value_term(tmp_debug_to_str(jcnt));
 	return content;
 }
 

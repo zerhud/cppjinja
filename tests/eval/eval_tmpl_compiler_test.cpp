@@ -25,6 +25,7 @@
 #include "evtree/nodes/block_named.hpp"
 
 namespace ast = cppjinja::ast;
+namespace east = cppjinja::east;
 namespace txt = cppjinja::text;
 namespace nodes = cppjinja::evtnodes;
 namespace tdata = boost::unit_test::data;
@@ -243,7 +244,7 @@ BOOST_FIXTURE_TEST_CASE(op_out, mock_exenv_fixture)
 	check_main(tree, "", 1, 0);
 	BOOST_TEST(make_node_seq_str(tree.main_block(), tree.render_tree.all_tree()) == "block_named,op_out..");
 
-	expect_sovle(cppjinja::east::var_name{"a"s}, ""s);
+	expect_sovle(cppjinja::east::var_name{"a"s}, east::value_term(""s));
 	MOCK_EXPECT(env.current_node);
 	make_node_seq(tree.main_block(), tree.render_tree.all_tree())[1]->render(env);
 }

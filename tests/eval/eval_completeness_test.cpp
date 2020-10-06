@@ -93,13 +93,13 @@ BOOST_DATA_TEST_CASE(get_var_filter
 		if( cur_count == 1 ) BOOST_TEST( fnc.ref[0] == "b"s );
 		if( cur_count == 0 ) BOOST_TEST( fnc.ref[0] == "a"s );
 		BOOST_TEST( v.get<std::string>() == "filter"s+std::to_string(cur_count) );
-		return "filter"s+std::to_string(++cur_count);
+		return east::value_term("filter"s+std::to_string(++cur_count));
 	};
 	auto make_var = [&cur_count](east::var_name v){
 		BOOST_TEST(v.size()==2);
 		BOOST_TEST(v[0]=="a");
 		BOOST_TEST(v[1]=="b");
-		return "filter"s+std::to_string(cur_count);
+		return east::value_term("filter"s+std::to_string(cur_count));
 	};
 
 	mocks::data_provider prov;
@@ -115,13 +115,13 @@ BOOST_AUTO_TEST_CASE(get_var_nesteed)
 	MOCK_EXPECT(prov.value_var_name).once().calls([](east::var_name v){
 		BOOST_TEST_REQUIRE(v.size()==1);
 		BOOST_TEST(v[0]=="b");
-		return "b";
+		return east::value_term("b"s);
 	});
 	MOCK_EXPECT(prov.value_var_name).once().calls([](east::var_name v){
 		BOOST_TEST_REQUIRE(v.size()==2);
 		BOOST_TEST(v[0]=="a");
 		BOOST_TEST(v[1]=="b");
-		return "ok";
+		return east::value_term("ok"s);
 	});
 	BOOST_TEST( parse_single("<= a[b] =>", prov)=="ok"s );
 }

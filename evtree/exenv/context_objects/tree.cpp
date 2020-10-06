@@ -70,7 +70,7 @@ cppjinja::east::value_term cppjinja::evt::context_objects::tree::solve() const
 	std::stringstream out;
 	render_children_with_comma(out << '{') << '}';
 	auto ret = out.str();
-	return ret.size() == 2 ? ret : ret.erase(ret.size()-2, 1);
+	return east::value_term(ret.size() == 2 ? ret : ret.erase(ret.size()-2, 1));
 }
 
 cppjinja::json cppjinja::evt::context_objects::tree::jval() const

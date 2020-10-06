@@ -29,6 +29,6 @@ void cppjinja::evtnodes::block_set::render(cppjinja::evt::exenv& env) const
 	env.current_node(this);
 	evt::raii_push_ctx ctx_holder(this, &env.ctx());
 	render_children(env.children(this), env, inner_ri());
-	auto child = std::make_shared<evt::context_objects::value>(env.result());
+	auto child = std::make_shared<evt::context_objects::value>(east::value_term(env.result()));
 	env.locals().add(block.name, child);
 }

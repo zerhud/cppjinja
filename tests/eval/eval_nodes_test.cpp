@@ -682,7 +682,7 @@ BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
 	auto calling_result = std::make_shared<mocks::context_object>();
 	auto calling = std::make_shared<mocks::context_object>();
 	MOCK_EXPECT(all_ctx.find).once().with(evar_name{"test"s}).returns(calling);
-	MOCK_EXPECT(calling_result->solve).returns("calling_result"s);
+	MOCK_EXPECT(calling_result->solve).returns(evalue_term("calling_result"s));
 	MOCK_EXPECT(calling->call).once().calls([&block,calling_result](auto params){
 		BOOST_TEST_REQUIRE(params.size()==2);
 		BOOST_TEST(params[1].name.value_or(""s) == "cp1n"s);

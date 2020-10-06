@@ -22,8 +22,11 @@ cppjinja::east::string_t cppjinja::details::east_cvt::cvt(const ast::string_t& s
 
 cppjinja::east::value_term cppjinja::details::east_cvt::cvt(const ast::value_term& val)
 {
-	if(val.var.type() == typeid(double)) return boost::get<double>(val.var);
-	if(val.var.type() == typeid(ast::string_t)) return cvt(boost::get<ast::string_t>(val.var));
+	using east::value_term;
+	if(val.var.type() == typeid(double))
+		return value_term(boost::get<double>(val.var));
+	if(val.var.type() == typeid(ast::string_t))
+		return value_term(cvt(boost::get<ast::string_t>(val.var)));
 	assert(false);
-	return ""s;
+	return value_term(""s);
 }

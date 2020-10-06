@@ -23,16 +23,33 @@ enum class cmp_op { nop, eq, neq, less, more, less_eq, more_eq, test };
 enum class logic_op { nop, op_and, op_or };
 
 struct expr;
+struct term;
 struct expr_bool;
+
+template<typename T>
+concept TermForward =
+           std::is_same_v<std::decay_t<T>, bool>
+        || std::is_same_v<std::decay_t<T>, double>
+        || std::is_same_v<std::decay_t<T>, string_t>
+        ;
+template<typename T>
+concept TermForwardCopy = std::is_same_v<std::decay_t<T>, term> ;
+template<typename T>
+concept TermInteger = std::integral<T>
+        && !TermForward<T>
+        && !TermForwardCopy<T>
+;
 
 using term_var = x3::variant<bool, std::int64_t, double, string_t>;
 struct term : term_var {
-	using base_type::base_type;
 	using base_type::operator=;
-	term(bool v) : term_var(v) {}
-	term(double v) : term_var(v) {}
-	term(string_t v) : term_var(v) {}
-	template<std::integral Int>
+
+	term() =default ;
+	template<TermForwardCopy T>
+	term(const T& v) : term_var(v) {}
+	template<TermForward T>
+	term(T v) : term_var(std::move(v)) {}
+	template<TermInteger Int>
 	explicit term(Int v) : term_var((std::int64_t)v) {}
 };
 
@@ -53,7 +70,11 @@ struct point {
 struct lvalue : x3::variant<single_var_name, point> {
 	using base_type::base_type;
 	using base_type::operator=;
-	lvalue& operator = (const lvalue&) =default ;
+
+	lvalue (lvalue&&)=default;
+	lvalue (const lvalue&)=default;
+	lvalue& operator = (lvalue&&)=default;
+	lvalue& operator = (const lvalue&)=default;
 };
 
 struct any_assign {
