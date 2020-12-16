@@ -71,7 +71,10 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${parser2_src} ${parser2_h
 add_library(parser2 STATIC ${parser2_src} ${parser2_hdr})
 target_include_directories(parser2
 	PRIVATE "${Boost_INCLUDE_DIRS}"
-	PUBLIC "$<BUILD_INTERFACE:${config_files_dir}>" "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/parser>"
+	PUBLIC
+		"$<BUILD_INTERFACE:${config_files_dir}>"
+		"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/parser>"
+		"$<INSTALL_INTERFACE:${inst_incdir}>"
 	)
 set_target_properties(parser2 PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_compile_definitions(parser2 PRIVATE -DPARSER_PRIVATE)

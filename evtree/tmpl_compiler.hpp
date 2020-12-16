@@ -10,7 +10,7 @@
 
 #include "declarations.hpp"
 #include "node_tree.hpp"
-#include "evtree/node.hpp"
+#include "node.hpp"
 #include "nodes/tmpl.hpp"
 #include "nodes/callable.hpp"
 #include "parser/ast/tmpls.hpp"
