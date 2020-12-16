@@ -10,4 +10,5 @@ else()
 	file(COPY "$ENV{${env_var}}" DESTINATION "${dir_out}")
 	file(RENAME "${dir_out}/${env_name}" "${dir_out}/${out_name}")
 endif()
+file(TOUCH_NOCREATE "${out}")
 

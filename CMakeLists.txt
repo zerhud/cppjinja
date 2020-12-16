@@ -53,7 +53,7 @@ set(inst_rtdir "lib/${PROJECT_NAME}/")
 
 
 # lohman json
-set(lohman_json_file "${CMAKE_CURRENT_BINARY_DIR}/nlohman/json.hpp")
+set(lohman_json_file "${CMAKE_CURRENT_BINARY_DIR}/nlohman/cppjinja/json.hpp")
 set(lohman_json_url "https://github.com/nlohmann/json/raw/develop/single_include/nlohmann/json.hpp")
 add_custom_command(OUTPUT "${lohman_json_file}"
 	COMMAND "${CMAKE_COMMAND}"
