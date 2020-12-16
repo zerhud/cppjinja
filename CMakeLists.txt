@@ -23,7 +23,7 @@ find_package(Boost COMPONENTS unit_test_framework system REQUIRED)
 # find_package sets libraries to Boost::unit_test_framework;Boost::system and so on
 # and cmake tries to find it in /nix/store/[include_hash]-boost-1.71.0-dev/lib/libboost_unit_test_framework.so.1.71.0 
 # but they leaves in /nix/store/[library_hash]/lib... in nix env all libraries can be found
-set(Boost_LIBRARIES "libboost_program_options.so;libboost_unit_test_framework.so;libboost_system.so")
+#set(Boost_LIBRARIES "libboost_program_options.so;libboost_unit_test_framework.so;libboost_system.so")
 
 find_package(Threads REQUIRED)
 include(CheckCXXSourceCompiles)

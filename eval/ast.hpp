@@ -14,7 +14,7 @@
 #include <vector>
 #include <variant>
 #include <optional>
-#include <json.hpp>
+#include <cppjinja/json.hpp>
 
 namespace cppjinja::east {
 

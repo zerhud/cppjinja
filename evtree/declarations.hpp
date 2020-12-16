@@ -9,7 +9,7 @@
 #pragma once
 
 #include <memory>
-#include <json.hpp>
+#include <cppjinja/json.hpp>
 
 namespace cppjinja {
 
