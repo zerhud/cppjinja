@@ -107,6 +107,7 @@ target_include_directories(evaluator
                 "${Boost_INCLUDE_DIRS}"
                 "${CMAKE_CURRENT_SOURCE_DIR}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/evtree"
+		 "${CMAKE_CURRENT_SOURCE_DIR}/parser"
         SYSTEM PUBLIC
                 "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/nlohman>"
         )
