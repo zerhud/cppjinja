@@ -1,0 +1,13 @@
+mind_map.minder
+compile_commands.json
+build/*
+build_/*
+_build/*
+cmake-*
+parser/ix3/build/*
+cbuild/*
+build-cov/*
+*.user
+tmp/*
+result/*
+export.tar.gz

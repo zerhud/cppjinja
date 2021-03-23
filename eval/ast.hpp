@@ -68,7 +68,7 @@ extern struct value_term : value_term_var
 	template<ValueTermForward T>
 	explicit value_term(T v) : value_term_var(std::move(v)) {}
 	template<ValueTermForwardCopy T>
-	explicit value_term(T v) : value_term_var(v) {}
+	explicit value_term(T&& v) : value_term_var(std::forward<T>(v)) {}
 	template<ValueTermInt Int>
 	explicit value_term(Int v) : value_term_var((std::int64_t)v) {}
 } nothing ;
