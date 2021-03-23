@@ -26,6 +26,7 @@ find_package(Boost COMPONENTS unit_test_framework system REQUIRED)
 #set(Boost_LIBRARIES "libboost_program_options.so;libboost_unit_test_framework.so;libboost_system.so")
 
 find_package(Threads REQUIRED)
+add_subdirectory(absd)
 include(CheckCXXSourceCompiles)
 include(CMakePackageConfigHelpers)
 include(cmake/target_sources_local.cmake)
