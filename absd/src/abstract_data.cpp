@@ -9,8 +9,59 @@
 #include "abstract_data.hpp"
 
 #include <cassert>
+#include <iomanip>
 
 using abs_data = absd::data;
+
+namespace absd {
+template<class... T> struct overloaded : T... { using T::operator()...; };
+template<class... T> overloaded(T...) -> overloaded<T...>;
+std::ostream& pbool(std::ostream& out, bool v)
+{
+	return out << (v?"true":"false");
+}
+} // namespace absd
+
+std::ostream& absd::operator << (std::ostream& out, const data& src)
+{
+	auto info = src.source->reflect();
+	if(src.is_pod(info)) {
+		if(src.is_cached()) {
+			std::visit( overloaded {
+			         [&out](auto&& d){out << d;},
+			         [&out](bool d){pbool(out, d);},
+			         [&out](std::pmr::string& d){out << std::quoted(d);}
+			    }, src.cache.value());
+		} else if(info.type == data_type::integer) out << (std::int64_t)src;
+		else if(info.type == data_type::floating_point) out << (double)src;
+		else if(info.type == data_type::string) out << std::quoted(src.str());
+		else if(info.type == data_type::boolean) pbool(out, (bool)src);
+		else {
+			assert(false);
+			throw std::logic_error("not all data types cached");
+		}
+	} else if(info.type == data_type::array) {
+		out << '[';
+		if(!info.size == 0) out << src[0];
+		for(std::uint64_t i=1;i<info.size;++i)
+			out << ',' << src[i];
+		out << ']';
+	} else if(info.type == data_type::object) {
+		out << '{';
+		if(!info.keys.empty()) {
+			auto last = info.keys.back();
+			info.keys.pop_back();
+			for(auto& k:info.keys)
+				out << std::quoted(k) << ':' << src[k] << ',';
+			out << std::quoted(last) << ':' << src[last] ;
+		}
+		out << '}';
+	} else {
+		assert(false);
+		throw std::logic_error("not all data types cached");
+	}
+	return out;
+}
 
 abs_data::data(std::shared_ptr<absd::data_holder> src)
     : source(std::move(src))
@@ -24,6 +75,12 @@ bool abs_data::is_cached() const
 	     || !key_cache.empty()
 	     || !ind_cache.empty()
 	        ;
+}
+
+bool abs_data::is_pod(const reflection_info& info)
+{
+	data_type t = info.type;
+	return t!=data_type::array && t!=data_type::object;
 }
 
 abs_data::operator std::int64_t() const

@@ -17,10 +17,22 @@
 
 namespace absd {
 
+class data;
+std::ostream& operator << (std::ostream& out, const data& src);
+
+enum class data_type { integer, floating_point, string, boolean, object, array };
+struct reflection_info {
+	data_type type;
+	std::uint64_t size;
+	std::pmr::vector<std::string_view> keys;
+};
+
 class data_holder {
 public:
-	typedef std::unique_ptr<data_holder> self_type;
+	typedef std::shared_ptr<data_holder> self_type;
 	virtual ~data_holder() noexcept =default;
+
+	virtual reflection_info reflect() const =0;
 
 	virtual std::int64_t to_int() const =0;
 	virtual double to_double() const =0;
@@ -32,6 +44,7 @@ public:
 };
 
 class data final {
+	friend std::ostream& operator << (std::ostream& out, const data& src);
 	using end_cache_t = std::variant<std::int64_t, double, std::pmr::string, bool>;
 
 	std::shared_ptr<data_holder> source;
@@ -41,6 +54,7 @@ class data final {
 	mutable std::map<std::int64_t,data,std::less<>> ind_cache;
 
 	bool is_cached() const ;
+	static bool is_pod(const reflection_info& info) ;
 public:
 	data(std::shared_ptr<data_holder> src);
 

@@ -15,6 +15,7 @@ namespace absd_mocks {
 
 MOCK_BASE_CLASS(data_holder, absd::data_holder)
 {
+	MOCK_METHOD(reflect, 0)
 	MOCK_METHOD(to_int, 0)
 	MOCK_METHOD(to_double, 0)
 	MOCK_METHOD(to_string, 0)
@@ -26,6 +27,20 @@ MOCK_BASE_CLASS(data_holder, absd::data_holder)
 struct fixture {
 	std::shared_ptr<data_holder> prov = std::make_shared<data_holder>();
 	absd::data dp{prov};
+
+	void expect_reflection(
+	        absd::data_type t,
+	        std::pmr::vector<std::string_view> k={},
+	        std::optional<std::uint64_t> i=std::nullopt,
+	        data_holder* p = nullptr)
+	{
+		data_holder* s = p ? p : prov.get();
+		MOCK_EXPECT(s->reflect).returns(
+		            absd::reflection_info{
+		                .type=t,
+		                .size = i ? *i : 0,
+		                .keys=std::move(k) });
+	}
 };
 
 } // namespace absd_mocks
