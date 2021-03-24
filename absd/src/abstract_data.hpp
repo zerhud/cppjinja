@@ -18,6 +18,7 @@
 namespace absd {
 
 class data;
+class to_json_printer;
 std::ostream& operator << (std::ostream& out, const data& src);
 
 enum class data_type { integer, floating_point, string, boolean, object, array };
@@ -44,6 +45,7 @@ public:
 };
 
 class data final {
+	friend class to_json_printer;
 	friend std::ostream& operator << (std::ostream& out, const data& src);
 	using end_cache_t = std::variant<std::int64_t, double, std::pmr::string, bool>;
 
@@ -70,6 +72,21 @@ public:
 
 	const data& operator [] (std::string_view key) const ;
 	const data& operator [] (std::int64_t ind) const ;
+};
+
+class to_json_printer final {
+	std::ostream& out;
+	reflection_info info;
+	const data* src;
+
+	std::ostream& cached() ;
+	std::ostream& pod() ;
+	std::ostream& array() ;
+	std::ostream& object() ;
+	std::ostream& pbool() ;
+public:
+	to_json_printer(std::ostream& out);
+	std::ostream& operator()(const data& to_print) ;
 };
 
 } // namespace absd
