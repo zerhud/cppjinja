@@ -11,9 +11,9 @@
 #include <turtle/mock.hpp>
 #include "abstract_data.hpp"
 
-namespace abstract_data_mocks {
+namespace absd_mocks {
 
-MOCK_BASE_CLASS(data_holder, abstract_data::data_holder)
+MOCK_BASE_CLASS(data_holder, absd::data_holder)
 {
 	MOCK_METHOD(to_int, 0)
 	MOCK_METHOD(to_double, 0)
@@ -25,7 +25,7 @@ MOCK_BASE_CLASS(data_holder, abstract_data::data_holder)
 
 struct fixture {
 	std::shared_ptr<data_holder> prov = std::make_shared<data_holder>();
-	abstract_data::data dp{prov};
+	absd::data dp{prov};
 };
 
-} // namespace abstract_data_mocks
+} // namespace absd_mocks

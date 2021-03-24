@@ -15,7 +15,7 @@
 #include <optional>
 #include <memory_resource>
 
-namespace abstract_data {
+namespace absd {
 
 class data_holder {
 public:
@@ -58,4 +58,4 @@ public:
 	const data& operator [] (std::int64_t ind) const ;
 };
 
-} // namespace abstract_data
+} // namespace absd

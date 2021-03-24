@@ -10,9 +10,9 @@
 
 #include <cassert>
 
-using abs_data = abstract_data::data;
+using abs_data = absd::data;
 
-abs_data::data(std::shared_ptr<abstract_data::data_holder> src)
+abs_data::data(std::shared_ptr<absd::data_holder> src)
     : source(std::move(src))
 {
 }

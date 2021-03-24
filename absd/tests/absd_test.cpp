@@ -17,8 +17,8 @@
 #include "mocks.hpp"
 
 BOOST_AUTO_TEST_SUITE(absd)
-using abstract_data_mocks::fixture;
-using abs_data = abstract_data::data;
+using absd_mocks::fixture;
+using abs_data = absd::data;
 BOOST_FIXTURE_TEST_CASE(to_int, fixture)
 {
 	MOCK_EXPECT(prov->to_int).once().returns(42);
@@ -50,7 +50,7 @@ BOOST_FIXTURE_TEST_CASE(to_bool, fixture)
 }
 BOOST_FIXTURE_TEST_CASE(as_object, fixture)
 {
-	auto val = std::make_unique<abstract_data_mocks::data_holder>();
+	auto val = std::make_unique<absd_mocks::data_holder>();
 	MOCK_EXPECT(val->to_int).once().returns(42);
 	MOCK_EXPECT(prov->by_key)
 	        .once().with("key")
@@ -62,7 +62,7 @@ BOOST_FIXTURE_TEST_CASE(as_object, fixture)
 }
 BOOST_FIXTURE_TEST_CASE(as_array, fixture)
 {
-	auto val = std::make_unique<abstract_data_mocks::data_holder>();
+	auto val = std::make_unique<absd_mocks::data_holder>();
 	MOCK_EXPECT(val->to_int).once().returns(42);
 	MOCK_EXPECT(prov->by_ind)
 	        .once().with(13)
