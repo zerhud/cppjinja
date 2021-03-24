@@ -26,7 +26,7 @@ if(ENABLE_TESTS)
 	get_filename_component(turtle "${turtle}" DIRECTORY)
 	find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 	macro(add_unit_test tname path lib)
-		add_executable(${tname}_test "${path}${tname}_test.cpp")
+		add_executable(${tname}_test "${path}${tname}_test.cpp" "${path}mocks.hpp")
 		target_link_libraries(${tname}_test PRIVATE ${lib} ${Boost_LIBRARIES} ${CMAKE_DL_LIBS})
 		target_include_directories(${tname}_test SYSTEM PRIVATE
 			"${Boost_INCLUDE_DIR}" "${turtle}"
@@ -37,4 +37,5 @@ if(ENABLE_TESTS)
 	endmacro()
 
 	add_unit_test(absd "tests/" "${PROJECT_NAME}")
+	add_unit_test(to_json "tests/" "${PROJECT_NAME}")
 endif()
