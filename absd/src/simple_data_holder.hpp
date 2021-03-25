@@ -27,7 +27,7 @@ class simple_data_holder : public data_holder {
 	void set_int(std::int64_t v);
 public:
 	simple_data_holder();
-	simple_data_holder(std::shared_ptr<std::pmr::memory_resource> mem);
+	simple_data_holder(std::shared_ptr<std::pmr::memory_resource> m);
 	~simple_data_holder() noexcept =default ;
 
 	std::pmr::memory_resource& storage() const ;

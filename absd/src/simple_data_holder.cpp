@@ -16,8 +16,10 @@ simple_dh::simple_data_holder()
 {
 }
 
-simple_dh::simple_data_holder(std::shared_ptr<std::pmr::memory_resource> mem)
-    : mem(std::move(mem))
+simple_dh::simple_data_holder(std::shared_ptr<std::pmr::memory_resource> m)
+    : mem(std::move(m))
+    , object(mem.get())
+    , array(mem.get())
 {
 }
 

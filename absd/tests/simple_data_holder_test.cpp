@@ -89,5 +89,24 @@ BOOST_AUTO_TEST_CASE(array)
 	BOOST_TEST(hld.by_ind(0)->to_int() == 42);
 	BOOST_CHECK_THROW(hld.by_ind(1), std::out_of_range);
 }
+BOOST_AUTO_TEST_CASE(use_resource)
+{
+	typedef std::pmr::unsynchronized_pool_resource mem_t;
+	mem_t mem;
+	auto mem_ptr = std::shared_ptr<mem_t>(&mem, [](auto){});
+
+	struct raii {
+		raii() {
+			std::pmr::set_default_resource(std::pmr::null_memory_resource());
+		}
+		~raii() {
+			std::pmr::set_default_resource(std::pmr::new_delete_resource());
+		}
+	} mr_setter;
+
+	simple_dh hld_obj(mem_ptr), hld_ar(mem_ptr);
+	BOOST_CHECK_NO_THROW(hld_obj.put("t1") = 42);
+	BOOST_CHECK_NO_THROW(hld_ar.push_back() = 42);
+}
 BOOST_AUTO_TEST_SUITE_END() // simple_data_holder_tests
 BOOST_AUTO_TEST_SUITE_END() // absd
