@@ -228,6 +228,34 @@ BOOST_FIXTURE_TEST_CASE(without_args, mock_exenv_fixture)
 	auto res = eeval(&env)(txt::parse(ext::expr, "a | b"));
 	BOOST_TEST(res == result);
 }
+BOOST_FIXTURE_TEST_CASE(without_args_few, mock_exenv_fixture)
+{
+	using fparam_t = cppjinja::evt::context_object::function_parameter;
+	auto a = std::make_shared<mocks::context_object>();
+	auto b = std::make_shared<mocks::context_object>();
+	auto c = std::make_shared<mocks::context_object>();
+	auto result_b = std::make_shared<mocks::context_object>();
+	auto result_c = std::make_shared<mocks::context_object>();
+	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
+	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"b"}).returns(b);
+	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"c"}).returns(c);
+
+	MOCK_EXPECT(b->call).calls([result_b,a](std::vector<fparam_t> params){
+		BOOST_TEST_REQUIRE(params.size() == 1);
+		BOOST_TEST(*params[0].name == "$");
+		BOOST_TEST(params[0].value == a);
+		return result_b;
+	});
+	MOCK_EXPECT(c->call).calls([result_b,result_c,a,b](std::vector<fparam_t> params){
+		BOOST_TEST_REQUIRE(params.size() == 1);
+		BOOST_TEST(*params[0].name == "$");
+		BOOST_TEST(params[0].value == result_b);
+		return result_c;
+	});
+
+	auto res = eeval(&env)(txt::parse(ext::expr, "a | b | c"));
+	BOOST_TEST(res == result_c);
+}
 BOOST_FIXTURE_TEST_CASE(with_args, mock_exenv_fixture)
 {
 	auto a = std::make_shared<mocks::context_object>();
