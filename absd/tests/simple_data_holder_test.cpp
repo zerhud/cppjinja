@@ -107,6 +107,8 @@ BOOST_AUTO_TEST_CASE(use_resource)
 	simple_dh hld_obj(mem_ptr), hld_ar(mem_ptr);
 	BOOST_CHECK_NO_THROW(hld_obj.put("t1") = 42);
 	BOOST_CHECK_NO_THROW(hld_ar.push_back() = 42);
+	BOOST_TEST(hld_obj.by_key("t1")->to_int() == 42);
+	BOOST_TEST(hld_ar.by_ind(0)->to_int() == 42);
 }
 BOOST_AUTO_TEST_SUITE_END() // simple_data_holder_tests
 BOOST_AUTO_TEST_SUITE_END() // absd
