@@ -75,39 +75,6 @@ BOOST_DATA_TEST_CASE(set_var
 	BOOST_TEST( parse_single(data, prov) == "okok"sv );
 }
 
-BOOST_DATA_TEST_CASE(get_var_filter
-      , data::make( "<= a.b =>"sv, "<= a.b | a | b | b =>"sv)
-      ^ data::make(0, 3), data, count)
-{
-	namespace east = cppjinja::east;
-	int cur_count = 0;
-	auto filter = [&cur_count]( east::function_call fnc){
-		BOOST_TEST_REQUIRE( fnc.params.size() == 1 );
-		BOOST_REQUIRE( fnc.params.at(0).name.has_value() && fnc.params.at(0).jval.has_value() );
-		BOOST_TEST(*fnc.params.at(0).name == "$");
-		auto v = *fnc.params.at(0).jval;
-
-		BOOST_REQUIRE( v.is_string() );
-
-		BOOST_TEST( fnc.ref.size() == 1 );
-		if( cur_count == 1 ) BOOST_TEST( fnc.ref[0] == "b"s );
-		if( cur_count == 0 ) BOOST_TEST( fnc.ref[0] == "a"s );
-		BOOST_TEST( v.get<std::string>() == "filter"s+std::to_string(cur_count) );
-		return east::value_term("filter"s+std::to_string(++cur_count));
-	};
-	auto make_var = [&cur_count](east::var_name v){
-		BOOST_TEST(v.size()==2);
-		BOOST_TEST(v[0]=="a");
-		BOOST_TEST(v[1]=="b");
-		return east::value_term("filter"s+std::to_string(cur_count));
-	};
-
-	mocks::data_provider prov;
-	MOCK_EXPECT(prov.value_var_name).once().calls(make_var);
-	MOCK_EXPECT(prov.value_function_call).exactly(count).calls(filter);
-	BOOST_TEST( parse_single(data, prov)=="filter"s+std::to_string(cur_count) );
-}
-
 BOOST_AUTO_TEST_CASE(get_var_nesteed)
 {
 	namespace east = cppjinja::east;
