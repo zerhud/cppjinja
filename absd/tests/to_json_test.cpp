@@ -19,13 +19,13 @@
 BOOST_AUTO_TEST_SUITE(absd)
 using absd_mocks::fixture;
 using abs_data = absd::data;
-std::string prt(const data& d)
-{
-	std::stringstream out;
-	out << d;
-	return out.str();
-}
 BOOST_AUTO_TEST_SUITE(printing)
+BOOST_FIXTURE_TEST_CASE(empty, fixture)
+{
+	expect_reflection(absd::data_type::empty);
+	abs_data d(prov);
+	BOOST_CHECK_THROW(prt(d), std::runtime_error);
+}
 BOOST_FIXTURE_TEST_CASE(pod_int, fixture)
 {
 	expect_reflection(absd::data_type::integer);

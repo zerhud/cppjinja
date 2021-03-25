@@ -41,6 +41,13 @@ struct fixture {
 		                .size = i ? *i : 0,
 		                .keys=std::move(k) });
 	}
+
+	std::string prt(const absd::data& d) const
+	{
+		std::stringstream out;
+		out << d;
+		return out.str();
+	}
 };
 
 } // namespace absd_mocks

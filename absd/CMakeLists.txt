@@ -38,4 +38,5 @@ if(ENABLE_TESTS)
 
 	add_unit_test(absd "tests/" "${PROJECT_NAME}")
 	add_unit_test(to_json "tests/" "${PROJECT_NAME}")
+	add_unit_test(simple_data_holder "tests/" "${PROJECT_NAME}")
 endif()
