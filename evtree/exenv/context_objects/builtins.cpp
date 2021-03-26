@@ -87,7 +87,7 @@ std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::join::call(
         std::vector<function_parameter> params) const
 {
-	if(params.size() < 2) return std::make_shared<value>(""s,0);
+	if(params.size() < 2) return std::make_shared<value>(""s,1);
 
 	east::string_t ret;
 	auto sep = params[0].value->jval().get<std::string>();
@@ -97,5 +97,5 @@ cppjinja::evt::context_objects::join::call(
 		ret += params[++ind].value->jval().get<std::string>() + sep;
 	ret += params[++ind].value->jval().get<std::string>();
 
-	return std::make_shared<value>(ret, 0);
+	return std::make_shared<value>(ret, 1);
 }

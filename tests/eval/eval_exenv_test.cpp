@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(solve)
 	obj.add("c2", std::make_shared<tree>());
 	BOOST_TEST(obj.solve() == east_value_term{"{\"c1\":{},\"c2\":{}}"s});
 	obj.find(var_name{"c2"})->add("c3", std::make_shared<tree>());
-	obj.find(var_name{"c2"})->add("c4", std::make_shared<covalue>(evalue_term("ok"s)));
+	obj.find(var_name{"c2"})->add("c4", std::make_shared<covalue>("ok"s));
 	BOOST_TEST(obj.solve() == east_value_term{"{\"c1\":{},\"c2\":{\"c3\":{},\"c4\":\"ok\"}}"s});
 }
 BOOST_AUTO_TEST_CASE(cannot_call)
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_SUITE_END() // tree
 BOOST_AUTO_TEST_SUITE(obj_value)
 BOOST_AUTO_TEST_CASE(no_tree_methods_and_no_call)
 {
-	cppjinja::evt::context_objects::value val(east::value_term("ok"s));
+	cppjinja::evt::context_objects::value val("ok"s,1);
 	BOOST_CHECK_THROW(val.add("a",std::make_shared<tree>()), std::exception);
 	BOOST_CHECK_THROW(val.find(var_name{"a"}), std::exception);
 	BOOST_CHECK_THROW(val.call({}), std::exception);
@@ -130,8 +130,8 @@ BOOST_AUTO_TEST_CASE(no_tree_methods_and_no_call)
 BOOST_AUTO_TEST_CASE(solve)
 {
 	using cppjinja::evt::context_objects::value;
-	BOOST_TEST(value(east_value_term{"ok"s}).solve() == east_value_term{"ok"s});
-	BOOST_TEST(value(east_value_term{4}).solve() == east_value_term{4});
+	BOOST_TEST(value("ok"s).solve() == east_value_term{"ok"s});
+	BOOST_TEST(value(4).solve() == east_value_term{4});
 }
 BOOST_AUTO_TEST_SUITE_END() // value
 BOOST_AUTO_TEST_SUITE(callable_node)
@@ -380,10 +380,10 @@ BOOST_FIXTURE_TEST_CASE(cur_namespace, mock_impls_fixture)
 	BOOST_CHECK_THROW(ctx.cur_namespace(), std::exception);
 
 	mocks::node maker, ctx1, ctx2;
-	auto obj_maker = std::make_shared<value>(evalue_term{"maker"s});
-	auto obj_ctx1 = std::make_shared<value>(evalue_term{"ctx1"s});
-	auto obj2_ctx1 = std::make_shared<value>(evalue_term{"ctx1_2"s});
-	auto obj_ctx2 = std::make_shared<value>(evalue_term{"ctx2"s});
+	auto obj_maker = std::make_shared<value>("maker"s,1);
+	auto obj_ctx1 = std::make_shared<value>("ctx1"s,1);
+	auto obj2_ctx1 = std::make_shared<value>("ctx1_2"s,1);
+	auto obj_ctx2 = std::make_shared<value>("ctx2"s,1);
 
 	ctx.push_shadow(&maker);
 	BOOST_CHECK_NO_THROW(ctx.cur_namespace());

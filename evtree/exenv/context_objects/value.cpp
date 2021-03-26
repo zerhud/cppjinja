@@ -8,24 +8,24 @@
 
 #include "value.hpp"
 
-cppjinja::ast::string_t cppjinja::evt::context_objects::value::tmp_debug_to_str(const cppjinja::json& v) const
+cppjinja::east::value_term cppjinja::evt::context_objects::value::tmp_debug_to_val(const json& v) const
 {
-	if(v.is_string()) return v.get<std::string>();
-	if(v.is_number_integer()) return std::to_string(v.get<std::int64_t>());
-	if(v.is_number_float()) return std::to_string(v.get<double>());
-	if(v.is_boolean()) return v.get<bool>() ? "true" : "false";
+	using evt = east::value_term;
+	if(v.is_string()) return evt{v.get<std::string>()};
+	if(v.is_number_integer()) return evt{v.get<std::int64_t>()};
+	if(v.is_number_float()) return evt{v.get<double>()};
+	if(v.is_boolean()) return evt{v.get<bool>()};
 	if(v.is_null()) throw std::runtime_error("cannot convert null to string");
-	return v.dump();
+	return evt{v.dump()};
 }
 
-cppjinja::evt::context_objects::value::value(cppjinja::json j, int)
+cppjinja::evt::context_objects::value::value(cppjinja::json j)
     : jcnt(std::move(j))
 {
 }
 
-cppjinja::evt::context_objects::value::value(cppjinja::east::value_term c)
-    : content(std::move(c))
-    , jcnt(nullptr)
+cppjinja::evt::context_objects::value::value(cppjinja::json j, int)
+    : value(std::move(j))
 {
 }
 
@@ -51,8 +51,7 @@ cppjinja::evt::context_objects::value::find(cppjinja::east::var_name n) const
 
 cppjinja::east::value_term cppjinja::evt::context_objects::value::solve() const
 {
-	if(jcnt != nullptr) return east::value_term(tmp_debug_to_str(jcnt));
-	return content;
+	return east::value_term(tmp_debug_to_val(jcnt));
 }
 
 cppjinja::json cppjinja::evt::context_objects::value::jval() const
