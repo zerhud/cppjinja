@@ -9,6 +9,7 @@
 #pragma once
 
 #include <cppjinja/json.hpp>
+#include "absd/abstract_data.hpp"
 #include "parser/ast/tmpls.hpp"
 #include "ast.hpp"
 

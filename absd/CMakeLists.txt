@@ -12,12 +12,29 @@ if(USE_LIBCXX_DEBUG AND "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 	add_compile_definitions(_GLIBCXX_DEBUG _GLIBCXX_DEBUG_PEDANTIC)
 endif()
 
-file(GLOB_RECURSE src_list LIST_DIRECTORIES false "src/*.cpp")
-file(GLOB_RECURSE hdr_list LIST_DIRECTORIES false "src/*.hpp")
+set(inst_incdir "include/${PROJECT_NAME}/")
+set(inst_rtdir "lib/${PROJECT_NAME}/")
+file(GLOB_RECURSE src_list LIST_DIRECTORIES false "absd/*.cpp")
+file(GLOB_RECURSE hdr_list LIST_DIRECTORIES false "absd/*.hpp")
 source_group(
     TREE "${CMAKE_CURRENT_SOURCE_DIR}"
     FILES ${src_list} ${hdr_list})
 add_library(${PROJECT_NAME} STATIC ${src_list} ${hdr_list})
+target_include_directories(${PROJECT_NAME}
+	PUBLIC
+		"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+		"$<INSTALL_INTERFACE:${inst_incdir}>"
+	)
+
+install(TARGETS ${PROJECT_NAME} 
+	EXPORT "${PROJECT_NAME}-export"
+	ARCHIVE DESTINATION "${inst_rtdir}" COMPONENT bin
+	INCLUDES DESTINATION "${inst_incdir}/../" "${inst_incdir}/"
+	PUBLIC_HEADER COMPONENT dev   DESTINATION "${inst_incdir}")
+install(EXPORT ${PROJECT_NAME}-export
+	NAMESPACE ${PROJECT_NAME}::
+	DESTINATION "${inst_rtdir}"
+	COMPONENT dev)
 
 if(ENABLE_TESTS)
 	enable_testing()

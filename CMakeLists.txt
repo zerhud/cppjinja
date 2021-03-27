@@ -112,7 +112,7 @@ target_include_directories(evaluator
         SYSTEM PUBLIC
                 "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/nlohman>"
         )
-target_link_libraries(evaluator PUBLIC stdc++fs PRIVATE loader)
+target_link_libraries(evaluator PUBLIC absd stdc++fs PRIVATE loader)
 install(DIRECTORY eval DESTINATION "${inst_incdir}" FILES_MATCHING PATTERN "*.hpp")
 install(DIRECTORY evtree DESTINATION "${inst_incdir}" FILES_MATCHING PATTERN "*.hpp")
 

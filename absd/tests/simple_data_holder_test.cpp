@@ -15,7 +15,7 @@
 #include <boost/test/data/monomorphic.hpp>
 
 #include "mocks.hpp"
-#include "simple_data_holder.hpp"
+#include "absd/simple_data_holder.hpp"
 
 BOOST_AUTO_TEST_SUITE(absd)
 using absd_mocks::fixture;
