@@ -21,9 +21,9 @@ class expr_eval final {
 	ast::expr_ops::expr src_operation;
 	mutable std::shared_ptr<evt::context_object> result;
 
-	cppjinja::json cvt(const ast::expr_ops::term& v) const ;
-	ast::string_t to_str(const cppjinja::json& v) const ;
-	bool to_bool(const cppjinja::json& v) const ;
+	absd::data cvt(const ast::expr_ops::term& v) const ;
+	ast::string_t to_str(const absd::data& v) const ;
+	bool to_bool(const absd::data& v) const ;
 	ast::expr_ops::term to_term(const json& j) const ;
 
 	void solve_point_arg(ast::expr_ops::point_element& left) const ;
@@ -34,9 +34,9 @@ class expr_eval final {
 	std::optional<east::string_t> make_param_name(ast::expr_ops::lvalue& name) const ;
 	void filter_content(ast::expr_ops::filter_call& call) const ;
 	std::shared_ptr<evt::context_object> solve_ref(ast::expr_ops::lvalue& ref) const ;
-	cppjinja::json perform_test(ast::expr_ops::cmp_check& t) const ;
+	absd::data perform_test(ast::expr_ops::cmp_check& t) const ;
 public:
-	typedef cppjinja::json eval_type;
+	typedef absd::data eval_type;
 
 	expr_eval(const exenv* e);
 
@@ -45,7 +45,7 @@ public:
 	bool operator() (ast::expr_ops::expr_bool e) const ;
 
 	eval_type operator () (ast::expr_ops::term& t) const ;
-	eval_type operator () (ast::expr_ops::single_var_name& t) const ;
+	void operator () (ast::expr_ops::single_var_name& t) const ;
 	eval_type operator () (ast::expr_ops::list& t) const ;
 	eval_type operator () (ast::expr_ops::tuple& t) const ;
 	eval_type operator () (ast::expr_ops::dict& t) const ;
@@ -73,7 +73,7 @@ private:
 	{
 		if(result) result.reset();
 		auto ret = boost::apply_visitor(*this, v.get().var);
-		if(result) return result->jval();
+		if(result) return result->solve();
 		return ret;
 	}
 };

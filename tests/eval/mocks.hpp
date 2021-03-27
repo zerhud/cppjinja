@@ -20,8 +20,8 @@ namespace mocks {
 
 MOCK_BASE_CLASS( data_provider, cppjinja::data_provider)
 {
-	MOCK_METHOD( value, 1, cppjinja::east::value_term(const cppjinja::east::var_name& val), value_var_name )
-	MOCK_METHOD( value, 1, cppjinja::east::value_term(const cppjinja::east::function_call& val), value_function_call )
+	MOCK_METHOD( value, 1, absd::data(const cppjinja::east::var_name& val), value_var_name )
+	MOCK_METHOD( value, 1, absd::data(const cppjinja::east::function_call& val), value_function_call )
 };
 
 MOCK_BASE_CLASS( node, cppjinja::evt::node )
@@ -60,7 +60,6 @@ MOCK_BASE_CLASS(context_object, cppjinja::evt::context_object)
 	MOCK_METHOD(add, 2)
 	MOCK_METHOD(find, 1)
 	MOCK_METHOD(solve, 0)
-	MOCK_METHOD(jval, 0)
 	MOCK_METHOD(call, 1)
 };
 
@@ -135,7 +134,7 @@ struct mock_exenv_fixture
 		MOCK_EXPECT(env.user_data).calls([this]()->context_object&{return user_data;});
 	}
 
-	void expect_sovle(cppjinja::east::var_name n, cppjinja::east::value_term v)
+	void expect_sovle(cppjinja::east::var_name n, absd::data v)
 	{
 		MOCK_EXPECT(all_ctx.find).once().with(n).returns(mock_all_ctx);
 		MOCK_EXPECT(mock_all_ctx->solve).once().returns(v);
@@ -153,7 +152,7 @@ struct mock_exenv_fixture
 			BOOST_TEST(params.size()==p.size());
 			for(std::size_t i=0;i<params.size();++i) {
 				BOOST_TEST(params.at(i).name.value_or(""s) == p.at(i).name.value_or(""s));
-				BOOST_TEST(params.at(i).value->jval() == p.at(i).value->jval());
+				BOOST_TEST(params.at(i).value->solve() == p.at(i).value->solve());
 			}
 			return val_obj;
 		});
@@ -182,12 +181,12 @@ struct mock_exenv_fixture
 		MOCK_EXPECT(ctx.pop).once().in(seq).with(maker);
 	}
 
-	void expect_children(std::vector<const cppjinja::evt::node*> children)
+	void expect_children(std::pmr::vector<const cppjinja::evt::node*> children)
 	{
 		MOCK_EXPECT(env.children).at_least(1).returns(children);
 	}
 
-	void expect_roots(std::vector<const cppjinja::evtnodes::callable*> roots)
+	void expect_roots(std::pmr::vector<const cppjinja::evtnodes::callable*> roots)
 	{
 		MOCK_EXPECT(env.roots).at_least(1).returns(roots);
 	}

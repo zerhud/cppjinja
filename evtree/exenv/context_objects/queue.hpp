@@ -13,11 +13,11 @@
 namespace cppjinja::evt::context_objects {
 
 class queue : public context_object {
-	std::vector<context_object*> content;
-	std::vector<const context_object*> const_content;
+	std::pmr::vector<context_object*> content;
+	std::pmr::vector<const context_object*> const_content;
 public:
-	using list = std::vector<context_object*>;
-	using clist = std::vector<const context_object*>;
+	using list = std::pmr::vector<context_object*>;
+	using clist = std::pmr::vector<const context_object*>;
 
 	queue();
 	queue(std::initializer_list<queue> cnt);
@@ -29,9 +29,8 @@ public:
 
 	void add(east::string_t n, std::shared_ptr<context_object> child) override ;
 	std::shared_ptr<context_object> find(east::var_name n) const override ;
-	east::value_term solve() const override ;
-	json jval() const override;
-	std::shared_ptr<context_object> call(std::vector<function_parameter> params) const override ;
+	absd::data solve() const override ;
+	std::shared_ptr<context_object> call(std::pmr::vector<function_parameter> params) const override ;
 };
 
 } // namespace cppjinja::evt::context_objects

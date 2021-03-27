@@ -8,19 +8,8 @@
 
 #include "value.hpp"
 
-cppjinja::east::value_term cppjinja::evt::context_objects::value::tmp_debug_to_val(const json& v) const
-{
-	using evt = east::value_term;
-	if(v.is_string()) return evt{v.get<std::string>()};
-	if(v.is_number_integer()) return evt{v.get<std::int64_t>()};
-	if(v.is_number_float()) return evt{v.get<double>()};
-	if(v.is_boolean()) return evt{v.get<bool>()};
-	if(v.is_null()) throw std::runtime_error("cannot convert null to string");
-	return evt{v.dump()};
-}
-
-cppjinja::evt::context_objects::value::value(cppjinja::json j)
-    : jcnt(std::move(j))
+cppjinja::evt::context_objects::value::value(absd::data j)
+    : src(std::move(j))
 {
 }
 
@@ -44,19 +33,14 @@ cppjinja::evt::context_objects::value::find(cppjinja::east::var_name n) const
 	throw std::runtime_error("cannot find a child in a value");
 }
 
-cppjinja::east::value_term cppjinja::evt::context_objects::value::solve() const
+absd::data cppjinja::evt::context_objects::value::solve() const
 {
-	return east::value_term(tmp_debug_to_val(jcnt));
-}
-
-cppjinja::json cppjinja::evt::context_objects::value::jval() const
-{
-	return jcnt;
+	return src;
 }
 
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::value::call(
-        std::vector<function_parameter> params) const
+        std::pmr::vector<function_parameter> params) const
 {
 	(void)params;
 	throw std::runtime_error("cannot call a value");

@@ -19,29 +19,25 @@
 
 using namespace std::literals;
 
-cppjinja::json cppjinja::evt::expr_eval::cvt(const cppjinja::ast::expr_ops::term& v) const
+absd::data cppjinja::evt::expr_eval::cvt(const cppjinja::ast::expr_ops::term& v) const
 {
 	auto cvt = [](const auto& v) -> eval_type { return v; };
 	return boost::apply_visitor(cvt, v);
 }
 
-cppjinja::ast::string_t cppjinja::evt::expr_eval::to_str(const json& v) const
+cppjinja::ast::string_t cppjinja::evt::expr_eval::to_str(const absd::data& v) const
 {
-	if(v.is_string()) return v.get<std::string>();
-	if(v.is_number_integer()) return std::to_string(v.get<std::int64_t>());
-	if(v.is_number_float()) return std::to_string(v.get<double>());
-	if(v.is_boolean()) return v.get<bool>() ? "true" : "false";
-	if(v.is_null()) throw std::runtime_error("cannot convert null to string");
-	return v.dump();
+	std::stringstream out;
+	absd::to_json_printer{out}(v);
+	return out.str();
 }
 
-bool cppjinja::evt::expr_eval::to_bool(const cppjinja::json& v) const
+bool cppjinja::evt::expr_eval::to_bool(const absd::data& v) const
 {
-	if(v.is_string()) return !v.get<std::string>().empty();
-	if(v.is_number_integer()) return !!v.get<std::int64_t>();
-	if(v.is_number_float()) return !!v.get<double>();
-	if(v.is_boolean()) return v.get<bool>();
-	if(v.is_null()) throw std::runtime_error("cannot convert null to bool");
+	if(v.is_string()) return !v.str().empty();
+	if(v.is_integer()) return !!(std::int64_t)v;
+	if(v.is_float()) return !!(double)v;
+	if(v.is_boolean()) return !!v;
 	return false;
 }
 
@@ -71,7 +67,7 @@ void cppjinja::evt::expr_eval::solve_point_arg(ast::expr_ops::expr& left) const
 {
 	if(!result) throw std::runtime_error("wrong access element");
 	auto solved = expr_eval(env)(left);
-	result = result->find(east::var_name{to_str(solved->jval())});
+	result = result->find(east::var_name{to_str(solved->solve())});
 }
 
 void cppjinja::evt::expr_eval::solve_point_arg(cppjinja::ast::expr_ops::point& left) const
@@ -105,7 +101,7 @@ void cppjinja::evt::expr_eval::filter_content(cppjinja::ast::expr_ops::filter_ca
 	result.reset();
 	auto filter = solve_ref(call.ref);
 
-	std::vector<context_object::function_parameter> params;
+	std::pmr::vector<context_object::function_parameter> params;
 	params.emplace_back(context_object::function_parameter{"$", std::move(base)});
 	for(auto& p:call.args) params.emplace_back(make_param(p.get()));
 
@@ -122,7 +118,7 @@ std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::expr_eval::solve_r
 	return ret;
 }
 
-cppjinja::json cppjinja::evt::expr_eval::perform_test(cppjinja::ast::expr_ops::cmp_check& t) const
+absd::data cppjinja::evt::expr_eval::perform_test(cppjinja::ast::expr_ops::cmp_check& t) const
 {
 	assert(t.op == ast::expr_ops::cmp_op::test);
 	auto* check_fnc = boost::get<ast::expr_ops::fnc_call>(&t.right.get());
@@ -164,7 +160,7 @@ bool cppjinja::evt::expr_eval::operator()(ast::expr_ops::expr_bool e) const
 {
 	result.reset();
 	auto val = boost::apply_visitor(*this, e);
-	if(result) val = result->jval();
+	if(result) val = result->solve();
 	result.reset();
 	return to_bool(val);
 }
@@ -175,11 +171,9 @@ cppjinja::evt::expr_eval::operator ()(cppjinja::ast::expr_ops::term& t) const
 	return cvt(t);
 }
 
-cppjinja::evt::expr_eval::eval_type
-cppjinja::evt::expr_eval::operator ()(ast::expr_ops::single_var_name& t) const
+void cppjinja::evt::expr_eval::operator ()(ast::expr_ops::single_var_name& t) const
 {
 	result = env->all_ctx().find(east::var_name{t.name});
-	return false;
 }
 
 cppjinja::evt::expr_eval::eval_type
