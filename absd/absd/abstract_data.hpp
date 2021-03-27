@@ -30,6 +30,7 @@ struct reflection_info {
 
 std::ostream& operator << (std::ostream& out, const data& src);
 std::ostream& operator << (std::ostream& out, const data_type& dt);
+bool operator == (const data& l, const data& r) noexcept ;
 
 class data_holder {
 public:
@@ -62,6 +63,13 @@ class data final {
 	static bool is_pod(const reflection_info& info) ;
 public:
 	data(std::shared_ptr<data_holder> src);
+
+	bool is_string() const ;
+	bool is_integer() const ;
+	bool is_float() const ;
+	bool is_boolean() const ;
+	bool is_object() const ;
+	bool is_array() const ;
 
 	explicit operator std::int64_t () const ;
 	explicit operator double () const ;
