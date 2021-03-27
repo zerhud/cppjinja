@@ -77,5 +77,5 @@ cppjinja::evt::context_objects::user_data::call(
 
 	std::stringstream out;
 	out << provider->value(call);
-	return std::make_shared<value>(out.str(), 1);
+	return std::make_shared<value>(out.str());
 }

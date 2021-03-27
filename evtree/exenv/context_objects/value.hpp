@@ -18,7 +18,6 @@ class value : public context_object {
 	east::value_term tmp_debug_to_val(const json& v) const ;
 public:
 	value(json j);
-	value(json j, int);
 	~value() noexcept override ;
 
 	void add(east::string_t n, std::shared_ptr<context_object> child) override ;

@@ -35,15 +35,15 @@ cppjinja::evt::context_objects::builtins::~builtins() noexcept
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::builtin_function::result_bool(bool res) const
 {
-	static auto res_true = std::make_shared<value>(true, 1);
-	static auto res_false = std::make_shared<value>(false, 1);
+	static auto res_true = std::make_shared<value>(true);
+	static auto res_false = std::make_shared<value>(false);
 	return res ? res_true : res_false;
 }
 
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::builtin_function::result_none() const
 {
-	static auto res = std::make_shared<value>(nullptr, 1);
+	static auto res = std::make_shared<value>(nullptr);
 	return res;
 }
 
@@ -87,7 +87,7 @@ std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::join::call(
         std::vector<function_parameter> params) const
 {
-	if(params.size() < 2) return std::make_shared<value>(""s,1);
+	if(params.size() < 2) return std::make_shared<value>(""s);
 
 	east::string_t ret;
 	auto sep = params[0].value->jval().get<std::string>();
@@ -97,5 +97,5 @@ cppjinja::evt::context_objects::join::call(
 		ret += params[++ind].value->jval().get<std::string>() + sep;
 	ret += params[++ind].value->jval().get<std::string>();
 
-	return std::make_shared<value>(ret, 1);
+	return std::make_shared<value>(ret);
 }

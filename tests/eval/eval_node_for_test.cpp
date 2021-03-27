@@ -26,6 +26,7 @@ namespace evtnodes = cppjinja::evtnodes;
 using namespace std::literals;
 
 using evar_name = cppjinja::east::var_name;
+using obj_val_t = cppjinja::evt::context_objects::value;
 
 struct mock_for_fixture : mocks::mock_exenv_fixture {};
 
@@ -238,7 +239,7 @@ BOOST_FIXTURE_TEST_CASE(index, mock_for_fixture)
 		BOOST_TEST(ind->jval() == 0);
 		BOOST_TEST(ind->jval() == loop->find({"ind"s})->jval());
 		BOOST_TEST(loop->find({"length"})->jval() == 2);
-		auto cycobj = std::make_shared<cppjinja::evt::context_objects::value>(R"(["a", "b"])"_json,1);
+		auto cycobj = std::make_shared<obj_val_t>(R"(["a", "b"])"_json);
 		BOOST_TEST(loop->find({"cycle"})->call({{std::nullopt,cycobj}})->jval() == "a"s);
 	});
 	MOCK_EXPECT(ctx.pop).once().in(ctx_seq);
@@ -256,7 +257,7 @@ BOOST_FIXTURE_TEST_CASE(index, mock_for_fixture)
 		BOOST_REQUIRE(ind);
 		BOOST_TEST(ind->jval() == 1);
 		BOOST_TEST(ind->jval() == loop->find({"ind"s})->jval());
-		auto cycobj = std::make_shared<cppjinja::evt::context_objects::value>(R"(["a", "b"])"_json,1);
+		auto cycobj = std::make_shared<obj_val_t>(R"(["a", "b"])"_json);
 		BOOST_TEST(loop->find({"cycle"})->call({{std::nullopt,cycobj}})->jval() == "b"s);
 	});
 	MOCK_EXPECT(ctx.pop).once().in(ctx_seq);

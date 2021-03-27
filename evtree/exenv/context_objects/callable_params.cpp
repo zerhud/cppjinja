@@ -48,7 +48,7 @@ void cppjinja::evt::context_objects::callable_params::add_value(
           std::string name
         , cppjinja::json val)
 {
-	params[name] = std::make_shared<value>(std::move(val), 1);
+	params[name] = std::make_shared<value>(std::move(val));
 }
 
 cppjinja::evt::context_objects::callable_params::callable_params(

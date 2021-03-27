@@ -607,6 +607,8 @@ BOOST_FIXTURE_TEST_CASE(getters, mock_callable_fixture)
 }
 BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
 {
+	using fnc_param_t = cppjinja::evt::context_object::function_parameter;
+	using val_obj_t = cppjinja::evt::context_objects::value;
 	ast::block_filtered ast_bl;
 	ast_bl.left_close.trim = true;
 	ast_bl.right_open.trim = true;
@@ -622,7 +624,7 @@ BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
 	expect_children({&child});
 	expect_call(
 	              cppjinja::east::var_name{"flt"s}
-	            , {cppjinja::evt::context_object::function_parameter{"$"s, std::make_shared<cppjinja::evt::context_objects::value>("base"s, 1)}}
+	            , {fnc_param_t{"$"s, std::make_shared<val_obj_t>("base"s)}}
 	            , "after"s);
 	MOCK_EXPECT(env.rinfo).with(cppjinja::evt::render_info{true, true});
 	block.render(env);

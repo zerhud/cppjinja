@@ -150,7 +150,7 @@ cppjinja::evt::expr_eval::operator ()(cppjinja::ast::expr_ops::expr t) const
 {
 	auto solved = boost::apply_visitor(*this, t);
 	if(result) return result;
-	return std::make_shared<context_objects::value>(solved,1);
+	return std::make_shared<context_objects::value>(solved);
 }
 
 std::shared_ptr<cppjinja::evt::context_object>

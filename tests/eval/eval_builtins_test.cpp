@@ -59,9 +59,9 @@ BOOST_AUTO_TEST_CASE(jinja_namespace)
 BOOST_AUTO_TEST_CASE(join)
 {
 	cppjinja::evt::context_objects::join j;
-	auto sep = std::make_shared<cppjinja::evt::context_objects::value>(","s,1);
-	auto o1 = std::make_shared<cppjinja::evt::context_objects::value>("1"s,1);
-	auto o2 = std::make_shared<cppjinja::evt::context_objects::value>("2"s,1);
+	auto sep = std::make_shared<cppjinja::evt::context_objects::value>(","s);
+	auto o1 = std::make_shared<cppjinja::evt::context_objects::value>("1"s);
+	auto o2 = std::make_shared<cppjinja::evt::context_objects::value>("2"s);
 	std::vector<function_parameter> params = {
 	     function_parameter{"$"s, sep}
 	    ,function_parameter{std::nullopt, o1}

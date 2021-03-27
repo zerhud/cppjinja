@@ -24,11 +24,6 @@ cppjinja::evt::context_objects::value::value(cppjinja::json j)
 {
 }
 
-cppjinja::evt::context_objects::value::value(cppjinja::json j, int)
-    : value(std::move(j))
-{
-}
-
 cppjinja::evt::context_objects::value::~value() noexcept
 {
 }
