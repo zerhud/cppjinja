@@ -17,19 +17,35 @@
 #include "expr/cmp_check.hpp"
 #include "expr/logic_check.hpp"
 
+#include "absd/simple_data_holder.hpp"
+
 using namespace std::literals;
+
+template<typename T>
+absd::data cppjinja::evt::expr_eval::create_data(T&& arg) const
+{
+	auto ret = std::allocate_shared<absd::simple_data_holder>(
+	            std::pmr::polymorphic_allocator(env->storage().get()),
+	            env->storage());
+	if constexpr (std::is_same_v<std::decay_t<T>,std::pmr::string>)
+	        ret->str() = std::move(arg);
+	else if constexpr (std::is_same_v<std::decay_t<T>,std::string>)
+	        ret->str().append(arg.begin(),arg.end());
+	else *ret = std::forward<T>(arg);
+	return absd::data{ret};
+}
 
 absd::data cppjinja::evt::expr_eval::cvt(const cppjinja::ast::expr_ops::term& v) const
 {
-	auto cvt = [](const auto& v) -> eval_type { return v; };
+	auto cvt = [this](const auto& v) -> eval_type { return create_data(v); };
 	return boost::apply_visitor(cvt, v);
 }
 
-cppjinja::ast::string_t cppjinja::evt::expr_eval::to_str(const absd::data& v) const
+std::pmr::string cppjinja::evt::expr_eval::to_str(const absd::data& v) const
 {
 	std::stringstream out;
 	absd::to_json_printer{out}(v);
-	return out.str();
+	return std::pmr::string(out.str().begin(),out.str().end(), env->storage().get());
 }
 
 bool cppjinja::evt::expr_eval::to_bool(const absd::data& v) const
@@ -41,13 +57,13 @@ bool cppjinja::evt::expr_eval::to_bool(const absd::data& v) const
 	return false;
 }
 
-cppjinja::ast::expr_ops::term cppjinja::evt::expr_eval::to_term(const cppjinja::json& j) const
+cppjinja::ast::expr_ops::term cppjinja::evt::expr_eval::to_term(const absd::data& d) const
 {
 	using ast::expr_ops::term;
-	if(j.is_number_integer()) return term{j.get<std::int64_t>()};
-	if(j.is_number_float()) return term{j.get<double>()};
-	if(j.is_string()) return term{j.get<std::string>()};
-	if(j.is_boolean()) return term{j.get<bool>()};
+	if(d.is_integer()) return term{(std::int64_t)d};
+	if(d.is_float()) return term{(double)d};
+	if(d.is_string()) return term{d.hstr()};
+	if(d.is_boolean()) return term{(bool)d};
 	throw std::runtime_error("cannot apply this operator on such type");
 }
 
@@ -67,7 +83,7 @@ void cppjinja::evt::expr_eval::solve_point_arg(ast::expr_ops::expr& left) const
 {
 	if(!result) throw std::runtime_error("wrong access element");
 	auto solved = expr_eval(env)(left);
-	result = result->find(east::var_name{to_str(solved->solve())});
+	result = result->find(east::var_name{solved->solve().hstr()});
 }
 
 void cppjinja::evt::expr_eval::solve_point_arg(cppjinja::ast::expr_ops::point& left) const
@@ -171,33 +187,41 @@ cppjinja::evt::expr_eval::operator ()(cppjinja::ast::expr_ops::term& t) const
 	return cvt(t);
 }
 
-void cppjinja::evt::expr_eval::operator ()(ast::expr_ops::single_var_name& t) const
+cppjinja::evt::expr_eval::eval_type
+cppjinja::evt::expr_eval::operator ()(ast::expr_ops::single_var_name& t) const
 {
 	result = env->all_ctx().find(east::var_name{t.name});
+	return create_data(false);
 }
 
 cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::list& t) const
 {
-	auto ret = json::array();
-	for(auto& item:t.items) ret.emplace_back(visit(item));
-	return ret;
+	auto ret = std::allocate_shared<absd::simple_data_holder>(
+	            std::pmr::polymorphic_allocator(env->storage().get()),
+	            env->storage());
+	for(auto& item:t.items) ret->push_back(visit(item));
+	return absd::data{ret};
 }
 
 cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::tuple& t) const
 {
-	auto ret = json::array();
-	for(auto& item:t.items) ret.emplace_back(visit(item));
-	return ret;
+	auto ret = std::allocate_shared<absd::simple_data_holder>(
+	            std::pmr::polymorphic_allocator(env->storage().get()),
+	            env->storage());
+	for(auto& item:t.items) ret->push_back(visit(item));
+	return absd::data{ret};
 }
 
 cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::dict& t) const
 {
-	json ret;
-	for(auto& item:t.items) ret[item.name] = visit(item.value);
-	return ret;
+	auto ret = std::allocate_shared<absd::simple_data_holder>(
+	            std::pmr::polymorphic_allocator(env->storage().get()),
+	            env->storage());
+	for(auto& item:t.items) ret->put(item.name, visit(item.value));
+	return absd::data{ret};
 }
 
 cppjinja::evt::expr_eval::eval_type
@@ -225,7 +249,7 @@ cppjinja::evt::expr_eval::operator ()(ast::expr_ops::math& t) const
 cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::concat& t) const
 {
-	return to_str(visit(t.left)) + to_str(visit(t.right));
+	return create_data(to_str(visit(t.left)) + to_str(visit(t.right)));
 }
 
 cppjinja::evt::expr_eval::eval_type
@@ -233,11 +257,22 @@ cppjinja::evt::expr_eval::operator ()(ast::expr_ops::in_check& t) const
 {
 	auto term = eval(t.term);
 	auto object = eval(t.object);
-	if(object.is_array()) {
-		for(auto& i:object) if(i==term) return true;
-		return false;
+	if(object.is_string() && term.is_string())
+		return create_data(object.str().find(term.str()) != std::string::npos);
+	if(term.is_object() || term.is_array())
+		throw std::runtime_error("cannot use array with 'in' operator");
+	auto info = object.src()->reflect();
+	if(info.size != 0) {
+		for(std::size_t i=0;i<info.size;++i)
+			if(object[i]==term) return create_data(true);
+		return create_data(false);
 	}
-	return object.contains(term);
+	if(!info.keys.empty()) {
+		for(auto& key:info.keys)
+			if(object[key] == term) return create_data(true);
+		return create_data(false);
+	}
+	throw std::runtime_error("use 'in' operator only for array maps and strings");
 }
 
 cppjinja::evt::expr_eval::eval_type
@@ -265,8 +300,9 @@ cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::negate& t) const
 {
 	auto solved = visit(t.arg);
-	if(solved.is_boolean()) return !solved.get<bool>();
-	if(solved.is_number()) return !(solved.get<double>());
+	if(solved.is_boolean()) return create_data(!solved);
+	if(solved.is_integer()) return create_data(!((std::int64_t)solved));
+	if(solved.is_float()) return create_data(!((double)solved));
 	throw std::runtime_error("cannot nagate such value");
 }
 
@@ -274,10 +310,10 @@ cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::fnc_call& t) const
 {
 	auto call_obj = solve_ref(t.ref);
-	std::vector<context_object::function_parameter> params;
+	std::pmr::vector<context_object::function_parameter> params(env->storage().get());
 	for(auto& p:t.args) params.emplace_back(make_param(p.get()));
 	result = call_obj->call(params);
-	return false;
+	return create_data(false);
 }
 
 cppjinja::evt::expr_eval::eval_type
@@ -285,7 +321,7 @@ cppjinja::evt::expr_eval::operator ()(ast::expr_ops::filter& t) const
 {
 	result = (*this)(t.base.get());
 	for(auto& f:t.filters) filter_content(f);
-	return false;
+	return create_data(false);
 }
 
 cppjinja::evt::expr_eval::eval_type
@@ -295,7 +331,7 @@ cppjinja::evt::expr_eval::operator ()(ast::expr_ops::point& t) const
 	if(!result) throw std::runtime_error("cannot find");
 	solve_point_arg(t.right);
 	if(!result) throw std::runtime_error("cannot find");
-	return eval_type{""s};
+	return create_data(std::pmr::string{});
 }
 
 cppjinja::evt::expr_eval::eval_type
@@ -303,5 +339,5 @@ cppjinja::evt::expr_eval::operator ()(ast::expr_ops::op_if& t) const
 {
 	if((*this)(t.cond.get())) return visit(t.term);
 	if(t.alternative) return visit(*t.alternative);
-	return nullptr;
+	throw std::runtime_error("cannot use if here");
 }

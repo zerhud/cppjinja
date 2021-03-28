@@ -8,6 +8,8 @@
 
 #include "simple_data_holder.hpp"
 
+#include <cassert>
+
 using abs_data = absd::data;
 using simple_dh = absd::simple_data_holder;
 
@@ -80,14 +82,24 @@ simple_dh& simple_dh::put(std::string_view key)
 {
 	require_change();
 	auto ret = std::allocate_shared<simple_dh>(alloc_t(&storage()), mem);
-	object[std::pmr::string(key, &storage())] = ret;
+	auto obj = std::make_pair(std::pmr::string(key, &storage()), data{ret});
+	object.emplace(std::move(obj));
 	return *ret;
+}
+
+void simple_dh::put(std::string_view key, data v)
+{
+	require_change();
+	auto obj = std::make_pair(std::pmr::string(key, &storage()), std::move(v));
+	object.emplace(std::move(obj));
 }
 
 simple_dh::self_type simple_dh::by_key(std::string_view key) const
 {
 	require_extract_obj();
-	return object.at(std::pmr::string(key,&storage()));
+	auto ret = object.at(std::pmr::string(key,&storage()));
+	assert(dynamic_cast<const simple_dh*>(ret.src().get()) != nullptr);
+	return ret.src();
 }
 
 void simple_dh::require_extract_obj() const
@@ -100,14 +112,22 @@ simple_dh& simple_dh::push_back()
 {
 	require_change();
 	auto ret = std::allocate_shared<simple_dh>(alloc_t(&storage()), mem);
-	array.emplace_back(ret);
+	array.emplace_back(data{ret});
 	return *ret;
+}
+
+void simple_dh::push_back(absd::data v)
+{
+	require_change();
+	array.emplace_back(std::move(v));
 }
 
 simple_dh::self_type simple_dh::by_ind(std::int64_t ind) const
 {
 	require_extract_arr();
-	return array.at(ind);
+	auto ret = array.at(ind);
+	assert(dynamic_cast<const simple_dh*>(ret.src().get()) != nullptr);
+	return ret.src();
 }
 
 void simple_dh::require_extract_arr() const

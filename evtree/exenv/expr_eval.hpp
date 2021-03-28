@@ -22,9 +22,9 @@ class expr_eval final {
 	mutable std::shared_ptr<evt::context_object> result;
 
 	absd::data cvt(const ast::expr_ops::term& v) const ;
-	ast::string_t to_str(const absd::data& v) const ;
+	std::pmr::string to_str(const absd::data& v) const ;
 	bool to_bool(const absd::data& v) const ;
-	ast::expr_ops::term to_term(const json& j) const ;
+	ast::expr_ops::term to_term(const absd::data& d) const ;
 
 	void solve_point_arg(ast::expr_ops::point_element& left) const ;
 	void solve_point_arg(ast::expr_ops::single_var_name& left) const ;
@@ -35,6 +35,9 @@ class expr_eval final {
 	void filter_content(ast::expr_ops::filter_call& call) const ;
 	std::shared_ptr<evt::context_object> solve_ref(ast::expr_ops::lvalue& ref) const ;
 	absd::data perform_test(ast::expr_ops::cmp_check& t) const ;
+
+	template<typename T>
+	absd::data create_data(T&& arg) const;
 public:
 	typedef absd::data eval_type;
 
@@ -45,7 +48,7 @@ public:
 	bool operator() (ast::expr_ops::expr_bool e) const ;
 
 	eval_type operator () (ast::expr_ops::term& t) const ;
-	void operator () (ast::expr_ops::single_var_name& t) const ;
+	eval_type operator () (ast::expr_ops::single_var_name& t) const ;
 	eval_type operator () (ast::expr_ops::list& t) const ;
 	eval_type operator () (ast::expr_ops::tuple& t) const ;
 	eval_type operator () (ast::expr_ops::dict& t) const ;

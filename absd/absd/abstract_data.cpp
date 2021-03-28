@@ -89,6 +89,53 @@ abs_data::data(std::shared_ptr<absd::data_holder> src)
 {
 }
 
+std::shared_ptr<absd::data_holder> abs_data::src() const
+{
+	return source;
+}
+
+bool abs_data::is_string() const
+{
+	assert(source);
+	if(!reflect) reflect = source->reflect();
+	return reflect->type == data_type::string;
+}
+
+bool abs_data::is_integer() const
+{
+	assert(source);
+	if(!reflect) reflect = source->reflect();
+	return reflect->type == data_type::integer;
+}
+
+bool abs_data::is_float() const
+{
+	assert(source);
+	if(!reflect) reflect = source->reflect();
+	return reflect->type == data_type::floating_point;
+}
+
+bool abs_data::is_boolean() const
+{
+	assert(source);
+	if(!reflect) reflect = source->reflect();
+	return reflect->type == data_type::boolean;
+}
+
+bool abs_data::is_object() const
+{
+	assert(source);
+	if(!reflect) reflect = source->reflect();
+	return reflect->type == data_type::object;
+}
+
+bool abs_data::is_array() const
+{
+	assert(source);
+	if(!reflect) reflect = source->reflect();
+	return reflect->type == data_type::array;
+}
+
 bool abs_data::is_cached() const
 {
 	return

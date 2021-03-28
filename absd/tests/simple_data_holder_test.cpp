@@ -79,6 +79,13 @@ BOOST_AUTO_TEST_CASE(object)
 	BOOST_TEST(hld.by_key("t1")->to_int() == 42);
 	BOOST_CHECK_THROW(hld.by_key("no"), std::out_of_range);
 }
+BOOST_AUTO_TEST_CASE(object_with_data)
+{
+	simple_dh hld;
+	auto val_dh = std::make_shared<simple_dh>();
+	hld.put("t1", absd::data{val_dh});
+	BOOST_TEST(hld.by_key("t1") == val_dh);
+}
 BOOST_AUTO_TEST_CASE(array)
 {
 	simple_dh hld;
@@ -88,6 +95,13 @@ BOOST_AUTO_TEST_CASE(array)
 	BOOST_CHECK_THROW(hld = false, std::exception);
 	BOOST_TEST(hld.by_ind(0)->to_int() == 42);
 	BOOST_CHECK_THROW(hld.by_ind(1), std::out_of_range);
+}
+BOOST_AUTO_TEST_CASE(array_with_data)
+{
+	simple_dh hld;
+	auto val_dh = std::make_shared<simple_dh>();
+	hld.push_back(data{val_dh});
+	BOOST_TEST(hld.by_ind(0) == val_dh);
 }
 BOOST_AUTO_TEST_CASE(use_resource)
 {

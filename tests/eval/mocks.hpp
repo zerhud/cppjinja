@@ -76,6 +76,8 @@ MOCK_BASE_CLASS( exenv, cppjinja::evt::exenv )
 	MOCK_METHOD(children, 1)
 	MOCK_METHOD(roots, 1)
 
+	MOCK_METHOD(storage, 0)
+
 	MOCK_METHOD(data, 0)
 	MOCK_METHOD(out, 0)
 	MOCK_METHOD(result, 0)

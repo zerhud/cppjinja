@@ -55,6 +55,7 @@ class data final {
 
 	std::shared_ptr<data_holder> source;
 
+	mutable std::optional<reflection_info> reflect;
 	mutable std::optional<end_cache_t> cache;
 	mutable std::map<std::string,data,std::less<>> key_cache;
 	mutable std::map<std::int64_t,data,std::less<>> ind_cache;
@@ -63,6 +64,8 @@ class data final {
 	static bool is_pod(const reflection_info& info) ;
 public:
 	data(std::shared_ptr<data_holder> src);
+
+	std::shared_ptr<data_holder> src() const ;
 
 	bool is_string() const ;
 	bool is_integer() const ;
@@ -79,6 +82,12 @@ public:
 	inline std::pmr::string str() const
 	{
 		return (std::pmr::string)(*this);
+	}
+
+	inline std::string hstr() const
+	{
+		auto s = str();
+		return std::string(s.begin(),s.end());
 	}
 
 	const data& operator [] (std::string_view key) const ;

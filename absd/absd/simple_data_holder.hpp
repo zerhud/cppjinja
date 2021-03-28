@@ -17,8 +17,8 @@ class simple_data_holder : public data_holder {
 
 	mutable std::shared_ptr<std::pmr::memory_resource> mem;
 	std::optional<data_variant> pod;
-	std::pmr::map<std::pmr::string,std::shared_ptr<simple_data_holder>,std::less<>> object;
-	std::pmr::vector<std::shared_ptr<simple_data_holder>> array;
+	std::pmr::map<std::pmr::string,data,std::less<>> object;
+	std::pmr::vector<data> array;
 
 	void require_change() const ;
 	void require_extract_pod() const ;
@@ -47,7 +47,10 @@ public:
 	const std::pmr::string& str() const ;
 
 	simple_data_holder& put(std::string_view key);
+	void put(std::string_view key, data v);
+
 	simple_data_holder& push_back();
+	void push_back(data v);
 
 	reflection_info reflect() const override;
 

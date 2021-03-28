@@ -72,4 +72,66 @@ BOOST_FIXTURE_TEST_CASE(as_array, fixture)
 	BOOST_TEST((std::int64_t)dval == 42);
 	BOOST_TEST(&dp[13] == &dval);
 }
+BOOST_AUTO_TEST_SUITE(reflect)
+BOOST_FIXTURE_TEST_CASE(string, fixture)
+{
+	expect_reflection(absd::data_type::string);
+	BOOST_TEST(dp.is_string() == true);
+	BOOST_TEST(dp.is_integer() == false);
+	BOOST_TEST(dp.is_float() == false);
+	BOOST_TEST(dp.is_boolean() == false);
+	BOOST_TEST(dp.is_object() == false);
+	BOOST_TEST(dp.is_array() == false);
+}
+BOOST_FIXTURE_TEST_CASE(integer, fixture)
+{
+	expect_reflection(absd::data_type::integer);
+	BOOST_TEST(dp.is_string() == false);
+	BOOST_TEST(dp.is_integer() == true);
+	BOOST_TEST(dp.is_float() == false);
+	BOOST_TEST(dp.is_boolean() == false);
+	BOOST_TEST(dp.is_object() == false);
+	BOOST_TEST(dp.is_array() == false);
+}
+BOOST_FIXTURE_TEST_CASE(floating_point, fixture)
+{
+	expect_reflection(absd::data_type::floating_point);
+	BOOST_TEST(dp.is_string() == false);
+	BOOST_TEST(dp.is_integer() == false);
+	BOOST_TEST(dp.is_float() == true);
+	BOOST_TEST(dp.is_boolean() == false);
+	BOOST_TEST(dp.is_object() == false);
+	BOOST_TEST(dp.is_array() == false);
+}
+BOOST_FIXTURE_TEST_CASE(boolean, fixture)
+{
+	expect_reflection(absd::data_type::boolean);
+	BOOST_TEST(dp.is_string() == false);
+	BOOST_TEST(dp.is_integer() == false);
+	BOOST_TEST(dp.is_float() == false);
+	BOOST_TEST(dp.is_boolean() == true);
+	BOOST_TEST(dp.is_object() == false);
+	BOOST_TEST(dp.is_array() == false);
+}
+BOOST_FIXTURE_TEST_CASE(object, fixture)
+{
+	expect_reflection(absd::data_type::object);
+	BOOST_TEST(dp.is_string() == false);
+	BOOST_TEST(dp.is_integer() == false);
+	BOOST_TEST(dp.is_float() == false);
+	BOOST_TEST(dp.is_boolean() == false);
+	BOOST_TEST(dp.is_object() == true);
+	BOOST_TEST(dp.is_array() == false);
+}
+BOOST_FIXTURE_TEST_CASE(array, fixture)
+{
+	expect_reflection(absd::data_type::array);
+	BOOST_TEST(dp.is_string() == false);
+	BOOST_TEST(dp.is_integer() == false);
+	BOOST_TEST(dp.is_float() == false);
+	BOOST_TEST(dp.is_boolean() == false);
+	BOOST_TEST(dp.is_object() == false);
+	BOOST_TEST(dp.is_array() == true);
+}
+BOOST_AUTO_TEST_SUITE_END() // reflect
 BOOST_AUTO_TEST_SUITE_END() // absd
