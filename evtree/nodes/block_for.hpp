@@ -11,8 +11,14 @@
 
 namespace cppjinja::evtnodes {
 
+class block_for_object;
 class block_for : public evt::node {
 	ast::block_for abl;
+	mutable std::pmr::vector<const node*> rc_children;
+
+	bool eval_for_str(evt::exenv& env, std::pmr::string val) const ;
+	bool eval_for_arr(evt::exenv& env, std::pmr::vector<absd::data> val) const ;
+	bool eval_for_obj(evt::exenv& env, std::pmr::map<std::pmr::string,absd::data> val) const ;
 	void eval_for(evt::exenv& env, absd::data val) const ;
 public:
 	block_for(ast::block_for ast_bl);

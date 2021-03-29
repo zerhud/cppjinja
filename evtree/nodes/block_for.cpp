@@ -16,6 +16,20 @@
 using namespace std::literals;
 using obj_val = cppjinja::evt::context_objects::value;
 
+static std::shared_ptr<obj_val> make_val(cppjinja::evt::exenv& env, absd::data v)
+{
+	std::pmr::polymorphic_allocator aloc(env.storage().get());
+	return std::allocate_shared<obj_val>(aloc, std::move(v));
+}
+template<typename T>
+static std::shared_ptr<obj_val> make_val(cppjinja::evt::exenv& env, T&& v)
+{
+	std::pmr::polymorphic_allocator aloc(env.storage().get());
+	auto h = std::allocate_shared<absd::simple_data_holder>(
+	            aloc, env.storage(), std::forward<T>(v) );
+	return std::allocate_shared<obj_val>(aloc, absd::data{std::move(h)});
+}
+
 cppjinja::evtnodes::block_for::block_for(cppjinja::ast::block_for ast_bl)
     : abl(ast_bl)
 {
@@ -39,9 +53,12 @@ void cppjinja::evtnodes::block_for::render(cppjinja::evt::exenv& env) const
 
 void cppjinja::evtnodes::block_for::eval_for(evt::exenv& env, absd::data val) const
 {
-//	bool need_else = true;
-//	auto children = env.children(this);
+	bool need_else = true;
+	rc_children = env.children(this);
 //	auto loop = std::make_shared<block_for_object>(val.size());
+	if(val.is_string()) need_else = eval_for_str(env, val.str());
+	if(val.is_array()) need_else = eval_for_arr(env, val.as_array());
+	if(val.is_object()) need_else = eval_for_obj(env, val.as_map());
 //	for(auto& lvar:val.items()) {
 //		evt::raii_push_ctx ctx(this, &env.ctx());
 //		need_else = false;
@@ -57,8 +74,52 @@ void cppjinja::evtnodes::block_for::eval_for(evt::exenv& env, absd::data val) co
 //		loop->next();
 //	}
 
-//	if(need_else && children.size()==2)
-//		children[1]->render(env);
+	if(need_else && rc_children.size()==2)
+		rc_children[1]->render(env);
+}
+
+bool cppjinja::evtnodes::block_for::eval_for_str(
+        evt::exenv& env, std::pmr::string val) const
+{
+	auto loop = std::make_shared<block_for_object>(env.storage(), val.size());
+	for(auto& lvar:val) {
+		evt::raii_push_ctx ctx(this, &env.ctx());
+		env.locals().add(abl.vars[0], make_val(env, lvar));
+		env.locals().add("loop", loop);
+		rc_children.at(0)->render(env);
+		loop->next();
+	}
+	return val.empty();
+}
+
+bool cppjinja::evtnodes::block_for::eval_for_arr(
+        evt::exenv& env, std::pmr::vector<absd::data> val) const
+{
+	auto loop = std::make_shared<block_for_object>(env.storage(), val.size());
+	for(auto& lvar:val) {
+		evt::raii_push_ctx ctx(this, &env.ctx());
+		env.locals().add(abl.vars[0], make_val(env, lvar));
+		env.locals().add("loop", loop);
+		rc_children.at(0)->render(env);
+		loop->next();
+	}
+	return val.empty();
+}
+
+bool cppjinja::evtnodes::block_for::eval_for_obj(
+        evt::exenv& env, std::pmr::map<std::pmr::string, absd::data> val) const
+{
+	auto loop = std::make_shared<block_for_object>(env.storage(), val.size());
+	for(auto& [key,lvar]:val) {
+		evt::raii_push_ctx ctx(this, &env.ctx());
+		if(abl.vars.size()==2)
+			env.locals().add(abl.vars[0], make_val(env, key));
+		env.locals().add(abl.vars[abl.vars.size()-1], make_val(env, lvar));
+		env.locals().add("loop", loop);
+		rc_children.at(0)->render(env);
+		loop->next();
+	}
+	return val.empty();
 }
 
 cppjinja::evtnodes::block_for_object::block_for_object(

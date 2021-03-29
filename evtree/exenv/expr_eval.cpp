@@ -339,5 +339,5 @@ cppjinja::evt::expr_eval::operator ()(ast::expr_ops::op_if& t) const
 {
 	if((*this)(t.cond.get())) return visit(t.term);
 	if(t.alternative) return visit(*t.alternative);
-	throw std::runtime_error("cannot use if here");
+	return create_data("");
 }

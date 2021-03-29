@@ -6,6 +6,7 @@
  * or <http://www.gnu.org/licenses/> for details
  *************************************************************************/
 
+#include <memory_resource>
 #include <turtle/mock.hpp>
 
 #include "eval/eval.hpp"
@@ -111,12 +112,15 @@ struct mock_exenv_fixture
 	std::stringstream out;
 	mocks::data_provider data;
 	cppjinja::evt::result_formatter rfmt;
+	std::shared_ptr<std::pmr::memory_resource> mem_r =
+	        std::make_shared<std::pmr::unsynchronized_pool_resource>();
 
 	context_object params, locals, globals, user_data, all_ctx;
 	std::shared_ptr<context_object> mock_all_ctx = std::make_shared<context_object>();
 
 	mock_exenv_fixture() : params({})
 	{
+		MOCK_EXPECT(env.storage).returns(mem_r);
 		MOCK_EXPECT(env.data).returns(&data);
 		MOCK_EXPECT(env.get_ctx).returns(ctx);
 		MOCK_EXPECT(env.get_cctx).returns(ctx);
