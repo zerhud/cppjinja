@@ -207,9 +207,9 @@ BOOST_FIXTURE_TEST_CASE(no_value_else2, mock_for_fixture)
 }
 
 BOOST_AUTO_TEST_SUITE(ctxobj)
-BOOST_AUTO_TEST_CASE(cannot_add_solve)
+BOOST_FIXTURE_TEST_CASE(cannot_add_solve, mock_for_fixture)
 {
-	evtnodes::block_for_object obj(1);
+	evtnodes::block_for_object obj(env.storage(), 1);
 	auto child = std::make_shared<mocks::context_object>();
 	BOOST_CHECK_THROW(obj.solve(), std::exception);
 	BOOST_CHECK_THROW(obj.add("ok"s, child), std::exception);

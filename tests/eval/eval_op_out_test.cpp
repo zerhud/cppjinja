@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_SUITE(var_name)
 		MOCK_EXPECT(data->value_var_name)
 		        .once()
 		        .with(east::var_name{"data"s})
-		        .returns(east::value_term{"test"s})
+		        .returns("test"_ad)
 		        ;
 		BOOST_TEST(parse_single("<= data =>"sv, *data) == "test"sv );
 	}
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(filter)
 	MOCK_EXPECT(data->value_var_name)
 	        .once()
 	        .with(east::var_name{"a"s})
-	        .returns(east::value_term{"not ok"s})
+	        .returns("not ok"_ad)
 	        ;
 	MOCK_EXPECT(data->value_function_call)
 	        .once()
@@ -126,8 +126,8 @@ BOOST_AUTO_TEST_CASE(filter)
 				BOOST_TEST( c.ref[0] == "filter"s );
 				BOOST_TEST( c.params.size() == 1 );
 				BOOST_TEST( *c.params.at(0).name == "$" );
-				BOOST_TEST( *c.params.at(0).jval == "not ok"s );
-				return east::value_term("ok"s);
+				BOOST_TEST( *c.params.at(0).val == "not ok"s );
+				return "ok"_ad;
 			});
 
 	auto pdata = "<= a | filter =>"sv;
@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE(function_from_provider)
 		BOOST_TEST( c.ref.size() == 1 );
 		BOOST_TEST( c.ref[0] == "a"s );
 		BOOST_TEST( c.params.size() == 1 );
-		return east::value_term("ok"s);
+		return "ok"_ad;
 	});
 
 	auto pdata = "<= a('p') =>"sv;
@@ -204,7 +204,7 @@ BOOST_AUTO_TEST_SUITE(access_to_variable_from_blocks)
 
 	BOOST_FIXTURE_TEST_CASE(block_cannt_access_outuer_set, mock_data_provider_fixture)
 	{
-		MOCK_EXPECT(data->value_var_name).once().returns(east::value_term("out"s));
+		MOCK_EXPECT(data->value_var_name).once().returns("out"_ad);
 		auto pdata =
 		        "<% set u='outer' %><% set a='bad' %><% block bl(a) %>"
 		        "<= a =><= u =><% endblock %><=  bl('ok') =>"sv;
