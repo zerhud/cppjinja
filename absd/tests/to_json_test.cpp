@@ -20,6 +20,17 @@ BOOST_AUTO_TEST_SUITE(absd)
 using absd_mocks::fixture;
 using abs_data = absd::data;
 BOOST_AUTO_TEST_SUITE(printing)
+std::string prt(const absd::data& d)
+{
+	std::stringstream out;
+	out << d;
+	auto opr = out.str();
+	out.str("");
+	absd::to_json_printer p(out);
+	p(d);
+	BOOST_TEST(opr == out.str());
+	return opr;
+}
 BOOST_FIXTURE_TEST_CASE(empty, fixture)
 {
 	expect_reflection(absd::data_type::empty);
@@ -45,8 +56,8 @@ BOOST_FIXTURE_TEST_CASE(pod_string, fixture)
 	expect_reflection(absd::data_type::string);
 	MOCK_EXPECT(prov->to_string).once().returns("foo\"");
 	abs_data d(prov);
-	BOOST_TEST(prt(d) == "\"foo\\\"\"");
-	BOOST_TEST(prt(d) == "\"foo\\\"\"");
+	BOOST_TEST(prt(d) == "foo\"");
+	BOOST_TEST(prt(d) == "foo\"");
 }
 BOOST_FIXTURE_TEST_CASE(pod_boolean, fixture)
 {

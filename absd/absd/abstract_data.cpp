@@ -23,6 +23,30 @@ std::ostream& to_json::operator () (const data& to_print)
 {
 	src = &to_print;
 	info = src->source->reflect();
+	return prt(to_print);
+}
+std::ostream& to_json::prt(const data& obj)
+{
+	struct swapper {
+		const data* old;
+		to_json* self;
+		swapper(to_json* self, const data& obj)
+		    : old(self->src)
+		    , self(self)
+		{
+			self->src = &obj;
+			self->info  = obj.source->reflect();
+		}
+		~swapper() noexcept
+		{
+			self->src = old;
+			self->info  = old->source->reflect();
+		}
+	} swp{this, obj};
+	return prt();
+}
+std::ostream& to_json::prt()
+{
 	if(src->is_pod(info)) return src->is_cached() ? cached() : pod();
 	if(info.type == data_type::array) return array();
 	if(info.type == data_type::object) return object();
@@ -35,7 +59,7 @@ std::ostream& to_json::cached()
 	std::visit( overloaded {
 	     [this](auto&& d){out << d;},
 	     [this](bool){pbool();},
-	     [this](std::pmr::string& d){out << std::quoted(d);}
+	     [this](std::pmr::string& d){str(d);}
 	    }, src->cache.value());
 	return out;
 }
@@ -43,10 +67,15 @@ std::ostream& to_json::pod()
 {
 	if(info.type == data_type::integer) return out << (std::int64_t)*src;
 	if(info.type == data_type::floating_point) return out << (double)*src;
-	if(info.type == data_type::string) return out << std::quoted(src->str());
+	if(info.type == data_type::string) return str(src->str());
 	if(info.type == data_type::boolean) return pbool();
 	assert(false);
 	throw std::logic_error("not all data types cached");
+}
+std::ostream& to_json::str(const std::pmr::string& s)
+{
+	if(is_json) return out << std::quoted(s);
+	return out << s;
 }
 std::ostream& to_json::pbool()
 {
@@ -54,21 +83,23 @@ std::ostream& to_json::pbool()
 }
 std::ostream& to_json::array()
 {
+	is_json = true;
 	out << '[';
-	if(!info.size == 0) out << (*src)[0];
+	if(info.size != 0) prt((*src)[0]);
 	for(std::uint64_t i=1;i<info.size;++i)
-		out << ',' << (*src)[i];
+		out << ',', prt((*src)[i]);
 	return out << ']';
 }
 std::ostream& to_json::object()
 {
+	is_json = true;
 	out << '{';
 	if(!info.keys.empty()) {
 		auto last = info.keys.back();
 		info.keys.pop_back();
 		for(auto& k:info.keys)
-			out << std::quoted(k) << ':' << (*src)[k] << ',';
-		out << std::quoted(last) << ':' << (*src)[last] ;
+			out << std::quoted(k) << ':', prt((*src)[k]) << ',';
+		out << std::quoted(last) << ':', prt((*src)[last]) ;
 	}
 	return out << '}';
 }

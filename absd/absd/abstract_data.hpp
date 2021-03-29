@@ -140,7 +140,11 @@ class to_json_printer final {
 	std::ostream& out;
 	reflection_info info;
 	const data* src;
+	bool is_json = false;
 
+	std::ostream& prt();
+	std::ostream& prt(const data& obj);
+	std::ostream& str(const std::pmr::string& s) ;
 	std::ostream& cached() ;
 	std::ostream& pod() ;
 	std::ostream& array() ;

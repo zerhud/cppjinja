@@ -71,13 +71,6 @@ struct fixture {
 	{
 		expect_reflection(t,std::move(k),i,prov2.get());
 	}
-
-	std::string prt(const absd::data& d) const
-	{
-		std::stringstream out;
-		out << d;
-		return out.str();
-	}
 };
 
 } // namespace absd_mocks
