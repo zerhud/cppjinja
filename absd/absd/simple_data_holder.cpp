@@ -52,10 +52,6 @@ simple_dh& simple_dh::operator = (bool v)
 
 void simple_dh::require_change() const
 {
-	const bool is_setted =
-	    pod.has_value() || !object.empty() || !array.empty();
-	if(is_setted)
-		throw std::runtime_error("double set");
 }
 
 std::pmr::string& simple_dh::str()
@@ -81,6 +77,7 @@ void simple_dh::require_extract_pod() const
 simple_dh& simple_dh::put(std::string_view key)
 {
 	require_change();
+	array.clear();
 	auto ret = std::allocate_shared<simple_dh>(alloc_t(storage()), mem);
 	auto obj = std::make_pair(std::pmr::string(key, storage()), data{ret});
 	object.emplace(std::move(obj));
@@ -90,6 +87,7 @@ simple_dh& simple_dh::put(std::string_view key)
 void simple_dh::put(std::string_view key, data v)
 {
 	require_change();
+	array.clear();
 	auto obj = std::make_pair(std::pmr::string(key, storage()), std::move(v));
 	object.emplace(std::move(obj));
 }
@@ -111,6 +109,7 @@ void simple_dh::require_extract_obj() const
 simple_dh& simple_dh::push_back()
 {
 	require_change();
+	object.clear();
 	auto ret = std::allocate_shared<simple_dh>(alloc_t(storage()), mem);
 	array.emplace_back(data{ret});
 	return *ret;
@@ -119,6 +118,7 @@ simple_dh& simple_dh::push_back()
 void simple_dh::push_back(absd::data v)
 {
 	require_change();
+	object.clear();
 	array.emplace_back(std::move(v));
 }
 

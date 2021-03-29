@@ -39,7 +39,6 @@ BOOST_AUTO_TEST_CASE(simple_int)
 	hld = 10;
 	check_reflect(hld.reflect(), absd::data_type::integer, 0, 0);
 	BOOST_TEST(hld.to_int() == 10);
-	BOOST_CHECK_THROW(hld = 3.14, std::exception);
 }
 BOOST_AUTO_TEST_CASE(simple_double)
 {
@@ -47,7 +46,6 @@ BOOST_AUTO_TEST_CASE(simple_double)
 	hld = 2.45;
 	check_reflect(hld.reflect(), absd::data_type::floating_point, 0, 0);
 	BOOST_TEST(hld.to_double() == 2.45);
-	BOOST_CHECK_THROW(hld = false, std::exception);
 }
 BOOST_AUTO_TEST_CASE(simple_bool)
 {
@@ -55,8 +53,6 @@ BOOST_AUTO_TEST_CASE(simple_bool)
 	hld = true;
 	check_reflect(hld.reflect(), absd::data_type::boolean, 0, 0);
 	BOOST_TEST(hld.to_bool() == true);
-	BOOST_CHECK_THROW(hld = false, std::exception);
-	BOOST_CHECK_THROW(hld = 3.14, std::exception);
 }
 BOOST_AUTO_TEST_CASE(simple_string)
 {
@@ -65,7 +61,6 @@ BOOST_AUTO_TEST_CASE(simple_string)
 	hld.str() = "kuku";
 	check_reflect(hld.reflect(), absd::data_type::string, 0, 0);
 	BOOST_TEST(hld.to_string() == "kuku");
-	BOOST_CHECK_THROW(hld = false, std::exception);
 	BOOST_TEST(chld.str().get_allocator().resource() == hld.storage());
 }
 BOOST_AUTO_TEST_CASE(object)
@@ -74,7 +69,6 @@ BOOST_AUTO_TEST_CASE(object)
 	BOOST_CHECK_THROW(hld.by_key("t1"), std::exception);
 	hld.put("t1") = 42;
 	check_reflect(hld.reflect(), absd::data_type::object, 0, 1);
-	BOOST_CHECK_THROW(hld = false, std::exception);
 	BOOST_TEST(hld.reflect().keys.at(0) == "t1");
 	BOOST_TEST(hld.by_key("t1")->to_int() == 42);
 	BOOST_CHECK_THROW(hld.by_key("no"), std::out_of_range);
@@ -92,9 +86,10 @@ BOOST_AUTO_TEST_CASE(array)
 	BOOST_CHECK_THROW(hld.by_ind(0), std::exception);
 	hld.push_back() = 42;
 	check_reflect(hld.reflect(), absd::data_type::array, 1, 0);
-	BOOST_CHECK_THROW(hld = false, std::exception);
 	BOOST_TEST(hld.by_ind(0)->to_int() == 42);
 	BOOST_CHECK_THROW(hld.by_ind(1), std::out_of_range);
+	hld.push_back() = 43;
+	BOOST_TEST(hld.by_ind(1)->to_int() == 43);
 }
 BOOST_AUTO_TEST_CASE(array_with_data)
 {
@@ -102,6 +97,22 @@ BOOST_AUTO_TEST_CASE(array_with_data)
 	auto val_dh = std::make_shared<simple_dh>();
 	hld.push_back(data{val_dh});
 	BOOST_TEST(hld.by_ind(0) == val_dh);
+}
+BOOST_AUTO_TEST_CASE(change)
+{
+	simple_dh hld;
+	hld = 10;
+	BOOST_TEST(hld.reflect().type == absd::data_type::integer);
+	hld = false;
+	BOOST_TEST(hld.reflect().type == absd::data_type::boolean);
+	BOOST_TEST(hld.to_bool() == false);
+
+	auto val_dh = std::make_shared<simple_dh>();
+	hld.put("t1", absd::data{val_dh});
+	BOOST_TEST(hld.reflect().type == absd::data_type::object);
+
+	hld.push_back() = 42;
+	BOOST_TEST(hld.reflect().type == absd::data_type::array);
 }
 BOOST_AUTO_TEST_CASE(use_resource)
 {
