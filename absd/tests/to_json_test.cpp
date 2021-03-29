@@ -67,7 +67,7 @@ BOOST_FIXTURE_TEST_CASE(object_empty, fixture)
 }
 BOOST_FIXTURE_TEST_CASE(object_single, fixture)
 {
-	auto src_42 = std::make_shared<absd_mocks::data_holder>();
+	auto src_42 = make_holder();
 	expect_reflection(absd::data_type::object, {"a"});
 	expect_reflection(absd::data_type::integer, {}, {}, src_42.get());
 	MOCK_EXPECT(src_42->to_int).returns(42);
@@ -76,8 +76,8 @@ BOOST_FIXTURE_TEST_CASE(object_single, fixture)
 }
 BOOST_FIXTURE_TEST_CASE(object_two, fixture)
 {
-	auto src_42 = std::make_shared<absd_mocks::data_holder>();
-	auto src_str = std::make_shared<absd_mocks::data_holder>();
+	auto src_42 = make_holder();
+	auto src_str = make_holder();
 	expect_reflection(absd::data_type::object, {"a","b"});
 	expect_reflection(absd::data_type::integer, {}, {}, src_42.get());
 	expect_reflection(absd::data_type::string, {}, {}, src_str.get());
@@ -91,9 +91,9 @@ BOOST_FIXTURE_TEST_CASE(object_two, fixture)
 }
 BOOST_FIXTURE_TEST_CASE(object_three, fixture)
 {
-	auto src_42 = std::make_shared<absd_mocks::data_holder>();
-	auto src_str = std::make_shared<absd_mocks::data_holder>();
-	auto src_bool = std::make_shared<absd_mocks::data_holder>();
+	auto src_42 = make_holder();
+	auto src_str = make_holder();
+	auto src_bool = make_holder();
 	expect_reflection(absd::data_type::object, {"a","b","c"});
 	expect_reflection(absd::data_type::integer, {}, {}, src_42.get());
 	expect_reflection(absd::data_type::string, {}, {}, src_str.get());
@@ -110,9 +110,9 @@ BOOST_FIXTURE_TEST_CASE(object_three, fixture)
 }
 BOOST_FIXTURE_TEST_CASE(array_three, fixture)
 {
-	auto src_42 = std::make_shared<absd_mocks::data_holder>();
-	auto src_str = std::make_shared<absd_mocks::data_holder>();
-	auto src_bool = std::make_shared<absd_mocks::data_holder>();
+	auto src_42 = make_holder();
+	auto src_str = make_holder();
+	auto src_bool = make_holder();
 	expect_reflection(absd::data_type::array, {}, 3);
 	expect_reflection(absd::data_type::integer, {}, std::nullopt, src_42.get());
 	expect_reflection(absd::data_type::string, {}, std::nullopt, src_str.get());
@@ -129,8 +129,8 @@ BOOST_FIXTURE_TEST_CASE(array_three, fixture)
 }
 BOOST_FIXTURE_TEST_CASE(array_two, fixture)
 {
-	auto src_42 = std::make_shared<absd_mocks::data_holder>();
-	auto src_str = std::make_shared<absd_mocks::data_holder>();
+	auto src_42 = make_holder();
+	auto src_str = make_holder();
 	expect_reflection(absd::data_type::array, {}, 2);
 	expect_reflection(absd::data_type::integer, {}, std::nullopt, src_42.get());
 	expect_reflection(absd::data_type::string, {}, std::nullopt, src_str.get());

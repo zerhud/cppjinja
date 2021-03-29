@@ -15,6 +15,7 @@ namespace absd_mocks {
 
 MOCK_BASE_CLASS(data_holder, absd::data_holder)
 {
+	MOCK_METHOD(storage, 0)
 	MOCK_METHOD(reflect, 0)
 	MOCK_METHOD(to_int, 0)
 	MOCK_METHOD(to_double, 0)
@@ -25,11 +26,29 @@ MOCK_BASE_CLASS(data_holder, absd::data_holder)
 };
 
 struct fixture {
-	std::shared_ptr<data_holder> prov = std::make_shared<data_holder>();
-	absd::data dp{prov};
+	std::shared_ptr<data_holder> prov;
+	std::optional<absd::data> _dp;
 
-	std::shared_ptr<data_holder> prov2 = std::make_shared<data_holder>();
-	absd::data dp2{prov2};
+	std::shared_ptr<data_holder> prov2;
+	std::optional<absd::data> _dp2;
+
+	absd::data& dp() { assert(!!_dp); return *_dp; }
+	absd::data& dp2() { assert(!!_dp2); return *_dp2; }
+
+	fixture()
+	    : prov(make_holder())
+	    , prov2(make_holder())
+	{
+		_dp.emplace(prov);
+		_dp2.emplace(prov2);
+	}
+
+	std::shared_ptr<data_holder> make_holder()
+	{
+		auto ret = std::make_shared<data_holder>();
+		MOCK_EXPECT(ret->storage).returns(std::pmr::new_delete_resource());
+		return ret;
+	}
 
 	void expect_reflection(
 	        absd::data_type t,

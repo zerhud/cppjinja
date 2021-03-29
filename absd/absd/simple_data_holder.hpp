@@ -42,7 +42,7 @@ public:
 
 	~simple_data_holder() noexcept =default ;
 
-	std::pmr::memory_resource& storage() const ;
+	std::pmr::memory_resource* storage() const override ;
 
 	template<Integer T>
 	simple_data_holder& operator = (T v)

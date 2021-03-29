@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(simple_string)
 	check_reflect(hld.reflect(), absd::data_type::string, 0, 0);
 	BOOST_TEST(hld.to_string() == "kuku");
 	BOOST_CHECK_THROW(hld = false, std::exception);
-	BOOST_TEST(chld.str().get_allocator().resource() == &hld.storage());
+	BOOST_TEST(chld.str().get_allocator().resource() == hld.storage());
 }
 BOOST_AUTO_TEST_CASE(object)
 {

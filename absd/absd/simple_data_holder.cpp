@@ -25,9 +25,9 @@ simple_dh::simple_data_holder(std::shared_ptr<std::pmr::memory_resource> m)
 {
 }
 
-std::pmr::memory_resource& simple_dh::storage() const
+std::pmr::memory_resource* simple_dh::storage() const
 {
-	return *mem;
+	return mem.get();
 }
 
 void simple_dh::set_int(std::int64_t v)
@@ -61,7 +61,7 @@ void simple_dh::require_change() const
 std::pmr::string& simple_dh::str()
 {
 	require_change();
-	std::pmr::string ret(&storage());
+	std::pmr::string ret(storage());
 	pod.emplace(std::move(ret));
 	return std::get<std::pmr::string>(*pod);
 }
@@ -81,8 +81,8 @@ void simple_dh::require_extract_pod() const
 simple_dh& simple_dh::put(std::string_view key)
 {
 	require_change();
-	auto ret = std::allocate_shared<simple_dh>(alloc_t(&storage()), mem);
-	auto obj = std::make_pair(std::pmr::string(key, &storage()), data{ret});
+	auto ret = std::allocate_shared<simple_dh>(alloc_t(storage()), mem);
+	auto obj = std::make_pair(std::pmr::string(key, storage()), data{ret});
 	object.emplace(std::move(obj));
 	return *ret;
 }
@@ -90,14 +90,14 @@ simple_dh& simple_dh::put(std::string_view key)
 void simple_dh::put(std::string_view key, data v)
 {
 	require_change();
-	auto obj = std::make_pair(std::pmr::string(key, &storage()), std::move(v));
+	auto obj = std::make_pair(std::pmr::string(key, storage()), std::move(v));
 	object.emplace(std::move(obj));
 }
 
 simple_dh::self_type simple_dh::by_key(std::string_view key) const
 {
 	require_extract_obj();
-	auto ret = object.at(std::pmr::string(key,&storage()));
+	auto ret = object.at(std::pmr::string(key,storage()));
 	assert(dynamic_cast<const simple_dh*>(ret.src().get()) != nullptr);
 	return ret.src();
 }
@@ -111,7 +111,7 @@ void simple_dh::require_extract_obj() const
 simple_dh& simple_dh::push_back()
 {
 	require_change();
-	auto ret = std::allocate_shared<simple_dh>(alloc_t(&storage()), mem);
+	auto ret = std::allocate_shared<simple_dh>(alloc_t(storage()), mem);
 	array.emplace_back(data{ret});
 	return *ret;
 }

@@ -73,6 +73,7 @@ public:
 	typedef std::shared_ptr<data_holder> self_type;
 	virtual ~data_holder() noexcept =default;
 
+	virtual std::pmr::memory_resource* storage() const =0 ;
 	virtual reflection_info reflect() const =0;
 
 	virtual std::int64_t to_int() const =0;
@@ -94,8 +95,8 @@ class data final {
 
 	mutable std::optional<reflection_info> reflect;
 	mutable std::optional<end_cache_t> cache;
-	mutable std::map<std::string,data,std::less<>> key_cache;
-	mutable std::map<std::int64_t,data,std::less<>> ind_cache;
+	mutable std::pmr::map<std::pmr::string,data> key_cache;
+	mutable std::pmr::map<std::int64_t,data,std::less<>> ind_cache;
 
 	bool is_cached() const ;
 	static bool is_pod(const reflection_info& info) ;
@@ -127,6 +128,9 @@ public:
 		auto s = str();
 		return std::string(s.begin(),s.end());
 	}
+
+	std::pmr::map<std::pmr::string,data> as_map() const ;
+	std::pmr::vector<data> as_array() const ;
 
 	const data& operator [] (std::string_view key) const ;
 	const data& operator [] (std::int64_t ind) const ;

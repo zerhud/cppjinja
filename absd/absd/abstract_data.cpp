@@ -11,7 +11,6 @@
 #include <cassert>
 #include <iomanip>
 
-using abs_data = absd::data;
 using to_json = absd::to_json_printer;
 
 namespace absd {
@@ -124,53 +123,55 @@ std::strong_ordering absd::operator <=> (const data& l, std::string_view r)
 	return l.str() <=> r;
 }
 
-abs_data::data(std::shared_ptr<absd::data_holder> src)
+absd::data::data(std::shared_ptr<absd::data_holder> src)
     : source(std::move(src))
+    , key_cache(source->storage())
+    , ind_cache(source->storage())
 {
 }
 
-std::shared_ptr<absd::data_holder> abs_data::src() const
+std::shared_ptr<absd::data_holder> absd::data::src() const
 {
 	return source;
 }
 
-bool abs_data::is_string() const
+bool absd::data::is_string() const
 {
 	assert(source);
 	return ref_info().type == data_type::string;
 }
 
-bool abs_data::is_integer() const
+bool absd::data::is_integer() const
 {
 	assert(source);
 	return ref_info().type == data_type::integer;
 }
 
-bool abs_data::is_float() const
+bool absd::data::is_float() const
 {
 	assert(source);
 	return ref_info().type == data_type::floating_point;
 }
 
-bool abs_data::is_boolean() const
+bool absd::data::is_boolean() const
 {
 	assert(source);
 	return ref_info().type == data_type::boolean;
 }
 
-bool abs_data::is_object() const
+bool absd::data::is_object() const
 {
 	assert(source);
 	return ref_info().type == data_type::object;
 }
 
-bool abs_data::is_array() const
+bool absd::data::is_array() const
 {
 	assert(source);
 	return ref_info().type == data_type::array;
 }
 
-bool abs_data::is_cached() const
+bool absd::data::is_cached() const
 {
 	return
 	        cache.has_value()
@@ -179,60 +180,77 @@ bool abs_data::is_cached() const
 	        ;
 }
 
-bool abs_data::is_pod(const reflection_info& info)
+bool absd::data::is_pod(const reflection_info& info)
 {
 	data_type t = info.type;
 	return t!=data_type::array && t!=data_type::object && t!=data_type::empty;
 }
 
-const absd::reflection_info& abs_data::ref_info() const
+const absd::reflection_info& absd::data::ref_info() const
 {
 	assert(source);
 	if(!reflect) reflect = source->reflect();
 	return *reflect;
 }
 
-abs_data::operator std::int64_t() const
+absd::data::operator std::int64_t() const
 {
 	assert(source);
 	if(!is_cached()) cache = source->to_int();
 	return std::get<std::int64_t>(cache.value());
 }
 
-abs_data::operator double() const
+absd::data::operator double() const
 {
 	assert(source);
 	if(!is_cached()) cache = source->to_double();
 	return std::get<double>(cache.value());
 }
 
-abs_data::operator std::pmr::string() const
+absd::data::operator std::pmr::string() const
 {
 	assert(source);
 	if(!is_cached()) cache = source->to_string();
 	return std::get<std::pmr::string>(cache.value());
 }
 
-abs_data::operator bool() const
+absd::data::operator bool() const
 {
 	assert(source);
 	if(!is_cached()) cache = source->to_bool();
 	return std::get<bool>(cache.value());
 }
 
-const abs_data& abs_data::operator [](std::string_view key) const
+const absd::data& absd::data::operator [](std::string_view key) const
 {
-	std::string skey(key);
-	if(is_cached() && key_cache.contains(key))
+	assert(source);
+	std::pmr::string skey(key, source->storage());
+	if(is_cached() && key_cache.contains(skey))
 		return key_cache.at(skey);
-	key_cache.emplace(std::make_pair(skey, abs_data(source->by_key(key))));
+	key_cache.emplace(std::make_pair(skey, absd::data(source->by_key(key))));
 	return key_cache.at(skey);
 }
 
-const abs_data& abs_data::operator [](std::int64_t ind) const
+const absd::data& absd::data::operator [](std::int64_t ind) const
 {
 	if(is_cached() && ind_cache.contains(ind))
 		return ind_cache.at(ind);
-	ind_cache.emplace(std::make_pair(ind, abs_data(source->by_ind(ind))));
+	ind_cache.emplace(std::make_pair(ind, absd::data(source->by_ind(ind))));
 	return ind_cache.at(ind);
+}
+
+std::pmr::map<std::pmr::string,absd::data> absd::data::as_map() const
+{
+	auto keys = ref_info().keys;
+	for(auto& key:keys) (*this)[key];
+	return key_cache;
+}
+
+std::pmr::vector<absd::data> absd::data::as_array() const
+{
+	assert(source);
+	std::int64_t size = ref_info().size;
+	std::pmr::vector<absd::data> ret(source->storage());
+	for(std::int64_t i=0;i<size;++i) ret.emplace_back((*this)[i]);
+	return ret;
 }
