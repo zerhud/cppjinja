@@ -10,7 +10,6 @@
 #include "parser/helpers.hpp"
 #include "evtree.hpp"
 #include "eval/ast.hpp"
-#include "helpers/binary_op.hpp"
 #include "helpers/loop_by_three.hpp"
 #include "exenv/callstack.hpp"
 
