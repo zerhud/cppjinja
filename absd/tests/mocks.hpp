@@ -28,6 +28,9 @@ struct fixture {
 	std::shared_ptr<data_holder> prov = std::make_shared<data_holder>();
 	absd::data dp{prov};
 
+	std::shared_ptr<data_holder> prov2 = std::make_shared<data_holder>();
+	absd::data dp2{prov2};
+
 	void expect_reflection(
 	        absd::data_type t,
 	        std::pmr::vector<std::string_view> k={},
@@ -40,6 +43,14 @@ struct fixture {
 		                .type=t,
 		                .size = i ? *i : 0,
 		                .keys=std::move(k) });
+	}
+
+	void expect_reflection2(
+	        absd::data_type t,
+	        std::pmr::vector<std::string_view> k={},
+	        std::optional<std::uint64_t> i=std::nullopt)
+	{
+		expect_reflection(t,std::move(k),i,prov2.get());
 	}
 
 	std::string prt(const absd::data& d) const

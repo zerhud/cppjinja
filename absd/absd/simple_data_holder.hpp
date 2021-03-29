@@ -28,12 +28,23 @@ class simple_data_holder : public data_holder {
 public:
 	simple_data_holder();
 	simple_data_holder(std::shared_ptr<std::pmr::memory_resource> m);
+
+	template<TrivialData T>
+	simple_data_holder(T v) : simple_data_holder() { (*this)=v; }
+	template<TrivialData T>
+	simple_data_holder(std::shared_ptr<std::pmr::memory_resource> m, T v)
+	    : simple_data_holder(std::move(m)) { (*this)=v; }
+
+	simple_data_holder(std::pmr::string v)
+	    : simple_data_holder() { str() = std::move(v); }
+	simple_data_holder(std::shared_ptr<std::pmr::memory_resource> m, std::pmr::string v)
+	    : simple_data_holder(std::move(m)) { str() = std::move(v); }
+
 	~simple_data_holder() noexcept =default ;
 
 	std::pmr::memory_resource& storage() const ;
 
-	template<typename T>
-	requires (std::integral<T> && !std::is_same_v<T,bool> && !std::is_same_v<T,double>)
+	template<Integer T>
 	simple_data_holder& operator = (T v)
 	{
 		set_int(v);

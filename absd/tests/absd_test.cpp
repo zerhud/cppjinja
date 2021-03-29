@@ -134,4 +134,75 @@ BOOST_FIXTURE_TEST_CASE(array, fixture)
 	BOOST_TEST(dp.is_array() == true);
 }
 BOOST_AUTO_TEST_SUITE_END() // reflect
+BOOST_AUTO_TEST_SUITE(operators)
+BOOST_FIXTURE_TEST_CASE(data_eq, fixture)
+{
+	BOOST_TEST(dp == absd::data{prov});
+}
+BOOST_FIXTURE_TEST_CASE(data_eq_str, fixture)
+{
+	expect_reflection(absd::data_type::string);
+	expect_reflection2(absd::data_type::string);
+	MOCK_EXPECT(prov->to_string).once().returns("test");
+	MOCK_EXPECT(prov2->to_string).once().returns("test");
+	BOOST_TEST(dp == dp2);
+	BOOST_TEST(dp == "test");
+}
+BOOST_FIXTURE_TEST_CASE(data_eq_int, fixture)
+{
+	expect_reflection(absd::data_type::integer);
+	expect_reflection2(absd::data_type::integer);
+	MOCK_EXPECT(prov->to_int).once().returns(42);
+	MOCK_EXPECT(prov2->to_int).once().returns(42);
+	BOOST_TEST(dp == dp2);
+	BOOST_TEST(dp == 42);
+}
+BOOST_FIXTURE_TEST_CASE(data_eq_float, fixture)
+{
+	expect_reflection(absd::data_type::floating_point);
+	expect_reflection2(absd::data_type::floating_point);
+	MOCK_EXPECT(prov->to_double).once().returns(3.14);
+	MOCK_EXPECT(prov2->to_double).once().returns(3.14);
+	BOOST_TEST(dp == dp2);
+	BOOST_TEST(dp == 3.14);
+}
+BOOST_FIXTURE_TEST_CASE(data_eq_bool, fixture)
+{
+	expect_reflection(absd::data_type::boolean);
+	expect_reflection2(absd::data_type::boolean);
+	MOCK_EXPECT(prov->to_bool).once().returns(true);
+	MOCK_EXPECT(prov2->to_bool).once().returns(true);
+	BOOST_TEST(dp == dp2);
+	BOOST_TEST(dp == true);
+}
+BOOST_FIXTURE_TEST_CASE(data_eq_ar, fixture)
+{
+	auto val = std::make_shared<absd_mocks::data_holder>();
+	expect_reflection(absd::data_type::array, {}, 1);
+	expect_reflection2(absd::data_type::array, {}, 1);
+	expect_reflection(absd::data_type::integer,{},std::nullopt,val.get());
+	MOCK_EXPECT(val->to_int).returns(42);
+	MOCK_EXPECT(prov->by_ind).once().with(0)
+	        .calls([&val](auto){return val;});
+	MOCK_EXPECT(prov2->by_ind).once().with(0)
+	        .calls([&val](auto){return val;});
+
+	BOOST_TEST(dp == dp2);
+}
+BOOST_FIXTURE_TEST_CASE(data_eq_map, fixture)
+{
+	auto val = std::make_shared<absd_mocks::data_holder>();
+	expect_reflection(absd::data_type::object, {"key"}, std::nullopt);
+	expect_reflection2(absd::data_type::object, {"key"}, std::nullopt);
+	expect_reflection(absd::data_type::integer,{},std::nullopt,val.get());
+	MOCK_EXPECT(val->to_int).returns(42);
+	MOCK_EXPECT(prov->by_key).once().with("key")
+	        .calls([&val](auto){return val;});
+	MOCK_EXPECT(prov2->by_key).once().with("key")
+	        .calls([&val](auto){return val;});
+
+	BOOST_TEST(dp == dp2);
+}
+BOOST_AUTO_TEST_SUITE_END() // operators
 BOOST_AUTO_TEST_SUITE_END() // absd
+

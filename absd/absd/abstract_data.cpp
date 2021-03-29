@@ -84,6 +84,46 @@ std::ostream& absd::operator << (std::ostream& out, const data_type& dt)
 	return out << static_cast<int>(dt);
 }
 
+std::partial_ordering absd::operator <=> (const data& l, const data& r) noexcept
+{
+	using ord = std::partial_ordering;
+	if(l.source == r.source) return ord::equivalent;
+	const reflection_info& ri = l.ref_info();
+	if(ri != r.ref_info()) return ri <=> r.ref_info();
+	if(l.is_pod(ri)) {
+		if(l.is_string()) return l.str() <=> r.str();
+		if(l.is_integer()) return (std::int64_t)l <=> (std::int64_t)r;
+		if(l.is_float()) return (double)l <=> (double)r;
+		if(l.is_boolean()) return (bool)l <=> (bool)r;
+		assert(false);
+		return ord::unordered;
+	}
+	if(l.is_array()) {
+		if(ri.size != r.ref_info().size)
+			return ri.size <=> r.ref_info().size;
+		for(std::size_t i=0;i<ri.size;++i) {
+			auto res = l[i] <=> r[i];
+			if(std::is_neq(res)) return res;
+		}
+		return ord::equivalent;
+	}
+	if(l.is_object()) {
+		if(ri.keys != r.ref_info().keys)
+			return ri.keys <=> r.ref_info().keys;
+		for(auto& key:ri.keys) {
+			auto res = l[key] <=> r[key];
+			if(std::is_neq(res)) return res;
+		}
+		return ord::equivalent;
+	}
+	return ord::unordered;
+}
+
+std::strong_ordering absd::operator <=> (const data& l, std::string_view r)
+{
+	return l.str() <=> r;
+}
+
 abs_data::data(std::shared_ptr<absd::data_holder> src)
     : source(std::move(src))
 {
@@ -97,43 +137,37 @@ std::shared_ptr<absd::data_holder> abs_data::src() const
 bool abs_data::is_string() const
 {
 	assert(source);
-	if(!reflect) reflect = source->reflect();
-	return reflect->type == data_type::string;
+	return ref_info().type == data_type::string;
 }
 
 bool abs_data::is_integer() const
 {
 	assert(source);
-	if(!reflect) reflect = source->reflect();
-	return reflect->type == data_type::integer;
+	return ref_info().type == data_type::integer;
 }
 
 bool abs_data::is_float() const
 {
 	assert(source);
-	if(!reflect) reflect = source->reflect();
-	return reflect->type == data_type::floating_point;
+	return ref_info().type == data_type::floating_point;
 }
 
 bool abs_data::is_boolean() const
 {
 	assert(source);
-	if(!reflect) reflect = source->reflect();
-	return reflect->type == data_type::boolean;
+	return ref_info().type == data_type::boolean;
 }
 
 bool abs_data::is_object() const
 {
 	assert(source);
-	if(!reflect) reflect = source->reflect();
-	return reflect->type == data_type::object;
+	return ref_info().type == data_type::object;
 }
 
 bool abs_data::is_array() const
 {
 	assert(source);
-	if(!reflect) reflect = source->reflect();
-	return reflect->type == data_type::array;
+	return ref_info().type == data_type::array;
 }
 
 bool abs_data::is_cached() const
@@ -149,6 +183,13 @@ bool abs_data::is_pod(const reflection_info& info)
 {
 	data_type t = info.type;
 	return t!=data_type::array && t!=data_type::object && t!=data_type::empty;
+}
+
+const absd::reflection_info& abs_data::ref_info() const
+{
+	assert(source);
+	if(!reflect) reflect = source->reflect();
+	return *reflect;
 }
 
 abs_data::operator std::int64_t() const

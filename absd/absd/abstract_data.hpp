@@ -12,6 +12,7 @@
 #include <memory>
 #include <string>
 #include <variant>
+#include <compare>
 #include <optional>
 #include <memory_resource>
 
@@ -20,17 +21,52 @@ namespace absd {
 class data;
 class to_json_printer;
 
+template<typename T>
+concept IntegerFloating = 
+        std::is_same_v<std::decay_t<T>, float>
+     || std::is_same_v<std::decay_t<T>, double>;
+template<typename T>
+concept Boolean = std::is_same_v<std::decay_t<T>, bool>;
+template<typename T>
+concept Integer = std::integral<std::decay_t<T>> && !Boolean<T> && !IntegerFloating<T>;
+template<typename T>
+concept TrivialData = IntegerFloating<T> || Integer<T> || Boolean<T>;
+template<typename T>
+concept AnyData = TrivialData<T> || std::is_constructible_v<std::pmr::string,T>;
+
 using data_variant = std::variant<std::int64_t, double, std::pmr::string, bool>;
-enum class data_type { integer, floating_point, string, boolean, object, array, empty };
+enum class data_type {
+	integer, floating_point, string, boolean,
+	object, array,
+	empty };
+
 struct reflection_info {
 	data_type type;
 	std::uint64_t size;
 	std::pmr::vector<std::string_view> keys;
+
+	auto operator <=> (const reflection_info&) const noexcept =default ;
 };
 
 std::ostream& operator << (std::ostream& out, const data& src);
 std::ostream& operator << (std::ostream& out, const data_type& dt);
-bool operator == (const data& l, const data& r) noexcept ;
+
+std::partial_ordering operator <=> (const data& l, const data& r) noexcept ;
+template<Integer T>
+std::strong_ordering operator <=> (const data& l, T&& r)
+{
+	return ((std::int64_t)l) <=> r;
+}
+template<TrivialData T>
+auto operator <=> (const data& l, T&& r)
+{
+	return ((std::decay_t<T>)l) <=> r;
+}
+std::strong_ordering operator <=> (const data& l, std::string_view r);
+
+template<typename T>
+	requires AnyData<T> || std::is_same_v<std::decay_t<T>,data>
+bool operator == (const data& l, T&& r) { return l<=>r == 0; }
 
 class data_holder {
 public:
@@ -50,7 +86,8 @@ public:
 
 class data final {
 	friend class to_json_printer;
-	friend std::ostream& operator << (std::ostream& out, const data& src);
+	friend std::ostream& operator << (std::ostream&, const data&);
+	friend std::partial_ordering operator <=> (const data&, const data&) noexcept ;
 	using end_cache_t = data_variant;
 
 	std::shared_ptr<data_holder> source;
@@ -62,6 +99,7 @@ class data final {
 
 	bool is_cached() const ;
 	static bool is_pod(const reflection_info& info) ;
+	const reflection_info& ref_info() const ;
 public:
 	data(std::shared_ptr<data_holder> src);
 
