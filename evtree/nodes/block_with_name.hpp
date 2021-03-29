@@ -21,7 +21,7 @@ protected:
 public:
 	evt::render_info rinfo() const override ;
 	ast::string_t name() const override ;
-	std::vector<east::function_parameter> solved_params(evt::exenv& env) const override ;
+	std::pmr::vector<east::function_parameter> solved_params(evt::exenv& env) const override ;
 };
 
 } // namespace cppjinja::evtnodes

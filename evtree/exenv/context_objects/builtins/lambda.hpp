@@ -16,11 +16,11 @@ namespace cppjinja::evt::context_objects
 class lambda_function : public builtin_function {
 public:
 	typedef std::function<
-		std::shared_ptr<context_object>
-		(std::vector<function_parameter>)>
+	    std::shared_ptr<context_object>
+	    (std::pmr::vector<function_parameter>)>
 		fnc_type;
 	lambda_function(fnc_type fnc);
-	std::shared_ptr<context_object> call(std::vector<function_parameter> params) const override ;
+	std::shared_ptr<context_object> call(std::pmr::vector<function_parameter> params) const override ;
 private:
 	fnc_type lambda;
 };

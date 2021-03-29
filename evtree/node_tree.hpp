@@ -27,8 +27,8 @@ struct edge {
 
 template<typename Node>
 class node_tree {
-	std::vector<Node*> all_roots;
-	std::vector<edge<Node>> edges;
+	std::pmr::vector<Node*> all_roots;
+	std::pmr::vector<edge<Node>> edges;
 
 	void require_no_root(Node* r)
 	{
@@ -55,24 +55,24 @@ public:
 		edges.emplace_back(parent, child);
 	}
 
-	std::vector<Node*> children(Node* parent) const
+	std::pmr::vector<Node*> children(Node* parent) const
 	{
-		std::vector<Node*> ret;
+		std::pmr::vector<Node*> ret;
 		for(auto& edge:edges)
 			if(edge.parent == parent)
 				ret.emplace_back(edge.child);
 		return ret;
 	}
 
-	std::vector<Node*> roots() const
+	std::pmr::vector<Node*> roots() const
 	{
-		std::vector<Node*> ret;
+		std::pmr::vector<Node*> ret;
 		ret.reserve(all_roots.size());
 		for(auto& v:all_roots) ret.emplace_back(v);
 		return ret;
 	}
 
-	std::vector<edge<Node>> all_tree() const
+	std::pmr::vector<edge<Node>> all_tree() const
 	{
 		return edges;
 	}

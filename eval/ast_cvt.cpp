@@ -6,6 +6,7 @@
  * or <http://www.gnu.org/licenses/> for details
  *************************************************************************/
 
+/*
 #include "ast_cvt.hpp"
 
 using namespace std::literals;
@@ -30,3 +31,4 @@ cppjinja::east::value_term cppjinja::details::east_cvt::cvt(const ast::value_ter
 	assert(false);
 	return value_term(""s);
 }
+*/

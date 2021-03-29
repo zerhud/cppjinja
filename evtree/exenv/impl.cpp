@@ -11,7 +11,7 @@
 #include "context.hpp"
 #include "callstack.hpp"
 
-#include "helpers/binary_op.hpp"
+#include <absd/simple_data_holder.hpp>
 
 std::ostream& cppjinja::evt::operator << (std::ostream& out, const render_info& ri)
 {
@@ -40,17 +40,22 @@ const cppjinja::evtree& cppjinja::evt::exenv_impl::tmpl() const
 	return *compiled_template;
 }
 
-std::vector<const cppjinja::evt::node*>
+std::pmr::vector<const cppjinja::evt::node*>
 cppjinja::evt::exenv_impl::children(const cppjinja::evt::node* selected) const
 {
 	assert(compiled_template);
 	return compiled_template->children(selected);
 }
 
-std::vector<const cppjinja::evtnodes::callable*>
+std::pmr::vector<const cppjinja::evtnodes::callable*>
 cppjinja::evt::exenv_impl::roots(const cppjinja::evtnodes::tmpl* tmpl) const
 {
 	return compiled_template->roots(tmpl);
+}
+
+std::shared_ptr<std::pmr::memory_resource> cppjinja::evt::exenv_impl::storage() const
+{
+	return nullptr;
 }
 
 const cppjinja::data_provider* cppjinja::evt::exenv_impl::data() const
@@ -63,9 +68,12 @@ std::ostream& cppjinja::evt::exenv_impl::out()
 	return ctx().out();
 }
 
-cppjinja::east::string_t cppjinja::evt::exenv_impl::result() const
+absd::data cppjinja::evt::exenv_impl::result() const
 {
-	return rfmt(ctx().result());
+	auto val = std::allocate_shared<absd::simple_data_holder>(
+	            std::pmr::polymorphic_allocator(storage().get()),
+	            storage(), rfmt(ctx().result()) );
+	return absd::data{ std::move(val) };
 }
 
 cppjinja::evt::context& cppjinja::evt::exenv_impl::ctx()

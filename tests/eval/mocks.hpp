@@ -16,6 +16,8 @@
 #include "parser/operators/single.hpp"
 #include "evtree/exenv/context_objects/value.hpp"
 
+#include "absd/simple_data_holder.hpp"
+
 namespace mocks {
 
 MOCK_BASE_CLASS( data_provider, cppjinja::data_provider)
@@ -145,7 +147,7 @@ struct mock_exenv_fixture
 	void expect_call(
 	        cppjinja::east::var_name n,
 	        std::vector<cppjinja::evt::context_object::function_parameter> p,
-	        cppjinja::json v)
+	        absd::data v)
 	{
 		using namespace std::literals;
 		auto val_obj= std::make_shared<cppjinja::evt::context_objects::value>(std::move(v));
@@ -188,6 +190,27 @@ struct mock_exenv_fixture
 		MOCK_EXPECT(env.children).at_least(1).returns(children);
 	}
 
+	template<absd::TrivialData T>
+	static auto create_absd_data(T d)
+	{
+		auto dh = std::make_shared<absd::simple_data_holder>();
+		*dh = d;
+		return absd::data{dh};
+	}
+
+	static auto create_absd_data(std::pmr::string d)
+	{
+		auto dh = std::make_shared<absd::simple_data_holder>();
+		dh->str() = d;
+		return absd::data{dh};
+	}
+
+	template<absd::AnyData T>
+	void expect_solve(context_object& obj, T d)
+	{
+		MOCK_EXPECT(obj.solve).returns(create_absd_data(d));
+	}
+
 	void expect_roots(std::pmr::vector<const cppjinja::evtnodes::callable*> roots)
 	{
 		MOCK_EXPECT(env.roots).at_least(1).returns(roots);
@@ -195,3 +218,18 @@ struct mock_exenv_fixture
 };
 
 } // namespace mocks
+
+absd::data operator "" _ad(const char* src, std::size_t size)
+{
+	return absd::data{std::make_shared<absd::simple_data_holder>(
+		            std::pmr::string(src,size))};
+}
+absd::data operator "" _ad(unsigned long long int val)
+{
+	return absd::data{std::make_shared<absd::simple_data_holder>(val)};
+}
+
+std::pmr::string operator "" _s(const char* src, std::size_t size)
+{
+	return std::pmr::string(src, size);
+}

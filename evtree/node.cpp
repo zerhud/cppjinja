@@ -17,7 +17,7 @@
 using namespace std::literals;
 
 void cppjinja::evt::node::render_children(
-        const std::vector<const node*>& children,
+        const std::pmr::vector<const node*>& children,
         exenv& ctx, render_info default_ri) const
 {
 	auto rnd = [&ctx,&default_ri]

@@ -20,7 +20,7 @@ class block_named : public block_with_name {
 public:
 	block_named(ast::block_named nb);
 	void render(evt::exenv& env) const override ;
-	east::string_t evaluate( evt::exenv& env) const override ;
+	absd::data evaluate( evt::exenv& env) const override ;
 };
 
 } // namespace cppjinja::evtnodes

@@ -27,7 +27,7 @@ public:
 	virtual const node* maker() const =0 ;
 
 	virtual std::ostream& out() =0 ;
-	virtual std::string result() const =0 ;
+	virtual std::pmr::string result() const =0 ;
 
 	virtual context_object& cur_namespace() =0 ;
 };

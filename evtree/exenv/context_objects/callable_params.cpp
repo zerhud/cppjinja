@@ -49,8 +49,8 @@ void callable_params::add_value(std::string name, absd::data val)
 }
 
 callable_params::callable_params(
-          std::vector<east::function_parameter> expected
-        , std::vector<function_parameter> called
+          std::pmr::vector<cppjinja::east::function_parameter> expected
+        , std::pmr::vector<function_parameter> called
         )
     : declared(std::move(expected))
 {

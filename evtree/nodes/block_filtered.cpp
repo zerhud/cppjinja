@@ -27,7 +27,8 @@ void cppjinja::evtnodes::block_filtered::render(cppjinja::evt::exenv& env) const
 	{
 		evt::raii_push_ctx maker(this, &env.ctx());
 		render_children(children, env, inner_ri());
-		base = env.result();
+		auto _base = (std::pmr::string)env.result();
+		base.append(_base.begin(),_base.end());
 	}
 	ast::expr_ops::filter flt;
 	flt.base = ast::expr_ops::expr{ast::expr_ops::term{base}};

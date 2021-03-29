@@ -8,6 +8,7 @@
 
 #include "result_formatter.hpp"
 
+#include <memory_resource>
 #include <boost/algorithm/string/replace.hpp>
 
 void cppjinja::evt::result_formatter::shift_tab(int val)
@@ -19,10 +20,10 @@ void cppjinja::evt::result_formatter::shift_tab(int val)
 	bval += val;
 }
 
-std::string cppjinja::evt::result_formatter::operator()(std::string src) const
+std::pmr::string cppjinja::evt::result_formatter::operator ()(std::pmr::string src) const
 {
 	assert( 0<= bval );
-	std::string tabs = "\n";
+	std::pmr::string tabs = "\n";
 	for(int i=0;i<bval;++i) tabs += "\t";
 	boost::algorithm::replace_all(src, "\n", tabs);
 	return src;

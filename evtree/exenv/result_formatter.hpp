@@ -16,7 +16,7 @@ class result_formatter final {
 	int bval=0;
 public:
 	void shift_tab(int val);
-	std::string operator()(std::string src) const ;
+	std::pmr::string operator()(std::pmr::string src) const ;
 };
 
 } // namespace cppjinja::evt

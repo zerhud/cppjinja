@@ -45,7 +45,7 @@ public:
 	const node* maker() const override ;
 
 	std::ostream& out() override ;
-	std::string result() const override ;
+	std::pmr::string result() const override ;
 
 	context_object& cur_namespace() override ;
 };

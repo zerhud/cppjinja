@@ -27,14 +27,14 @@
 namespace cppjinja {
 
 class evtree : public evaluator {
-	std::vector<evt::compiled_tmpl> templates;
+	std::pmr::vector<evt::compiled_tmpl> templates;
 
 	const evt::compiled_tmpl& tmpl_by_node(const evt::node* n) const ;
 public:
 	/// debug function
 	const evtnodes::tmpl* search_tmpl(const ast::string_t& name) const ;
-	std::vector<const evt::node*> children(const evt::node* selected) const ;
-	std::vector<const evtnodes::callable*> roots(const evtnodes::tmpl* tmpl) const ;
+	std::pmr::vector<const evt::node*> children(const evt::node* selected) const ;
+	std::pmr::vector<const evtnodes::callable*> roots(const evtnodes::tmpl* tmpl) const ;
 
 	evtree& add_tmpl(ast::tmpl& tmpl) override ;
 	void render(

@@ -10,6 +10,8 @@
 #include "tree.hpp"
 #include "value.hpp"
 
+#include <absd/simple_data_holder.hpp>
+
 #include "builtins/tests.hpp"
 
 using namespace std::literals;
@@ -35,15 +37,18 @@ cppjinja::evt::context_objects::builtins::~builtins() noexcept
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::builtin_function::result_bool(bool res) const
 {
-	static auto res_true = std::make_shared<value>(true);
-	static auto res_false = std::make_shared<value>(false);
+	static auto res_true = std::make_shared<value>(
+	            absd::data{std::make_shared<absd::simple_data_holder>(true)});
+	static auto res_false = std::make_shared<value>(
+	            absd::data{std::make_shared<absd::simple_data_holder>(false)});
 	return res ? res_true : res_false;
 }
 
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::builtin_function::result_none() const
 {
-	static auto res = std::make_shared<value>(nullptr);
+	static auto res = std::make_shared<value>(
+	            absd::data{std::make_shared<absd::simple_data_holder>("")});
 	return res;
 }
 
@@ -62,19 +67,14 @@ cppjinja::evt::context_objects::builtin_function::find(east::var_name n) const
 	throw std::runtime_error("cannot find something in builtin function");
 }
 
-cppjinja::east::value_term cppjinja::evt::context_objects::builtin_function::solve() const
-{
-	throw std::runtime_error("cannot solve builtin function");
-}
-
-cppjinja::json cppjinja::evt::context_objects::builtin_function::jval() const
+absd::data cppjinja::evt::context_objects::builtin_function::solve() const
 {
 	throw std::runtime_error("cannot solve builtin function");
 }
 
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::jinja_namespace::call(
-        std::vector<function_parameter> params) const
+        std::pmr::vector<function_parameter> params) const
 {
 	if(params.empty()) throw std::runtime_error("cannot create empty namespace");
 	auto ret = std::make_shared<tree>();
@@ -85,17 +85,14 @@ cppjinja::evt::context_objects::jinja_namespace::call(
 
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::join::call(
-        std::vector<function_parameter> params) const
+        std::pmr::vector<function_parameter> params) const
 {
-	if(params.size() < 2) return std::make_shared<value>(""s);
-
-	east::string_t ret;
-	auto sep = params[0].value->jval().get<std::string>();
-
+	std::stringstream out;
+	auto sep = params[0].value->solve();
 	std::size_t ind = 0;
-	while(ind!=params.size()-2)
-		ret += params[++ind].value->jval().get<std::string>() + sep;
-	ret += params[++ind].value->jval().get<std::string>();
-
-	return std::make_shared<value>(ret);
+	if(params.size() < 2) while(ind!=params.size()-2)
+		out << params[++ind].value->solve() << sep;
+	auto hd = std::make_shared<absd::simple_data_holder>();
+	hd->str().append(out.str().begin(), out.str().end());
+	return std::make_shared<value>(absd::data{std::move(hd)});
 }

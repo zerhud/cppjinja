@@ -7,28 +7,34 @@
  *************************************************************************/
 
 #include <istream>
+#include <absd/simple_data_holder.hpp>
+
 #include "block_macro.hpp"
 #include "../evtree.hpp"
 
-const cppjinja::ast::block_with_name& cppjinja::evtnodes::block_macro::cur_ast() const
+using cppjinja::evtnodes::block_macro;
+
+const cppjinja::ast::block_with_name& block_macro::cur_ast() const
 {
 	return block;
 }
 
-cppjinja::evtnodes::block_macro::block_macro(cppjinja::ast::block_macro nb)
+block_macro::block_macro(cppjinja::ast::block_macro nb)
     : block(std::move(nb))
 {
 }
 
-void cppjinja::evtnodes::block_macro::render(evt::exenv& env) const
+void block_macro::render(evt::exenv& env) const
 {
 	env.current_node(this);
 }
 
-cppjinja::east::string_t
-cppjinja::evtnodes::block_macro::evaluate(cppjinja::evt::exenv& env) const
+absd::data block_macro::evaluate(cppjinja::evt::exenv& env) const
 {
 	env.current_node(this);
 	auto fmt = inner_evaluate(env);
-	return east::string_t();
+	auto es = std::allocate_shared<absd::simple_data_holder>(
+	            std::pmr::polymorphic_allocator{env.storage().get()},
+	            env.storage(), "");
+	return absd::data{es};
 }

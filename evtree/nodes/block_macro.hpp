@@ -19,7 +19,7 @@ class block_macro : public block_with_name {
 public:
 	block_macro(ast::block_macro nb);
 	void render(evt::exenv& env) const override ;
-	east::string_t evaluate( evt::exenv& env) const override ;
+	absd::data evaluate( evt::exenv& env) const override ;
 };
 
 } // namespace cppjinja::evtnodes

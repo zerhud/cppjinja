@@ -18,7 +18,7 @@ class block_call : public block_with_name {
 public:
 	block_call(ast::block_call nb);
 	void render(evt::exenv& env) const override ;
-	east::string_t evaluate(evt::exenv& env) const override ;
+	absd::data evaluate(evt::exenv& env) const override ;
 	ast::string_t name() const override ;
 };
 

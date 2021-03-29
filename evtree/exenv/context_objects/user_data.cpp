@@ -51,31 +51,21 @@ cppjinja::evt::context_objects::user_data::find(cppjinja::east::var_name n) cons
 	return std::make_shared<user_data>(provider, std::move(nsel));
 }
 
-cppjinja::east::value_term cppjinja::evt::context_objects::user_data::solve() const
+absd::data cppjinja::evt::context_objects::user_data::solve() const
 {
 	return provider->value(selected_name);
 }
 
-cppjinja::json cppjinja::evt::context_objects::user_data::jval() const
-{
-	std::stringstream out;
-	out << solve();
-	return out.str();
-}
-
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::user_data::call(
-        std::vector<function_parameter> params) const
+        std::pmr::vector<function_parameter> params) const
 {
 	east::function_call call;
 	call.ref = selected_name;
 	for(auto& p:params) {
 		east::function_parameter& cur = call.params.emplace_back();
 		cur.name = p.name;
-		cur.jval = p.value->jval();
+		cur.val = p.value->solve();
 	}
-
-	std::stringstream out;
-	out << provider->value(call);
-	return std::make_shared<value>(out.str());
+	return std::make_shared<value>(provider->value(call));
 }

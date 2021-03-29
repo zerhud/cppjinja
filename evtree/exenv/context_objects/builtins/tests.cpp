@@ -12,7 +12,7 @@
 
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::builtins_tests::callable::call(
-        std::vector<cppjinja::evt::context_object::function_parameter> params) const
+        std::pmr::vector<cppjinja::evt::context_object::function_parameter> params) const
 {
 	auto res = dynamic_cast<const callable_node*>(params.at(0).value.get());
 	return result_bool(!!res);
@@ -20,7 +20,7 @@ cppjinja::evt::context_objects::builtins_tests::callable::call(
 
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::builtins_tests::defined::call(
-        std::vector<cppjinja::evt::context_object::function_parameter> params) const
+        std::pmr::vector<cppjinja::evt::context_object::function_parameter> params) const
 {
 	bool res = params.at(0).value != nullptr;
 	return result_bool(res);
@@ -28,7 +28,7 @@ cppjinja::evt::context_objects::builtins_tests::defined::call(
 
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::builtins_tests::undefined::call(
-        std::vector<cppjinja::evt::context_object::function_parameter> params) const
+        std::pmr::vector<cppjinja::evt::context_object::function_parameter> params) const
 {
 	bool res = params.at(0).value == nullptr;
 	return result_bool(res);
@@ -36,7 +36,7 @@ cppjinja::evt::context_objects::builtins_tests::undefined::call(
 
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::builtins_tests::sameas::call(
-        std::vector<cppjinja::evt::context_object::function_parameter> params) const
+        std::pmr::vector<cppjinja::evt::context_object::function_parameter> params) const
 {
 	bool res = params.at(0).value.get() == params.at(1).value.get();
 	return result_bool(res);
@@ -44,28 +44,30 @@ cppjinja::evt::context_objects::builtins_tests::sameas::call(
 
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::builtins_tests::upper::call(
-        std::vector<cppjinja::evt::context_object::function_parameter> params) const
+        std::pmr::vector<cppjinja::evt::context_object::function_parameter> params) const
 {
-	auto val = params.at(0).value->jval();
-	for(auto& v:val.get<std::string>())
+	auto val = params.at(0).value->solve();
+	if(val.is_string()) for(auto& v:(std::pmr::string)val)
 		if(!std::isupper(v))
 			return result_bool(false);
 	return result_bool(true);
 }
 
-std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::builtins_tests::lower::call(std::vector<cppjinja::evt::context_object::function_parameter> params) const
+std::shared_ptr<cppjinja::evt::context_object>
+cppjinja::evt::context_objects::builtins_tests::lower::call(
+        std::pmr::vector<cppjinja::evt::context_object::function_parameter> params) const
 {
-	auto val = params.at(0).value->jval();
-	for(auto& v:val.get<std::string>())
+	auto val = params.at(0).value->solve();
+	if(val.is_string()) for(auto& v:(std::pmr::string)val)
 		if(!std::islower(v))
 			return result_bool(false);
 	return result_bool(true);
 }
 
-std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::builtins_tests::iterable::call(std::vector<cppjinja::evt::context_object::function_parameter> params) const
+std::shared_ptr<cppjinja::evt::context_object>
+cppjinja::evt::context_objects::builtins_tests::iterable::call(
+        std::pmr::vector<cppjinja::evt::context_object::function_parameter> params) const
 {
-	bool res = !!dynamic_cast<const tree*>(params.at(0).value.get());
-	res = res || params.at(0).value->jval().is_object();
-	res = res || params[0].value->jval().is_array();
-	return result_bool(res);
+	auto val = params.at(0).value->solve();
+	return result_bool(val.is_array() || val.is_object());
 }

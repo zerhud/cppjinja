@@ -44,7 +44,6 @@ using ast::value_term;
 using mocks::mock_exenv_fixture; // qtcreator cannot parse test with namespace
 
 using evar_name = cppjinja::east::var_name;
-using evalue_term = cppjinja::east::value_term;
 
 struct mock_callable_fixture : mock_exenv_fixture {
 	mocks::node child1, child2;
@@ -126,7 +125,7 @@ BOOST_FIXTURE_TEST_CASE(rendered_only_empty_name, mock_exenv_fixture)
 	MOCK_EXPECT(env.current_node).with(&tmpl);
 	MOCK_EXPECT(child_empty_name.name).at_least(1).returns("");
 	MOCK_EXPECT(child_with_name.name).at_least(1).returns("tn");
-	MOCK_EXPECT(child_empty_name.evaluate).once().returns("test");
+	MOCK_EXPECT(child_empty_name.evaluate).once().returns("test"_ad);
 	tmpl.render(env);
 	BOOST_TEST(out.str() == "test");
 }
@@ -139,8 +138,8 @@ BOOST_FIXTURE_TEST_CASE(creates_self, mock_exenv_fixture)
 	MOCK_EXPECT(env.current_node).with(&tmpl);
 	MOCK_EXPECT(child1.name).at_least(1).returns("ch1");
 	MOCK_EXPECT(child2.name).at_least(1).returns("ch2");
-	MOCK_EXPECT(child1.evaluate).returns("ok_ch1");
-	MOCK_EXPECT(child2.evaluate).returns("ok_ch2");
+	MOCK_EXPECT(child1.evaluate).returns("ok_ch1"_ad);
+	MOCK_EXPECT(child2.evaluate).returns("ok_ch2"_ad);
 
 	namespace pl = std::placeholders;
 	using cppjinja::evt::context_object;
@@ -181,7 +180,7 @@ BOOST_FIXTURE_TEST_CASE(value, mock_exenv_fixture)
 	ast::op_set ast_node{ {1,1}, std::move(op), {{1,1},false}, {{1,1},true} };
 	evtnodes::op_set snode(ast_node);
 	expect_glp(0, 1, 0);
-	auto check = [](std::shared_ptr<context_object> v){return v->jval() == 42.0;};
+	auto check = [](std::shared_ptr<context_object> v){return v->solve() == 42;};
 	MOCK_EXPECT(env.current_node).once().with(&snode);
 	MOCK_EXPECT(locals.add).once().with("tname", check);
 	snode.render(env);
@@ -235,14 +234,14 @@ BOOST_FIXTURE_TEST_CASE(few_names, mock_exenv_fixture)
 	        .calls([](std::string n, std::shared_ptr<cppjinja::evt::context_object> obj)
 	{
 		BOOST_TEST(n == "a");
-		BOOST_TEST(obj->jval() == 3);
+		BOOST_TEST(obj->solve() == 3);
 	});
 	MOCK_EXPECT(locals.add)
 	        .in(seq).once()
 	        .calls([](std::string n, std::shared_ptr<cppjinja::evt::context_object> obj)
 	{
 		BOOST_TEST(n == "b");
-		BOOST_TEST(obj->jval() == 5);
+		BOOST_TEST(obj->solve() == 5);
 	});
 	MOCK_EXPECT(env.current_node).once().with(&snode);
 	snode.render(env);
@@ -344,7 +343,7 @@ BOOST_FIXTURE_TEST_CASE(render_no_children, mock_exenv_fixture)
 	expect_children({});
 	expect_cxt_settings(&cnt);
 	expect_call(&cnt);
-	MOCK_EXPECT(env.result).once().returns("result");
+	MOCK_EXPECT(env.result).once().returns("result"_ad);
 	BOOST_CHECK_NO_THROW(cnt.render(env));
 	BOOST_TEST(out.str() == "result");
 }
@@ -365,7 +364,7 @@ BOOST_FIXTURE_TEST_CASE(render_two_children, mock_callable_fixture)
 	expect_cxt_settings(&cnt);
 	expect_call(&cnt);
 	prepare_for_render_two_childrend();
-	MOCK_EXPECT(env.result).once().returns("result");
+	MOCK_EXPECT(env.result).once().returns("result"_ad);
 	BOOST_CHECK_NO_THROW(cnt.render(env));
 	BOOST_TEST(out.str() == "result");
 }
@@ -377,7 +376,7 @@ BOOST_FIXTURE_TEST_CASE(evaluate_two_children, mock_callable_fixture)
 	evtnodes::block_named cnt(ast_bl);
 	expect_cxt_settings(&cnt);
 	prepare_for_render_two_childrend();
-	MOCK_EXPECT(env.result).once().returns("result");
+	MOCK_EXPECT(env.result).once().returns("result"_ad);
 	BOOST_TEST(cnt.evaluate(env) == "result");
 }
 BOOST_FIXTURE_TEST_CASE(render_with_tabshift, mock_callable_fixture)
@@ -391,11 +390,11 @@ BOOST_FIXTURE_TEST_CASE(render_with_tabshift, mock_callable_fixture)
 	expect_call(&cnt);
 	expect_cxt_settings(&cnt);
 	MOCK_EXPECT(env.result).once().calls([this](){
-		BOOST_TEST(rfmt("\na"s) == "\n\t\ta"s);
-		return "ok"s;
+		BOOST_TEST(rfmt("\na"_s) == "\n\t\ta"_s);
+		return "ok"_ad;
 	});
 	cnt.render(env);
-	BOOST_TEST(rfmt("\na"s) == "\n\ta"s);
+	BOOST_TEST(rfmt("\na"_s) == "\n\ta"_s);
 }
 BOOST_AUTO_TEST_SUITE_END() // block_named
 
@@ -421,10 +420,10 @@ BOOST_FIXTURE_TEST_CASE(render_with_tabshift, mock_callable_fixture)
 	MOCK_EXPECT(env.rinfo);
 	MOCK_EXPECT(child1.rinfo).returns(render_info{false,false});
 	MOCK_EXPECT(child1.render).once().calls([this](cppjinja::evt::exenv&){
-		BOOST_TEST(rfmt("\na"s) == "\n\t\ta"s);
+		BOOST_TEST(rfmt("\na"_s) == "\n\t\ta"_s);
 	});
 	cnt.evaluate(env);
-	BOOST_TEST(rfmt("\na"s) == "\n\ta"s);
+	BOOST_TEST(rfmt("\na"_s) == "\n\ta"_s);
 }
 BOOST_AUTO_TEST_SUITE_END() // block_macro
 
@@ -453,14 +452,14 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(sovled_params, T, callable_list, mock_callable_
 	std::remove_pointer_t<std::tuple_element_t<1, T>> blp(ast_bl);
 	auto obj = std::make_shared<mocks::context_object>();
 	MOCK_EXPECT(all_ctx.find).with(evar_name{"a"s}).returns(obj);
-	MOCK_EXPECT(obj->jval).returns("b");
+	MOCK_EXPECT(obj->solve).returns("b"_ad);
 
 	auto solved = blp.solved_params(env);
 	BOOST_TEST_REQUIRE(solved.size() == 2);
 	BOOST_TEST(*solved[0].name == "a"s);
 	BOOST_TEST(*solved[1].name == "b"s);
-	BOOST_TEST(*solved[0].jval == "a"s);
-	BOOST_TEST(*solved[1].jval == "b"s);
+	BOOST_TEST(*solved[0].val == "a"s);
+	BOOST_TEST(*solved[1].val == "b"s);
 }
 BOOST_AUTO_TEST_SUITE_END() // callables
 
@@ -562,20 +561,20 @@ BOOST_FIXTURE_TEST_CASE(render_if_tabshift, mock_callable_fixture)
 	expect_children({&child1, &child2});
 	MOCK_EXPECT(env.rinfo);
 	MOCK_EXPECT(child1.render).once().calls([this](cppjinja::evt::exenv&){
-		BOOST_TEST(rfmt("\na"s) == "\n\t\ta"s);
+		BOOST_TEST(rfmt("\na"_s) == "\n\t\ta"_s);
 	});
 	expect_transporent_cxt(&cnt);
 	cnt.render(env);
-	BOOST_TEST(rfmt("\na"s) == "\n\ta"s);
+	BOOST_TEST(rfmt("\na"_s) == "\n\ta"_s);
 
 	ast_bl.else_block.emplace().left_open.bsign = -3;
 	cnt = evtnodes::block_if(ast_bl);
 	MOCK_EXPECT(child1.render).once().calls([this](cppjinja::evt::exenv&){
-		BOOST_TEST(rfmt("\na"s) == "\n\t\t\ta"s);
+		BOOST_TEST(rfmt("\na"_s) == "\n\t\t\ta"_s);
 	});
 	expect_transporent_cxt(&cnt);
 	cnt.render(env);
-	BOOST_TEST(rfmt("\na"s) == "\na"s);
+	BOOST_TEST(rfmt("\na"_s) == "\na"_s);
 }
 BOOST_FIXTURE_TEST_CASE(render_else_tabshift, mock_callable_fixture)
 {
@@ -587,11 +586,11 @@ BOOST_FIXTURE_TEST_CASE(render_else_tabshift, mock_callable_fixture)
 	expect_children({&child1, &child2});
 	MOCK_EXPECT(env.rinfo);
 	MOCK_EXPECT(child2.render).once().calls([this](cppjinja::evt::exenv&){
-		BOOST_TEST(rfmt("\na"s) == "\n\t\ta"s);
+		BOOST_TEST(rfmt("\na"_s) == "\n\t\ta"_s);
 	});
 	expect_transporent_cxt(&cnt);
 	cnt.render(env);
-	BOOST_TEST(rfmt("\na"s) == "\n\ta"s);
+	BOOST_TEST(rfmt("\na"_s) == "\n\ta"_s);
 }
 BOOST_AUTO_TEST_SUITE_END() // block_if
 
@@ -618,14 +617,14 @@ BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
 
 	mocks::node child;
 	MOCK_EXPECT(child.render).once();
-	MOCK_EXPECT(env.result).once().returns("base"s);
+	MOCK_EXPECT(env.result).once().returns("base"_ad);
 
 	expect_transporent_cxt(&block);
 	expect_children({&child});
 	expect_call(
 	              cppjinja::east::var_name{"flt"s}
-	            , {fnc_param_t{"$"s, std::make_shared<val_obj_t>("base"s)}}
-	            , "after"s);
+	            , {fnc_param_t{"$"s, std::make_shared<val_obj_t>("base"_ad)}}
+	            , "after"_ad);
 	MOCK_EXPECT(env.rinfo).with(cppjinja::evt::render_info{true, true});
 	block.render(env);
 	BOOST_TEST(out.str() == "after"s);
@@ -657,10 +656,10 @@ BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
 	expect_transporent_cxt(&block);
 	MOCK_EXPECT(env.rinfo).once().with(cppjinja::evt::render_info{true, true});
 	MOCK_EXPECT(child.render).once().calls([](auto& e){e.out() << "kuku";});
-	MOCK_EXPECT(env.result).returns("ok");
+	MOCK_EXPECT(env.result).returns("ok"_ad);
 
 	auto check = [](std::shared_ptr<context_object> v){
-		return v->solve() == evalue_term{"ok"s};};
+		return v->solve() == "ok"s;};
 	MOCK_EXPECT(locals.add).once().with("tname", check);
 
 	block.render(env);
@@ -684,11 +683,11 @@ BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
 	auto calling_result = std::make_shared<mocks::context_object>();
 	auto calling = std::make_shared<mocks::context_object>();
 	MOCK_EXPECT(all_ctx.find).once().with(evar_name{"test"s}).returns(calling);
-	MOCK_EXPECT(calling_result->solve).returns(evalue_term("calling_result"s));
+	MOCK_EXPECT(calling_result->solve).returns("calling_result"_ad);
 	MOCK_EXPECT(calling->call).once().calls([&block,calling_result](auto params){
 		BOOST_TEST_REQUIRE(params.size()==2);
 		BOOST_TEST(params[1].name.value_or(""s) == "cp1n"s);
-		BOOST_TEST(params[1].value->jval() == "cp1v"s);
+		BOOST_TEST(params[1].value->solve() == "cp1v"s);
 		auto* fp = dynamic_cast<cppjinja::evt::context_objects::callable_node*>(params[0].value.get());
 		BOOST_REQUIRE(fp);
 		BOOST_CHECK(fp->is_it(&block));
@@ -707,7 +706,7 @@ BOOST_FIXTURE_TEST_CASE(evaluate, mock_callable_fixture)
 	cppjinja::evtnodes::block_call block(ast_bl);
 	expect_cxt_settings(&block);
 	prepare_for_render_two_childrend();
-	MOCK_EXPECT(env.result).once().returns("result"s);
+	MOCK_EXPECT(env.result).once().returns("result"_ad);
 	BOOST_TEST(block.evaluate(env) == "result"s);
 }
 BOOST_AUTO_TEST_SUITE_END() // block_call

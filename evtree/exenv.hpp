@@ -27,16 +27,16 @@ public:
 	virtual ~exenv() noexcept =default ;
 
 	virtual const evtree& tmpl() const =0 ;
-	virtual std::vector<const node*> children(
+	virtual std::pmr::vector<const node*> children(
 		const node* selected ) const =0 ;
-	virtual std::vector<const evtnodes::callable*> roots(
+	virtual std::pmr::vector<const evtnodes::callable*> roots(
 	        const evtnodes::tmpl* tmpl) const =0 ;
 
 	virtual std::shared_ptr<std::pmr::memory_resource> storage() const =0;
 
 	virtual const data_provider* data() const =0 ;
 	virtual std::ostream& out() =0 ;
-	virtual east::string_t result() const =0 ;
+	virtual absd::data result() const =0 ;
 
 	virtual context& ctx() =0 ;
 	virtual const context& ctx() const =0 ;

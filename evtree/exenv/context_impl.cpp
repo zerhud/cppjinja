@@ -7,9 +7,6 @@
  *************************************************************************/
 
 #include "context_impl.hpp"
-#include "eval/ast_cvt.hpp"
-
-using namespace cppjinja::details;
 
 void cppjinja::evt::context_impl::require_not_empty() const
 {
@@ -30,7 +27,7 @@ const cppjinja::evt::context_impl::frame& cppjinja::evt::context_impl::last_shad
 
 void cppjinja::evt::context_impl::create_shadow()
 {
-	std::vector<context_object*> queue;
+	std::pmr::vector<context_object*> queue;
 	for(auto pos=ctx.rbegin();pos!=ctx.rend();++pos) {
 		queue.push_back(&pos->ns);
 		if(pos->shadow) break;
@@ -92,9 +89,10 @@ std::ostream& cppjinja::evt::context_impl::out()
 	return last_shadow().out;
 }
 
-std::string cppjinja::evt::context_impl::result() const
+std::pmr::string cppjinja::evt::context_impl::result() const
 {
-	return last_shadow().out.str();
+	auto ret = last_shadow().out.str();
+	return std::pmr::string(ret.begin(), ret.end());
 }
 
 cppjinja::evt::context_object& cppjinja::evt::context_impl::cur_namespace()

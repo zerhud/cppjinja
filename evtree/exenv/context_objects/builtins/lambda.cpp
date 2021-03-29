@@ -16,7 +16,7 @@ cppjinja::evt::context_objects::lambda_function::lambda_function(
 
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::lambda_function::call(
-        std::vector<cppjinja::evt::context_object::function_parameter> params) const
+        std::pmr::vector<cppjinja::evt::context_object::function_parameter> params) const
 {
 	return lambda ? lambda(std::move(params)) : result_none();
 }

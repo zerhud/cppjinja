@@ -32,13 +32,15 @@ public:
 	exenv_impl(const data_provider* prov, const evtree* tmpl);
 
 	const evtree& tmpl() const override ;
-	std::vector<const node*> children(const node* selected ) const override ;
-	std::vector<const evtnodes::callable*> roots(
+	std::pmr::vector<const node*> children(const node* selected ) const override ;
+	std::pmr::vector<const evtnodes::callable*> roots(
 	        const evtnodes::tmpl* tmpl) const override ;
+
+	std::shared_ptr<std::pmr::memory_resource> storage() const override ;
 
 	const data_provider* data() const override ;
 	std::ostream& out() override ;
-	east::string_t result() const override;
+	absd::data result() const override;
 
 	context& ctx() override ;
 	const context& ctx() const override ;

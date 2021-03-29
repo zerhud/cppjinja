@@ -25,8 +25,7 @@ public:
 	virtual render_info rinfo() const =0 ;
 	virtual void render( evt::exenv& ctx ) const =0 ;
 protected:
-	void render_children(
-	    const std::vector<const node*>& children,
+	void render_children(const std::pmr::vector<const node*>& children,
 	    exenv& ctx, render_info default_ri) const ;
 };
 

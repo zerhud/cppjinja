@@ -43,18 +43,13 @@ cppjinja::evt::context_objects::callable_node::find(cppjinja::east::var_name n) 
 	throw std::runtime_error("cannot find somthing in callable node");
 }
 
-cppjinja::east::value_term cppjinja::evt::context_objects::callable_node::solve() const
+absd::data cppjinja::evt::context_objects::callable_node::solve() const
 {
 	throw std::runtime_error("cannot solve an callable node");
 }
 
-cppjinja::json cppjinja::evt::context_objects::callable_node::jval() const
-{
-	throw std::logic_error("not ready yet");
-}
-
 std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::callable_node::call(
-        std::vector<function_parameter> params) const
+        std::pmr::vector<function_parameter> params) const
 {
 	assert(env);
 	assert(node);

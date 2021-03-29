@@ -91,7 +91,9 @@ std::string make_node_type_str(Node* n)
 
 template<typename T>
 std::vector<const cppjinja::evt::node*>
-make_node_seq(const cppjinja::evt::node* p, const std::vector<cppjinja::evt::edge<T>>& edges)
+make_node_seq(
+        const cppjinja::evt::node* p
+      , const std::pmr::vector<cppjinja::evt::edge<T>>& edges)
 {
 	std::vector<const cppjinja::evt::node*> ret;
 	ret.emplace_back(p);
@@ -105,7 +107,7 @@ make_node_seq(const cppjinja::evt::node* p, const std::vector<cppjinja::evt::edg
 template<typename T>
 std::string make_node_seq_str(
           const cppjinja::evt::node* p
-        , const std::vector<cppjinja::evt::edge<T>>& edges)
+        , const std::pmr::vector<cppjinja::evt::edge<T>>& edges)
 {
 	std::string ret = make_node_type_str(p);
 	for(auto& edge:edges) if(edge.parent == p) {
@@ -141,10 +143,10 @@ using cppjinja::evt::node_tree;
 BOOST_AUTO_TEST_CASE(roots)
 {
 	node_tree<int> tree;
-	std::vector<int> storage{1, 2, 3};
+	std::pmr::vector<int> storage{1, 2, 3};
 	tree.add_root(&storage[0]);
 	tree.add_root(&storage[1]);
-	std::vector<int*> roots = tree.roots();
+	std::pmr::vector<int*> roots = tree.roots();
 	BOOST_TEST_REQUIRE(roots.size()==2);
 	BOOST_TEST(*roots[0] == 1);
 	BOOST_TEST(*roots[1] == 2);
@@ -244,7 +246,7 @@ BOOST_FIXTURE_TEST_CASE(op_out, mock_exenv_fixture)
 	check_main(tree, "", 1, 0);
 	BOOST_TEST(make_node_seq_str(tree.main_block(), tree.render_tree.all_tree()) == "block_named,op_out..");
 
-	expect_sovle(cppjinja::east::var_name{"a"s}, east::value_term(""s));
+	expect_sovle(cppjinja::east::var_name{"a"s}, create_absd_data(""));
 	MOCK_EXPECT(env.current_node);
 	make_node_seq(tree.main_block(), tree.render_tree.all_tree())[1]->render(env);
 }

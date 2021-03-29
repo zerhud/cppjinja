@@ -21,18 +21,17 @@ protected:
 public:
 	void add(east::string_t n, std::shared_ptr<context_object> child) override ;
 	std::shared_ptr<context_object> find(east::var_name n) const override ;
-	east::value_term solve() const override ;
-	json jval() const override;
+	absd::data solve() const override ;
 };
 
 class jinja_namespace : public builtin_function {
 public:
-	std::shared_ptr<context_object> call(std::vector<function_parameter> params) const override ;
+	std::shared_ptr<context_object> call(std::pmr::vector<function_parameter> params) const override ;
 };
 
 class join : public builtin_function {
 public:
-	std::shared_ptr<context_object> call(std::vector<function_parameter> params) const override ;
+	std::shared_ptr<context_object> call(std::pmr::vector<function_parameter> params) const override ;
 };
 
 class builtins : public tree {

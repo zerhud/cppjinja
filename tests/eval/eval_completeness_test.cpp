@@ -82,13 +82,13 @@ BOOST_AUTO_TEST_CASE(get_var_nesteed)
 	MOCK_EXPECT(prov.value_var_name).once().calls([](east::var_name v){
 		BOOST_TEST_REQUIRE(v.size()==1);
 		BOOST_TEST(v[0]=="b");
-		return east::value_term("b"s);
+		return "b"_ad;
 	});
 	MOCK_EXPECT(prov.value_var_name).once().calls([](east::var_name v){
 		BOOST_TEST_REQUIRE(v.size()==2);
 		BOOST_TEST(v[0]=="a");
 		BOOST_TEST(v[1]=="b");
-		return east::value_term("ok"s);
+		return "ok"_ad;
 	});
 	BOOST_TEST( parse_single("<= a[b] =>", prov)=="ok"s );
 }

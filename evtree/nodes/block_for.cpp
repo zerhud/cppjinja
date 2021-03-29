@@ -32,10 +32,10 @@ void cppjinja::evtnodes::block_for::render(cppjinja::evt::exenv& env) const
 	auto value = evt::expr_eval(&env)(abl.value);
 	assert(value);
 	assert(abl.vars.size()==1 || abl.vars.size()==2);
-	eval_for(env, value->jval());
+	eval_for(env, value->solve());
 }
 
-void cppjinja::evtnodes::block_for::eval_for(evt::exenv& env, cppjinja::json val) const
+void cppjinja::evtnodes::block_for::eval_for(evt::exenv& env, absd::data val) const
 {
 	bool need_else = true;
 	auto children = env.children(this);
@@ -94,19 +94,14 @@ cppjinja::evtnodes::block_for_object::find(cppjinja::east::var_name n) const
 	return nullptr;
 }
 
-cppjinja::east::value_term cppjinja::evtnodes::block_for_object::solve() const
+absd::data cppjinja::evtnodes::block_for_object::solve() const
 {
 	throw std::runtime_error("cannot find something in loop");
 }
 
-cppjinja::json cppjinja::evtnodes::block_for_object::jval() const
-{
-	return ""s;
-}
-
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evtnodes::block_for_object::call(
-	std::vector<function_parameter> params) const
+    std::pmr::vector<function_parameter> params) const
 {
 	return nullptr;
 }

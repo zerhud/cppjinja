@@ -38,17 +38,17 @@ cppjinja::evtree::search_tmpl(const ast::string_t& name) const
 	return nullptr;
 }
 
-std::vector<const cppjinja::evt::node*> cppjinja::evtree::children(
+std::pmr::vector<const cppjinja::evt::node*> cppjinja::evtree::children(
           const cppjinja::evt::node* selected) const
 {
 	if(!selected) return {};
 	return tmpl_by_node(selected).render_tree.children(selected);
 }
 
-std::vector<const cppjinja::evtnodes::callable*>
+std::pmr::vector<const cppjinja::evtnodes::callable*>
 cppjinja::evtree::roots(const evtnodes::tmpl* tmpl) const
 {
-	std::vector<const cppjinja::evtnodes::callable*> ret;
+	std::pmr::vector<const cppjinja::evtnodes::callable*> ret;
 	for(auto& ct:templates) if(ct.tmpl_node() == tmpl) {
 		for(auto& r:ct.roots) ret.emplace_back(r);
 	}
