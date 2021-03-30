@@ -67,13 +67,9 @@ cppjinja::evt::context_objects::tree::find(cppjinja::east::var_name n) const
 
 absd::data cppjinja::evt::context_objects::tree::solve() const
 {
-	typedef std::pmr::string str_t;
-	std::basic_stringstream<
-	        str_t::value_type, str_t::traits_type, str_t::allocator_type> out;
-	render_children_with_comma(out << '{') << '}';
-	auto ret = out.str();
-	auto dh = std::make_shared<absd::simple_data_holder>(
-	            ret.size() == 2 ? ret : ret.erase(ret.size()-2, 1) );
+	auto dh = std::make_shared<absd::simple_data_holder>();
+	dh->make_empty_object();
+	for(auto& [k,v]:children) dh->put(k,v->solve());
 	return absd::data{std::move(dh)};
 }
 

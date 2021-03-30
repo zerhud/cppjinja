@@ -76,6 +76,12 @@ BOOST_AUTO_TEST_SUITE(context_object)
 using cppjinja::east::var_name;
 using cppjinja::evt::context_objects::tree;
 BOOST_AUTO_TEST_SUITE(obj_tree)
+std::string prt(const absd::data& d)
+{
+	std::stringstream out;
+	out << d;
+	return out.str();
+}
 BOOST_AUTO_TEST_CASE(find)
 {
 	tree obj;
@@ -102,14 +108,14 @@ BOOST_AUTO_TEST_CASE(solve)
 	using covalue = cppjinja::evt::context_objects::value;
 
 	tree obj;
-	BOOST_TEST(obj.solve() == "{}");
+	BOOST_TEST(prt(obj.solve()) == "{}");
 	obj.add("c1", std::make_shared<tree>());
-	BOOST_TEST(obj.solve() == "{\"c1\":{}}");
+	BOOST_TEST(prt(obj.solve()) == "{\"c1\":{}}");
 	obj.add("c2", std::make_shared<tree>());
-	BOOST_TEST(obj.solve() == "{\"c1\":{},\"c2\":{}}");
+	BOOST_TEST(prt(obj.solve()) == "{\"c1\":{},\"c2\":{}}");
 	obj.find(var_name{"c2"})->add("c3", std::make_shared<tree>());
 	obj.find(var_name{"c2"})->add("c4", std::make_shared<covalue>("ok"_ad));
-	BOOST_TEST(obj.solve() == "{\"c1\":{},\"c2\":{\"c3\":{},\"c4\":\"ok\"}}");
+	BOOST_TEST(prt(obj.solve()) == "{\"c1\":{},\"c2\":{\"c3\":{},\"c4\":\"ok\"}}");
 }
 BOOST_AUTO_TEST_CASE(cannot_call)
 {
