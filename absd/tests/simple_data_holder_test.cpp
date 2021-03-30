@@ -75,6 +75,15 @@ BOOST_AUTO_TEST_CASE(object)
 	BOOST_TEST(hld.by_key("t1")->to_int() == 42);
 	BOOST_CHECK_THROW(hld.by_key("no"), std::out_of_range);
 }
+BOOST_AUTO_TEST_CASE(empty_object)
+{
+	auto hld = std::make_shared<simple_dh>();
+	hld->make_empty_object();
+	check_reflect(hld->reflect(), absd::data_type::object, 0, 0);
+	std::stringstream out;
+	out << absd::data{hld};
+	BOOST_TEST(out.str() == "{}");
+}
 BOOST_AUTO_TEST_CASE(object_with_data)
 {
 	simple_dh hld;
@@ -92,6 +101,15 @@ BOOST_AUTO_TEST_CASE(array)
 	BOOST_CHECK_THROW(hld.by_ind(1), std::out_of_range);
 	hld.push_back() = 43;
 	BOOST_TEST(hld.by_ind(1)->to_int() == 43);
+}
+BOOST_AUTO_TEST_CASE(empty_array)
+{
+	auto hld = std::make_shared<simple_dh>();
+	hld->make_empty_array();
+	check_reflect(hld->reflect(), absd::data_type::array, 0, 0);
+	std::stringstream out;
+	out << absd::data{hld};
+	BOOST_TEST(out.str() == "[]");
 }
 BOOST_AUTO_TEST_CASE(array_with_data)
 {
@@ -113,8 +131,14 @@ BOOST_AUTO_TEST_CASE(change)
 	hld.put("t1", absd::data{val_dh});
 	BOOST_TEST(hld.reflect().type == absd::data_type::object);
 
-	hld.push_back() = 42;
+	hld = 42;
+	BOOST_TEST(hld.reflect().type == absd::data_type::integer);
+
+	hld.push_back() = 43;
 	BOOST_TEST(hld.reflect().type == absd::data_type::array);
+
+	hld = 44;
+	BOOST_TEST(hld.reflect().type == absd::data_type::integer);
 }
 BOOST_AUTO_TEST_CASE(use_resource)
 {

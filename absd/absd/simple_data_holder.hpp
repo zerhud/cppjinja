@@ -19,8 +19,11 @@ class simple_data_holder : public data_holder {
 	std::optional<data_variant> pod;
 	std::pmr::map<std::pmr::string,data,std::less<>> object;
 	std::pmr::vector<data> array;
+	bool is_empty_obj = false;
+	bool is_empty_arr = false;
 
-	void require_change() const ;
+	void clear_state() ;
+	void require_change() ;
 	void require_extract_pod() const ;
 	void require_extract_obj() const ;
 	void require_extract_arr() const ;
@@ -66,6 +69,8 @@ public:
 
 	simple_data_holder& put(std::string_view key);
 	void put(std::string_view key, data v);
+	void make_empty_object();
+	void make_empty_array();
 
 	simple_data_holder& push_back();
 	void push_back(data v);
