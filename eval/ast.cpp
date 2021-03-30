@@ -11,13 +11,6 @@
 #include <iomanip>
 #include "ast.hpp"
 
-bool cppjinja::east::operator ==(
-          const cppjinja::east::function_parameter& left
-        , const cppjinja::east::function_parameter& right)
-{
-	return left.name == right.name && left.val == right.val;
-}
-
 std::ostream& cppjinja::east::operator <<(std::ostream& out, const cppjinja::east::function_parameter& val)
 {
 	using namespace std::literals;

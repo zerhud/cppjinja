@@ -25,14 +25,15 @@ using var_name = std::vector<string_t>;
 struct function_parameter {
 	std::optional<string_t> name;
 	std::optional<absd::data> val;
+	auto operator <=> (const function_parameter&) const noexcept =default ;
 };
 
 struct function_call {
 	var_name ref;
 	std::pmr::vector<function_parameter> params;
+	auto operator <=> (const function_call&) const noexcept =default ;
 };
 
-bool operator == (const function_parameter& left, const function_parameter& right);
 std::ostream& operator << (std::ostream& out, const function_parameter& val);
 
 } // namespace cppjinja::east
