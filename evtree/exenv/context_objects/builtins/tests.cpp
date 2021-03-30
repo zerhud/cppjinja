@@ -69,5 +69,5 @@ cppjinja::evt::context_objects::builtins_tests::iterable::call(
         std::pmr::vector<cppjinja::evt::context_object::function_parameter> params) const
 {
 	auto val = params.at(0).value->solve();
-	return result_bool(val.is_array() || val.is_object());
+	return result_bool(val.is_array() || val.is_object() || val.is_string());
 }

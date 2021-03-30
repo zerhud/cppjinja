@@ -51,6 +51,13 @@ public:
 		return *this;
 	}
 
+	template<StringData T>
+	simple_data_holder& operator = (T&& v)
+	{
+		str() = std::forward<T>(v);
+		return *this;
+	}
+
 	simple_data_holder& operator = (double v);
 	simple_data_holder& operator = (bool v);
 

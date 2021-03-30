@@ -9,7 +9,6 @@
 #include "logic_check.hpp"
 
 
-
 void cppjinja::evt::expr_evals::logic_check::throw_int_and_string_op() const
 {
 	throw std::runtime_error("cannot compare string and number");
@@ -21,9 +20,7 @@ cppjinja::evt::expr_evals::logic_check::logic_check(cppjinja::ast::expr_ops::log
 }
 
 cppjinja::ast::expr_ops::term cppjinja::evt::expr_evals::logic_check::operator()(const bool& l, const bool& r) const
-{
-	return ast::expr_ops::term(default_op(l,r));
-}
+{ return ast::expr_ops::term(default_op(l,r)); }
 cppjinja::ast::expr_ops::term cppjinja::evt::expr_evals::logic_check::operator()(const bool& l, const std::int64_t& r) const
 {return ast::expr_ops::term(default_op(l,r));}
 cppjinja::ast::expr_ops::term cppjinja::evt::expr_evals::logic_check::operator()(const bool& l, const double& r) const
@@ -56,4 +53,4 @@ cppjinja::ast::expr_ops::term cppjinja::evt::expr_evals::logic_check::operator()
 cppjinja::ast::expr_ops::term cppjinja::evt::expr_evals::logic_check::operator()(const ast::string_t&, const double&) const
 {throw_int_and_string_op();}
 cppjinja::ast::expr_ops::term cppjinja::evt::expr_evals::logic_check::operator()(const ast::string_t& l, const ast::string_t& r) const
-{return ast::expr_ops::term(default_op(l.empty(),r.empty()) || default_op(!l.empty(),!r.empty()));}
+{ return ast::expr_ops::term(default_op(l.empty(),r.empty()) || default_op(!l.empty(),!r.empty())); }

@@ -12,6 +12,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cassert>
+#include <absd/simple_data_holder.hpp>
 
 std::ostream& cppjinja::evt::context_objects::tree::print_solved_value(std::ostream& out, const cppjinja::evt::context_object& obj) const
 {
@@ -66,12 +67,14 @@ cppjinja::evt::context_objects::tree::find(cppjinja::east::var_name n) const
 
 absd::data cppjinja::evt::context_objects::tree::solve() const
 {
-	throw std::runtime_error("cannot solve tree");
-//	using namespace std::literals;
-//	std::stringstream out;
-//	render_children_with_comma(out << '{') << '}';
-//	auto ret = out.str();
-//	return east::value_term(ret.size() == 2 ? ret : ret.erase(ret.size()-2, 1));
+	typedef std::pmr::string str_t;
+	std::basic_stringstream<
+	        str_t::value_type, str_t::traits_type, str_t::allocator_type> out;
+	render_children_with_comma(out << '{') << '}';
+	auto ret = out.str();
+	auto dh = std::make_shared<absd::simple_data_holder>(
+	            ret.size() == 2 ? ret : ret.erase(ret.size()-2, 1) );
+	return absd::data{std::move(dh)};
 }
 
 std::shared_ptr<cppjinja::evt::context_object>

@@ -56,12 +56,14 @@ BOOST_AUTO_TEST_CASE(simple_bool)
 }
 BOOST_AUTO_TEST_CASE(simple_string)
 {
-	simple_dh hld;
+	simple_dh hld, hld2;
 	const simple_dh& chld = hld;
 	hld.str() = "kuku";
 	check_reflect(hld.reflect(), absd::data_type::string, 0, 0);
 	BOOST_TEST(hld.to_string() == "kuku");
 	BOOST_TEST(chld.str().get_allocator().resource() == hld.storage());
+	hld2 = "test";
+	BOOST_TEST(hld2.to_string() == "test");
 }
 BOOST_AUTO_TEST_CASE(object)
 {

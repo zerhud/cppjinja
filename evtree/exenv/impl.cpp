@@ -55,7 +55,7 @@ cppjinja::evt::exenv_impl::roots(const cppjinja::evtnodes::tmpl* tmpl) const
 
 std::shared_ptr<std::pmr::memory_resource> cppjinja::evt::exenv_impl::storage() const
 {
-	return nullptr;
+	return mem;
 }
 
 const cppjinja::data_provider* cppjinja::evt::exenv_impl::data() const

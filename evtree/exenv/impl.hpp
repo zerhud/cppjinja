@@ -28,6 +28,8 @@ class exenv_impl final : public exenv {
 	context_objects::tree global_namespace;
 	context_objects::builtins builtins;
 	result_formatter rfmt;
+	std::shared_ptr<std::pmr::memory_resource> mem =
+	        std::make_shared<std::pmr::unsynchronized_pool_resource>();
 public:
 	exenv_impl(const data_provider* prov, const evtree* tmpl);
 

@@ -146,6 +146,7 @@ BOOST_FIXTURE_TEST_CASE(iterable, mock_exenv_fixture)
 	auto nca_ar = std::make_shared<mocks::context_object>();
 	auto nca_obj = std::make_shared<mocks::context_object>();
 	auto nca_str = std::make_shared<mocks::context_object>();
+	auto nca_int = std::make_shared<mocks::context_object>();
 	auto v_ar = std::make_shared<absd::simple_data_holder>();
 	v_ar->push_back() = 1;
 	auto v_obj = std::make_shared<absd::simple_data_holder>();
@@ -153,10 +154,12 @@ BOOST_FIXTURE_TEST_CASE(iterable, mock_exenv_fixture)
 	MOCK_EXPECT(nca_ar->solve).returns(absd::data{v_ar});
 	MOCK_EXPECT(nca_obj->solve).returns(absd::data{v_obj});
 	expect_solve(*nca_str, "test");
+	expect_solve(*nca_int, 42);
 	BOOST_TEST(obj.call({fnc_param{std::nullopt, std::make_shared<tree>()}})->solve() == true);
 	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca_ar}})->solve() == true);
 	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca_obj}})->solve() == true);
-	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca_str}})->solve() == false);
+	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca_str}})->solve() == true);
+	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca_int}})->solve() == false);
 }
 BOOST_AUTO_TEST_SUITE_END() // tests
 BOOST_AUTO_TEST_SUITE_END() // builtins

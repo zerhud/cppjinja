@@ -32,7 +32,9 @@ concept Integer = std::integral<std::decay_t<T>> && !Boolean<T> && !IntegerFloat
 template<typename T>
 concept TrivialData = IntegerFloating<T> || Integer<T> || Boolean<T>;
 template<typename T>
-concept AnyData = TrivialData<T> || std::is_constructible_v<std::pmr::string,T>;
+concept StringData = std::is_constructible_v<std::pmr::string,T>;
+template<typename T>
+concept AnyData = TrivialData<T> || StringData<T>;
 
 using data_variant = std::variant<std::int64_t, double, std::pmr::string, bool>;
 enum class data_type {

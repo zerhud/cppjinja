@@ -43,9 +43,10 @@ absd::data cppjinja::evt::expr_eval::cvt(const cppjinja::ast::expr_ops::term& v)
 
 std::pmr::string cppjinja::evt::expr_eval::to_str(const absd::data& v) const
 {
-	std::stringstream out;
-	absd::to_json_printer{out}(v);
-	return std::pmr::string(out.str().begin(),out.str().end(), env->storage().get());
+	typedef std::pmr::string str_t;
+	std::basic_stringstream<char,str_t::traits_type,str_t::allocator_type> out_s;
+	absd::to_json_printer{out_s}(v);
+	return out_s.str();
 }
 
 bool cppjinja::evt::expr_eval::to_bool(const absd::data& v) const
@@ -269,7 +270,7 @@ cppjinja::evt::expr_eval::operator ()(ast::expr_ops::in_check& t) const
 	}
 	if(!info.keys.empty()) {
 		for(auto& key:info.keys)
-			if(object[key] == term) return create_data(true);
+			if(key == term) return create_data(true);
 		return create_data(false);
 	}
 	throw std::runtime_error("use 'in' operator only for array maps and strings");

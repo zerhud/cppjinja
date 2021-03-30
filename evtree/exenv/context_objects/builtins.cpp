@@ -51,6 +51,11 @@ cppjinja::evt::context_objects::builtin_function::result_none() const
 	            absd::data{std::make_shared<absd::simple_data_holder>("")});
 	return res;
 }
+std::shared_ptr<cppjinja::evt::context_object>
+cppjinja::evt::context_objects::builtin_function::result_empty_str() const
+{
+	return result_none();
+}
 
 void cppjinja::evt::context_objects::builtin_function::add(
         cppjinja::east::string_t n, std::shared_ptr<cppjinja::evt::context_object> child)
@@ -87,12 +92,15 @@ std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::join::call(
         std::pmr::vector<function_parameter> params) const
 {
-	std::stringstream out;
-	auto sep = params[0].value->solve();
+	typedef std::pmr::string str_t;
+	if(params.size() < 2) return result_empty_str();
+
 	std::size_t ind = 0;
-	if(params.size() < 2) while(ind!=params.size()-2)
+	auto sep = params[ind].value->solve();
+	std::basic_stringstream<char,str_t::traits_type,str_t::allocator_type> out;
+	while(ind!=params.size()-2)
 		out << params[++ind].value->solve() << sep;
-	auto hd = std::make_shared<absd::simple_data_holder>();
-	hd->str().append(out.str().begin(), out.str().end());
+	out << params[++ind].value->solve();
+	auto hd = std::make_shared<absd::simple_data_holder>(out.str());
 	return std::make_shared<value>(absd::data{std::move(hd)});
 }

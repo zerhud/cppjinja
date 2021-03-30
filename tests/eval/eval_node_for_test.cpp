@@ -248,7 +248,8 @@ BOOST_FIXTURE_TEST_CASE(index, mock_for_fixture)
 		BOOST_TEST(ind->solve() == loop->find({"ind"s})->solve());
 		BOOST_TEST(loop->find({"length"})->solve() == 2);
 		auto cycobj = std::make_shared<obj_val_t>(absd::data{ab_val});
-		BOOST_TEST(loop->find({"cycle"})->call({{std::nullopt,cycobj}})->solve() == "a"s);
+		auto cycle = loop->find({"cycle"})->call({{std::nullopt,cycobj}});
+		BOOST_TEST(cycle->solve() == "a"s);
 	});
 	MOCK_EXPECT(ctx.pop).once().in(ctx_seq);
 
