@@ -14,13 +14,14 @@
 #include <vector>
 #include <variant>
 #include <optional>
+#include <memory_resource>
 #include <absd/abstract_data.hpp>
 
 namespace cppjinja::east {
 
 typedef std::string string_t;
 
-using var_name = std::vector<string_t>;
+using var_name = std::pmr::vector<string_t>;
 
 struct function_parameter {
 	std::optional<string_t> name;

@@ -444,11 +444,12 @@ BOOST_FIXTURE_TEST_CASE(cannot_call_nullptr, mock_impls_fixture)
 BOOST_FIXTURE_TEST_CASE(push_pop, mock_impls_fixture)
 {
 	using namespace cppjinja::east;
+	using evar_name = cppjinja::east::var_name;
 	mocks::callable_node calling1, calling2;
 
 	BOOST_CHECK_THROW(calls.current_params(&calling1), std::exception);
 	calls.push(&calling1, cppjinja::evt::context_objects::callable_params({}, {}));
-	BOOST_TEST(calls.current_params(&calling1).find(var_name{"a"}) == nullptr);
+	BOOST_TEST(calls.current_params(&calling1).find(evar_name{"a"}) == nullptr);
 	BOOST_CHECK_THROW(calls.current_params(&calling2), std::exception);
 	calls.pop();
 	BOOST_CHECK_THROW(calls.current_params(&calling1), std::exception);
