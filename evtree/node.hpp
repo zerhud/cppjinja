@@ -27,11 +27,12 @@ public:
 protected:
 	void render_children(const std::pmr::vector<const node*>& children,
 	    exenv& ctx, render_info default_ri) const ;
+	static std::pmr::string tps(const std::string& src) ;
 };
 
 class named_node : virtual public node {
 public:
-	virtual ast::string_t name() const =0 ;
+	virtual std::pmr::string name() const =0 ;
 };
 
 }} // namespace cppjinja::evt

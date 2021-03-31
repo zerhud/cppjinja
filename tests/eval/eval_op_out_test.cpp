@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_SUITE(var_name)
 	{
 		MOCK_EXPECT(data->value_var_name)
 		        .once()
-		        .with(east::var_name{"data"s})
+		        .with(east::var_name{"data"_s})
 		        .returns("test"_ad)
 		        ;
 		BOOST_TEST(parse_single("<= data =>"sv, *data) == "test"sv );
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(filter)
 	auto data = std::make_unique<mocks::data_provider>();
 	MOCK_EXPECT(data->value_var_name)
 	        .once()
-	        .with(east::var_name{"a"s})
+	        .with(east::var_name{"a"_s})
 	        .returns("not ok"_ad)
 	        ;
 	MOCK_EXPECT(data->value_function_call)

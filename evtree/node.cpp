@@ -30,3 +30,8 @@ void cppjinja::evt::node::render_children(
 	};
 	evtnodes::loop_by_three(children, rnd);
 }
+
+std::pmr::string cppjinja::evt::node::tps(const std::string& src)
+{
+	return std::pmr::string(src.begin(),src.end());
+}

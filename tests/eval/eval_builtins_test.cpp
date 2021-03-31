@@ -36,12 +36,12 @@ BOOST_AUTO_TEST_CASE(context)
 	using namespace cppjinja::evt::context_objects;
 	cppjinja::evt::context_objects::builtins stdlib;
 
-	BOOST_CHECK(dynamic_cast<join*>(stdlib.find(var_name{"join"s}).get()));
-	BOOST_CHECK(dynamic_cast<jinja_namespace*>(stdlib.find(var_name{"namespace"s}).get()));
-	BOOST_CHECK(dynamic_cast<builtins_tests::callable*>(stdlib.find(var_name{"$tests"s, "callable"s}).get()));
-	BOOST_CHECK(dynamic_cast<builtins_tests::defined*>(stdlib.find(var_name{"$tests"s, "defined"s}).get()));
-	BOOST_CHECK(dynamic_cast<builtins_tests::undefined*>(stdlib.find(var_name{"$tests"s, "undefined"s}).get()));
-	BOOST_CHECK(dynamic_cast<builtins_tests::sameas*>(stdlib.find(var_name{"$tests"s, "sameas"s}).get()));
+	BOOST_CHECK(dynamic_cast<join*>(stdlib.find(var_name{"join"_s}).get()));
+	BOOST_CHECK(dynamic_cast<jinja_namespace*>(stdlib.find(var_name{"namespace"_s}).get()));
+	BOOST_CHECK(dynamic_cast<builtins_tests::callable*>(stdlib.find(var_name{"$tests"_s, "callable"_s}).get()));
+	BOOST_CHECK(dynamic_cast<builtins_tests::defined*>(stdlib.find(var_name{"$tests"_s, "defined"_s}).get()));
+	BOOST_CHECK(dynamic_cast<builtins_tests::undefined*>(stdlib.find(var_name{"$tests"_s, "undefined"_s}).get()));
+	BOOST_CHECK(dynamic_cast<builtins_tests::sameas*>(stdlib.find(var_name{"$tests"_s, "sameas"_s}).get()));
 }
 BOOST_AUTO_TEST_CASE(jinja_namespace)
 {
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(join)
 	auto o1 = std::make_shared<ctx_val>(mock_exenv_fixture::create_absd_data("1"));
 	auto o2 = std::make_shared<ctx_val>(mock_exenv_fixture::create_absd_data("2"));
 	std::pmr::vector<function_parameter> params = {
-	     function_parameter{"$"s, sep}
+	     function_parameter{"$"_s, sep}
 	    ,function_parameter{std::nullopt, o1}
 	};
 

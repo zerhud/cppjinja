@@ -196,7 +196,7 @@ BOOST_FIXTURE_TEST_CASE(name, mock_exenv_fixture)
 	evtnodes::op_set snode(ast_node);
 	auto obj = std::make_shared<mocks::context_object>();
 	expect_glp(0, 1, 0);
-	MOCK_EXPECT(all_ctx.find).with(evar_name{"a"s}).returns(obj);
+	MOCK_EXPECT(all_ctx.find).with(evar_name{"a"_s}).returns(obj);
 	MOCK_EXPECT(locals.add).once().with("tname", obj);
 	MOCK_EXPECT(env.current_node).once().with(&snode);
 	snode.render(env);
@@ -213,7 +213,7 @@ BOOST_FIXTURE_TEST_CASE(call, mock_exenv_fixture)
 	auto obj = std::make_shared<mocks::context_object>();
 	auto gotten_obj = std::make_shared<mocks::context_object>();
 	expect_glp(0, 1, 0);
-	MOCK_EXPECT(all_ctx.find).with(evar_name{"a"s}).returns(obj);
+	MOCK_EXPECT(all_ctx.find).with(evar_name{"a"_s}).returns(obj);
 	MOCK_EXPECT(obj->call).once().returns(gotten_obj);
 	MOCK_EXPECT(locals.add).once().with("tname", gotten_obj);
 	MOCK_EXPECT(env.current_node).once().with(&snode);
@@ -231,14 +231,14 @@ BOOST_FIXTURE_TEST_CASE(few_names, mock_exenv_fixture)
 	expect_glp(0, 1, 0);
 	MOCK_EXPECT(locals.add)
 	        .in(seq).once()
-	        .calls([](std::string n, std::shared_ptr<cppjinja::evt::context_object> obj)
+	        .calls([](std::pmr::string n, std::shared_ptr<cppjinja::evt::context_object> obj)
 	{
 		BOOST_TEST(n == "a");
 		BOOST_TEST(obj->solve() == 3);
 	});
 	MOCK_EXPECT(locals.add)
 	        .in(seq).once()
-	        .calls([](std::string n, std::shared_ptr<cppjinja::evt::context_object> obj)
+	        .calls([](std::pmr::string n, std::shared_ptr<cppjinja::evt::context_object> obj)
 	{
 		BOOST_TEST(n == "b");
 		BOOST_TEST(obj->solve() == 5);
@@ -451,15 +451,15 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(sovled_params, T, callable_list, mock_callable_
 	ast_bl.params.emplace_back(ast::macro_parameter{"b", aps::expr{aps::single_var_name{"a"s}}});
 	std::remove_pointer_t<std::tuple_element_t<1, T>> blp(ast_bl);
 	auto obj = std::make_shared<mocks::context_object>();
-	MOCK_EXPECT(all_ctx.find).with(evar_name{"a"s}).returns(obj);
+	MOCK_EXPECT(all_ctx.find).with(evar_name{"a"_s}).returns(obj);
 	MOCK_EXPECT(obj->solve).returns("b"_ad);
 
 	auto solved = blp.solved_params(env);
 	BOOST_TEST_REQUIRE(solved.size() == 2);
-	BOOST_TEST(*solved[0].name == "a"s);
-	BOOST_TEST(*solved[1].name == "b"s);
-	BOOST_TEST(*solved[0].val == "a"s);
-	BOOST_TEST(*solved[1].val == "b"s);
+	BOOST_TEST(*solved[0].name == "a"_s);
+	BOOST_TEST(*solved[1].name == "b"_s);
+	BOOST_TEST(*solved[0].val == "a"_s);
+	BOOST_TEST(*solved[1].val == "b"_s);
 }
 BOOST_AUTO_TEST_SUITE_END() // callables
 
@@ -622,8 +622,8 @@ BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
 	expect_transporent_cxt(&block);
 	expect_children({&child});
 	expect_call(
-	              cppjinja::east::var_name{"flt"s}
-	            , {fnc_param_t{"$"s, std::make_shared<val_obj_t>("base"_ad)}}
+	              cppjinja::east::var_name{"flt"_s}
+	            , {fnc_param_t{"$"_s, std::make_shared<val_obj_t>("base"_ad)}}
 	            , "after"_ad);
 	MOCK_EXPECT(env.rinfo).with(cppjinja::evt::render_info{true, true});
 	block.render(env);
@@ -682,12 +682,12 @@ BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
 	// calls other block
 	auto calling_result = std::make_shared<mocks::context_object>();
 	auto calling = std::make_shared<mocks::context_object>();
-	MOCK_EXPECT(all_ctx.find).once().with(evar_name{"test"s}).returns(calling);
+	MOCK_EXPECT(all_ctx.find).once().with(evar_name{"test"_s}).returns(calling);
 	MOCK_EXPECT(calling_result->solve).returns("calling_result"_ad);
 	MOCK_EXPECT(calling->call).once().calls([&block,calling_result](auto params){
 		BOOST_TEST_REQUIRE(params.size()==2);
-		BOOST_TEST(params[1].name.value_or(""s) == "cp1n"s);
-		BOOST_TEST(params[1].value->solve() == "cp1v"s);
+		BOOST_TEST(params[1].name.value_or(""_s) == "cp1n"_s);
+		BOOST_TEST(params[1].value->solve() == "cp1v"_s);
 		auto* fp = dynamic_cast<cppjinja::evt::context_objects::callable_node*>(params[0].value.get());
 		BOOST_REQUIRE(fp);
 		BOOST_CHECK(fp->is_it(&block));

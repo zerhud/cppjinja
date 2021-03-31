@@ -19,6 +19,35 @@
 
 #include "absd/simple_data_holder.hpp"
 
+
+absd::data operator "" _ad(const char* src, std::size_t size)
+{
+	return absd::data{std::make_shared<absd::simple_data_holder>(
+		            std::pmr::string(src,size))};
+}
+absd::data operator "" _ad(unsigned long long int val)
+{
+	return absd::data{std::make_shared<absd::simple_data_holder>(val)};
+}
+
+std::pmr::string operator "" _s(const char* src, std::size_t size)
+{
+	return std::pmr::string(src, size);
+}
+
+namespace std {
+bool operator == (const std::string& l, const std::pmr::string& r)
+{
+	if(l.size() != r.size()) return false;
+	for(std::size_t i=0;i<l.size();++i) if(l[i]!=r[i]) return false;
+	return true;
+}
+bool operator == (const std::pmr::string& l, const std::string& r)
+{
+	return r == l;
+}
+} // namespace std
+
 namespace mocks {
 
 MOCK_BASE_CLASS( data_provider, cppjinja::data_provider)
@@ -159,7 +188,7 @@ struct mock_exenv_fixture
 		MOCK_EXPECT(mock_all_ctx->call).once().calls([val_obj,p](auto params){
 			BOOST_TEST(params.size()==p.size());
 			for(std::size_t i=0;i<params.size();++i) {
-				BOOST_TEST(params.at(i).name.value_or(""s) == p.at(i).name.value_or(""s));
+				BOOST_TEST(params.at(i).name.value_or(""_s) == p.at(i).name.value_or(""_s));
 				BOOST_TEST(params.at(i).value->solve() == p.at(i).value->solve());
 			}
 			return val_obj;
@@ -222,18 +251,3 @@ struct mock_exenv_fixture
 };
 
 } // namespace mocks
-
-absd::data operator "" _ad(const char* src, std::size_t size)
-{
-	return absd::data{std::make_shared<absd::simple_data_holder>(
-		            std::pmr::string(src,size))};
-}
-absd::data operator "" _ad(unsigned long long int val)
-{
-	return absd::data{std::make_shared<absd::simple_data_holder>(val)};
-}
-
-std::pmr::string operator "" _s(const char* src, std::size_t size)
-{
-	return std::pmr::string(src, size);
-}

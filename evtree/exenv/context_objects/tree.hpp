@@ -15,7 +15,7 @@
 namespace cppjinja::evt::context_objects {
 
 class tree : public context_object {
-	std::map<std::string, std::shared_ptr<context_object>> children;
+	std::pmr::map<east::string_t, std::shared_ptr<context_object>> children;
 	std::ostream& print_solved_value(std::ostream& out, const context_object& obj) const ;
 	std::ostream& render_children_with_comma(std::ostream& out) const ;
 protected:

@@ -21,7 +21,8 @@ public:
 
 	evt::render_info rinfo() const override ;
 
-	ast::string_t name() const override ;
+	std::string ast_name() const ;
+	std::pmr::string name() const override ;
 	void render(evt::exenv& env) const override ;
 	ast::string_t rendered() const ;
 };

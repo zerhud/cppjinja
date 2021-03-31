@@ -84,7 +84,7 @@ bool cppjinja::evtnodes::block_for::eval_for_str(
 	auto loop = std::make_shared<block_for_object>(env.storage(), val.size());
 	for(auto& lvar:val) {
 		evt::raii_push_ctx ctx(this, &env.ctx());
-		env.locals().add(abl.vars[0], make_val(env, lvar));
+		env.locals().add(tps(abl.vars[0]), make_val(env, lvar));
 		env.locals().add("loop", loop);
 		rc_children.at(0)->render(env);
 		loop->next();
@@ -98,7 +98,7 @@ bool cppjinja::evtnodes::block_for::eval_for_arr(
 	auto loop = std::make_shared<block_for_object>(env.storage(), val.size());
 	for(auto& lvar:val) {
 		evt::raii_push_ctx ctx(this, &env.ctx());
-		env.locals().add(abl.vars[0], make_val(env, lvar));
+		env.locals().add(tps(abl.vars[0]), make_val(env, lvar));
 		env.locals().add("loop", loop);
 		rc_children.at(0)->render(env);
 		loop->next();
@@ -113,8 +113,8 @@ bool cppjinja::evtnodes::block_for::eval_for_obj(
 	for(auto& [key,lvar]:val) {
 		evt::raii_push_ctx ctx(this, &env.ctx());
 		if(abl.vars.size()==2)
-			env.locals().add(abl.vars[0], make_val(env, key));
-		env.locals().add(abl.vars[abl.vars.size()-1], make_val(env, lvar));
+			env.locals().add(tps(abl.vars[0]), make_val(env, key));
+		env.locals().add(tps(abl.vars[abl.vars.size()-1]), make_val(env, lvar));
 		env.locals().add("loop", loop);
 		rc_children.at(0)->render(env);
 		loop->next();
@@ -151,11 +151,11 @@ void cppjinja::evtnodes::block_for_object::add(
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evtnodes::block_for_object::find(cppjinja::east::var_name n) const
 {
-	if(n==east::var_name{"index"s})
+	if(n==east::var_name{"index"})
 		return std::make_shared<evt::context_objects::value>(create_data(cur_iter+1));
-	if(n==east::var_name{"index0"s} || n==east::var_name{"ind"s})
+	if(n==east::var_name{"index0"} || n==east::var_name{"ind"})
 		return std::make_shared<evt::context_objects::value>(create_data(cur_iter));
-	if(n == east::var_name{"length"s})
+	if(n == east::var_name{"length"})
 		return std::make_shared<evt::context_objects::value>(create_data(length));
 	if(n == east::var_name{"cycle"})
 		return std::make_shared<evt::context_objects::lambda_function>(

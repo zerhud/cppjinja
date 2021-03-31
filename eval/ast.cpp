@@ -14,7 +14,7 @@
 std::ostream& cppjinja::east::operator <<(std::ostream& out, const cppjinja::east::function_parameter& val)
 {
 	using namespace std::literals;
-	out << (val.name.has_value() ? *val.name : "[]"s);
+	out << (val.name.has_value() ? *val.name : "[]"sv);
 	if(val.val.has_value()) return out << '=' << *val.val;
 	return out << '=' << "[]"sv;
 }

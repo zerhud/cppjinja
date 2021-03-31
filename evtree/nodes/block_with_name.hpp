@@ -20,7 +20,7 @@ protected:
 	[[nodiscard]] evt::raii_result_format inner_evaluate(evt::exenv& env) const ;
 public:
 	evt::render_info rinfo() const override ;
-	ast::string_t name() const override ;
+	std::pmr::string name() const override ;
 	std::pmr::vector<east::function_parameter> solved_params(evt::exenv& env) const override ;
 };
 

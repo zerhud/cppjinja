@@ -240,7 +240,7 @@ void cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::op_comment& obj)
 
 std::string cppjinja::evt::compiled_tmpl::tmpl_name() const
 {
-	return tmpl_node()->name();
+	return tmpl_node()->ast_name();
 }
 
 cppjinja::evtnodes::tmpl* cppjinja::evt::compiled_tmpl::tmpl_node()

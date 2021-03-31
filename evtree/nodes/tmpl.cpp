@@ -22,9 +22,14 @@ cppjinja::evt::render_info cppjinja::evtnodes::tmpl::rinfo() const
 	return {false, false};
 }
 
-cppjinja::ast::string_t cppjinja::evtnodes::tmpl::name() const
+std::string cppjinja::evtnodes::tmpl::ast_name() const
 {
 	return itmpl_.name;
+}
+
+std::pmr::string cppjinja::evtnodes::tmpl::name() const
+{
+	return tps(ast_name());
 }
 
 void cppjinja::evtnodes::tmpl::render(evt::exenv& env) const

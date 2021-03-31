@@ -43,7 +43,7 @@ void callable_params::replace_placed(std::size_t place, function_parameter p)
 	declared[place].val.reset();
 }
 
-void callable_params::add_value(std::string name, absd::data val)
+void callable_params::add_value(std::pmr::string name, absd::data val)
 {
 	params[name] = std::make_shared<value>(std::move(val));
 }

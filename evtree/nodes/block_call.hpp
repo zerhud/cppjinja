@@ -19,7 +19,7 @@ public:
 	block_call(ast::block_call nb);
 	void render(evt::exenv& env) const override ;
 	absd::data evaluate(evt::exenv& env) const override ;
-	ast::string_t name() const override ;
+	std::pmr::string name() const override ;
 };
 
 } // namespace cppjinja::evtnodes

@@ -40,9 +40,9 @@ cppjinja::evt::render_info cppjinja::evtnodes::block_with_name::rinfo() const
 	return {block.left_open.trim, block.right_close.trim};
 }
 
-cppjinja::ast::string_t cppjinja::evtnodes::block_with_name::name() const
+std::pmr::string cppjinja::evtnodes::block_with_name::name() const
 {
-	return cur_ast().name;
+	return tps(cur_ast().name);
 }
 
 std::pmr::vector<cppjinja::east::function_parameter>

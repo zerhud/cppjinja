@@ -76,15 +76,16 @@ void cppjinja::evt::expr_eval::solve_point_arg(cppjinja::ast::expr_ops::point_el
 
 void cppjinja::evt::expr_eval::solve_point_arg(cppjinja::ast::expr_ops::single_var_name& left) const
 {
-	if(!result) result = env->all_ctx().find(east::var_name{left.name});
-	else result = result->find(east::var_name{left.name});
+	std::pmr::string ln(left.name.begin(),left.name.end());
+	if(!result) result = env->all_ctx().find(east::var_name{ln});
+	else result = result->find(east::var_name{ln});
 }
 
 void cppjinja::evt::expr_eval::solve_point_arg(ast::expr_ops::expr& left) const
 {
 	if(!result) throw std::runtime_error("wrong access element");
 	auto solved = expr_eval(env)(left);
-	result = result->find(east::var_name{solved->solve().hstr()});
+	result = result->find(east::var_name{solved->solve().str()});
 }
 
 void cppjinja::evt::expr_eval::solve_point_arg(cppjinja::ast::expr_ops::point& left) const
@@ -107,7 +108,8 @@ cppjinja::evt::expr_eval::make_param(cppjinja::ast::expr_ops::expr& pexpr) const
 
 std::optional<cppjinja::east::string_t> cppjinja::evt::expr_eval::make_param_name(ast::expr_ops::lvalue& name) const
 {
-	return boost::get<ast::expr_ops::single_var_name>(name).name;
+	std::string n = boost::get<ast::expr_ops::single_var_name>(name).name;
+	return std::pmr::string(n.begin(),n.end());
 }
 
 void cppjinja::evt::expr_eval::filter_content(cppjinja::ast::expr_ops::filter_call& call) const
@@ -191,7 +193,8 @@ cppjinja::evt::expr_eval::operator ()(cppjinja::ast::expr_ops::term& t) const
 cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::single_var_name& t) const
 {
-	result = env->all_ctx().find(east::var_name{t.name});
+	std::pmr::string tn(t.name.begin(),t.name.end());
+	result = env->all_ctx().find(east::var_name{tn});
 	return create_data(false);
 }
 

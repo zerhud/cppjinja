@@ -74,8 +74,8 @@ BOOST_FIXTURE_TEST_CASE(render_one, mock_for_fixture)
 	        .calls( [&iteration](
 	            cppjinja::east::string_t n
 	          , std::shared_ptr<cppjinja::evt::context_object> child){
-		if(n=="loop"s) return;
-		BOOST_TEST(n=="a"s);
+		if(n=="loop"_s) return;
+		BOOST_TEST(n=="a"_s);
 		BOOST_REQUIRE(child);
 		BOOST_TEST(child->solve() == ++iteration);
 	});
@@ -112,7 +112,7 @@ BOOST_FIXTURE_TEST_CASE(render_two, mock_for_fixture)
 	          , std::shared_ptr<cppjinja::evt::context_object> child){
 		BOOST_TEST(n=="k");
 		BOOST_REQUIRE(child);
-		BOOST_TEST(child->solve() == "one"s);
+		BOOST_TEST(child->solve() == "one"_s);
 	});
 	MOCK_EXPECT(locals.add)
 	        .once().in(locals_add_seq)
@@ -123,7 +123,7 @@ BOOST_FIXTURE_TEST_CASE(render_two, mock_for_fixture)
 		BOOST_REQUIRE(child);
 		BOOST_TEST(child->solve() == 1);
 	});
-	MOCK_EXPECT(locals.add).once().in(locals_add_seq).with("loop"s, mock::any);
+	MOCK_EXPECT(locals.add).once().in(locals_add_seq).with("loop"_s, mock::any);
 	MOCK_EXPECT(ctx.pop).once().in(locals_add_seq).with(&block);
 	MOCK_EXPECT(ctx.push).once().in(locals_add_seq).with(&block);
 	MOCK_EXPECT(locals.add)
@@ -133,7 +133,7 @@ BOOST_FIXTURE_TEST_CASE(render_two, mock_for_fixture)
 	          , std::shared_ptr<cppjinja::evt::context_object> child){
 		BOOST_TEST(n=="k");
 		BOOST_REQUIRE(child);
-		BOOST_TEST(child->solve() == "two"s);
+		BOOST_TEST(child->solve() == "two"_s);
 	});
 	MOCK_EXPECT(locals.add)
 	        .once().in(locals_add_seq)
@@ -144,7 +144,7 @@ BOOST_FIXTURE_TEST_CASE(render_two, mock_for_fixture)
 		BOOST_REQUIRE(child);
 		BOOST_TEST(child->solve() == 2);
 	});
-	MOCK_EXPECT(locals.add).once().in(locals_add_seq).with("loop"s, mock::any);
+	MOCK_EXPECT(locals.add).once().in(locals_add_seq).with("loop"_s, mock::any);
 	MOCK_EXPECT(ctx.pop).once().in(locals_add_seq).with(&block);
 	block.render(env);
 	BOOST_TEST(out.str() == ""s);
@@ -212,7 +212,7 @@ BOOST_FIXTURE_TEST_CASE(cannot_add_solve, mock_for_fixture)
 	evtnodes::block_for_object obj(env.storage(), 1);
 	auto child = std::make_shared<mocks::context_object>();
 	BOOST_CHECK_THROW(obj.solve(), std::exception);
-	BOOST_CHECK_THROW(obj.add("ok"s, child), std::exception);
+	BOOST_CHECK_THROW(obj.add("ok"_s, child), std::exception);
 }
 BOOST_FIXTURE_TEST_CASE(index, mock_for_fixture)
 {
@@ -234,40 +234,40 @@ BOOST_FIXTURE_TEST_CASE(index, mock_for_fixture)
 	ab_val->push_back() = "b";
 
 	MOCK_EXPECT(ctx.push).once().in(ctx_seq).with(&block);
-	MOCK_EXPECT(locals.add).once().in(ctx_seq).with("a"s, mock::any);
+	MOCK_EXPECT(locals.add).once().in(ctx_seq).with("a"_s, mock::any);
 	MOCK_EXPECT(locals.add).once().in(ctx_seq).calls(
 	            [ab_val](east::string_t n, std::shared_ptr<cppjinja::evt::context_object> loop){
-		BOOST_TEST(n=="loop"s);
+		BOOST_TEST(n=="loop"_s);
 		BOOST_REQUIRE(loop);
-		auto ind = loop->find({"index"s});
+		auto ind = loop->find({"index"_s});
 		BOOST_REQUIRE(ind);
 		BOOST_TEST(ind->solve() == 1);
-		ind = loop->find({"index0"s});
+		ind = loop->find({"index0"_s});
 		BOOST_REQUIRE(ind);
 		BOOST_TEST(ind->solve() == 0);
-		BOOST_TEST(ind->solve() == loop->find({"ind"s})->solve());
+		BOOST_TEST(ind->solve() == loop->find({"ind"_s})->solve());
 		BOOST_TEST(loop->find({"length"})->solve() == 2);
 		auto cycobj = std::make_shared<obj_val_t>(absd::data{ab_val});
 		auto cycle = loop->find({"cycle"})->call({{std::nullopt,cycobj}});
-		BOOST_TEST(cycle->solve() == "a"s);
+		BOOST_TEST(cycle->solve() == "a"_s);
 	});
 	MOCK_EXPECT(ctx.pop).once().in(ctx_seq);
 
 	MOCK_EXPECT(ctx.push).once().in(ctx_seq).with(&block);
-	MOCK_EXPECT(locals.add).once().in(ctx_seq).with("a"s, mock::any);
+	MOCK_EXPECT(locals.add).once().in(ctx_seq).with("a"_s, mock::any);
 	MOCK_EXPECT(locals.add).once().in(ctx_seq).calls(
 	            [ab_val](east::string_t n, std::shared_ptr<cppjinja::evt::context_object> loop){
-		BOOST_TEST(n=="loop"s);
+		BOOST_TEST(n=="loop"_s);
 		BOOST_REQUIRE(loop);
-		auto ind = loop->find({"index"s});
+		auto ind = loop->find({"index"_s});
 		BOOST_REQUIRE(ind);
 		BOOST_TEST(ind->solve() == 2);
-		ind = loop->find({"index0"s});
+		ind = loop->find({"index0"_s});
 		BOOST_REQUIRE(ind);
 		BOOST_TEST(ind->solve() == 1);
-		BOOST_TEST(ind->solve() == loop->find({"ind"s})->solve());
+		BOOST_TEST(ind->solve() == loop->find({"ind"_s})->solve());
 		auto cycobj = std::make_shared<obj_val_t>(absd::data{ab_val});
-		BOOST_TEST(loop->find({"cycle"})->call({{std::nullopt,cycobj}})->solve() == "b"s);
+		BOOST_TEST(loop->find({"cycle"})->call({{std::nullopt,cycobj}})->solve() == "b"_s);
 	});
 	MOCK_EXPECT(ctx.pop).once().in(ctx_seq);
 

@@ -203,8 +203,8 @@ BOOST_FIXTURE_TEST_CASE(points, mock_exenv_fixture)
 	auto c = std::make_shared<mocks::context_object>();
 	auto d = std::make_shared<mocks::context_object>();
 	auto call = std::make_shared<mocks::context_object>();
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"s}).returns(a);
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"c"s}).returns(c);
+	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"_s}).returns(a);
+	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"c"_s}).returns(c);
 	MOCK_EXPECT(a->find).with(cppjinja::east::var_name{"b"}).returns(b);
 	MOCK_EXPECT(c->find).with(cppjinja::east::var_name{"d"}).returns(d);
 	MOCK_EXPECT(b->call).with(params).returns(call);
@@ -303,10 +303,10 @@ BOOST_FIXTURE_TEST_CASE(wihout_args, mock_exenv_fixture)
 	auto tests = std::make_shared<mocks::context_object>();
 	auto int_check = std::make_shared<mocks::context_object>();
 	auto check_result = std::make_shared<mocks::context_object>();
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"$tests"s}).returns(tests);
+	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"$tests"_s}).returns(tests);
 	MOCK_EXPECT(tests->find)
 	        .exactly(2)
-	        .with(cppjinja::east::var_name{"integer"s})
+	        .with(cppjinja::east::var_name{"integer"_s})
 	        .returns(int_check);
 	MOCK_EXPECT(int_check->call).returns(check_result);
 	MOCK_EXPECT(check_result->solve).once().returns(create_absd_data(true));
