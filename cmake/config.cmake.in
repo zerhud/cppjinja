@@ -7,4 +7,3 @@ set_and_check(@PROJECT_NAME@_SYSCONFIG_DIR "${PACKAGE_PREFIX_DIR}/@lib_dest@")
 
 include("${PACKAGE_PREFIX_DIR}/@inst_rtdir@/@PROJECT_NAME@-export.cmake")
 set(@PROJECT_NAME@_FOUND TRUE)
-check_required_components(@PROJECT_NAME@)

@@ -127,7 +127,8 @@ set(config_file_dir "${CMAKE_CURRENT_BINARY_DIR}/configs/")
 configure_package_config_file(
 	"${CMAKE_CURRENT_SOURCE_DIR}/cmake/config.cmake.in"
 	"${config_file_dir}/${PROJECT_NAME}-config.cmake"
-	INSTALL_DESTINATION "${inst_rtdir}")
+	INSTALL_DESTINATION "${inst_rtdir}"
+	NO_CHECK_REQUIRED_COMPONENTS_MACRO)
 write_basic_package_version_file(
 	"${config_file_dir}/${PROJECT_NAME}-config-version.cmake"
 	COMPATIBILITY AnyNewerVersion)
