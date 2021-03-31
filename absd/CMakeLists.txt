@@ -15,11 +15,12 @@ endif()
 set(inst_incdir "include/${PROJECT_NAME}/")
 set(inst_rtdir "lib/${PROJECT_NAME}/")
 file(GLOB_RECURSE src_list LIST_DIRECTORIES false "absd/*.cpp")
-file(GLOB_RECURSE hdr_list LIST_DIRECTORIES false "absd/*.hpp")
+file(GLOB_RECURSE hdr_list RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} LIST_DIRECTORIES false "absd/*.hpp")
 source_group(
     TREE "${CMAKE_CURRENT_SOURCE_DIR}"
     FILES ${src_list} ${hdr_list})
 add_library(${PROJECT_NAME} STATIC ${src_list} ${hdr_list})
+set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${hdr_list}")
 target_include_directories(${PROJECT_NAME}
 	PUBLIC
 		"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
