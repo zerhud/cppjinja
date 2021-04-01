@@ -53,18 +53,6 @@ set(inst_incdir "include/${PROJECT_NAME}/")
 set(inst_rtdir "lib/${PROJECT_NAME}/")
 
 
-# lohman json
-set(lohman_json_file "${CMAKE_CURRENT_BINARY_DIR}/nlohman/cppjinja/json.hpp")
-set(lohman_json_url "https://github.com/nlohmann/json/raw/develop/single_include/nlohmann/json.hpp")
-add_custom_command(OUTPUT "${lohman_json_file}"
-	COMMAND "${CMAKE_COMMAND}"
-		-Durl="${lohman_json_url}" -Dout="${lohman_json_file}"
-		-Denv_var="nlohman_json_header"
-		-P "${CMAKE_CURRENT_LIST_DIR}/cmake/download_or_get.cmake"
-	DEPENDS
-		"${CMAKE_CURRENT_LIST_DIR}/cmake/download_or_get.cmake"
-)
-
 #parser2
 file(GLOB_RECURSE parser2_src LIST_DIRECTORIES false "parser/*.cpp")
 file(GLOB_RECURSE parser2_hdr LIST_DIRECTORIES false "parser/*.hpp")
@@ -109,8 +97,6 @@ target_include_directories(evaluator
                 "${CMAKE_CURRENT_SOURCE_DIR}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/evtree"
 		"${CMAKE_CURRENT_SOURCE_DIR}/parser"
-        SYSTEM PUBLIC
-                "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/nlohman>"
         )
 target_link_libraries(evaluator PUBLIC absd stdc++fs PRIVATE loader)
 install(DIRECTORY eval DESTINATION "${inst_incdir}" FILES_MATCHING PATTERN "*.hpp")

@@ -9,11 +9,8 @@
 #pragma once
 
 #include <memory>
-#include <cppjinja/json.hpp>
 
 namespace cppjinja {
-
-using json = nlohmann::json;
 
 /// compiled template
 class evtree;
