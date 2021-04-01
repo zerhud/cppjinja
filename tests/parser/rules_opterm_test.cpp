@@ -42,8 +42,8 @@ BOOST_AUTO_TEST_CASE(common)
 	BOOST_REQUIRE_THROW( result = txt::parse(txt::op_term_start, data), std::exception );
 
 	data = "{=+";
-	cppjinja::parser_env env; env.output.b="{=";
-	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::op_term_start, data, std::move(env)) );
+	cppjinja::throw_cerr_env env(""); env.output.b="{=";
+	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::op_term_start, data, &env) );
 	BOOST_TEST( result.trim );
 }
 

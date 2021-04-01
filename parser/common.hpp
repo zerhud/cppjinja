@@ -18,6 +18,7 @@
 
 namespace cppjinja {
 
+struct parser_env_tag;
 struct parser_env {
 	struct {
 		std::string b= "<=";
@@ -31,6 +32,21 @@ struct parser_env {
 		std::string b="<#";
 		std::string e="#>";
 	} cmt;
+
+	static const parser_env* default_env() ;
+
+	virtual std::pmr::string file_name() const =0 ;
+	virtual void on_error() const =0 ;
+	virtual std::ostream& elog() const =0 ;
+};
+
+class throw_cerr_env : public parser_env {
+	std::pmr::string cur_file;
+public:
+	throw_cerr_env(std::string_view file_name);
+	std::pmr::string file_name() const override ;
+	void on_error() const override ;
+	std::ostream& elog() const override ;
 };
 
 namespace ast {

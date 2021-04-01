@@ -20,7 +20,8 @@ namespace cppjinja::text {
 	// ---
 	// helpers function
 	// ---
-	constexpr auto get_data = [](auto& ctx){ return x3::get<parser_env>(ctx); };
+	constexpr auto get_data = [](auto& ctx) -> const parser_env& {
+		return x3::get<parser_env_tag>(ctx).get(); };
 	const auto check_if_term_start    = [](auto& ctx){
 		_pass(ctx) = _attr(ctx) == get_data(ctx).output.b; };
 	const auto check_if_term_end      = [](auto& ctx){
