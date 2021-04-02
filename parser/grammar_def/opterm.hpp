@@ -76,12 +76,12 @@ namespace cppjinja::text {
 	// ---
 	// tags
 	// ---
-	class op_term_start_class      : x3::annotate_on_success { };
-	class op_term_end_class        : x3::annotate_on_success { };
-	class block_term_start_class   : x3::annotate_on_success { };
-	class block_term_end_class     : x3::annotate_on_success { };
-	class comment_term_start_class : x3::annotate_on_success { };
-	class comment_term_end_class   : x3::annotate_on_success { };
+	struct op_term_start_class      : error_handler, x3::annotate_on_success { };
+	struct op_term_end_class        : error_handler, x3::annotate_on_success { };
+	struct block_term_start_class   : error_handler, x3::annotate_on_success { };
+	struct block_term_end_class     : error_handler, x3::annotate_on_success { };
+	struct comment_term_start_class : error_handler, x3::annotate_on_success { };
+	struct comment_term_end_class   : error_handler, x3::annotate_on_success { };
 
 	// ---
 	// definitions

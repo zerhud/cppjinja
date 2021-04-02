@@ -118,20 +118,20 @@ namespace cppjinja::text {
 	    >> lit("endcall") >> block_term_end
 	    ;
 
-	class block_if_class          : x3::annotate_on_success {};
-	class block_for_class         : x3::annotate_on_success {};
-	class block_raw_class         : x3::annotate_on_success {};
-	class block_set_class         : x3::annotate_on_success {};
-	class block_call_class        : x3::annotate_on_success {};
-	class else_thread_class       : x3::annotate_on_success {};
-	class block_macro_class       : x3::annotate_on_success {};
-	class block_named_class       : x3::annotate_on_success {};
-	class block_filtered_class    : x3::annotate_on_success {};
-	class block_raw_text_class    : x3::annotate_on_success {};
-	class call_parameter_calss    : x3::annotate_on_success {};
-	class block_free_text_class   : x3::annotate_on_success {};
-	class macro_parameter_calss   : x3::annotate_on_success {};
-	class block_content_vec_class : x3::annotate_on_success {};
+	struct block_if_class          : error_handler {};
+	struct block_for_class         : error_handler, x3::annotate_on_success {};
+	struct block_raw_class         : error_handler, x3::annotate_on_success {};
+	struct block_set_class         : error_handler, x3::annotate_on_success {};
+	struct block_call_class        : error_handler, x3::annotate_on_success {};
+	struct else_thread_class       : error_handler, x3::annotate_on_success {};
+	struct block_macro_class       : error_handler, x3::annotate_on_success {};
+	struct block_named_class       : error_handler, x3::annotate_on_success {};
+	struct block_filtered_class    : error_handler, x3::annotate_on_success {};
+	struct block_raw_text_class    : error_handler, x3::annotate_on_success {};
+	struct call_parameter_class    : error_handler, x3::annotate_on_success {};
+	struct block_free_text_class   : error_handler, x3::annotate_on_success {};
+	struct macro_parameter_calss   : error_handler, x3::annotate_on_success {};
+	struct block_content_vec_class : error_handler, x3::annotate_on_success {};
 
 	BOOST_SPIRIT_DEFINE( block_if )
 	BOOST_SPIRIT_DEFINE( block_for )

@@ -92,7 +92,7 @@ using value_term_var = x3::variant<
 	, binary_op
 > ;
 
-struct value_term : value_term_var
+struct value_term : value_term_var, x3::position_tagged
 {
 	using base_type::base_type;
 	using base_type::operator=;

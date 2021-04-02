@@ -14,13 +14,13 @@
 namespace cppjinja::text {
 	namespace x3 = boost::spirit::x3;
 
-	class op_out_class;
-	class op_comment_class;
-	class op_comment_value_class;
-	class op_set_class;
-	class op_include_class;
-	class filter_call_class;
-	class filename_class;
+	struct op_out_class;
+	struct op_comment_class;
+	struct op_comment_value_class;
+	struct op_set_class;
+	struct op_include_class;
+	struct filter_call_class;
+	struct filename_class;
 
 	const x3::rule<op_out_class, ast::op_out> op_out = "op_out";
 	const x3::rule<op_comment_value_class, ast::string_t> op_comment_value = "op_comment_value";

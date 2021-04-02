@@ -14,21 +14,21 @@
 namespace cppjinja::text {
 	namespace x3 = boost::spirit::x3;
 
-	class block_if_class;
-	class block_raw_class;
-	class block_for_class;
-	class block_set_class;
-	class block_call_class;
-	class else_thread_class;
-	class block_macro_class;
-	class block_named_class;
-	class block_content_class;
-	class block_filtered_class;
-	class block_raw_text_class;
-	class call_parameter_class;
-	class block_free_text_class;
-	class macro_parameter_class;
-	class block_content_vec_class;
+	struct block_if_class;
+	struct block_raw_class;
+	struct block_for_class;
+	struct block_set_class;
+	struct block_call_class;
+	struct else_thread_class;
+	struct block_macro_class;
+	struct block_named_class;
+	struct block_content_class;
+	struct block_filtered_class;
+	struct block_raw_text_class;
+	struct call_parameter_class;
+	struct block_free_text_class;
+	struct macro_parameter_class;
+	struct block_content_vec_class;
 
 	const x3::rule<block_free_text_class, std::string> block_free_text = "block_free_text";
 

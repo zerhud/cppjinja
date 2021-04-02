@@ -15,14 +15,14 @@ namespace cppjinja::text {
 
 	namespace x3 = boost::spirit::x3;
 
-	class extend_st_class;
-	class extend_st_ex_class;
+	struct extend_st_class;
+	struct extend_st_ex_class;
 
-	class tmpl_class;
-	class tmpl_ex_class;
-	class tmpl_original_class;
+	struct tmpl_class;
+	struct tmpl_ex_class;
+	struct tmpl_original_class;
 
-	class file_class;
+	struct file_class;
 
 	const x3::rule<extend_st_class, ast::extend_st> extend_st = "extend_st";
 	const x3::rule<extend_st_ex_class, ast::extend_st> extend_st_ex = "extend_st_ex";

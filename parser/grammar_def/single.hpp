@@ -35,12 +35,12 @@ namespace cppjinja::text {
 	        >> block_term_end
 	        ;
 
-	class op_out_class      : x3::annotate_on_success { };
-	class op_set_class      : x3::annotate_on_success { };
-	class op_comment_class  : x3::annotate_on_success { };
-	class op_include_class  : x3::annotate_on_success { };
-	class filter_call_class : x3::annotate_on_success { };
-	class filename_class    : x3::annotate_on_success { };
+	struct op_out_class      : error_handler, x3::annotate_on_success { };
+	struct op_set_class      : error_handler, x3::annotate_on_success { };
+	struct op_comment_class  : error_handler, x3::annotate_on_success { };
+	struct op_include_class  : error_handler, x3::annotate_on_success { };
+	struct filter_call_class : error_handler, x3::annotate_on_success { };
+	struct filename_class    : error_handler, x3::annotate_on_success { };
 
 	BOOST_SPIRIT_DEFINE( op_out )
 	BOOST_SPIRIT_DEFINE( op_comment )

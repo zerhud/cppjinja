@@ -10,26 +10,34 @@
 
 #include <type_traits>
 #include <boost/spirit/include/support_istream_iterator.hpp>
+#include <boost/spirit/home/x3/support/utility/error_reporting.hpp>
 #include "common.hpp"
 
 namespace cppjinja::text {
 
 	namespace x3 = boost::spirit::x3;
 
-
-	template<typename EnvTag, typename Parser, typename Env>
-	auto make_grammar(const Parser& parser, const Env& env)
-	{
-		return boost::spirit::x3::with<
-		        EnvTag,std::reference_wrapper<const Env>
-		        >(std::cref(env))[parser];
-	}
-
 	using iterator_type = boost::spirit::istream_iterator;
+	using error_handler_type = x3::error_handler<iterator_type>;
 	using context_type = x3::context<
 	    parser_env_tag,std::reference_wrapper<const parser_env>,
-	    x3::phrase_parse_context<decltype(x3::space)>::type
+	    x3::context<
+	      x3::error_handler_tag, std::reference_wrapper<error_handler_type>,
+	      x3::phrase_parse_context<decltype(x3::space)>::type
+	    >
 	>;
+
+	template<typename EnvTag, typename Parser, typename Env, typename ErrHndl>
+	auto make_grammar(const Parser& parser, const Env& env, ErrHndl& eh)
+	{
+		return x3::with<x3::error_handler_tag>(std::ref(eh))
+		        [
+		            boost::spirit::x3::with<EnvTag>(std::cref(env))
+		            [
+		                parser
+		            ]
+		        ];
+	}
 
 	template<typename Id, typename Attribute, typename Iterator>
 	Attribute parse(
@@ -38,13 +46,14 @@ namespace cppjinja::text {
 	        const parser_env* env=parser_env::default_env())
 	{
 		Attribute result;
+		x3::error_handler eh(begin,end, env->elog(), env->file_name());
 		bool success = boost::spirit::x3::phrase_parse(
 		            begin, end,
-		            make_grammar<parser_env_tag>(rule, *env),
+		            make_grammar<parser_env_tag>(rule, *env, eh),
 		            boost::spirit::x3::space,
 		            result);
 
-		if(!success) throw std::runtime_error("cannot parse");
+		if(!success) env->on_error();
 
 		return result;
 	}

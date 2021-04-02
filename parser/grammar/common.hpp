@@ -14,18 +14,18 @@
 namespace cppjinja::text {
 	namespace x3 = boost::spirit::x3;
 
-	class quoted_string_class;
-	class single_var_name_class;
-	class var_name_class;
-	class binary_op_class;
-	class function_call_parameter_class;
-	class function_call_class;
-	class value_term_class;
-	class array_class;
-	class tuple_class;
-	class array_call_class;
-	class array_calls_class;
-	class array_call_tail_class;
+	struct quoted_string_class;
+	struct single_var_name_class;
+	struct var_name_class;
+	struct binary_op_class;
+	struct function_call_parameter_class;
+	struct function_call_class;
+	struct value_term_class;
+	struct array_class;
+	struct tuple_class;
+	struct array_call_class;
+	struct array_calls_class;
+	struct array_call_tail_class;
 
 	const x3::rule<quoted_string_class, ast::string_t> quoted_string = "quoted_string";
 	const x3::rule<single_var_name_class, ast::string_t> single_var_name = "single_var_name";

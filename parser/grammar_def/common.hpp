@@ -14,9 +14,46 @@
 #include "grammar/opterm.hpp"
 
 namespace cppjinja::text {
-	//auto& char_ = x3::unicode::char_;
-	//auto& space = x3::unicode::space;
-	//using boost::spirit::x3::standard_wide::lit;
+
+struct error_handler
+{
+	template <typename Iterator, typename Exception, typename Context>
+	x3::error_handler_result on_error(
+	        Iterator&, Iterator const&
+	      , Exception const& x, Context const& context)
+	{
+		auto& error_handler = x3::get<x3::error_handler_tag>(context).get();
+		const parser_env& env = x3::get<parser_env_tag>(context).get();
+		error_handler(x.where(), env.format_err_msg(x.which()));
+		env.on_error();
+		return x3::error_handler_result::fail;
+	}
+
+	// bug workaround: sizeof of Id incomplete type (x3::on_success class),
+	// just copy pase it's code here
+	template <typename Iterator, typename Context, typename... Types>
+	inline void on_success(Iterator const& first, Iterator const& last
+	  , x3::variant<Types...>& ast, Context const& context)
+	{
+		ast.apply_visitor(x3::make_lambda_visitor<void>([&](auto& node)
+		{
+		this->on_success(first, last, node, context);
+		}));
+	}
+
+	template <typename T, typename Iterator, typename Context>
+	inline void on_success(Iterator const& first, Iterator const& last
+	  , T& ast, Context const& context)
+	{
+		auto& error_handler = x3::get<x3::error_handler_tag>(context).get();
+		error_handler.tag(ast, first, last);
+	}
+};
+
+    //auto& char_ = x3::unicode::char_;
+    //auto& space = x3::unicode::space;
+    //using boost::spirit::x3::standard_wide::lit;
+
 
 	extern decltype(x3::char_)& char_;
 	extern decltype(x3::space)& space;
@@ -72,18 +109,18 @@ namespace cppjinja::text {
 	        >> x3::omit[')']
 		;
 
-	class quoted_string_class   : x3::annotate_on_success {};
-	class single_var_name_class : x3::annotate_on_success {};
-	class var_name_class        : x3::annotate_on_success {};
-	class binary_op_class       : x3::annotate_on_success {};
-	class value_term_class      : x3::annotate_on_success {};
-	class function_call_class   : x3::annotate_on_success {};
-	class function_call_parameter_class : x3::annotate_on_success {};
-	class array_class : x3::annotate_on_success {};
-	class tuple_class : x3::annotate_on_success {};
-	class array_call_class      : x3::annotate_on_success {};
-	class array_calls_class     : x3::annotate_on_success {};
-	class array_call_tail_class : x3::annotate_on_success {};
+	struct quoted_string_class   {};
+	struct single_var_name_class {};
+	struct var_name_class        {};
+	struct binary_op_class       {};
+	struct value_term_class      : error_handler, x3::annotate_on_success {};
+	struct function_call_class   : error_handler, x3::annotate_on_success {};
+	struct function_call_parameter_class : error_handler, x3::annotate_on_success {};
+	struct array_class : error_handler, x3::annotate_on_success {};
+	struct tuple_class : error_handler, x3::annotate_on_success {};
+	struct array_call_class      : error_handler, x3::annotate_on_success {};
+	struct array_calls_class     : error_handler, x3::annotate_on_success {};
+	struct array_call_tail_class : error_handler, x3::annotate_on_success {};
 
 	BOOST_SPIRIT_DEFINE( quoted_string )
 	BOOST_SPIRIT_DEFINE( single_var_name )

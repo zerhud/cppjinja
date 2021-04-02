@@ -35,18 +35,20 @@ struct parser_env {
 
 	static const parser_env* default_env() ;
 
-	virtual std::pmr::string file_name() const =0 ;
+	virtual std::string file_name() const =0 ;
 	virtual void on_error() const =0 ;
 	virtual std::ostream& elog() const =0 ;
+	virtual std::string format_err_msg(const std::string& which_rule) const =0;
 };
 
 class throw_cerr_env : public parser_env {
-	std::pmr::string cur_file;
+	std::string cur_file;
 public:
 	throw_cerr_env(std::string_view file_name);
-	std::pmr::string file_name() const override ;
+	std::string file_name() const override ;
 	void on_error() const override ;
 	std::ostream& elog() const override ;
+	std::string format_err_msg(const std::string& which_rule) const override ;
 };
 
 namespace ast {

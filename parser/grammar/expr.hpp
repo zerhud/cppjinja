@@ -15,32 +15,32 @@ namespace cppjinja::text::expr_ops {
 
 namespace x3 = boost::spirit::x3;
 
-class term_class;
-class bool_class;
-class quoted_string_class;
+struct term_class;
+struct bool_class;
+struct quoted_string_class;
 
-class list_class;
-class tuple_class;
-class dict_class;
+struct list_class;
+struct tuple_class;
+struct dict_class;
 
-class eq_assign_class;
-class in_assign_class;
-class math_class;
-class mathop_class;
-class concat_class;
-class in_check_class;
-class cmp_check_class;
-class logic_check_class;
-class negate_class;
-class fnc_call_class;
-class filter_call_class;
-class filter_class;
-class single_var_name_class;
-class point_class;
-class op_if_class;
+struct eq_assign_class;
+struct in_assign_class;
+struct math_class;
+struct mathop_class;
+struct concat_class;
+struct in_check_class;
+struct cmp_check_class;
+struct logic_check_class;
+struct negate_class;
+struct fnc_call_class;
+struct filter_call_class;
+struct filter_class;
+struct single_var_name_class;
+struct point_class;
+struct op_if_class;
 
-class expr_class;
-class expr_bool_class;
+struct expr_class;
+struct expr_bool_class;
 
 const x3::rule<bool_class, bool> bool_rule = "bool_rule";
 const x3::rule<term_class, ast::expr_ops::term> term = "term";
