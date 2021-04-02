@@ -27,8 +27,8 @@ BOOST_FIXTURE_TEST_CASE(tmpl, parser_fixture)
 	expect_fn("test");
 	MOCK_EXPECT(env->on_error);
 	txt::parse(txt::file, "<% template tmpl %> <%endtemplate%>", env.get());
-	txt::parse(txt::file, "<% templ %>abrakadabra", env.get());
-	std::cout << eout.str() << std::endl;
+	BOOST_TEST(eout.str().find("In file test") != std::string::npos);
+	BOOST_TEST(eout.str().find("block_content_vec") != std::string::npos);
 }
 BOOST_AUTO_TEST_SUITE_END() // errors
 BOOST_AUTO_TEST_SUITE_END() // phase_parse

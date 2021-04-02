@@ -31,8 +31,8 @@ namespace cppjinja::text {
 	auto const tmpl_original_def =
 	           x3::attr(std::string(""))
 	        >> *extend_st
-	        >  block_content_vec
-	        > x3::eoi
+	        >> block_content_vec
+	        >> x3::eoi
 	        ;
 	auto const tmpl_ex_def =
 	           omit[block_term_start]
