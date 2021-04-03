@@ -2,6 +2,13 @@ find_file(turtle turtle/mock.hpp)
 get_filename_component(turtle "${turtle}" DIRECTORY)
 get_filename_component(turtle "${turtle}" DIRECTORY)
 
+find_package(Boost COMPONENTS unit_test_framework program_options REQUIRED)
+add_executable(jparse tests/jparse.cpp tests/jparse/json_prov.cpp)
+target_link_libraries(jparse PRIVATE
+	evaluator loader parser2 absd ${Boost_LIBRARIES})
+target_include_directories(jparse PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+target_compile_definitions(jparse PRIVATE -DBOOST_JSON_STANDALONE)
+
 # unit tests...
 enable_testing()
 macro(add_unit_test tname path lib)

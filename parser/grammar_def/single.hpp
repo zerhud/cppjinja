@@ -28,11 +28,11 @@ namespace cppjinja::text {
 	auto const op_include_def =
 	           block_term_start
 	        >> omit[lit("include")]
-	        >> filename
-	        >> -(omit[lit("ignore") >> lit("missing")] >> x3::attr(true))
-	        >> -((lit("with")    >> lit("context") >> x3::attr(true))
+	        > filename
+	        > -(omit[lit("ignore") >> lit("missing")] >> x3::attr(true))
+	        > -((lit("with")    >> lit("context") >> x3::attr(true))
 	           | (lit("without") >> lit("context") >> x3::attr(false)))
-	        >> block_term_end
+	        > block_term_end
 	        ;
 
 	struct op_out_class      : error_handler, x3::annotate_on_success { };
