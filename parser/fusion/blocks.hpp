@@ -20,8 +20,13 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
 		cppjinja::ast::block_if,
 		left_open, condition, left_close,
-		content, content, else_block,
+		content, content, elifs, else_block,
 		right_open, right_close)
+
+BOOST_FUSION_ADAPT_STRUCT(
+		cppjinja::ast::block_elif,
+		left_open, condition, left_close,
+		content, content)
 
 BOOST_FUSION_ADAPT_STRUCT(
 		cppjinja::ast::else_thread,

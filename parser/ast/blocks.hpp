@@ -61,10 +61,17 @@ struct else_thread
 	std::vector<block_content> content;
 };
 
+struct block_elif : block
+{
+	expr_ops::expr_bool condition;
+	std::vector<block_content> content;
+};
+
 struct block_if : block
 {
 	expr_ops::expr_bool condition;
 	std::vector<block_content> content;
+	std::vector<block_elif> elifs;
 	std::optional<else_thread> else_block;
 };
 

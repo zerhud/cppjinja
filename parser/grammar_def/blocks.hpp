@@ -57,10 +57,15 @@ namespace cppjinja::text {
 
 	const auto block_if_def =
 		   block_term_start >> omit[lit("if")] >> expr_ops::expr_bool
-		>> block_term_end_cnt >> *block_content
+		>> block_term_end_cnt >> *block_content >> *block_elif
 		>> -else_thread >> block_term_start
 		>> lit("endif") >> block_term_end
 		;
+
+	const auto block_elif_def =
+	       block_term_start >> omit[lit("elif")] >> expr_ops::expr_bool
+	    >> block_term_end_cnt >> *block_content
+	    ;
 
 	const auto else_thread_def =
 		   block_term_start
@@ -122,6 +127,7 @@ namespace cppjinja::text {
 	struct block_for_class         : error_handler, x3::annotate_on_success {};
 	struct block_raw_class         : error_handler, x3::annotate_on_success {};
 	struct block_set_class         : error_handler, x3::annotate_on_success {};
+	struct block_elif_class        : error_handler, x3::annotate_on_success {};
 	struct block_call_class        : error_handler, x3::annotate_on_success {};
 	struct else_thread_class       : error_handler, x3::annotate_on_success {};
 	struct block_macro_class       : error_handler, x3::annotate_on_success {};
@@ -137,6 +143,7 @@ namespace cppjinja::text {
 	BOOST_SPIRIT_DEFINE( block_for )
 	BOOST_SPIRIT_DEFINE( block_raw )
 	BOOST_SPIRIT_DEFINE( block_set )
+	BOOST_SPIRIT_DEFINE( block_elif )
 	BOOST_SPIRIT_DEFINE( block_call )
 	BOOST_SPIRIT_DEFINE( else_thread )
 	BOOST_SPIRIT_DEFINE( block_macro )

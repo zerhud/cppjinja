@@ -19,6 +19,7 @@ namespace cppjinja::text {
 	struct block_for_class;
 	struct block_set_class;
 	struct block_call_class;
+	struct block_elif_class;
 	struct else_thread_class;
 	struct block_macro_class;
 	struct block_named_class;
@@ -41,6 +42,7 @@ namespace cppjinja::text {
 	const x3::rule<block_if_class,  ast::block_if>  block_if  = "block_if";
 	const x3::rule<block_for_class, ast::block_for> block_for = "block_for";
 	const x3::rule<block_set_class, ast::block_set> block_set = "block_set";
+	const x3::rule<block_elif_class, ast::block_elif> block_elif = "block_elif";
 	const x3::rule<else_thread_class, ast::else_thread>  else_thread  = "else_thread";
 
 	const x3::rule<block_call_class, ast::block_call> block_call = "block_call";
@@ -55,6 +57,7 @@ namespace cppjinja::text {
 	BOOST_SPIRIT_DECLARE(decltype(block_raw))
 	BOOST_SPIRIT_DECLARE(decltype(block_set))
 	BOOST_SPIRIT_DECLARE(decltype(block_call))
+	BOOST_SPIRIT_DECLARE(decltype(block_elif))
 	BOOST_SPIRIT_DECLARE(decltype(else_thread))
 	BOOST_SPIRIT_DECLARE(decltype(block_named))
 	BOOST_SPIRIT_DECLARE(decltype(block_macro))
