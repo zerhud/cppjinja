@@ -51,9 +51,9 @@ namespace cppjinja::text {
 	// ---
 	// helpers expressions
 	// ---
-	const auto check_trim = -char_('+')[set_trim];
+	const auto check_trim = -((char_('+')[set_trim] | char_('-')[set_trim]) >> !x3::int_);
 	const auto op_seq_def =
-		x3::repeat(2)[char_("!#$%&()*,-./:;<=>?@[\\]^_`{|}~")];
+	    x3::repeat(2)[char_("!#$%&()*,./:;<=>?@[\\]^_`{|}~")];
 
 	// ---
 	// rules

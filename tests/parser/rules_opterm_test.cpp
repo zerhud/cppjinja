@@ -37,6 +37,9 @@ BOOST_AUTO_TEST_CASE(common)
 	data = "<=+";
 	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::op_term_start, data) );
 	BOOST_TEST( result.trim );
+	data = "<=-";
+	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::op_term_start, data) );
+	BOOST_TEST( result.trim );
 
 	data = "<%";
 	BOOST_REQUIRE_THROW( result = txt::parse(txt::op_term_start, data), std::exception );
