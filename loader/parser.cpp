@@ -65,6 +65,7 @@ cppjinja::parser& cppjinja::parser::parse(std::filesystem::path file)
 
 cppjinja::parser& cppjinja::parser::parse(std::istream& data)
 {
+	data >> std::noskipws;
 	boost::spirit::istream_iterator end;
 	boost::spirit::istream_iterator begin(data);
 
