@@ -43,6 +43,19 @@ BOOST_DATA_TEST_CASE(
 }
 
 BOOST_DATA_TEST_CASE(
+        quoted2_string
+      ,   utd::make("\"kuku\""s, "\"ku ku\""s, "\"\""s, "\"привет\""s, "\"k\\k\""s, "\"ok\\\"ok\""s)
+        ^ utd::make("kuku"s,   "ku ku"s,   ""s,   "привет"s  , "k\\k"s,   "ok\"ok"s)
+      , data, good_result
+      )
+{
+	std::string result;
+	BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(
+	            cppjinja::text::quoted_string, data) );
+	BOOST_TEST( result == good_result );
+}
+
+BOOST_DATA_TEST_CASE(
         single_var_name
       ,   utd::make("kuku"s, ""s, "a8_"s, "8a"s)
         ^ utd::make("kuku"s, ""s, "a8_"s, ""s)

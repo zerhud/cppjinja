@@ -64,7 +64,10 @@ struct error_handler
 
 	auto const quoted_string_1_def = *(char_ >> !lit('\'') | lit("\\'") >> x3::attr('\'')) >> char_;
 	auto const quoted_string_2_def = *(char_ >> !lit('"') | lit("\\\"") >> x3::attr('"')) >> char_;
-	auto const quoted_string_def = lexeme[lit("'") >> -quoted_string_1_def >> lit("'")];
+	auto const quoted_string_def =
+	        (lexeme[lit("'") >> -quoted_string_1_def >> lit("'")])
+	      | (lexeme[lit("\"") >> -quoted_string_2_def >> lit("\"")])
+	                           ;
 
 	auto const single_var_name_def = lexeme[char_("A-Za-z_") >> *char_("0-9A-Za-z_")];
 
