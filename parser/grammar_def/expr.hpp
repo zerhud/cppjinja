@@ -139,10 +139,10 @@ static auto const fnc_call_def = lvalue >> lit('(') >> -(expr % ',') >> lit(')')
 static auto const filter_call_def = lvalue >> -( lit('(') >> -expr % ',' >> lit(')') );
 static auto const filter_def = expr_filter >> lit('|') >> filter_call % '|';
 
-static auto const op_if_def = expr_cmp_check >> lit("if") >> expr_bool >> -(lit("else") >> expr_cmp_check);
+static auto const op_if_def = expr_cmp_check >> lit("if") > expr_bool > -(lit("else") > expr_cmp_check);
 
 static auto const expr_in_pan_def = lit('(') >> expr >> lit(')');
-static auto const expr_bool_def =
+static auto const expr_bool_def = !keywords_def >>
                        op_if | in_check | logic_check | cmp_check | filter | list | tuple | dict | concat | math | negate | fnc_call | point | single_var_name | term;
 static auto const expr_ipoint_def = filter | concat | math | fnc_call | point | single_var_name | term;
 
