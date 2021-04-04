@@ -34,6 +34,8 @@ int main(int argc, char** argv)
 	jparser.parse(opt_vals["tmpl"].as<std::string>().c_str());
 	for(auto& t:jparser.tmpls()) ev.add_tmpl(t);
 
+	std::cout << "parsed ok" << std::endl;
+
 	std::string json_data;
 	std::cin >> json_data;
 	cogen::jinja_json_prov data(boost::json::parse(json_data));
