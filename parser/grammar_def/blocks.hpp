@@ -56,10 +56,10 @@ namespace cppjinja::text {
 		>> lit("endraw") >> block_term_end;
 
 	const auto block_if_def =
-		   block_term_start >> omit[lit("if")] >> expr_ops::expr_bool
-		>> block_term_end_cnt >> *block_content >> *block_elif
-		>> -else_thread >> block_term_start
-		>> lit("endif") >> block_term_end
+	       block_term_start >> omit[lit("if")] > expr_ops::expr_bool
+	    > block_term_end_cnt > *block_content > *block_elif
+	    > -else_thread > block_term_start
+	    > lit("endif") > block_term_end
 		;
 
 	const auto block_elif_def =
@@ -74,14 +74,14 @@ namespace cppjinja::text {
 		;
 
 	const auto block_for_def =
-		   block_term_start
+	       block_term_start
 	    >> lit("for") > (single_var_name % ',')
-	    > lit("in") > expr_ops::expr
-	    > -(lit("recursive") > x3::attr(true))
-	    > block_term_end_cnt > *block_content
-	    > -else_thread
-	    > block_term_start
-	    > lit("endfor") >> block_term_end
+	    >  lit("in") > expr_ops::expr
+	    >  -(lit("recursive") > x3::attr(true))
+	    >  block_term_end_cnt > *block_content
+	    >  -else_thread
+	    >  block_term_start
+	    >  lit("endfor") >> block_term_end
 		;
 
 	const auto block_set_def =
