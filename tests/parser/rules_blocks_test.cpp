@@ -122,6 +122,23 @@ BOOST_AUTO_TEST_CASE(else_thread)
 	BOOST_TEST_REQUIRE( if_cnt != nullptr );
 	BOOST_TEST( *if_cnt == " never seen "s );
 }
+BOOST_AUTO_TEST_CASE(elif_blocks)
+{
+	ast::block_if result;
+	std::string text = "<% if 1==2 %>no<%elif 1==3%>bad<%elif 1==1%>got<%else%>e<%endif%>";
+	BOOST_REQUIRE_NO_THROW( result = cppjinja::text::parse(txt::block_if, text) );
+	BOOST_TEST_REQUIRE( result.else_block.has_value() );
+	BOOST_TEST_REQUIRE( result.else_block->content.size() == 1 );
+	BOOST_TEST_REQUIRE( result.elifs.size() == 2);
+
+	auto* cnt_e1 = boost::get<std::string>(&result.elifs[0].content[0]);
+	BOOST_TEST_REQUIRE( cnt_e1!=nullptr );
+	BOOST_TEST( *cnt_e1 == "bad" );
+
+	auto* cnt_e2 = boost::get<std::string>(&result.elifs[1].content[0]);
+	BOOST_TEST_REQUIRE( cnt_e2!=nullptr );
+	BOOST_TEST( *cnt_e2 == "got" );
+}
 BOOST_AUTO_TEST_SUITE_END() // block_if
 
 BOOST_AUTO_TEST_SUITE(inner)
