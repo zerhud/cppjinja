@@ -158,8 +158,18 @@ void cppjinja::evt::tmpl_compiler::operator()(
         ast::forward_ast<cppjinja::ast::block_if>& obj)
 {
 	auto if_node = create_rendered_node<evtnodes::block_if>(obj.get());
-	details::push_pop_raii rnd_raii(rnd_stack, if_node);
+	std::vector<details::push_pop_raii<std::vector<node*>,node>> rnd_raii;
+	rnd_raii.reserve(1 + obj.get().elifs.size());
+	rnd_raii.emplace_back(rnd_stack, if_node);
 	make_content_block(make_ri_for_if(obj.get()), std::move(obj.get().content));
+	for(auto& elif:obj.get().elifs) {
+		ast::block_if fake_if;
+		static_cast<ast::block&>(fake_if) = std::move(static_cast<ast::block&>(elif));
+		fake_if.condition = std::move(elif.condition);
+		if_node = create_rendered_node<evtnodes::block_if>(fake_if);
+		rnd_raii.emplace_back(rnd_stack, if_node);
+		make_content_block(make_ri_for_if(obj.get()), std::move(elif.content));
+	}
 	if(obj.get().else_block)
 		make_content_block(
 		            make_ri_for_else(obj.get()),

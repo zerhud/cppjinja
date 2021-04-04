@@ -291,6 +291,18 @@ BOOST_FIXTURE_TEST_CASE(if_else, mock_exenv_fixture)
 	BOOST_TEST(mb_rnd[3]->rinfo().trim_right == false);
 }
 
+BOOST_FIXTURE_TEST_CASE(if_elif1_else, mock_exenv_fixture)
+{
+	compiled_tmpl tree = build_tree("<% if 1==2 +%><%elif 1==1%><%+ else %><% set a='a' %><% endif +%>cnt");
+	BOOST_TEST(make_node_seq_str(tree.main_block(), tree.render_tree.all_tree()) ==
+	           "block_named,block_if,content_block.,block_if,content_block.,content_block,op_set....,content..");
+	auto mb_rnd = make_node_seq(tree.main_block(), tree.render_tree.all_tree());
+	BOOST_TEST(mb_rnd[2]->rinfo().trim_left == true);
+	BOOST_TEST(mb_rnd[2]->rinfo().trim_right == true);
+	BOOST_TEST(mb_rnd[3]->rinfo().trim_left == false);
+	BOOST_TEST(mb_rnd[3]->rinfo().trim_right == false);
+}
+
 BOOST_AUTO_TEST_CASE(tmpl_name)
 {
 	compiled_tmpl tree = build_tree("<% template kuku %>c<%endtemplate%>");
