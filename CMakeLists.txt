@@ -73,7 +73,7 @@ install(DIRECTORY parser DESTINATION "${inst_incdir}" FILES_MATCHING PATTERN "*.
 file(GLOB_RECURSE loader_src LIST_DIRECTORIES false "loader/*.cpp")
 file(GLOB_RECURSE loader_hdr LIST_DIRECTORIES false "loader/*.hpp")
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${loader_src} ${loader_hdr})
-add_library(loader SHARED ${loader_src} ${loader_hdr})
+add_library(loader STATIC ${loader_src} ${loader_hdr})
 target_include_directories(loader PRIVATE "${Boost_INCLUDE_DIRS}" "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(loader PUBLIC stdc++fs PRIVATE parser2)
 install(DIRECTORY loader DESTINATION "${inst_incdir}" FILES_MATCHING PATTERN "*.hpp")
@@ -89,7 +89,7 @@ source_group(
 list(APPEND eval_headers ${lohman_json_file})
 list(APPEND eval_headers ${evaluator_hdr})
 list(APPEND eval_headers ${eval_hdr})
-add_library(evaluator SHARED ${eval_src} ${evaluator_src} ${eval_headers})
+add_library(evaluator STATIC ${eval_src} ${evaluator_src} ${eval_headers})
 set_target_properties(evaluator PROPERTIES PUBLIC_HEADER "${lohman_json_file}")
 target_include_directories(evaluator
         PRIVATE
