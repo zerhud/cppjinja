@@ -44,8 +44,8 @@ enum class data_type {
 
 struct reflection_info {
 	data_type type;
-	std::uint64_t size;
-	std::pmr::vector<std::string_view> keys;
+	std::uint64_t size=0;
+	std::pmr::vector<std::string_view> keys{};
 
 	auto operator <=> (const reflection_info&) const noexcept =default ;
 };
