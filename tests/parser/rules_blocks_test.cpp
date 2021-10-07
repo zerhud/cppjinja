@@ -191,6 +191,15 @@ BOOST_AUTO_TEST_CASE(block_for_else)
 	BOOST_TEST( result.else_block->content.size() == 1);
 }
 
+BOOST_AUTO_TEST_CASE(block_for_if)
+{
+	ast::block_for result;
+	std::string text = "<% for key in keys if a %>f<%endfor%>"s;
+	result = txt::parse(txt::block_for, text);
+	BOOST_CHECK( !result.else_block.has_value() );
+	BOOST_TEST( result.content.size() == 1);
+}
+
 BOOST_DATA_TEST_CASE(
 	  block_macro
 	, utd::make("macro m"s, "macro m()"s, "macro m(n, n=v)"s)
