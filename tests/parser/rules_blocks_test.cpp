@@ -197,6 +197,7 @@ BOOST_AUTO_TEST_CASE(block_for_if)
 	std::string text = "<% for key in keys if a %>f<%endfor%>"s;
 	result = txt::parse(txt::block_for, text);
 	BOOST_CHECK( !result.else_block.has_value() );
+	BOOST_CHECK( result.condition.has_value() );
 	BOOST_TEST( result.content.size() == 1);
 }
 

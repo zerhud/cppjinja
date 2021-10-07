@@ -80,6 +80,7 @@ struct block_for : block
 	typedef x3::variant<var_name, function_call> value_t;
 
 	expr_ops::expr value;
+	std::optional<expr_ops::expr_bool> condition;
 	bool recursive=false;
 	std::vector<string_t> vars;
 	std::vector<block_content> content;

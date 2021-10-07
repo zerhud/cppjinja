@@ -176,5 +176,6 @@ std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evtnodes::block_for_object::call(
     std::pmr::vector<function_parameter> params) const
 {
+	// the recursive call (same block other data, renders inside parent)
 	return nullptr;
 }

@@ -76,7 +76,8 @@ namespace cppjinja::text {
 	const auto block_for_def =
 	       block_term_start
 	    >> lit("for") > (single_var_name % ',')
-	    >  lit("in") > expr_ops::expr
+	    >  lit("in") > expr_ops::expr_op_if
+	    >  -(lit("if") >> expr_ops::expr_bool)
 	    >  -(lit("recursive") > x3::attr(true))
 	    >  block_term_end_cnt > *block_content
 	    >  -else_thread
