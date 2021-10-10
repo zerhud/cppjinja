@@ -8,8 +8,6 @@
 
 #include "cmp_check.hpp"
 
-
-
 void cppjinja::evt::expr_evals::cmp_check::throw_int_and_string_op() const
 {
 	throw std::runtime_error("cannot compare string and number");
@@ -21,9 +19,7 @@ cppjinja::evt::expr_evals::cmp_check::cmp_check(cppjinja::ast::expr_ops::cmp_op 
 }
 
 cppjinja::ast::expr_ops::term cppjinja::evt::expr_evals::cmp_check::operator()(const bool& l, const bool& r) const
-{
-	return ast::expr_ops::term(default_op(l,r));
-}
+{return ast::expr_ops::term(default_op(l,r));}
 cppjinja::ast::expr_ops::term cppjinja::evt::expr_evals::cmp_check::operator()(const bool& l, const std::int64_t& r) const
 {return ast::expr_ops::term(default_op(l,r));}
 cppjinja::ast::expr_ops::term cppjinja::evt::expr_evals::cmp_check::operator()(const bool& l, const double& r) const

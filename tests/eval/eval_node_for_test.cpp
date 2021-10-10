@@ -205,6 +205,38 @@ BOOST_FIXTURE_TEST_CASE(no_value_else2, mock_for_fixture)
 	MOCK_EXPECT(child_else.render).once();
 	block.render(env);
 }
+BOOST_FIXTURE_TEST_CASE(no_value_filter, mock_for_fixture)
+{
+	ast::block_for ast_bl;
+	ast_bl.vars.emplace_back("a"s);
+	ast_bl.value = cppjinja::text::parse(cppjinja::text::expr_ops::expr, "[4,5,6]" );
+	ast_bl.condition = cppjinja::text::parse(cppjinja::text::expr_ops::expr_bool, "a==3");
+	cppjinja::evtnodes::block_for block(ast_bl);
+
+	mocks::node child_main;
+
+	expect_glp(0, 4, 0);
+	expect_children({&child_main});
+
+	MOCK_EXPECT(env.current_node).with(&block);
+	MOCK_EXPECT(ctx.push).with(&block);
+	MOCK_EXPECT(ctx.pop).with(&block);
+
+	MOCK_EXPECT(locals.add).exactly(3).with("loop"_s, mock::any);
+	MOCK_EXPECT(locals.add)
+	        .exactly(3).with("a"_s, mock::any)
+	        .calls( [this](
+	            cppjinja::east::string_t n
+	          , std::shared_ptr<cppjinja::evt::context_object> child){
+		BOOST_REQUIRE(child);
+		BOOST_CHECK(n=="a" || n=="loop");
+		if(n=="a") {
+			MOCK_EXPECT(all_ctx.find).once().with(evar_name{"a"}).returns(child);
+		}
+	});
+
+	block.render(env);
+}
 
 BOOST_AUTO_TEST_SUITE(ctxobj)
 BOOST_FIXTURE_TEST_CASE(cannot_add_solve, mock_for_fixture)

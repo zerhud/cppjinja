@@ -78,6 +78,12 @@ void cppjinja::evtnodes::block_for::eval_for(evt::exenv& env, absd::data val) co
 		rc_children[1]->render(env);
 }
 
+bool cppjinja::evtnodes::block_for::eval_condition(evt::exenv& env) const
+{
+	if(!abl.condition) return true;
+	return evt::expr_eval(&env)(*abl.condition);
+}
+
 bool cppjinja::evtnodes::block_for::eval_for_str(
         evt::exenv& env, std::pmr::string val) const
 {
@@ -86,7 +92,8 @@ bool cppjinja::evtnodes::block_for::eval_for_str(
 		evt::raii_push_ctx ctx(this, &env.ctx());
 		env.locals().add(tps(abl.vars[0]), make_val(env, lvar));
 		env.locals().add("loop", loop);
-		rc_children.at(0)->render(env);
+		if(eval_condition(env))
+			rc_children.at(0)->render(env);
 		loop->next();
 	}
 	return val.empty();
@@ -100,7 +107,8 @@ bool cppjinja::evtnodes::block_for::eval_for_arr(
 		evt::raii_push_ctx ctx(this, &env.ctx());
 		env.locals().add(tps(abl.vars[0]), make_val(env, lvar));
 		env.locals().add("loop", loop);
-		rc_children.at(0)->render(env);
+		if(eval_condition(env))
+			rc_children.at(0)->render(env);
 		loop->next();
 	}
 	return val.empty();
@@ -116,7 +124,8 @@ bool cppjinja::evtnodes::block_for::eval_for_obj(
 			env.locals().add(tps(abl.vars[0]), make_val(env, key));
 		env.locals().add(tps(abl.vars[abl.vars.size()-1]), make_val(env, lvar));
 		env.locals().add("loop", loop);
-		rc_children.at(0)->render(env);
+		if(eval_condition(env))
+			rc_children.at(0)->render(env);
 		loop->next();
 	}
 	return val.empty();

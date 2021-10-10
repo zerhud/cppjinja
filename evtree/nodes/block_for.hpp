@@ -16,6 +16,7 @@ class block_for : public evt::node {
 	ast::block_for abl;
 	mutable std::pmr::vector<const node*> rc_children;
 
+	bool eval_condition(evt::exenv& env) const ;
 	bool eval_for_str(evt::exenv& env, std::pmr::string val) const ;
 	bool eval_for_arr(evt::exenv& env, std::pmr::vector<absd::data> val) const ;
 	bool eval_for_obj(evt::exenv& env, std::pmr::map<std::pmr::string,absd::data> val) const ;

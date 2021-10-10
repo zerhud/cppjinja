@@ -179,8 +179,8 @@ bool cppjinja::evt::expr_eval::operator()(ast::expr_ops::expr_bool e) const
 {
 	result.reset();
 	auto val = boost::apply_visitor(*this, e);
-	if(result) val = result->solve();
-	result.reset();
+	//if(result) val = result->solve();
+	//result.reset();
 	return to_bool(val);
 }
 
@@ -195,7 +195,7 @@ cppjinja::evt::expr_eval::operator ()(ast::expr_ops::single_var_name& t) const
 {
 	std::pmr::string tn(t.name.begin(),t.name.end());
 	result = env->all_ctx().find(east::var_name{tn});
-	return create_data(false);
+	return result->solve();
 }
 
 cppjinja::evt::expr_eval::eval_type

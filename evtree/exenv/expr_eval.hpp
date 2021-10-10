@@ -19,6 +19,7 @@ namespace cppjinja::evt {
 class expr_eval final {
 	const exenv* env;
 	ast::expr_ops::expr src_operation;
+	//TODO: remove the result, use stack insteed
 	mutable std::shared_ptr<evt::context_object> result;
 
 	absd::data cvt(const ast::expr_ops::term& v) const ;
