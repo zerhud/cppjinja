@@ -25,5 +25,5 @@ cppjinja::evt::render_info cppjinja::evtnodes::op_out::rinfo() const
 void cppjinja::evtnodes::op_out::render(evt::exenv& env) const
 {
 	env.current_node(this);
-	env.out() << evt::expr_eval(&env)(op.value)->solve();
+	env.out() << evt::expr_eval(&env)(op.value);
 }

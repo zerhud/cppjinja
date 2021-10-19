@@ -48,7 +48,7 @@ void cppjinja::evtnodes::block_for::render(cppjinja::evt::exenv& env) const
 	auto value = evt::expr_eval(&env)(abl.value);
 	assert(value);
 	assert(abl.vars.size()==1 || abl.vars.size()==2);
-	eval_for(env, value->solve());
+	eval_for(env, value);
 }
 
 void cppjinja::evtnodes::block_for::eval_for(evt::exenv& env, absd::data val) const

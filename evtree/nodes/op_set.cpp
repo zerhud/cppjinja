@@ -19,7 +19,9 @@ void op_set::set_names(evt::exenv& env, const cppjinja::ast::expr_ops::tuple& tv
 	for(std::size_t i=0;i<op.value.names.size();++i) {
 		const auto& name =
 		        boost::get<ast::expr_ops::single_var_name>(op.value.names[i]);
-		env.locals().add(tps(name.name), evt::expr_eval(&env)(tval.items.at(i)));
+		auto val = std::make_shared<evt::context_objects::value>(
+		            evt::expr_eval(&env)(tval.items.at(i)));
+		env.locals().add(tps(name.name), std::move(val));
 	}
 }
 
@@ -43,6 +45,8 @@ void op_set::render(evt::exenv& env) const
 	else {
 		const ast::expr_ops::single_var_name& name =
 		        boost::get<ast::expr_ops::single_var_name>(op.value.names.at(0));
-		env.locals().add(tps(name.name), evt::expr_eval(&env)(op.value.value.get()));
+		auto val = std::make_shared<evt::context_objects::value>(
+		            evt::expr_eval(&env)(op.value.value.get()));
+		env.locals().add(tps(name.name), std::move(val));
 	}
 }

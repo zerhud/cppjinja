@@ -33,7 +33,7 @@ void cppjinja::evtnodes::block_filtered::render(cppjinja::evt::exenv& env) const
 	ast::expr_ops::filter flt;
 	flt.base = ast::expr_ops::expr{ast::expr_ops::term{base}};
 	flt.filters.emplace_back(ast.flt);
-	env.out() << evt::expr_eval(&env)(ast::expr_ops::expr{flt})->solve();
+	env.out() << evt::expr_eval(&env)(ast::expr_ops::expr{flt});
 }
 
 cppjinja::evt::render_info cppjinja::evtnodes::block_filtered::rinfo() const

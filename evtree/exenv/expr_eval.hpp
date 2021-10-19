@@ -17,35 +17,36 @@ namespace cppjinja::evt {
 
 
 class expr_eval final {
+public:
+	typedef absd::data eval_type;
+private:
 	const exenv* env;
 	ast::expr_ops::expr src_operation;
-	//TODO: remove the result, use stack insteed
-	mutable std::shared_ptr<evt::context_object> result;
+
+	static std::shared_ptr<evt::context_object> make_value_object(eval_type v) ;
 
 	absd::data cvt(const ast::expr_ops::term& v) const ;
 	std::pmr::string to_str(const absd::data& v) const ;
 	bool to_bool(const absd::data& v) const ;
 	ast::expr_ops::term to_term(const absd::data& d) const ;
 
-	void solve_point_arg(ast::expr_ops::point_element& left) const ;
-	void solve_point_arg(ast::expr_ops::single_var_name& left) const ;
-	void solve_point_arg(ast::expr_ops::expr& left) const ;
-	void solve_point_arg(ast::expr_ops::point& left) const ;
+	const evt::context_object& solve_point_arg(const evt::context_object& left, ast::expr_ops::point_element& expr) const ;
+	const evt::context_object& solve_point_arg(const evt::context_object& left, ast::expr_ops::single_var_name& epxr) const ;
+	const evt::context_object& solve_point_arg(const evt::context_object& left, ast::expr_ops::expr& expr) const ;
+	const evt::context_object& solve_point_arg(const evt::context_object& left, ast::expr_ops::point& expr) const ;
 	context_object::function_parameter make_param(ast::expr_ops::expr& pexpr) const ;
 	std::optional<east::string_t> make_param_name(ast::expr_ops::lvalue& name) const ;
-	void filter_content(ast::expr_ops::filter_call& call) const ;
-	std::shared_ptr<evt::context_object> solve_ref(ast::expr_ops::lvalue& ref) const ;
+	eval_type filter_content(eval_type base, ast::expr_ops::filter_call& call) const ;
+	const evt::context_object& solve_ref(ast::expr_ops::lvalue& ref) const ;
 	absd::data perform_test(ast::expr_ops::cmp_check& t) const ;
 
 	template<typename T>
 	absd::data create_data(T&& arg) const;
 public:
-	typedef absd::data eval_type;
-
 	expr_eval(const exenv* e);
 
-	std::shared_ptr<evt::context_object> operator () (ast::expr_ops::expr t) const ;
-	std::shared_ptr<evt::context_object> operator () (ast::expr_ops::lvalue ref) const ;
+	eval_type operator () (ast::expr_ops::expr t) const ;
+	eval_type operator () (ast::expr_ops::lvalue ref) const ;
 	bool operator() (ast::expr_ops::expr_bool e) const ;
 
 	eval_type operator () (ast::expr_ops::term& t) const ;
@@ -75,10 +76,7 @@ private:
 	template<typename T>
 	eval_type eval(ast::forward_ast<T>& v) const
 	{
-		if(result) result.reset();
-		auto ret = boost::apply_visitor(*this, v.get().var);
-		if(result) return result->solve();
-		return ret;
+		return boost::apply_visitor(*this, v.get().var);
 	}
 };
 

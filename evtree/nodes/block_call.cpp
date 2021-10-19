@@ -7,8 +7,9 @@
  *************************************************************************/
 
 #include "block_call.hpp"
-#include "evtree/exenv/context_objects/callable_node.hpp"
 #include "evtree/exenv/expr_eval.hpp"
+#include "evtree/exenv/context_objects/value.hpp"
+#include "evtree/exenv/context_objects/callable_node.hpp"
 
 using namespace std::literals;
 
@@ -32,7 +33,8 @@ void cppjinja::evtnodes::block_call::render(cppjinja::evt::exenv& env) const
 		assert(p.value.has_value());
 		auto& cur = params.emplace_back();
 		cur.name = p.name;
-		cur.value = evt::expr_eval(&env)(*p.value);
+		cur.value = std::make_shared<evt::context_objects::value>(
+		            evt::expr_eval(&env)(*p.value));
 	}
 	env.out() << obj->call(params)->solve();
 }
