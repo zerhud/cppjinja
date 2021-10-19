@@ -171,6 +171,15 @@ struct mock_exenv_fixture
 		MOCK_EXPECT(env.user_data).calls([this]()->context_object&{return user_data;});
 	}
 
+	template<absd::AnyData T>
+	void expect_local_object_created(std::string name, T d)
+	{
+		auto data = create_absd_data(std::move(d));
+		MOCK_EXPECT(locals.add)
+		        .once().with(name, mock::any)
+		        .calls([data](auto, auto p){ BOOST_TEST(p->solve()==data); });
+	}
+
 	void expect_sovle(cppjinja::east::var_name n, absd::data v)
 	{
 		MOCK_EXPECT(all_ctx.find).once().with(n).returns(mock_all_ctx);
