@@ -6,6 +6,7 @@
  * or <http://www.gnu.org/licenses/> for details
  *************************************************************************/
 
+#include <fstream>
 #include <boost/json/src.hpp>
 #include <boost/program_options.hpp>
 #include <loader/parser.hpp>
@@ -20,7 +21,8 @@ int main(int argc, char** argv)
 	opts.add_options()
 		("help,h", "produce the help message")
 		("tmpl,t", po::value<std::string>(), "the template file")
-		;
+		("data,i", po::value<std::string>()->default_value(""), "the data file")
+	    ;
 	po::store(po::command_line_parser(argc,argv).options(opts).run(), opt_vals);
 	if(opt_vals.count("help") || opt_vals.count("tmpl")==0) {
 		std::cout
@@ -36,8 +38,14 @@ int main(int argc, char** argv)
 
 	std::cout << "parsed ok" << std::endl;
 
-	std::string json_data;
-	std::cin >> json_data;
+	std::string json_data, json_line;
+	if(opt_vals["data"].as<std::string>() == "")
+		while(std::getline(std::cin, json_line)) json_data += json_line;
+	else {
+		std::fstream data(opt_vals["data"].as<std::string>(), std::ios::in);
+		while(std::getline(data, json_line)) json_data += json_line;
+	}
+
 	cogen::jinja_json_prov data(boost::json::parse(json_data));
 	ev.render(std::cout, data, "");
 	return 0;
