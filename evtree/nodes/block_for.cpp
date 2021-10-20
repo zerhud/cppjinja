@@ -54,25 +54,9 @@ void cppjinja::evtnodes::block_for::eval_for(evt::exenv& env, absd::data val) co
 {
 	bool need_else = true;
 	rc_children = env.children(this);
-//	auto loop = std::make_shared<block_for_object>(val.size());
 	if(val.is_string()) need_else = eval_for_str(env, val.str());
 	if(val.is_array()) need_else = eval_for_arr(env, val.as_array());
 	if(val.is_object()) need_else = eval_for_obj(env, val.as_map());
-//	for(auto& lvar:val.items()) {
-//		evt::raii_push_ctx ctx(this, &env.ctx());
-//		need_else = false;
-//		if(abl.vars.size()==2)
-//			env.locals().add(
-//			          abl.vars[0]
-//			        , std::make_shared<obj_val>(lvar.key()));
-//		env.locals().add(
-//		          abl.vars[abl.vars.size()-1]
-//		        , std::make_shared<obj_val>(lvar.value()));
-//		env.locals().add("loop", loop);
-//		children.at(0)->render(env);
-//		loop->next();
-//	}
-
 	if(need_else && rc_children.size()==2)
 		rc_children[1]->render(env);
 }
