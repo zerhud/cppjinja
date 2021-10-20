@@ -26,6 +26,7 @@ class context;
 class callstack;
 class ctx_object;
 class context_object; ///< aka namespace
+using context_object_ptr = std::shared_ptr<context_object>;
 
 class result_formatter;
 

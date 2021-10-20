@@ -23,21 +23,21 @@ private:
 	const exenv* env;
 	ast::expr_ops::expr src_operation;
 
-	static std::shared_ptr<evt::context_object> make_value_object(eval_type v) ;
+	static evt::context_object_ptr make_value_object(eval_type v) ;
 
 	absd::data cvt(const ast::expr_ops::term& v) const ;
 	std::pmr::string to_str(const absd::data& v) const ;
 	bool to_bool(const absd::data& v) const ;
 	ast::expr_ops::term to_term(const absd::data& d) const ;
 
-	const evt::context_object& solve_point_arg(const evt::context_object& left, ast::expr_ops::point_element& expr) const ;
-	const evt::context_object& solve_point_arg(const evt::context_object& left, ast::expr_ops::single_var_name& epxr) const ;
-	const evt::context_object& solve_point_arg(const evt::context_object& left, ast::expr_ops::expr& expr) const ;
-	const evt::context_object& solve_point_arg(const evt::context_object& left, ast::expr_ops::point& expr) const ;
+	evt::context_object_ptr solve_point_arg(const evt::context_object& left, ast::expr_ops::point_element& expr) const ;
+	evt::context_object_ptr solve_point_arg(const evt::context_object& left, ast::expr_ops::single_var_name& epxr) const ;
+	evt::context_object_ptr solve_point_arg(const evt::context_object& left, ast::expr_ops::expr& expr) const ;
+	evt::context_object_ptr solve_point_arg(const evt::context_object& left, ast::expr_ops::point& expr) const ;
 	context_object::function_parameter make_param(ast::expr_ops::expr& pexpr) const ;
 	std::optional<east::string_t> make_param_name(ast::expr_ops::lvalue& name) const ;
 	eval_type filter_content(eval_type base, ast::expr_ops::filter_call& call) const ;
-	const evt::context_object& solve_ref(ast::expr_ops::lvalue& ref) const ;
+	evt::context_object_ptr solve_ref(ast::expr_ops::lvalue& ref) const ;
 	absd::data perform_test(ast::expr_ops::cmp_check& t) const ;
 
 	template<typename T>

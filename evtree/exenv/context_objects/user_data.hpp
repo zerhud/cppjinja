@@ -18,6 +18,9 @@ class user_data : public context_object {
 	const data_provider* provider;
 	east::var_name selected_name;
 public:
+	user_data(user_data&& other) noexcept =default ;
+	user_data& operator = (user_data&& other) noexcept =default ;
+
 	user_data(const data_provider* prov);
 	user_data(const data_provider* prov, east::var_name selected);
 	~user_data() noexcept override ;

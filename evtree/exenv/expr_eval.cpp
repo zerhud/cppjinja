@@ -21,7 +21,7 @@
 
 using namespace std::literals;
 
-std::shared_ptr<cppjinja::evt::context_object>
+cppjinja::evt::context_object_ptr
 cppjinja::evt::expr_eval::make_value_object(eval_type v)
 {
 	return std::make_shared<cppjinja::evt::context_objects::value>(std::move(v));
@@ -77,41 +77,39 @@ cppjinja::ast::expr_ops::term cppjinja::evt::expr_eval::to_term(const absd::data
 cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::point& t) const
 {
-	return solve_point_arg(env->all_ctx(), t).solve();
+	return solve_point_arg(env->all_ctx(), t)->solve();
 }
 
-const cppjinja::evt::context_object& cppjinja::evt::expr_eval::solve_point_arg(
+cppjinja::evt::context_object_ptr cppjinja::evt::expr_eval::solve_point_arg(
         const evt::context_object& left,
         cppjinja::ast::expr_ops::point_element& expr) const
 {
-	auto setter = [this,&left](auto& e) -> const evt::context_object& {
-		return solve_point_arg(left, e);
-	};
+	auto setter = [this,&left](auto& e) { return solve_point_arg(left, e); };
 	return boost::apply_visitor(setter, expr);
 }
 
-const cppjinja::evt::context_object& cppjinja::evt::expr_eval::solve_point_arg(
+cppjinja::evt::context_object_ptr cppjinja::evt::expr_eval::solve_point_arg(
         const evt::context_object& left,
         cppjinja::ast::expr_ops::single_var_name& epxr) const
 {
 	std::pmr::string ln(epxr.name.begin(),epxr.name.end());
-	return *left.find(east::var_name{ln});
+	return left.find(east::var_name{ln});
 }
 
-const cppjinja::evt::context_object& cppjinja::evt::expr_eval::solve_point_arg(
+cppjinja::evt::context_object_ptr cppjinja::evt::expr_eval::solve_point_arg(
         const evt::context_object& left,
         ast::expr_ops::expr& expr) const
 {
 	eval_type solved = expr_eval(env)(expr);
-	return *left.find(east::var_name{solved.str()});
+	return left.find(east::var_name{solved.str()});
 }
 
-const cppjinja::evt::context_object& cppjinja::evt::expr_eval::solve_point_arg(
+cppjinja::evt::context_object_ptr cppjinja::evt::expr_eval::solve_point_arg(
         const evt::context_object& left,
         cppjinja::ast::expr_ops::point& expr) const
 {
-	auto& obj_left = solve_point_arg(left, expr.left);
-	return solve_point_arg(obj_left, expr.right);
+	auto obj_left = solve_point_arg(left, expr.left);
+	return solve_point_arg(*obj_left, expr.right);
 }
 
 cppjinja::evt::context_object::function_parameter
@@ -136,19 +134,19 @@ std::optional<cppjinja::east::string_t> cppjinja::evt::expr_eval::make_param_nam
 cppjinja::evt::expr_eval::eval_type cppjinja::evt::expr_eval::filter_content(
         eval_type base, cppjinja::ast::expr_ops::filter_call& call) const
 {
-	auto& filter = solve_ref(call.ref);
+	auto filter = solve_ref(call.ref);
 
 	std::pmr::vector<context_object::function_parameter> params;
 	params.emplace_back(context_object::function_parameter{"$", make_value_object(std::move(base))});
 	for(auto& p:call.args) params.emplace_back(make_param(p.get()));
 
-	return filter.call(params)->solve();
+	return filter->call(params)->solve();
 }
-const cppjinja::evt::context_object& cppjinja::evt::expr_eval::solve_ref(
+cppjinja::evt::context_object_ptr cppjinja::evt::expr_eval::solve_ref(
         cppjinja::ast::expr_ops::lvalue& ref) const
 {
 	return boost::apply_visitor(
-	            [this](auto& r) -> const cppjinja::evt::context_object& {
+	            [this](auto& r) {
 		return solve_point_arg(env->all_ctx(), r);
 	}, ref);
 }
@@ -185,7 +183,7 @@ cppjinja::evt::expr_eval::operator ()(cppjinja::ast::expr_ops::expr t) const
 cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator () (ast::expr_ops::lvalue ref) const
 {
-	return solve_ref(ref).solve();
+	return solve_ref(ref)->solve();
 }
 
 bool cppjinja::evt::expr_eval::operator()(ast::expr_ops::expr_bool e) const
@@ -322,10 +320,10 @@ cppjinja::evt::expr_eval::operator ()(ast::expr_ops::negate& t) const
 cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::fnc_call& t) const
 {
-	auto& call_obj = solve_ref(t.ref);
+	auto call_obj = solve_ref(t.ref);
 	std::pmr::vector<context_object::function_parameter> params(env->storage().get());
 	for(auto& p:t.args) params.emplace_back(make_param(p.get()));
-	return call_obj.call(params)->solve();
+	return call_obj->call(params)->solve();
 }
 
 cppjinja::evt::expr_eval::eval_type

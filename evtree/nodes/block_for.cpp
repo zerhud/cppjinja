@@ -46,7 +46,6 @@ void cppjinja::evtnodes::block_for::render(cppjinja::evt::exenv& env) const
 {
 	env.current_node(this);
 	auto value = evt::expr_eval(&env)(abl.value);
-	assert(value);
 	assert(abl.vars.size()==1 || abl.vars.size()==2);
 	eval_for(env, value);
 }
