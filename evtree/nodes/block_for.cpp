@@ -169,5 +169,6 @@ cppjinja::evtnodes::block_for_object::call(
     std::pmr::vector<function_parameter> params) const
 {
 	// the recursive call (same block other data, renders inside parent)
-	return nullptr;
+	(void)params;
+	throw std::logic_error("not ready yet");
 }
