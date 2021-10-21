@@ -53,8 +53,9 @@ struct op_include : x3::position_tagged
 struct op_import : x3::position_tagged
 {
 	string_t filename;
-	std::vector<string_t> mods;
-	std::optional<bool> with_context;
+	string_t as;
+	op_term_start open;
+	op_term_end close;
 };
 
 } // namespace cppjinja::ast

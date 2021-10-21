@@ -35,10 +35,18 @@ namespace cppjinja::text {
 	        > block_term_end
 	        ;
 
+	auto const op_import_def =
+	        block_term_start
+	     >> omit[lit("import")]
+	     >> filename >> omit[lit("as")] >> single_var_name
+	      > block_term_end
+	        ;
+
 	struct op_out_class      : error_handler, x3::annotate_on_success { };
 	struct op_set_class      : error_handler, x3::annotate_on_success { };
 	struct op_comment_class  : error_handler, x3::annotate_on_success { };
 	struct op_include_class  : error_handler, x3::annotate_on_success { };
+	struct op_import_class   : error_handler, x3::annotate_on_success { };
 	struct filter_call_class : error_handler, x3::annotate_on_success { };
 	struct filename_class    : error_handler, x3::annotate_on_success { };
 
@@ -47,6 +55,7 @@ namespace cppjinja::text {
 	BOOST_SPIRIT_DEFINE( op_set )
 	BOOST_SPIRIT_DEFINE( op_comment_value )
 	BOOST_SPIRIT_DEFINE( op_include )
+	BOOST_SPIRIT_DEFINE( op_import )
 	BOOST_SPIRIT_DEFINE( filter_call )
 	BOOST_SPIRIT_DEFINE( filename )
 

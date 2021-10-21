@@ -22,7 +22,7 @@ std::string cppjinja::throw_cerr_env::file_name() const
 void cppjinja::throw_cerr_env::on_error() const
 {
 	throw std::runtime_error(
-	            "cannot parser " +
+	            "cannot parse " +
 	            std::string(cur_file.begin(),cur_file.end()));
 }
 

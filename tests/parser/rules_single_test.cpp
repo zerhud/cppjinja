@@ -126,5 +126,14 @@ BOOST_DATA_TEST_CASE(
 	BOOST_TEST( result == good_result );
 }
 
+BOOST_AUTO_TEST_CASE(op_import)
+{
+	ast::op_import result;
+	std::string text = "<% import 'file' as variable %>"s;
+	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::op_import, text) );
+	BOOST_TEST(result.as == "variable");
+	BOOST_TEST(result.filename == "file");
+}
+
 BOOST_AUTO_TEST_SUITE_END() // singles
 BOOST_AUTO_TEST_SUITE_END() // phase_parse

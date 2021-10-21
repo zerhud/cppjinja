@@ -19,6 +19,7 @@ namespace cppjinja::text {
 	struct op_comment_value_class;
 	struct op_set_class;
 	struct op_include_class;
+	struct op_import_class;
 	struct filter_call_class;
 	struct filename_class;
 
@@ -28,6 +29,7 @@ namespace cppjinja::text {
 	const x3::rule<op_set_class, ast::op_set> op_set = "op_set";
 	const x3::rule<filter_call_class, ast::filter_call> filter_call = "filter_call";
 	const x3::rule<op_include_class, ast::op_include> op_include = "op_include";
+	const x3::rule<op_import_class, ast::op_import> op_import = "op_import";
 	const x3::rule<filename_class, ast::string_t> filename = "filename";
 
 	BOOST_SPIRIT_DECLARE(decltype(op_out))
@@ -35,6 +37,7 @@ namespace cppjinja::text {
 	BOOST_SPIRIT_DECLARE(decltype(op_comment))
 	BOOST_SPIRIT_DECLARE(decltype(op_set))
 	BOOST_SPIRIT_DECLARE(decltype(op_include))
+	BOOST_SPIRIT_DECLARE(decltype(op_import))
 	BOOST_SPIRIT_DECLARE(decltype(filter_call))
 	BOOST_SPIRIT_DECLARE(decltype(filename))
 

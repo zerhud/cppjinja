@@ -15,5 +15,6 @@ BOOST_FUSION_ADAPT_STRUCT( cppjinja::ast::op_out, open, value, close)
 BOOST_FUSION_ADAPT_STRUCT( cppjinja::ast::op_comment, open, value, close)
 BOOST_FUSION_ADAPT_STRUCT(cppjinja::ast::op_set, open, value, close)
 BOOST_FUSION_ADAPT_STRUCT(
-		cppjinja::ast::op_include,
-		open, filename, ignore_missing, with_context, close)
+        cppjinja::ast::op_include,
+        open, filename, ignore_missing, with_context, close)
+BOOST_FUSION_ADAPT_STRUCT(cppjinja::ast::op_import, open, filename, as, close)
