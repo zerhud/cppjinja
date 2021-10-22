@@ -31,6 +31,7 @@ struct file : x3::position_tagged
 	string_t name;
 	std::vector<tmpl> tmpls;
 	std::vector<op_include> includes;
+	std::vector<op_import> imports;
 };
 
 } // namespace cppjinja::ast

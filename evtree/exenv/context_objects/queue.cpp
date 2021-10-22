@@ -49,7 +49,8 @@ void cppjinja::evt::context_objects::queue::add(
 	content.front()->add(std::move(n), std::move(child));
 }
 
-std::shared_ptr<cppjinja::evt::context_object> cppjinja::evt::context_objects::queue::find(cppjinja::east::var_name n) const
+std::shared_ptr<cppjinja::evt::context_object>
+cppjinja::evt::context_objects::queue::find(cppjinja::east::var_name n) const
 {
 	for(auto& c:content) if(auto f = c->find(n);f) return f;
 	for(auto& c:const_content) if(auto f = c->find(n);f) return f;

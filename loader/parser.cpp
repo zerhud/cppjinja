@@ -26,7 +26,7 @@ std::filesystem::path cppjinja::parser::solve_path(const std::filesystem::path& 
 	return absolute(to);
 }
 
-void cppjinja::parser::parse(const cppjinja::ast::op_include& inc)
+void cppjinja::parser::parse(const ast::op_include& inc)
 {
 	std::filesystem::path fn = inc.filename;
 	fn = solve_path(fn);
@@ -38,6 +38,13 @@ void cppjinja::parser::parse(const cppjinja::ast::op_include& inc)
 
 	//TODO: with or without context ignored for now
 
+	parse(fn);
+}
+
+void cppjinja::parser::parse(const ast::op_import &imp)
+{
+	std::filesystem::path fn = solve_path(imp.filename);
+	assert(fn.is_absolute());
 	parse(fn);
 }
 
@@ -72,6 +79,10 @@ cppjinja::parser& cppjinja::parser::parse(std::istream& data)
 	if(!cur_file_) cur_file_ = &files_.emplace_back();
 	*cur_file_ = cppjinja::text::parse(text::file, begin, end);
 
+	if(cur_file_->tmpls.size() == 1 && cur_file_->tmpls[0].name.empty())
+		cur_file_->tmpls[0].name = cur_file_->name;
+
+	for(auto& imp:cur_file_->imports) parse(imp);
 	for(auto& inc:cur_file_->includes) parse(inc);
 
 	return *this;

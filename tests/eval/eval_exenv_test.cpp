@@ -24,6 +24,7 @@
 #include "evtree/exenv/context_objects/value.hpp"
 #include "evtree/exenv/context_objects/callable_node.hpp"
 #include "evtree/exenv/context_objects/user_data.hpp"
+#include "evtree/exenv/context_objects/inner_navigation.hpp"
 #include "evtree/nodes/callable.hpp"
 #include "parser/operators/common.hpp"
 #include "parser/grammar/tmpls.hpp"
@@ -336,6 +337,12 @@ BOOST_AUTO_TEST_CASE(name_combination)
 	BOOST_TEST(obj_ab->solve() == "ok2"_s);
 }
 BOOST_AUTO_TEST_SUITE_END() // user_data
+BOOST_AUTO_TEST_SUITE(inner_navigation)
+BOOST_AUTO_TEST_CASE(find)
+{
+	BOOST_FAIL("empty test");
+}
+BOOST_AUTO_TEST_SUITE_END() // inner_navigation
 BOOST_AUTO_TEST_SUITE_END() // context_object
 
 BOOST_AUTO_TEST_SUITE(context)

@@ -23,6 +23,7 @@ class parser final {
 
 	std::filesystem::path solve_path(const std::filesystem::path& to) const ;
 	void parse(const ast::op_include& inc);
+	void parse(const ast::op_import& imp);
 public:
 	parser(const parser&) =delete ;
 	parser& operator = (const parser&) =delete ;
