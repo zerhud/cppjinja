@@ -31,6 +31,8 @@ cppjinja::evt::exenv_impl::exenv_impl(
         )
     : compiled_template(tree)
     , given_data(prov)
+    , nav_env(this)
+    , nav_tmpl(this)
 {
 }
 
@@ -101,6 +103,16 @@ cppjinja::evt::context_object& cppjinja::evt::exenv_impl::globals()
 	return global_namespace;
 }
 
+const cppjinja::evt::context_object& cppjinja::evt::exenv_impl::inner_env()
+{
+	return nav_env;
+}
+
+const cppjinja::evt::context_object& cppjinja::evt::exenv_impl::inner_tmpl()
+{
+	return nav_tmpl;
+}
+
 const cppjinja::evt::context_objects::queue cppjinja::evt::exenv_impl::params() const
 {
 	return execalls.current_params(exectx.maker());
@@ -115,7 +127,11 @@ const cppjinja::evt::context_objects::queue cppjinja::evt::exenv_impl::all_ctx()
 {
 	using context_objects::queue;
 	const auto& l = const_cast<exenv_impl*>(this)->locals();
-	return {params(), queue::clist{&l, &global_namespace, &builtins, &user_data()}};
+	return {params(), queue::clist{
+			&l, &global_namespace,
+			&nav_tmpl, &nav_env,
+			&builtins, &user_data()
+		}};
 }
 
 cppjinja::evt::callstack& cppjinja::evt::exenv_impl::calls()

@@ -16,6 +16,7 @@
 #include "context_objects/tree.hpp"
 #include "context_objects/user_data.hpp"
 #include "context_objects/builtins.hpp"
+#include "context_objects/inner_navigation.hpp"
 
 namespace cppjinja::evt {
 
@@ -27,6 +28,8 @@ class exenv_impl final : public exenv {
 	std::optional<render_info> cur_rinfo;
 	context_objects::tree global_namespace;
 	context_objects::builtins builtins;
+	context_objects::navigation_env nav_env;
+	context_objects::navigation_tmpl nav_tmpl;
 	result_formatter rfmt;
 	std::shared_ptr<std::pmr::memory_resource> mem =
 	        std::make_shared<std::pmr::unsynchronized_pool_resource>();
@@ -50,6 +53,8 @@ public:
 
 	context_object& locals() override ;
 	context_object& globals() override ;
+	const context_object& inner_env() override ;
+	const context_object& inner_tmpl() override ;
 	const context_objects::queue params() const override ;
 	const context_object& user_data() const override ;
 	const context_objects::queue all_ctx() const override ;

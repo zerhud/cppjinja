@@ -6,6 +6,8 @@
  * or <http://www.gnu.org/licenses/> for details
  *************************************************************************/
 
+#pragma once
+
 #include "../context_object.hpp"
 
 namespace cppjinja::evt::context_objects {

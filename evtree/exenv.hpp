@@ -44,6 +44,8 @@ public:
 
 	virtual context_object& locals() =0 ;
 	virtual context_object& globals() =0 ;
+	virtual const context_object& inner_env() =0 ;
+	virtual const context_object& inner_tmpl() =0 ;
 	virtual const context_objects::queue params() const =0 ;
 	virtual const context_object& user_data() const =0 ;
 	virtual const context_objects::queue all_ctx() const =0 ;

@@ -34,12 +34,15 @@ using namespace std::literals;
 namespace tdata = boost::unit_test::data;
 namespace east = cppjinja::east;
 namespace ast = cppjinja::ast;
+namespace evtn = cppjinja::evtnodes;
 
 using cppjinja::ast::var_name;
 using cppjinja::ast::comparator;
 using cppjinja::ast::value_term;
 using evar_name = cppjinja::east::var_name;
 using mocks::mock_exenv_fixture; // qtcreator cannot parse test with namespace
+using co_nav_env = cppjinja::evt::context_objects::navigation_env;
+using co_nav_tmpl = cppjinja::evt::context_objects::navigation_tmpl;
 
 template<typename A>
 A make_container(const std::vector<value_term> vals)
@@ -339,9 +342,6 @@ BOOST_AUTO_TEST_CASE(name_combination)
 }
 BOOST_AUTO_TEST_SUITE_END() // user_data
 BOOST_AUTO_TEST_SUITE(inner_navigation)
-namespace evtn = cppjinja::evtnodes;
-using co_nav_env = cppjinja::evt::context_objects::navigation_env;
-using co_nav_tmpl = cppjinja::evt::context_objects::navigation_tmpl;
 BOOST_AUTO_TEST_CASE(cannot_create_without_env)
 {
 	BOOST_CHECK_THROW(co_nav_env{nullptr}, std::runtime_error);
@@ -406,6 +406,13 @@ BOOST_FIXTURE_TEST_CASE(find_in_roots, mock_exenv_fixture)
 
 	auto b = in.find(east::var_name{"b"});
 	BOOST_TEST(b->call({})->solve() == "test"_ad);
+
+	MOCK_EXPECT(ctx.current_tmpl).returns(&tmpl);
+	BOOST_REQUIRE(in.find(east::var_name{"self", "b"}) != nullptr);
+
+	expect_call(b_block.get());
+	MOCK_EXPECT(b_block->evaluate).once().returns("test2"_ad);
+	BOOST_TEST(in.find(east::var_name{"self", "b"})->call({})->solve() == "test2"_ad);
 }
 BOOST_AUTO_TEST_SUITE_END() // inner_navigation
 BOOST_AUTO_TEST_SUITE_END() // context_object
@@ -623,9 +630,13 @@ BOOST_FIXTURE_TEST_CASE(result, impl_exenv_fixture)
 }
 BOOST_FIXTURE_TEST_CASE(bintins, impl_exenv_fixture)
 {
+	evtn::tmpl tmpl(ast::tmpl{});
+	ctx.push_shadow(&tmpl);
+
 	mocks::callable_node node;
 	ctx.push_shadow(&node);
 	calls.push(&node, cppjinja::evt::context_objects::callable_params({},{}));
+
 	BOOST_CHECK(dynamic_cast<cppjinja::evt::context_objects::jinja_namespace*>(
 	                env.all_ctx().find(evar_name{"namespace"}).get()));
 }
@@ -658,6 +669,9 @@ BOOST_FIXTURE_TEST_CASE(user_data, impl_exenv_fixture)
 }
 BOOST_FIXTURE_TEST_CASE(all_ctx, impl_exenv_fixture)
 {
+	evtn::tmpl tmpl(ast::tmpl{});
+	ctx.push_shadow(&tmpl);
+
 	mocks::callable_node maker;
 	ctx.push_shadow(&maker);
 	calls.push(&maker, cppjinja::evt::context_objects::callable_params({},{}));

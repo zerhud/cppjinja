@@ -35,8 +35,14 @@ navigation_tmpl::navigation_tmpl(exenv* e) : inner_navigation(e)
 
 std::shared_ptr<context_object> navigation_tmpl::find(east::var_name n) const
 {
-	if(n.size() != 1) return nullptr;
-	return find_in_roots(std::move(n));
+	if(n.size() == 1) return find_in_roots(std::move(n));
+	if(n.size() == 2 && n[0] == "self") {
+		n.erase(n.begin());
+		auto ret = find_in_roots(std::move(n));
+		if(ret) return ret;
+	}
+
+	return nullptr;
 }
 
 inner_navigation::inner_navigation(exenv *e)
@@ -87,7 +93,7 @@ std::shared_ptr<context_object> inner_navigation::find_in_tmpl(
 	auto roots = env->roots(t);
 	for(auto& r:roots) if(r->name() == n[0])
 		return std::make_shared<evt::context_objects::callable_node>(env, r);
-	throw std::runtime_error("cannot find "s + n[0].c_str());
+	return nullptr;
 }
 
 absd::data inner_navigation::solve() const
