@@ -15,7 +15,29 @@
 
 using namespace std::literals;
 using cppjinja::evt::context_object;
+using cppjinja::evt::context_objects::navigation_env;
+using cppjinja::evt::context_objects::navigation_tmpl;
 using cppjinja::evt::context_objects::inner_navigation;
+
+navigation_env::navigation_env(exenv* e) : inner_navigation(e)
+{
+}
+
+std::shared_ptr<context_object> navigation_env::find(east::var_name n) const
+{
+	if(n.size() != 2) return nullptr;
+	return find_in_imports(std::move(n));
+}
+
+navigation_tmpl::navigation_tmpl(exenv* e) : inner_navigation(e)
+{
+}
+
+std::shared_ptr<context_object> navigation_tmpl::find(east::var_name n) const
+{
+	if(n.size() != 1) return nullptr;
+	return find_in_roots(std::move(n));
+}
 
 inner_navigation::inner_navigation(exenv *e)
     : env(e)
@@ -34,8 +56,15 @@ void inner_navigation::add(east::string_t n, std::shared_ptr<context_object> chi
 
 std::shared_ptr<context_object> inner_navigation::find(east::var_name n) const
 {
-	if(n.size()!=2) return nullptr;
-	return find_in_imports(n) ;
+	if(n.size() == 1) return find_in_roots(n);
+	if(n.size() == 2) return find_in_imports(n);
+	return nullptr;
+}
+
+std::shared_ptr<context_object> inner_navigation::find_in_roots(east::var_name n) const
+{
+	assert(n.size() == 1);
+	return find_in_tmpl(env->ctx().current_tmpl(), n);
 }
 
 std::shared_ptr<context_object> inner_navigation::find_in_imports(east::var_name n) const

@@ -265,6 +265,13 @@ struct mock_exenv_fixture
 	{
 		MOCK_EXPECT(env.roots).at_least(1).returns(roots);
 	}
+
+	void expect_roots(
+	        const cppjinja::evtnodes::tmpl* root,
+	        std::pmr::vector<const cppjinja::evtnodes::callable*> roots)
+	{
+		MOCK_EXPECT(env.roots).at_least(1).with(root).returns(roots);
+	}
 };
 
 } // namespace mocks

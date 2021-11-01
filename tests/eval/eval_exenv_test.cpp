@@ -340,26 +340,27 @@ BOOST_AUTO_TEST_CASE(name_combination)
 BOOST_AUTO_TEST_SUITE_END() // user_data
 BOOST_AUTO_TEST_SUITE(inner_navigation)
 namespace evtn = cppjinja::evtnodes;
-using co_inner_nav = cppjinja::evt::context_objects::inner_navigation;
+using co_nav_env = cppjinja::evt::context_objects::navigation_env;
+using co_nav_tmpl = cppjinja::evt::context_objects::navigation_tmpl;
 BOOST_AUTO_TEST_CASE(cannot_create_without_env)
 {
-	BOOST_CHECK_THROW(co_inner_nav{nullptr}, std::runtime_error);
+	BOOST_CHECK_THROW(co_nav_env{nullptr}, std::runtime_error);
+	BOOST_CHECK_THROW(co_nav_tmpl{nullptr}, std::runtime_error);
 }
 BOOST_AUTO_TEST_CASE(cannot_add)
 {
 	mocks::exenv env;
-	co_inner_nav in(&env);
-	BOOST_CHECK_THROW(in.add("a", nullptr), std::logic_error );
+	BOOST_CHECK_THROW(co_nav_env(&env).add("a", nullptr), std::logic_error );
+	BOOST_CHECK_THROW(co_nav_tmpl(&env).add("a", nullptr), std::logic_error );
 }
-BOOST_FIXTURE_TEST_CASE(find_only_two_namepoints, mock_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(find_only_two_or_one_namepoints, mock_exenv_fixture)
 {
-	co_inner_nav in(&env);
-	BOOST_TEST( in.find(east::var_name{"a"}) == nullptr );
-	BOOST_TEST( in.find(east::var_name{"a", "b", "c"}) == nullptr );
+	BOOST_TEST( co_nav_env(&env).find(east::var_name{}) == nullptr );
+	BOOST_TEST( co_nav_tmpl(&env).find(east::var_name{"a", "b", "c"}) == nullptr );
 }
-BOOST_FIXTURE_TEST_CASE(find, mock_exenv_fixture)
+BOOST_FIXTURE_TEST_CASE(find_in_imports, mock_exenv_fixture)
 {
-	co_inner_nav in(&env);
+	co_nav_env in(&env);
 	cppjinja::evtree tmpl_info;
 
 	ast::tmpl tast;
@@ -381,6 +382,30 @@ BOOST_FIXTURE_TEST_CASE(find, mock_exenv_fixture)
 
 	BOOST_TEST( ab!=nullptr );
 	BOOST_TEST( ab->call({})->solve() == "test"_ad );
+}
+BOOST_FIXTURE_TEST_CASE(find_in_roots, mock_exenv_fixture)
+{
+	ast::tmpl tast;
+	tast.file_imports.emplace_back(ast::op_import{0,0,"fn", "as",{},{}});
+	evtn::tmpl tmpl (tast);
+
+	co_nav_tmpl in(&env);
+	cppjinja::evtree tmpl_info;
+	tmpl_info.add_tmpl(tast);
+
+	auto a_block = std::make_shared<mocks::callable_node>();
+	auto b_block = std::make_shared<mocks::callable_node>();
+
+	expect_call(b_block.get());
+	expect_solved_params(*b_block, {});
+	expect_roots(&tmpl, {a_block.get(), b_block.get()});
+	MOCK_EXPECT(a_block->name).returns("a");
+	MOCK_EXPECT(b_block->name).returns("b");
+	MOCK_EXPECT(ctx.current_tmpl).once().returns(&tmpl);
+	MOCK_EXPECT(b_block->evaluate).once().returns("test"_ad);
+
+	auto b = in.find(east::var_name{"b"});
+	BOOST_TEST(b->call({})->solve() == "test"_ad);
 }
 BOOST_AUTO_TEST_SUITE_END() // inner_navigation
 BOOST_AUTO_TEST_SUITE_END() // context_object
