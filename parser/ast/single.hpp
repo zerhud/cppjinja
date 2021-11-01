@@ -54,6 +54,7 @@ struct op_import : x3::position_tagged
 {
 	string_t filename;
 	string_t as;
+	string_t tmpl_name;
 	op_term_start open;
 	op_term_end close;
 };

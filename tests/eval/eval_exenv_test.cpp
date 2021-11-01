@@ -367,7 +367,7 @@ BOOST_FIXTURE_TEST_CASE(find_in_imports, mock_exenv_fixture)
 	ast::tmpl tast;
 	tast.name = "fn";
 	tast.file_name = "fn";
-	tast.file_imports.emplace_back(ast::op_import{0,0,"fn", "as",{},{}});
+	tast.file_imports.emplace_back(ast::op_import{0,0,"fn", "as", "",{},{}});
 	evtn::tmpl tmpl (tast);
 
 	tmpl_info.add_tmpl(tast);

@@ -38,6 +38,7 @@ namespace cppjinja::text {
 	auto const op_import_def =
 	        block_term_start
 	     >> omit[lit("import")]
+	     >> -(single_var_name >> omit[lit("from")])
 	     >> filename >> omit[lit("as")] >> single_var_name
 	      > block_term_end
 	        ;

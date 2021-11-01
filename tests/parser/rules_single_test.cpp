@@ -133,6 +133,13 @@ BOOST_AUTO_TEST_CASE(op_import)
 	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::op_import, text) );
 	BOOST_TEST(result.as == "variable");
 	BOOST_TEST(result.filename == "file");
+	BOOST_TEST(result.tmpl_name == "");
+
+	text = "<% import tmpl from 'file' as variable %>"s;
+	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::op_import, text) );
+	BOOST_TEST(result.as == "variable");
+	BOOST_TEST(result.filename == "file");
+	BOOST_TEST(result.tmpl_name == "tmpl");
 }
 
 BOOST_AUTO_TEST_SUITE_END() // singles
