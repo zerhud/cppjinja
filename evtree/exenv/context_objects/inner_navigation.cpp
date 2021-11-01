@@ -18,6 +18,7 @@ using cppjinja::evt::context_object;
 using cppjinja::evt::context_objects::navigation_env;
 using cppjinja::evt::context_objects::navigation_tmpl;
 using cppjinja::evt::context_objects::inner_navigation;
+using cppjinja::evt::context_objects::navigation_single_tmpl;
 
 navigation_env::navigation_env(exenv* e) : inner_navigation(e)
 {
@@ -25,8 +26,12 @@ navigation_env::navigation_env(exenv* e) : inner_navigation(e)
 
 std::shared_ptr<context_object> navigation_env::find(east::var_name n) const
 {
-	if(n.size() != 2) return nullptr;
-	return find_in_imports(std::move(n));
+	if(n.size() == 2) return find_in_imports(std::move(n));
+	if(n.size() == 1) {
+		auto found_tmpl = find_tmpl(n);
+		if(found_tmpl) return find_in_tmpl(found_tmpl);
+	}
+	return nullptr;
 }
 
 navigation_tmpl::navigation_tmpl(exenv* e) : inner_navigation(e)
@@ -35,14 +40,26 @@ navigation_tmpl::navigation_tmpl(exenv* e) : inner_navigation(e)
 
 std::shared_ptr<context_object> navigation_tmpl::find(east::var_name n) const
 {
-	if(n.size() == 1) return find_in_roots(std::move(n));
-	if(n.size() == 2 && n[0] == "self") {
-		n.erase(n.begin());
-		auto ret = find_in_roots(std::move(n));
-		if(ret) return ret;
-	}
-
+	const bool single_name = n.size() == 1;
+	auto ret = single_name ? find_in_roots(n) : nullptr;
+	if(ret) return ret;
+	const bool link_to_cur_tmpl = !n.empty() && n[0]=="self";
+	n.erase(n.begin());
+	if(link_to_cur_tmpl)
+		return single_name ? find_in_cur_tmpl() : find_in_roots(n);
 	return nullptr;
+}
+
+navigation_single_tmpl::navigation_single_tmpl(exenv* e, const cppjinja::evtnodes::tmpl* tmpl)
+    : inner_navigation(e)
+    , tmpl(tmpl)
+{
+	assert(tmpl);
+}
+
+std::shared_ptr<context_object> navigation_single_tmpl::find(east::var_name n) const
+{
+	return find_in_tmpl(tmpl, n);
 }
 
 inner_navigation::inner_navigation(exenv *e)
@@ -75,13 +92,19 @@ std::shared_ptr<context_object> inner_navigation::find_in_roots(east::var_name n
 
 std::shared_ptr<context_object> inner_navigation::find_in_imports(east::var_name n) const
 {
+	const evtnodes::tmpl* found_tmpl = find_tmpl(n);
+	if(!found_tmpl) return nullptr;
+	n.erase(n.begin());
+	return find_in_tmpl(found_tmpl, n);
+}
+
+const cppjinja::evtnodes::tmpl* inner_navigation::find_tmpl(east::var_name n) const
+{
+	assert(!n.empty());
 	auto cur_imports = env->ctx().current_tmpl()->imports();
 	std::string first_var(n.front().begin(), n.front().end());
-	for(auto& i:cur_imports) if(i.as == first_var) {
-		auto* found_tmpl = env->tmpl().search_tmpl(i.filename);
-		n.erase(n.begin());
-		return find_in_tmpl(found_tmpl, n);
-	}
+	for(auto& i:cur_imports) if(i.as == first_var)
+		return env->tmpl().search_tmpl(i.filename);
 	return nullptr;
 }
 
@@ -89,11 +112,23 @@ std::shared_ptr<context_object> inner_navigation::find_in_tmpl(
         const evtnodes::tmpl* t, east::var_name n) const
 {
 	assert(n.size()==1);
+	assert(t != nullptr);
 
 	auto roots = env->roots(t);
 	for(auto& r:roots) if(r->name() == n[0])
 		return std::make_shared<evt::context_objects::callable_node>(env, r);
 	return nullptr;
+}
+
+std::shared_ptr<context_object> inner_navigation::find_in_tmpl(const evtnodes::tmpl* t) const
+{
+	assert(t != nullptr);
+	return std::make_shared<navigation_single_tmpl>(env, t);
+}
+
+std::shared_ptr<context_object> inner_navigation::find_in_cur_tmpl() const
+{
+	return find_in_tmpl(env->ctx().current_tmpl());
 }
 
 absd::data inner_navigation::solve() const

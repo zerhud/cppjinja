@@ -124,7 +124,7 @@ BOOST_FIXTURE_TEST_CASE(rendered_only_empty_name, mock_exenv_fixture)
 	evtnodes::tmpl tmpl(ast::tmpl{});
 	mock::sequence ctx_seq;
 	mocks::callable_node child_with_name, child_empty_name;
-	expect_glp(1, 0, 0);
+	expect_glp(0, 0, 0);
 	expect_call(&child_empty_name);
 	expect_roots({&child_with_name, &child_empty_name});
 	MOCK_EXPECT(globals.add);
@@ -134,35 +134,6 @@ BOOST_FIXTURE_TEST_CASE(rendered_only_empty_name, mock_exenv_fixture)
 	MOCK_EXPECT(child_empty_name.evaluate).once().returns("test"_ad);
 	tmpl.render(env);
 	BOOST_TEST(out.str() == "test");
-}
-BOOST_FIXTURE_TEST_CASE(creates_self, mock_exenv_fixture)
-{
-	evtnodes::tmpl tmpl(ast::tmpl{});
-	mocks::callable_node child1, child2;
-	expect_glp(1, 0, 0);
-	expect_roots({&child1, &child2});
-	MOCK_EXPECT(env.current_node).with(&tmpl);
-	MOCK_EXPECT(child1.name).at_least(1).returns("ch1");
-	MOCK_EXPECT(child2.name).at_least(1).returns("ch2");
-	MOCK_EXPECT(child1.evaluate).returns("ok_ch1"_ad);
-	MOCK_EXPECT(child2.evaluate).returns("ok_ch2"_ad);
-
-	namespace pl = std::placeholders;
-	using cppjinja::evt::context_object;
-	using cppjinja::evt::context_objects::callable_node;
-	auto check = [](std::shared_ptr<context_object> ch1, const cppjinja::evtnodes::callable* child){
-		const auto* node = dynamic_cast<const callable_node*>(ch1.get());
-		return node && node->is_it(child);
-	};
-	auto check_ch1 = std::bind(check, pl::_1, &child1);
-	auto check_ch2 = std::bind(check, pl::_1, &child2);
-	MOCK_EXPECT(globals.add).once().with("ch1", check_ch1);
-	MOCK_EXPECT(globals.add).once().with("ch2", check_ch2);
-	MOCK_EXPECT(globals.add).once().with("self", [&](std::shared_ptr<context_object> s){
-		return check_ch1(s->find(evar_name{"ch1"})) && check_ch2(s->find(evar_name{"ch2"}));
-	});
-
-	tmpl.render(env);
 }
 BOOST_AUTO_TEST_SUITE_END() // tmpl
 

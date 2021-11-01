@@ -47,7 +47,6 @@ std::pmr::string cppjinja::evtnodes::tmpl::name() const
 void cppjinja::evtnodes::tmpl::render(evt::exenv& env) const
 {
 	env.current_node(this);
-	create_self_obj(&env);
 
 	auto children = env.roots(this);
 	for(auto&& child:children) {
@@ -57,17 +56,4 @@ void cppjinja::evtnodes::tmpl::render(evt::exenv& env) const
 			env.out() << child->evaluate(env);
 		}
 	}
-}
-
-void cppjinja::evtnodes::tmpl::create_self_obj(cppjinja::evt::exenv* env) const
-{
-	auto children = env->roots(this);
-	auto self = std::make_shared<evt::context_objects::tree>();
-	for(auto& child:children) {
-		auto child_obj = std::make_shared<evt::context_objects::callable_node>(env, child);
-		self->add(child->name(), child_obj);
-		env->globals().add(child->name(), std::move(child_obj));
-	}
-	if(!children.empty())
-		env->globals().add("self", std::move(self));
 }
