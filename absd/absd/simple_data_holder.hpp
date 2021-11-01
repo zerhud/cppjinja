@@ -86,4 +86,20 @@ public:
 	self_type by_ind(std::int64_t ind) const override;
 };
 
+template<typename T>
+data make_simple(T&& d)
+{
+	return data{ std::make_shared<simple_data_holder>(std::forward<T>(d)) };
+}
+
+inline data operator "" _sd(const char* src, std::size_t size)
+{
+	return absd::data{std::make_shared<simple_data_holder>(
+		            std::pmr::string(src,size))};
+}
+inline data operator "" _sd(unsigned long long int val)
+{
+	return absd::data{std::make_shared<simple_data_holder>(val)};
+}
+
 } // namespace absd
