@@ -80,6 +80,7 @@ MOCK_BASE_CLASS( context, cppjinja::evt::context )
 	MOCK_METHOD(push, 1)
 	MOCK_METHOD(push_shadow, 1)
 	MOCK_METHOD(maker, 0)
+	MOCK_METHOD(current_tmpl, 0)
 
 	MOCK_METHOD(out, 0)
 	MOCK_METHOD(result, 0)
@@ -209,6 +210,13 @@ struct mock_exenv_fixture
 		mock::sequence seq;
 		MOCK_EXPECT(calls.push).once().with(calling, mock::any).in(seq);
 		MOCK_EXPECT(calls.pop).once().in(seq);
+	}
+
+	void expect_solved_params(
+	        callable_node& node,
+	        std::pmr::vector<cppjinja::east::function_parameter> params)
+	{
+		MOCK_EXPECT(node.solved_params).returns(params);
 	}
 
 	void expect_cxt_settings(cppjinja::evt::node* maker)

@@ -127,6 +127,19 @@ BOOST_AUTO_TEST_CASE(children)
 	BOOST_CHECK_THROW(tree.children(&nonexisting), std::exception);
 }
 
+BOOST_AUTO_TEST_CASE(list)
+{
+	BOOST_TEST((cppjinja::evtree{}).list().size()==0);
+	BOOST_TEST(build_tree("cnt").list().size() == 1);
+	cppjinja::evtree tree = build_tree(
+	                            "<% template base %>main<%endtemplate%>"
+	                            "<%template child extends base%>child"
+	                            "<%endtemplate%>"sv);
+	BOOST_TEST(tree.list().size() == 2);
+	BOOST_TEST(tree.list().at(0)->name() == "base");
+	BOOST_TEST(tree.list().at(1)->name() == "child");
+}
+
 BOOST_AUTO_TEST_CASE(render)
 {
 	std::stringstream out;

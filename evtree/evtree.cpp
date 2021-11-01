@@ -38,6 +38,13 @@ cppjinja::evtree::search_tmpl(const ast::string_t& name) const
 	return nullptr;
 }
 
+std::pmr::vector<const cppjinja::evtnodes::tmpl*> cppjinja::evtree::list() const
+{
+	std::pmr::vector<const cppjinja::evtnodes::tmpl*> ret;
+	for(auto& t:templates) ret.emplace_back(t.tmpl_node());
+	return ret;
+}
+
 std::pmr::vector<const cppjinja::evt::node*> cppjinja::evtree::children(
           const cppjinja::evt::node* selected) const
 {

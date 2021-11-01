@@ -21,6 +21,9 @@ public:
 
 	evt::render_info rinfo() const override ;
 
+	std::pmr::string file_name() const ;
+	std::pmr::vector<ast::op_import> imports() const ;
+
 	std::string ast_name() const ;
 	std::pmr::string name() const override ;
 	void render(evt::exenv& env) const override ;

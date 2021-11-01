@@ -24,6 +24,9 @@ struct tmpl : x3::position_tagged
 	string_t name;
 	std::vector<extend_st> extends;
 	std::vector<block_content> content;
+
+	string_t file_name;
+	std::vector<op_import> file_imports;
 };
 
 struct file : x3::position_tagged

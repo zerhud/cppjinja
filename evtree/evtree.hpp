@@ -36,6 +36,8 @@ public:
 	std::pmr::vector<const evt::node*> children(const evt::node* selected) const ;
 	std::pmr::vector<const evtnodes::callable*> roots(const evtnodes::tmpl* tmpl) const ;
 
+	std::pmr::vector<const evtnodes::tmpl*> list() const ;
+
 	evtree& add_tmpl(ast::tmpl& tmpl) override ;
 	void render(
 	          std::ostream& to

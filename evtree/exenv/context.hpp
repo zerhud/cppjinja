@@ -25,6 +25,7 @@ public:
 	virtual void push(const node* n)=0 ;
 	virtual void push_shadow(const node* n)=0 ;
 	virtual const node* maker() const =0 ;
+	virtual const evtnodes::tmpl* current_tmpl() const =0 ;
 
 	virtual std::ostream& out() =0 ;
 	virtual std::pmr::string result() const =0 ;

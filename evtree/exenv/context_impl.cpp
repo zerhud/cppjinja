@@ -7,6 +7,7 @@
  *************************************************************************/
 
 #include "context_impl.hpp"
+#include "nodes/tmpl.hpp"
 
 void cppjinja::evt::context_impl::require_not_empty() const
 {
@@ -82,6 +83,17 @@ void cppjinja::evt::context_impl::push_shadow(const cppjinja::evt::node* n)
 const cppjinja::evt::node* cppjinja::evt::context_impl::maker() const
 {
 	return last_shadow().maker;
+}
+
+const cppjinja::evtnodes::tmpl* cppjinja::evt::context_impl::current_tmpl() const
+{
+	for(auto pos=ctx.rbegin();pos!=ctx.rend();++pos) {
+		const evtnodes::tmpl* tmaker =
+		        dynamic_cast<const evtnodes::tmpl*>(pos->maker);
+		if(pos->shadow && tmaker != nullptr)
+			return tmaker;
+	}
+	throw std::runtime_error("no template was found");
 }
 
 std::ostream& cppjinja::evt::context_impl::out()

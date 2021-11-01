@@ -43,6 +43,7 @@ public:
 	void push(const node* n)override ;
 	void push_shadow(const node* n) override ;
 	const node* maker() const override ;
+	const evtnodes::tmpl* current_tmpl() const override ;
 
 	std::ostream& out() override ;
 	std::pmr::string result() const override ;

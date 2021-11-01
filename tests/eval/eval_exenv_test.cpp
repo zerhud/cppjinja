@@ -33,6 +33,7 @@
 using namespace std::literals;
 namespace tdata = boost::unit_test::data;
 namespace east = cppjinja::east;
+namespace ast = cppjinja::ast;
 
 using cppjinja::ast::var_name;
 using cppjinja::ast::comparator;
@@ -338,14 +339,76 @@ BOOST_AUTO_TEST_CASE(name_combination)
 }
 BOOST_AUTO_TEST_SUITE_END() // user_data
 BOOST_AUTO_TEST_SUITE(inner_navigation)
-BOOST_AUTO_TEST_CASE(find)
+namespace evtn = cppjinja::evtnodes;
+using co_inner_nav = cppjinja::evt::context_objects::inner_navigation;
+BOOST_AUTO_TEST_CASE(cannot_create_without_env)
 {
-	BOOST_FAIL("empty test");
+	BOOST_CHECK_THROW(co_inner_nav{nullptr}, std::runtime_error);
+}
+BOOST_AUTO_TEST_CASE(cannot_add)
+{
+	mocks::exenv env;
+	co_inner_nav in(&env);
+	BOOST_CHECK_THROW(in.add("a", nullptr), std::logic_error );
+}
+BOOST_FIXTURE_TEST_CASE(find_only_two_namepoints, mock_exenv_fixture)
+{
+	co_inner_nav in(&env);
+	BOOST_TEST( in.find(east::var_name{"a"}) == nullptr );
+	BOOST_TEST( in.find(east::var_name{"a", "b", "c"}) == nullptr );
+}
+BOOST_FIXTURE_TEST_CASE(find, mock_exenv_fixture)
+{
+	co_inner_nav in(&env);
+	cppjinja::evtree tmpl_info;
+
+	ast::tmpl tast;
+	tast.file_imports.emplace_back(ast::op_import{0,0,"fn", "as",{},{}});
+	evtn::tmpl tmpl (tast);
+
+	tmpl_info.add_tmpl(tast);
+
+	auto b_block = std::make_shared<mocks::callable_node>();
+
+	MOCK_EXPECT(ctx.current_tmpl).once().returns(&tmpl);
+	MOCK_EXPECT(env.tmpl).at_least(1).returns(std::ref(tmpl_info));
+	expect_roots({b_block.get()});
+	expect_solved_params(*b_block, {});
+	expect_call(b_block.get());
+	MOCK_EXPECT(b_block->name).returns("b");
+	MOCK_EXPECT(b_block->evaluate).once().returns("test"_ad);
+	auto ab = in.find(east::var_name{"as","b"});
+
+	BOOST_TEST( ab!=nullptr );
+	BOOST_TEST( ab->call({})->solve() == "test"_ad );
 }
 BOOST_AUTO_TEST_SUITE_END() // inner_navigation
 BOOST_AUTO_TEST_SUITE_END() // context_object
 
 BOOST_AUTO_TEST_SUITE(context)
+BOOST_FIXTURE_TEST_CASE(current_tmpl, impl_exenv_fixture)
+{
+	using namespace cppjinja::ast;
+
+	auto data = "<%template a%><%block a%>a<%endblock%><%endtemplate%><%template b%>b<%endtemplate%>"sv;
+	auto parsed = cppjinja::text::parse(cppjinja::text::file, data);
+	for(auto& t:parsed.tmpls) compiled.add_tmpl(t);
+	BOOST_TEST( compiled.list().size() == 2 );
+	const cppjinja::evtnodes::tmpl* tmpl_a = compiled.search_tmpl("a");
+	const cppjinja::evtnodes::tmpl* tmpl_b = compiled.search_tmpl("b");
+	BOOST_REQUIRE( tmpl_a );
+	BOOST_REQUIRE( tmpl_b );
+	BOOST_TEST_REQUIRE(tmpl_a->ast_name() == "a");
+	BOOST_TEST_REQUIRE(tmpl_b->ast_name() == "b");
+
+	BOOST_CHECK_THROW(ctx.current_tmpl(), std::runtime_error);
+	ctx.push_shadow(tmpl_a);
+	BOOST_TEST(ctx.current_tmpl()->ast_name() == "a");
+	ctx.push_shadow(tmpl_b);
+	BOOST_TEST(ctx.current_tmpl()->ast_name() == "b");
+	ctx.pop(tmpl_b);
+	BOOST_TEST(ctx.current_tmpl()->ast_name() == "a");
+}
 BOOST_FIXTURE_TEST_CASE(current_node, mock_impls_fixture)
 {
 	mocks::node fnode1, fnode2;

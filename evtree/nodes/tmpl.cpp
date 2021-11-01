@@ -22,6 +22,18 @@ cppjinja::evt::render_info cppjinja::evtnodes::tmpl::rinfo() const
 	return {false, false};
 }
 
+std::pmr::string cppjinja::evtnodes::tmpl::file_name() const
+{
+	return {itmpl_.file_name.begin(), itmpl_.file_name.end()};
+}
+
+std::pmr::vector<cppjinja::ast::op_import> cppjinja::evtnodes::tmpl::imports() const
+{
+	std::pmr::vector<cppjinja::ast::op_import> ret;
+	for(auto& i:itmpl_.file_imports) ret.emplace_back(i);
+	return ret;
+}
+
 std::string cppjinja::evtnodes::tmpl::ast_name() const
 {
 	return itmpl_.name;

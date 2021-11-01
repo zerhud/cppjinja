@@ -81,6 +81,10 @@ cppjinja::parser& cppjinja::parser::parse(std::istream& data)
 
 	if(cur_file_->tmpls.size() == 1 && cur_file_->tmpls[0].name.empty())
 		cur_file_->tmpls[0].name = cur_file_->name;
+	for(auto& tmpl:cur_file_->tmpls) {
+		tmpl.file_name = cur_file_->name;
+		tmpl.file_imports = cur_file_->imports;
+	}
 
 	for(auto& imp:cur_file_->imports) parse(imp);
 	for(auto& inc:cur_file_->includes) parse(inc);
