@@ -29,6 +29,7 @@ const x3::rule<class cmp_op_class, ast::expr_ops::cmp_op> cmp_op = "cmp_op";
 const x3::rule<class logic_op_class, ast::expr_ops::logic_op> logic_op = "logic_op";
 const x3::rule<class point_element_class, ast::expr_ops::point_element> point_element = "point_element";
 const x3::rule<class point_right_element_class, ast::expr_ops::point_element> point_element_right = "point_right_element";
+const x3::rule<class point_element_sq_class, ast::expr_ops::point> point_element_sq = "point_element_sq";
 
 const x3::rule<class cmp_test_class, ast::expr_ops::expr> cmp_test_right_expr = "cmp_test_right_expr";
 const x3::rule<class cmp_test_fnc1_class, ast::expr_ops::fnc_call> cmp_test_fnc1 = "cmp_test_fnc1";
@@ -73,9 +74,9 @@ static auto const quoted_string_def =
 
 static auto const bool_rule_def = x3::lexeme[(lit("true") >> x3::attr(true) | lit("false") >> x3::attr(false)) >> !x3::alpha];
 static auto const term_def = bool_rule | double_ | x3::int64 | quoted_string;
-static auto const keywords_def = bool_rule|x3::lexeme[(lit("if")|lit("else")|lit("in")|lit("and")|lit("or")|lit("is")|lit("recursive")) >> !x3::alpha];
+static auto const keywords_def = bool_rule|x3::lexeme[(lit("if")|lit("else")|lit("in")|lit("and")|lit("or")|lit("is")|lit("not")|lit("recursive")) >> !x3::alpha];
 static auto const single_var_name_helper_def = x3::lexeme[ !keywords_def >> x3::char_("A-Za-z_") >> *x3::char_("0-9A-Za-z_") ];
-static auto const single_var_name_def = !keywords_def >> single_var_name_helper;
+static auto const single_var_name_def = x3::lexeme[!keywords_def >> single_var_name_helper];
 
 static auto const math_pow_def = expr_math_pow >> lit("**") >> x3::attr(ast::expr_ops::math_op::pow) >> expr_math_pow;
 
@@ -93,9 +94,19 @@ static auto const mathop2_def =
       | lit("//") >> x3::attr(ast::expr_ops::math_op::trunc_dev)
                     ;
 
+static auto const point_def = point_element >> ( point_element_sq|point_element_right );
 static auto const point_element_def = single_var_name | (lit('[') >> expr_ipoint >> lit(']'));
-static auto const point_element_right_def = point | (lit('[') >> expr_ipoint >> lit(']')) | single_var_name;
-static auto const point_def = point_element >> -lit('.') >> point_element_right ;
+static auto const point_element_sq_def =
+          (lit('[') >> expr_ipoint >> lit(']'))
+       >> ((lit('[') >> expr_ipoint >> lit(']'))
+          |(lit('.') >> point)
+          )
+        ;
+static auto const point_element_right_def =
+          (lit('.') >> point)
+        | (lit('[') >> expr_ipoint >> lit(']'))
+        | (lit('.') >> single_var_name)
+        ;
 
 static auto const list_def = lit("[") >> expr % ',' >> lit("]");
 static auto const tuple_def = lit("(") >> expr % ',' >> lit(")");
@@ -132,7 +143,7 @@ static auto const logic_op_def =
         lit("and") >> x3::attr(ast::expr_ops::logic_op::op_and)
       | lit("or") >> x3::attr(ast::expr_ops::logic_op::op_or) ;
 
-static auto const negate_def = lit("!") >> expr_concat_left;
+static auto const negate_def = (lit("!") | lit("not")) >> expr_concat_left;
 
 static auto const fnc_call_def = lvalue >> lit('(') >> -(expr % ',') >> lit(')');
 
@@ -175,6 +186,7 @@ BOOST_SPIRIT_DEFINE( lvalue )
 BOOST_SPIRIT_DEFINE( point )
 BOOST_SPIRIT_DEFINE( point_element )
 BOOST_SPIRIT_DEFINE( point_element_right )
+BOOST_SPIRIT_DEFINE( point_element_sq )
 BOOST_SPIRIT_DEFINE( concat )
 BOOST_SPIRIT_DEFINE( in_check )
 BOOST_SPIRIT_DEFINE( cmp_check )
