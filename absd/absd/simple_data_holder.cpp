@@ -157,7 +157,6 @@ simple_dh::self_type simple_dh::by_ind(std::int64_t ind) const
 {
 	require_extract_arr();
 	auto ret = array.at(ind);
-	assert(dynamic_cast<const simple_dh*>(ret.src().get()) != nullptr);
 	return ret.src();
 }
 
