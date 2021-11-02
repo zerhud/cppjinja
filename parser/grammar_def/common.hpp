@@ -74,7 +74,7 @@ struct error_handler
 	auto const array_v_def = lit('[') >> (value_term % ',') >> lit(']');
 	auto const tuple_v_def = lit('(') >> (value_term % ',') >> lit(')');
 
-	auto const var_name_def = single_var_name % '.';
+	auto const var_name_def = lexeme[single_var_name % '.'];
 	auto const array_call_def = var_name >> '[' >> value_term >> ']';
 	auto const array_call_tail_def = -( '.' >> var_name) >> '[' >> value_term >> ']';
 	auto const array_calls_def = array_call >> *array_call_tail;

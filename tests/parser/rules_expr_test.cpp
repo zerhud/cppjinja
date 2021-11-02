@@ -87,6 +87,7 @@ BOOST_AUTO_TEST_CASE(point)
 {
 	auto result = txt::parse(ext::point, "a.b");
 	BOOST_TEST(result.left == est::point_element{est::single_var_name{"a"s}});
+	BOOST_TEST(result.right == est::point_element{est::single_var_name{"b"s}});
 
 	auto result2 = txt::parse(ext::point, "c.a.b");
 	BOOST_TEST(result2.left == est::point_element{est::single_var_name{"c"s}});
@@ -97,6 +98,13 @@ BOOST_AUTO_TEST_CASE(point)
 	result = txt::parse(ext::point, "a['b']");
 	BOOST_TEST(result.left == est::point_element{est::single_var_name{"a"s}});
 	BOOST_TEST(result.right == est::point_element{est::expr{est::term{"b"s}}});
+
+	result = txt::parse(ext::point, "a['b'][c]");
+	BOOST_TEST(result.left == est::point_element{est::single_var_name{"a"s}});
+	est::point rright;
+	rright.left = est::point_element{est::expr{est::term{"b"s}}};
+	rright.right = est::point_element{est::expr{est::single_var_name{"c"s}}};
+	BOOST_TEST(result.right == est::point_element{rright});
 }
 BOOST_AUTO_TEST_CASE(list)
 {
@@ -174,6 +182,9 @@ BOOST_AUTO_TEST_CASE(logic_check)
 BOOST_AUTO_TEST_CASE(negate)
 {
 	auto result = txt::parse(ext::negate, "!b");
+	BOOST_TEST(result.arg == est::expr{est::single_var_name{"b"s}});
+
+	result = txt::parse(ext::negate, "not b");
 	BOOST_TEST(result.arg == est::expr{est::single_var_name{"b"s}});
 }
 BOOST_AUTO_TEST_CASE(fnc_call)
