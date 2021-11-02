@@ -47,6 +47,8 @@ cppjinja::evt::tmpl_compiler::operator()(cppjinja::ast::tmpl t)
 {
 	cur_tmpl = std::move(t);
 	result.extends = std::move(cur_tmpl.extends);
+	for(auto& i:cur_tmpl.file_imports)
+		if(i.tmpl_name.empty()) i.tmpl_name = i.filename;
 	make_main_nodes();
 	return std::move(result);
 }

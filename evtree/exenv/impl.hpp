@@ -28,7 +28,7 @@ class exenv_impl final : public exenv {
 	std::optional<render_info> cur_rinfo;
 	context_objects::tree global_namespace;
 	context_objects::builtins builtins;
-	context_objects::navigation_env nav_env;
+	context_objects::navigation_imp nav_env;
 	context_objects::navigation_tmpl nav_tmpl;
 	result_formatter rfmt;
 	std::shared_ptr<std::pmr::memory_resource> mem =

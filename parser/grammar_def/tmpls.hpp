@@ -25,7 +25,7 @@ namespace cppjinja::text {
 	auto const extend_st_ex_def =
 		single_var_name >> -(lit("from") >> filename);
 
-	auto const file_def = *op_include >> (+tmpl_ex | +tmpl_original);
+	auto const file_def = *op_include >> *op_import >> (+tmpl_ex | +tmpl_original);
 
 	auto const tmpl_def = tmpl_ex | tmpl_original;
 	auto const tmpl_original_def =

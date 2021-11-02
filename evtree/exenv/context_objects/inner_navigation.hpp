@@ -15,7 +15,7 @@ namespace cppjinja::evt::context_objects {
 class inner_navigation : public context_object {
 	exenv* env;
 protected:
-	const evtnodes::tmpl* find_tmpl(east::var_name n) const ;
+	const evtnodes::tmpl* find_tmpl_by_import(east::var_name n) const ;
 	std::shared_ptr<context_object> find_in_cur_tmpl() const;
 	std::shared_ptr<context_object> find_in_tmpl(const evtnodes::tmpl* t) const;
 	std::shared_ptr<context_object> find_in_tmpl(const evtnodes::tmpl* t, east::var_name n) const;
@@ -31,9 +31,9 @@ public:
 	        std::pmr::vector<function_parameter> params) const override ;
 };
 
-class navigation_env : public inner_navigation {
+class navigation_imp : public inner_navigation {
 public:
-	navigation_env(exenv* e);
+	navigation_imp(exenv* e);
 	std::shared_ptr<context_object> find(east::var_name n) const override ;
 };
 

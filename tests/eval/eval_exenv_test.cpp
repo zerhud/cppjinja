@@ -41,7 +41,7 @@ using cppjinja::ast::comparator;
 using cppjinja::ast::value_term;
 using evar_name = cppjinja::east::var_name;
 using mocks::mock_exenv_fixture; // qtcreator cannot parse test with namespace
-using co_nav_env = cppjinja::evt::context_objects::navigation_env;
+using co_nav_imp = cppjinja::evt::context_objects::navigation_imp;
 using co_nav_tmpl = cppjinja::evt::context_objects::navigation_tmpl;
 using co_nav_stmpl = cppjinja::evt::context_objects::navigation_single_tmpl;
 
@@ -345,29 +345,29 @@ BOOST_AUTO_TEST_SUITE_END() // user_data
 BOOST_AUTO_TEST_SUITE(inner_navigation)
 BOOST_AUTO_TEST_CASE(cannot_create_without_env)
 {
-	BOOST_CHECK_THROW(co_nav_env{nullptr}, std::runtime_error);
+	BOOST_CHECK_THROW(co_nav_imp{nullptr}, std::runtime_error);
 	BOOST_CHECK_THROW(co_nav_tmpl{nullptr}, std::runtime_error);
 }
 BOOST_AUTO_TEST_CASE(cannot_add)
 {
 	mocks::exenv env;
-	BOOST_CHECK_THROW(co_nav_env(&env).add("a", nullptr), std::logic_error );
+	BOOST_CHECK_THROW(co_nav_imp(&env).add("a", nullptr), std::logic_error );
 	BOOST_CHECK_THROW(co_nav_tmpl(&env).add("a", nullptr), std::logic_error );
 }
 BOOST_FIXTURE_TEST_CASE(find_only_two_or_one_namepoints, mock_exenv_fixture)
 {
-	BOOST_TEST( co_nav_env(&env).find(east::var_name{}) == nullptr );
+	BOOST_TEST( co_nav_imp(&env).find(east::var_name{}) == nullptr );
 	BOOST_TEST( co_nav_tmpl(&env).find(east::var_name{"a", "b", "c"}) == nullptr );
 }
 BOOST_FIXTURE_TEST_CASE(find_in_imports, mock_exenv_fixture)
 {
-	co_nav_env in(&env);
+	co_nav_imp in(&env);
 	cppjinja::evtree tmpl_info;
 
 	ast::tmpl tast;
-	tast.name = "fn";
+	tast.name = "tn";
 	tast.file_name = "fn";
-	tast.file_imports.emplace_back(ast::op_import{0,0,"fn", "as", "",{},{}});
+	tast.file_imports.emplace_back(ast::op_import{0,0,"fn", "as", "tn",{},{}});
 	evtn::tmpl tmpl (tast);
 
 	tmpl_info.add_tmpl(tast);
@@ -396,7 +396,7 @@ BOOST_FIXTURE_TEST_CASE(find_in_imports, mock_exenv_fixture)
 BOOST_FIXTURE_TEST_CASE(find_in_roots, mock_exenv_fixture)
 {
 	ast::tmpl tast;
-	tast.file_imports.emplace_back(ast::op_import{0,0,"fn", "as",{},{}});
+	tast.file_imports.emplace_back(ast::op_import{0,0,"fn", "as","tn",{},{}});
 	evtn::tmpl tmpl (tast);
 
 	co_nav_tmpl in(&env);

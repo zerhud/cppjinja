@@ -133,6 +133,7 @@ cppjinja::evt::compiled_tmpl build_tree(std::string_view ptxt)
 	BOOST_TEST_CONTEXT("parsing: " << ptxt)
 	    BOOST_REQUIRE_NO_THROW( parsed = txt::parse(txt::file, ptxt) );
 	assert(parsed.tmpls.size() == 1);
+	for(auto& t:parsed.tmpls) t.file_imports = parsed.imports;
 	return cppjinja::evt::tmpl_compiler()(parsed.tmpls[0]);
 }
 
@@ -183,6 +184,15 @@ BOOST_AUTO_TEST_CASE(root_not_exists)
 BOOST_AUTO_TEST_SUITE_END() // compiled_tmpl
 
 BOOST_AUTO_TEST_SUITE(tmpl_compiler)
+
+BOOST_AUTO_TEST_CASE(imports)
+{
+	auto data = "<% import 'file' as tmpl %><= a =>";
+	compiled_tmpl tree = build_tree(data);
+	BOOST_REQUIRE(tree.tmpl_node()->imports().size() == 1);
+	BOOST_TEST(tree.tmpl_node()->imports()[0].filename == "file");
+	BOOST_TEST(tree.tmpl_node()->imports()[0].tmpl_name == "file");
+}
 
 BOOST_AUTO_TEST_CASE(empty_tmpl)
 {

@@ -13,4 +13,4 @@
 
 BOOST_FUSION_ADAPT_STRUCT( cppjinja::ast::extend_st, tmpl_name, file_name)
 BOOST_FUSION_ADAPT_STRUCT( cppjinja::ast::tmpl, name, extends, content)
-BOOST_FUSION_ADAPT_STRUCT( cppjinja::ast::file, includes, tmpls)
+BOOST_FUSION_ADAPT_STRUCT( cppjinja::ast::file, includes, imports, tmpls)
