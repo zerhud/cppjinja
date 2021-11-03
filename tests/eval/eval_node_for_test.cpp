@@ -246,6 +246,11 @@ BOOST_FIXTURE_TEST_CASE(cannot_add_solve, mock_for_fixture)
 	BOOST_CHECK_THROW(obj.solve(), std::exception);
 	BOOST_CHECK_THROW(obj.add("ok"_s, child), std::exception);
 }
+BOOST_FIXTURE_TEST_CASE(find_throws_if_nonexists, mock_for_fixture)
+{
+	evtnodes::block_for_object obj(env.storage(), 1);
+	BOOST_CHECK_THROW(obj.find(east::var_name{"nonexisting"}), std::runtime_error);
+}
 BOOST_FIXTURE_TEST_CASE(index, mock_for_fixture)
 {
 	ast::block_for ast_bl;
@@ -282,6 +287,9 @@ BOOST_FIXTURE_TEST_CASE(index, mock_for_fixture)
 		auto cycobj = std::make_shared<obj_val_t>(absd::data{ab_val});
 		auto cycle = loop->find({"cycle"})->call({{std::nullopt,cycobj}});
 		BOOST_TEST(cycle->solve() == "a"_s);
+		auto last = loop->find({"last"_s});
+		BOOST_REQUIRE(last);
+		BOOST_TEST(last->solve() == false);
 	});
 	MOCK_EXPECT(ctx.pop).once().in(ctx_seq);
 
@@ -300,6 +308,9 @@ BOOST_FIXTURE_TEST_CASE(index, mock_for_fixture)
 		BOOST_TEST(ind->solve() == loop->find({"ind"_s})->solve());
 		auto cycobj = std::make_shared<obj_val_t>(absd::data{ab_val});
 		BOOST_TEST(loop->find({"cycle"})->call({{std::nullopt,cycobj}})->solve() == "b"_s);
+		auto last = loop->find({"last"_s});
+		BOOST_REQUIRE(last);
+		BOOST_TEST(last->solve() == true);
 	});
 	MOCK_EXPECT(ctx.pop).once().in(ctx_seq);
 

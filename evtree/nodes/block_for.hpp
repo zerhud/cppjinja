@@ -31,7 +31,8 @@ class block_for_object : public evt::context_object {
 	std::size_t length;
 	std::size_t cur_iter = 0;
 	std::shared_ptr<std::pmr::memory_resource> mem;
-	absd::data create_data(std::size_t v) const ;
+	template<typename T>
+	absd::data create_data(T v) const ;
 public:
 	block_for_object(std::shared_ptr<std::pmr::memory_resource> r, std::size_t sz);
 	void next();

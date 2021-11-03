@@ -15,6 +15,7 @@
 
 using namespace std::literals;
 using obj_val = cppjinja::evt::context_objects::value;
+using absd::make_simple;
 
 static std::shared_ptr<obj_val> make_val(cppjinja::evt::exenv& env, absd::data v)
 {
@@ -28,6 +29,12 @@ static std::shared_ptr<obj_val> make_val(cppjinja::evt::exenv& env, T&& v)
 	auto h = std::allocate_shared<absd::simple_data_holder>(
 	            aloc, env.storage(), std::forward<T>(v) );
 	return std::allocate_shared<obj_val>(aloc, absd::data{std::move(h)});
+}
+
+template<typename T>
+absd::data cppjinja::evtnodes::block_for_object::create_data(T v) const
+{
+	return make_simple(mem, v);
 }
 
 cppjinja::evtnodes::block_for::block_for(cppjinja::ast::block_for ast_bl)
@@ -121,14 +128,6 @@ cppjinja::evtnodes::block_for_object::block_for_object(
 {
 }
 
-absd::data cppjinja::evtnodes::block_for_object::create_data(std::size_t v) const
-{
-	return absd::data{
-		std::allocate_shared<absd::simple_data_holder>(
-		            std::pmr::polymorphic_allocator(mem.get()), mem, v)
-	};
-}
-
 void cppjinja::evtnodes::block_for_object::next()
 {
 	++cur_iter;
@@ -149,6 +148,8 @@ cppjinja::evtnodes::block_for_object::find(cppjinja::east::var_name n) const
 		return std::make_shared<evt::context_objects::value>(create_data(cur_iter));
 	if(n == east::var_name{"length"})
 		return std::make_shared<evt::context_objects::value>(create_data(length));
+	if(n == east::var_name{"last"})
+		return std::make_shared<evt::context_objects::value>(create_data(cur_iter+1 == length));
 	if(n == east::var_name{"cycle"})
 		return std::make_shared<evt::context_objects::lambda_function>(
 		[cur_iter=cur_iter](auto params) -> std::shared_ptr<evt::context_object>{
@@ -156,7 +157,8 @@ cppjinja::evtnodes::block_for_object::find(cppjinja::east::var_name n) const
 			auto val = param_val[cur_iter % param_val.size()];
 			return std::make_shared<evt::context_objects::value>(val);
 		});
-	return nullptr;
+	assert(0 < n.size());
+	throw std::runtime_error("cannot find variable "s + n.at(0).c_str());
 }
 
 absd::data cppjinja::evtnodes::block_for_object::solve() const
