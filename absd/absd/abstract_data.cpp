@@ -50,7 +50,7 @@ std::ostream& to_json::prt()
 	if(src->is_pod(info)) return src->is_cached() ? cached() : pod();
 	if(info.type == data_type::array) return array();
 	if(info.type == data_type::object) return object();
-	if(info.type == data_type::empty) throw std::runtime_error("try to print none");
+	if(info.type == data_type::empty) return out;
 	assert(false);
 	throw std::logic_error("not all data types cached");
 }

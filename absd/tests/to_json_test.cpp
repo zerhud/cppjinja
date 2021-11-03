@@ -35,7 +35,7 @@ BOOST_FIXTURE_TEST_CASE(empty, fixture)
 {
 	expect_reflection(absd::data_type::empty);
 	abs_data d(prov);
-	BOOST_CHECK_THROW(prt(d), std::runtime_error);
+	BOOST_TEST(prt(d) == "");
 }
 BOOST_FIXTURE_TEST_CASE(pod_int, fixture)
 {
