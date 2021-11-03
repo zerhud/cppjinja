@@ -92,6 +92,15 @@ data make_simple(T&& d)
 	return data{ std::make_shared<simple_data_holder>(std::forward<T>(d)) };
 }
 
+template<typename T>
+data make_simple(std::shared_ptr<std::pmr::memory_resource> m, T&& d)
+{
+	return data{
+		std::allocate_shared<absd::simple_data_holder>(
+		            std::pmr::polymorphic_allocator(m.get()), m, std::forward<T>(d))
+	};
+}
+
 namespace literals {
 
 inline data operator "" _sd(const char* src, std::size_t size)
