@@ -18,6 +18,8 @@ using storage_ptr = std::shared_ptr<std::pmr::memory_resource>;
 class json_data_holder : public absd::data_holder {
 	boost::json::value val;
 	storage_ptr mem;
+
+	self_type create_empty() const ;
 public:
 	static self_type create_for_val(storage_ptr mem, boost::json::value v) ;
 
@@ -32,6 +34,9 @@ public:
 
 	self_type by_key(std::string_view key) const override;
 	self_type by_ind(std::int64_t ind) const override;
+
+	self_type at_key(std::string_view key) const override ;
+	self_type at_ind(std::int64_t ind) const override ;
 };
 
 class jinja_json_prov : public cppjinja::data_provider {

@@ -22,7 +22,7 @@ void block_if::render_if(cppjinja::evt::exenv& ctx) const
 void block_if::render_else(cppjinja::evt::exenv& ctx) const
 {
 	auto children = ctx.children(this);
-	if(children.size() == 2) {
+	if(children.size() == 2 && block.else_block) {
 		auto formatter = raii_else_formatter(ctx);
 		children[1]->render(ctx);
 	}

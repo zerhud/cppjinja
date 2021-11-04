@@ -41,10 +41,11 @@ void cppjinja::parser::parse(const ast::op_include& inc)
 	parse(fn);
 }
 
-void cppjinja::parser::parse(const ast::op_import &imp)
+void cppjinja::parser::parse(ast::op_import& imp)
 {
 	std::filesystem::path fn = solve_path(imp.filename);
 	assert(fn.is_absolute());
+	imp.filename = fn;
 	parse(fn);
 }
 
@@ -60,6 +61,7 @@ cppjinja::parser& cppjinja::parser::parse(std::filesystem::path file)
 
 	cur_file_ = &files_.emplace_back();
 	cur_file_->name = file.generic_string();
+	cur_file_name_ = absolute(file).generic_string();
 
 	std::fstream fdata(file);
 
@@ -78,6 +80,10 @@ cppjinja::parser& cppjinja::parser::parse(std::istream& data)
 
 	if(!cur_file_) cur_file_ = &files_.emplace_back();
 	*cur_file_ = cppjinja::text::parse(text::file, begin, end);
+	if(!cur_file_name_.empty())
+		cur_file_->name = cur_file_name_;
+
+	for(auto& imp:cur_file_->imports) imp.filename = solve_path(imp.filename);
 
 	if(cur_file_->tmpls.size() == 1 && cur_file_->tmpls[0].name.empty())
 		cur_file_->tmpls[0].name = cur_file_->name;
@@ -101,6 +107,8 @@ std::vector<cppjinja::ast::tmpl> cppjinja::parser::tmpls() const
 
 std::vector<cppjinja::ast::file> cppjinja::parser::files() const
 {
-	return files_;
+	std::vector<cppjinja::ast::file> ret;
+	for(auto& f:files_) ret.emplace_back(f);
+	return ret;
 }
 

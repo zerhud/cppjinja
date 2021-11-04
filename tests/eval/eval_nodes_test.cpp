@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(getters)
 	ast::tmpl t;
 	t.name = "test_name";
 	t.file_name = "file_name";
-	t.file_imports.emplace_back(ast::op_import{0, 0, "fn", "as", {}, {}});
+	t.file_imports.emplace_back(ast::op_import{0, 0, "fn", "as", "tn", {}, {}});
 	evtnodes::tmpl tmpl(t);
 	BOOST_CHECK( !tmpl.rinfo().trim_left );
 	BOOST_CHECK( !tmpl.rinfo().trim_right );
@@ -109,6 +109,7 @@ BOOST_AUTO_TEST_CASE(getters)
 	BOOST_REQUIRE( tmpl.imports().size() ==1 );
 	BOOST_TEST( tmpl.imports()[0].filename == "fn" );
 	BOOST_TEST( tmpl.imports()[0].as == "as" );
+	BOOST_TEST( tmpl.imports()[0].tmpl_name == "tn" );
 	test_name_equals( tmpl, t );
 }
 BOOST_FIXTURE_TEST_CASE(no_children_no_render, mock_exenv_fixture)

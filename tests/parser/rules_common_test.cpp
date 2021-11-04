@@ -31,8 +31,8 @@ BOOST_AUTO_TEST_SUITE(common)
 
 BOOST_DATA_TEST_CASE(
         quoted1_string
-      ,   utd::make("'kuku'"s, "'ku ku'"s, "''"s, "'привет'"s, "'k\\k'"s, "'ok\\'ok'"s)
-        ^ utd::make("kuku"s,   "ku ku"s,   ""s,   "привет"s  , "k\\k"s,   "ok'ok"s)
+      ,   utd::make("'kuku'"s, "'ku ku'"s, "''"s, "'привет'"s, "'k\\k'"s, "'ok\\'ok'"s, "'\"'"s)
+        ^ utd::make("kuku"s,   "ku ku"s,   ""s,   "привет"s  , "k\\k"s,   "ok'ok"s,     "\""s)
       , data, good_result
       )
 {
@@ -44,8 +44,8 @@ BOOST_DATA_TEST_CASE(
 
 BOOST_DATA_TEST_CASE(
         quoted2_string
-      ,   utd::make("\"kuku\""s, "\"ku ku\""s, "\"\""s, "\"привет\""s, "\"k\\k\""s, "\"ok\\\"ok\""s)
-        ^ utd::make("kuku"s,   "ku ku"s,   ""s,   "привет"s  , "k\\k"s,   "ok\"ok"s)
+      ,   utd::make("\"kuku\""s, "\"ku ku\""s, "\"\""s, "\"привет\""s, "\"k\\k\""s, "\"ok\\\"ok\""s, "\"'\""s)
+        ^ utd::make("kuku"s,   "ku ku"s,   ""s,   "привет"s  , "k\\k"s,   "ok\"ok"s, "'"s)
       , data, good_result
       )
 {
@@ -72,8 +72,8 @@ BOOST_DATA_TEST_CASE(
 	BOOST_TEST( result == good_result );
 }
 
-BOOST_DATA_TEST_CASE( var_name , utd::make("a"s, "a.b"s)
-        ^ utd::make( ast::var_name{"a"s} , ast::var_name{"a"s, "b"s} )
+BOOST_DATA_TEST_CASE( var_name , utd::make("a"s, "a.b"s, " c.d"s)
+        ^ utd::make( ast::var_name{"a"s}, ast::var_name{"a"s, "b"s}, ast::var_name{"c"s, "d"s} )
         , data, good_result)
 {
 	ast::var_name result;

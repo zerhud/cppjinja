@@ -71,13 +71,16 @@ cppjinja::ast::expr_ops::term cppjinja::evt::expr_eval::to_term(const absd::data
 	if(d.is_float()) return term{(double)d};
 	if(d.is_string()) return term{d.hstr()};
 	if(d.is_boolean()) return term{(bool)d};
+	if(d.is_empty()) return term{ast::string_t("")};
 	throw std::runtime_error("cannot apply this operator on such type");
 }
 
 cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::point& t) const
 {
-	return solve_point_arg(env->all_ctx(), t)->solve();
+	auto solved_point = solve_point_arg(env->all_ctx(), t);
+	assert(solved_point);
+	return solved_point->solve();
 }
 
 cppjinja::evt::context_object_ptr cppjinja::evt::expr_eval::solve_point_arg(

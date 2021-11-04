@@ -88,12 +88,33 @@ bool cogen::json_data_holder::to_bool() const
 
 cogen::json_data_holder::self_type cogen::json_data_holder::by_key(std::string_view key) const
 {
+	auto vobj = val.as_object();
+	if(!vobj.contains(key)) return create_empty();
 	return create_for_val(mem, val.as_object().at(key));
 }
 
 cogen::json_data_holder::self_type cogen::json_data_holder::by_ind(int64_t ind) const
 {
-	return create_for_val(mem, val.as_array()[ind]);
+	auto varr = val.as_array();
+	if((std::int64_t)varr.size() <= ind) return create_empty();
+	return create_for_val(mem, varr[ind]);
+}
+
+cogen::json_data_holder::self_type cogen::json_data_holder::at_key(std::string_view key) const
+{
+	auto vobj = val.as_object();
+	return create_for_val(mem, val.as_object().at(key));
+}
+
+cogen::json_data_holder::self_type cogen::json_data_holder::at_ind(std::int64_t ind) const
+{
+	auto varr = val.as_array();
+	return create_for_val(mem, varr.at(ind));
+}
+
+cogen::json_data_holder::self_type cogen::json_data_holder::create_empty() const
+{
+	return create_for_val(mem, boost::json::value{});
 }
 
 cogen::json_data_holder::self_type cogen::json_data_holder::create_for_val(

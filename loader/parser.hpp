@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <list>
 #include <vector>
 #include <string>
 #include <filesystem>
@@ -18,12 +19,13 @@ namespace cppjinja {
 class parser final {
 	std::vector<std::filesystem::path> cur_dir_stack_;
 	std::vector<std::filesystem::path> incs_;
-	std::vector<ast::file> files_;
+	std::list<ast::file> files_;
 	ast::file* cur_file_ = nullptr;
+	ast::string_t cur_file_name_;
 
 	std::filesystem::path solve_path(const std::filesystem::path& to) const ;
 	void parse(const ast::op_include& inc);
-	void parse(const ast::op_import& imp);
+	void parse(ast::op_import& imp);
 public:
 	parser(const parser&) =delete ;
 	parser& operator = (const parser&) =delete ;

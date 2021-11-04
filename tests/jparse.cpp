@@ -9,9 +9,123 @@
 #include <fstream>
 #include <boost/json/src.hpp>
 #include <boost/program_options.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 #include <loader/parser.hpp>
+#include <absd/simple_data_holder.hpp>
 #include <evtree/evtree.hpp>
 #include "jparse/json_prov.hpp"
+
+using absd::make_simple;
+using namespace absd::literals;
+
+class extra_functions : public cogen::jinja_json_prov {
+	static bool contains(const std::vector<absd::data>& con, absd::data val)
+	{
+		for(auto& v:con) if(v==val) return true;
+		return false;
+	}
+
+	absd::data upper(absd::data obj) const
+	{
+		if(!obj.is_string()) return obj;
+		auto str = obj.str();
+		boost::algorithm::to_upper(str);
+		return make_simple(str);
+	}
+
+	absd::data extract_name(absd::data obj, absd::data nind=make_simple(-1)) const
+	{
+		auto name = obj["name"];
+		std::int64_t ind = (std::int64_t)nind;
+		if(name.is_array()) return name[0 <= ind ? ind : 0];
+		return name;
+	}
+
+	absd::data select_keys(absd::data obj, absd::data vals) const
+	{
+		auto ret = std::make_shared<absd::simple_data_holder>();
+		auto vals_arr = vals.as_array();
+		auto contains = [&vals_arr](auto&& v){for(auto& av:vals_arr) if(av==v)return true; return false;};
+		if(obj.is_object()) {
+			for(auto& [k,v]:obj.as_map()) if(contains(k)) {
+				if(v.is_array())
+					for(auto& vv:v.as_array())
+						ret->push_back(vv);
+				else ret->push_back(v);
+			}
+		}
+		return absd::data{ret};
+	}
+	absd::data unique(absd::data vals) const
+	{
+		if(!vals.is_array()) return vals;
+		std::vector<absd::data> result;
+		for(auto& v:vals.as_array())
+			if(!contains(result, v)) result.emplace_back(v);
+		auto ret = std::make_shared<absd::simple_data_holder>();
+		for(auto& r:result) ret->push_back(std::move(r));
+		return absd::data{ret};
+	}
+	absd::data apply_prefix(absd::data obj, absd::data prefix, absd::data nind=0_sd) const
+	{
+		auto naming = (obj["naming"][(std::int64_t)nind]).str();
+		if(naming=="underscore") return make_simple(prefix.str() + "_" + extract_name(obj, nind).str());
+		if(naming=="title_case") return make_simple(prefix.str() + extract_name(obj, nind).str());
+		if(naming=="camel_case") return make_simple(prefix.str() + "_" + extract_name(obj, nind).str());
+		return "phhh"_sd;
+	}
+	absd::data apply_sufix(absd::data obj, absd::data prefix, absd::data nind=0_sd) const
+	{
+		auto naming = (obj["naming"][(std::int64_t)nind]).str();
+		if(naming=="underscore") return make_simple(prefix.str() + "_" + extract_name(obj, nind).str());
+		if(naming=="title_case") return make_simple(prefix.str() + extract_name(obj, nind).str());
+		if(naming=="camel_case") return make_simple(prefix.str() + "_" + extract_name(obj, nind).str());
+		return "sifuxxx"_sd;
+	}
+public:
+	extra_functions(boost::json::value jd) : jinja_json_prov(std::move(jd)) {}
+	absd::data value(const cppjinja::east::function_call& val) const override
+	{
+		if(val.ref.size()!=1) return jinja_json_prov::value(std::move(val));
+		if(val.ref[0] == "select_keys") {
+			if(val.params.size() != 2)
+				throw std::runtime_error("function select_keys takes two arguments");
+			return select_keys(
+			            std::move(val.params[0].val.value()),
+			            std::move(val.params[1].val.value()));
+		} else if(val.ref[0] == "unique") {
+			if(val.params.size() != 1)
+				throw std::runtime_error("function unique takes one argument");
+			return unique( std::move(val.params[0].val.value()) );
+		} else if(val.ref[0] == "apply_prefix") {
+			if(val.params.size()==2)
+				return apply_prefix(val.params[0].val.value(), val.params[1].val.value());
+			if(val.params.size()==3)
+				return apply_prefix(val.params[0].val.value(), val.params[1].val.value(), val.params[2].val.value());
+			throw std::runtime_error("function apply_prefix takes 2 or 3 arguments");
+		} else if(val.ref[0] == "apply_sufix") {
+			if(val.params.size()==2)
+				return apply_prefix(val.params[0].val.value(), val.params[1].val.value());
+			if(val.params.size()==3)
+				return apply_sufix(val.params[0].val.value(), val.params[1].val.value(), val.params[2].val.value());
+			throw std::runtime_error("function apply_sufix takes 2 or 3 arguments");
+		} else if(val.ref[0] == "name") {
+			if(val.params.size()==2)
+				return extract_name(val.params[0].val.value(), val.params[1].val.value());
+			if(val.params.size()==1)
+				return extract_name(val.params[0].val.value());
+			throw std::runtime_error("function extract_name takes 1 or 2 arguments");
+		} else if(val.ref[0] == "upper") {
+			if(val.params.size()==1)
+				return upper(val.params[0].val.value());
+			throw std::runtime_error("function upper takes 1 argument");
+		}
+		std::cout << "function call " << val.ref[0] << std::endl;
+		std::cout << "\t" << val.ref.size() << std::endl;
+		return "data is here"_sd;
+//		return jinja_json_prov::value(std::move(val));
+	}
+};
 
 int main(int argc, char** argv)
 {
@@ -33,7 +147,9 @@ int main(int argc, char** argv)
 
 	cppjinja::evtree ev;
 	cppjinja::parser jparser({});
-	jparser.parse(opt_vals["tmpl"].as<std::string>().c_str());
+	std::filesystem::path rtmpl = opt_vals["tmpl"].as<std::string>();
+	rtmpl = absolute(rtmpl);
+	jparser.parse(rtmpl);
 	for(auto& t:jparser.tmpls()) ev.add_tmpl(t);
 
 	std::cout << "parsed ok" << std::endl;
@@ -46,7 +162,7 @@ int main(int argc, char** argv)
 		while(std::getline(data, json_line)) json_data += json_line;
 	}
 
-	cogen::jinja_json_prov data(boost::json::parse(json_data));
-	ev.render(std::cout, data, "");
+	extra_functions data(boost::json::parse(json_data));
+	ev.render(std::cout, data, rtmpl.generic_string());
 	return 0;
 }
