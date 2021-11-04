@@ -202,6 +202,11 @@ bool absd::data::is_array() const
 	return ref_info().type == data_type::array;
 }
 
+bool absd::data::is_empty() const
+{
+	return ref_info().type == data_type::empty;
+}
+
 bool absd::data::is_cached() const
 {
 	return

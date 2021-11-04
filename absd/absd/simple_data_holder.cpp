@@ -37,6 +37,13 @@ void simple_dh::set_int(std::int64_t v)
 	pod.emplace(v);
 }
 
+simple_dh::self_type simple_dh::create_empty() const
+{
+	auto ret = std::allocate_shared<simple_dh>(alloc_t(storage()), mem);
+	assert(ret->reflect().type == data_type::empty);
+	return ret;
+}
+
 void simple_dh::clear_state()
 {
 	is_empty_obj = false;
@@ -118,6 +125,15 @@ void simple_dh::make_empty_object()
 simple_dh::self_type simple_dh::by_key(std::string_view key) const
 {
 	require_extract_obj();
+	auto pos = object.find(key);
+	if(pos == object.end()) return create_empty();
+	assert(dynamic_cast<const simple_dh*>(pos->second.src().get()) != nullptr);
+	return pos->second.src();
+}
+
+simple_dh::self_type simple_dh::at_key(std::string_view key) const
+{
+	require_extract_obj();
 	auto ret = object.at(std::pmr::string(key,storage()));
 	assert(dynamic_cast<const simple_dh*>(ret.src().get()) != nullptr);
 	return ret.src();
@@ -156,8 +172,13 @@ void simple_dh::make_empty_array()
 simple_dh::self_type simple_dh::by_ind(std::int64_t ind) const
 {
 	require_extract_arr();
-	auto ret = array.at(ind);
-	return ret.src();
+	return array.size() <= ind ? create_empty() : array[ind].src();
+}
+
+simple_dh::self_type simple_dh::at_ind(std::int64_t ind) const
+{
+	require_extract_arr();
+	return array.at(ind).src();
 }
 
 void simple_dh::require_extract_arr() const

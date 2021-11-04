@@ -23,6 +23,8 @@ MOCK_BASE_CLASS(data_holder, absd::data_holder)
 	MOCK_METHOD(to_bool, 0)
 	MOCK_METHOD(by_key, 1)
 	MOCK_METHOD(by_ind, 1)
+	MOCK_METHOD(at_key, 1)
+	MOCK_METHOD(at_ind, 1)
 };
 
 struct fixture {

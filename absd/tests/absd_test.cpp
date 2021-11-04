@@ -102,6 +102,17 @@ BOOST_FIXTURE_TEST_CASE(as_array_fnc, fixture)
 	for(auto& v:ar) BOOST_TEST(v == absd::data{val});
 }
 BOOST_AUTO_TEST_SUITE(reflect)
+BOOST_FIXTURE_TEST_CASE(empty, fixture)
+{
+	expect_reflection(absd::data_type::empty);
+	BOOST_TEST(dp().is_string() == false);
+	BOOST_TEST(dp().is_integer() == false);
+	BOOST_TEST(dp().is_float() == false);
+	BOOST_TEST(dp().is_boolean() == false);
+	BOOST_TEST(dp().is_object() == false);
+	BOOST_TEST(dp().is_array() == false);
+	BOOST_TEST(dp().is_empty() == true);
+}
 BOOST_FIXTURE_TEST_CASE(string, fixture)
 {
 	expect_reflection(absd::data_type::string);
@@ -111,6 +122,7 @@ BOOST_FIXTURE_TEST_CASE(string, fixture)
 	BOOST_TEST(dp().is_boolean() == false);
 	BOOST_TEST(dp().is_object() == false);
 	BOOST_TEST(dp().is_array() == false);
+	BOOST_TEST(dp().is_empty() == false);
 }
 BOOST_FIXTURE_TEST_CASE(integer, fixture)
 {
@@ -121,6 +133,7 @@ BOOST_FIXTURE_TEST_CASE(integer, fixture)
 	BOOST_TEST(dp().is_boolean() == false);
 	BOOST_TEST(dp().is_object() == false);
 	BOOST_TEST(dp().is_array() == false);
+	BOOST_TEST(dp().is_empty() == false);
 }
 BOOST_FIXTURE_TEST_CASE(floating_point, fixture)
 {
@@ -131,6 +144,7 @@ BOOST_FIXTURE_TEST_CASE(floating_point, fixture)
 	BOOST_TEST(dp().is_boolean() == false);
 	BOOST_TEST(dp().is_object() == false);
 	BOOST_TEST(dp().is_array() == false);
+	BOOST_TEST(dp().is_empty() == false);
 }
 BOOST_FIXTURE_TEST_CASE(boolean, fixture)
 {
@@ -141,6 +155,7 @@ BOOST_FIXTURE_TEST_CASE(boolean, fixture)
 	BOOST_TEST(dp().is_boolean() == true);
 	BOOST_TEST(dp().is_object() == false);
 	BOOST_TEST(dp().is_array() == false);
+	BOOST_TEST(dp().is_empty() == false);
 }
 BOOST_FIXTURE_TEST_CASE(object, fixture)
 {
@@ -151,6 +166,7 @@ BOOST_FIXTURE_TEST_CASE(object, fixture)
 	BOOST_TEST(dp().is_boolean() == false);
 	BOOST_TEST(dp().is_object() == true);
 	BOOST_TEST(dp().is_array() == false);
+	BOOST_TEST(dp().is_empty() == false);
 }
 BOOST_FIXTURE_TEST_CASE(array, fixture)
 {
@@ -161,6 +177,7 @@ BOOST_FIXTURE_TEST_CASE(array, fixture)
 	BOOST_TEST(dp().is_boolean() == false);
 	BOOST_TEST(dp().is_object() == false);
 	BOOST_TEST(dp().is_array() == true);
+	BOOST_TEST(dp().is_empty() == false);
 }
 BOOST_AUTO_TEST_SUITE_END() // reflect
 BOOST_AUTO_TEST_SUITE(operators)

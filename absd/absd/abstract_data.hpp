@@ -85,6 +85,9 @@ public:
 
 	virtual self_type by_key(std::string_view key) const =0;
 	virtual self_type by_ind(std::int64_t ind) const =0;
+
+	virtual self_type at_key(std::string_view key) const =0;
+	virtual self_type at_ind(std::int64_t ind) const =0;
 };
 
 class data final {
@@ -114,6 +117,7 @@ public:
 	bool is_boolean() const ;
 	bool is_object() const ;
 	bool is_array() const ;
+	bool is_empty() const ;
 
 	explicit operator std::int64_t () const ;
 	explicit operator double () const ;

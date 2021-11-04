@@ -69,11 +69,14 @@ BOOST_AUTO_TEST_CASE(object)
 {
 	simple_dh hld;
 	BOOST_CHECK_THROW(hld.by_key("t1"), std::exception);
+	BOOST_CHECK_THROW(hld.at_key("t1"), std::exception);
 	hld.put("t1") = 42;
 	check_reflect(hld.reflect(), absd::data_type::object, 0, 1);
 	BOOST_TEST(hld.reflect().keys.at(0) == "t1");
 	BOOST_TEST(hld.by_key("t1")->to_int() == 42);
-	BOOST_CHECK_THROW(hld.by_key("no"), std::out_of_range);
+	BOOST_TEST(hld.at_key("t1")->to_int() == 42);
+	check_reflect(hld.by_key("no")->reflect(), absd::data_type::empty, 0, 0);
+	BOOST_CHECK_THROW(hld.at_key("no"), std::out_of_range);
 }
 BOOST_AUTO_TEST_CASE(empty_object)
 {
@@ -95,12 +98,16 @@ BOOST_AUTO_TEST_CASE(array)
 {
 	simple_dh hld;
 	BOOST_CHECK_THROW(hld.by_ind(0), std::exception);
+	BOOST_CHECK_THROW(hld.at_ind(0), std::exception);
 	hld.push_back() = 42;
 	check_reflect(hld.reflect(), absd::data_type::array, 1, 0);
 	BOOST_TEST(hld.by_ind(0)->to_int() == 42);
-	BOOST_CHECK_THROW(hld.by_ind(1), std::out_of_range);
+	BOOST_TEST(hld.at_ind(0)->to_int() == 42);
+	check_reflect(hld.by_ind(1)->reflect(), absd::data_type::empty, 0, 0);
+	BOOST_CHECK_THROW(hld.at_ind(1), std::out_of_range);
 	hld.push_back() = 43;
 	BOOST_TEST(hld.by_ind(1)->to_int() == 43);
+	BOOST_TEST(hld.at_ind(1)->to_int() == 43);
 }
 BOOST_AUTO_TEST_CASE(empty_array)
 {

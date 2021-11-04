@@ -22,6 +22,8 @@ class simple_data_holder : public data_holder {
 	bool is_empty_obj = false;
 	bool is_empty_arr = false;
 
+	self_type create_empty() const ;
+
 	void clear_state() ;
 	void require_change() ;
 	void require_extract_pod() const ;
@@ -84,6 +86,9 @@ public:
 
 	self_type by_key(std::string_view key) const override;
 	self_type by_ind(std::int64_t ind) const override;
+
+	self_type at_key(std::string_view key) const override ;
+	self_type at_ind(std::int64_t ind) const override ;
 };
 
 template<typename T>
