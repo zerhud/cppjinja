@@ -368,19 +368,20 @@ BOOST_FIXTURE_TEST_CASE(find_in_imports, mock_exenv_fixture)
 	tast.name = "tn";
 	tast.file_name = "fn";
 	tast.file_imports.emplace_back(ast::op_import{0,0,"fn", "as", "tn",{},{}});
-	evtn::tmpl tmpl (tast);
 
 	tmpl_info.add_tmpl(tast);
+	const evtn::tmpl* tmpl = tmpl_info.search_tmpl("tn");
 
 	auto b_block = std::make_shared<mocks::callable_node>();
 
-	MOCK_EXPECT(ctx.current_tmpl).returns(&tmpl);
+	MOCK_EXPECT(env.current_tmpl).returns(tmpl);
 	MOCK_EXPECT(env.tmpl).at_least(1).returns(std::ref(tmpl_info));
 	expect_roots({b_block.get()});
 	expect_solved_params(*b_block, {});
 	expect_call(b_block.get());
 	MOCK_EXPECT(b_block->name).returns("b");
 	MOCK_EXPECT(b_block->evaluate).returns("test"_ad);
+
 	auto ab = in.find(east::var_name{"as","b"});
 
 	BOOST_REQUIRE( ab!=nullptr );
@@ -391,33 +392,35 @@ BOOST_FIXTURE_TEST_CASE(find_in_imports, mock_exenv_fixture)
 	BOOST_REQUIRE(btmpl != nullptr);
 	ab = btmpl->find(east::var_name{"b"});
 	BOOST_REQUIRE(ab != nullptr);
+
 	BOOST_TEST( ab->call({})->solve() == "test"_ad );
 }
 BOOST_FIXTURE_TEST_CASE(find_in_roots, mock_exenv_fixture)
 {
 	ast::tmpl tast;
+	tast.name = "name";
 	tast.file_imports.emplace_back(ast::op_import{0,0,"fn", "as","tn",{},{}});
-	evtn::tmpl tmpl (tast);
 
 	co_nav_tmpl in(&env);
 	cppjinja::evtree tmpl_info;
 	tmpl_info.add_tmpl(tast);
+	const evtn::tmpl* tmpl = tmpl_info.search_tmpl("name");
 
 	auto a_block = std::make_shared<mocks::callable_node>();
 	auto b_block = std::make_shared<mocks::callable_node>();
 
 	expect_call(b_block.get());
 	expect_solved_params(*b_block, {});
-	expect_roots(&tmpl, {a_block.get(), b_block.get()});
+	expect_roots(tmpl, {a_block.get(), b_block.get()});
 	MOCK_EXPECT(a_block->name).returns("a");
 	MOCK_EXPECT(b_block->name).returns("b");
-	MOCK_EXPECT(ctx.current_tmpl).once().returns(&tmpl);
+	MOCK_EXPECT(env.current_tmpl).returns(tmpl);
 	MOCK_EXPECT(b_block->evaluate).once().returns("test"_ad);
 
 	auto b = in.find(east::var_name{"b"});
 	BOOST_TEST(b->call({})->solve() == "test"_ad);
 
-	MOCK_EXPECT(ctx.current_tmpl).returns(&tmpl);
+	MOCK_EXPECT(env.current_tmpl).returns(tmpl);
 	BOOST_REQUIRE(in.find(east::var_name{"self", "b"}) != nullptr);
 
 	expect_call(b_block.get());
@@ -437,6 +440,7 @@ BOOST_FIXTURE_TEST_CASE(find_in_single_tmpl, mock_exenv_fixture)
 	MOCK_EXPECT(a_block->name).returns("a");
 	MOCK_EXPECT(b_block->name).returns("b");
 	MOCK_EXPECT(b_block->evaluate).once().returns("test"_ad);
+	MOCK_EXPECT(env.current_tmpl).returns(&tmpl);
 
 	auto b = in.find(east::var_name{"b"});
 	BOOST_TEST(b->call({})->solve() == "test"_ad);
@@ -634,6 +638,15 @@ BOOST_FIXTURE_TEST_CASE(current_node, impl_exenv_fixture)
 	ctx.push_shadow(&fnode2);
 	BOOST_CHECK_NO_THROW( env.current_node(&fnode1) );
 	BOOST_TEST(ctx.nth_node_on_stack(0) == &fnode1);
+}
+BOOST_FIXTURE_TEST_CASE(current_tmpl, impl_exenv_fixture)
+{
+	ast::tmpl asttmpl;
+	asttmpl.name = "test";
+	cppjinja::evtnodes::tmpl tmpl(asttmpl);
+	mocks::node fnode1, fnode2;
+	ctx.push_shadow(&tmpl);
+	BOOST_TEST(env.current_tmpl() == &tmpl);
 }
 BOOST_FIXTURE_TEST_CASE(children, impl_exenv_fixture)
 {

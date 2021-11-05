@@ -12,6 +12,7 @@
 #include "result_formatter.hpp"
 
 using cppjinja::evt::raii_result_format;
+using cppjinja::evt::raii_callstack_push;
 
 cppjinja::evt::raii_push_ctx::raii_push_ctx(
         cppjinja::evt::raii_push_ctx&& other) noexcept
@@ -27,7 +28,8 @@ cppjinja::evt::raii_push_ctx::raii_push_ctx(
     : ctx(c)
     , maker(n)
 {
-	ctx->push(maker);
+	if(maker) ctx->push(maker);
+	else ctx = nullptr;
 }
 
 cppjinja::evt::raii_push_ctx::~raii_push_ctx()
@@ -61,18 +63,32 @@ raii_result_format::~raii_result_format()
 	if(fmt) fmt->shift_tab(back);
 }
 
-cppjinja::evt::raii_callstack_push::raii_callstack_push(
+raii_callstack_push::raii_callstack_push(raii_callstack_push&& other) noexcept
+    : calls(other.calls)
+{
+	other.calls = nullptr;
+}
+
+raii_callstack_push& raii_callstack_push::operator = (raii_callstack_push&& other) noexcept
+{
+	calls = other.calls;
+	other.calls = nullptr;
+	return *this;
+}
+
+raii_callstack_push::raii_callstack_push(
           cppjinja::evt::callstack* c
         , const cppjinja::evtnodes::callable* n
         , context_objects::callable_params params)
     : calls(c)
 {
-	calls->push(n, std::move(params));
+	if(n) calls->push(n, std::move(params));
+	else calls = nullptr;
 }
 
-cppjinja::evt::raii_callstack_push::~raii_callstack_push()
+raii_callstack_push::~raii_callstack_push()
 {
-	calls->pop();
+	if(calls) calls->pop();
 }
 
 cppjinja::evt::raii_push_shadow_ctx::raii_push_shadow_ctx(
@@ -89,7 +105,8 @@ cppjinja::evt::raii_push_shadow_ctx::raii_push_shadow_ctx(
     : ctx(c)
     , maker(n)
 {
-	ctx->push_shadow(maker);
+	if(maker) ctx->push_shadow(maker);
+	else ctx = nullptr;
 }
 
 cppjinja::evt::raii_push_shadow_ctx::~raii_push_shadow_ctx()

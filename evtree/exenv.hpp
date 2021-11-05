@@ -41,6 +41,7 @@ public:
 	virtual context& ctx() =0 ;
 	virtual const context& ctx() const =0 ;
 	virtual void current_node(const node* n) =0 ;
+	virtual const evtnodes::tmpl* current_tmpl() const =0 ;
 
 	virtual context_object& locals() =0 ;
 	virtual context_object& globals() =0 ;

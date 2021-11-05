@@ -93,6 +93,11 @@ void cppjinja::evt::exenv_impl::current_node(const cppjinja::evt::node* n)
 	ctx().current_node(n);
 }
 
+const cppjinja::evtnodes::tmpl* cppjinja::evt::exenv_impl::current_tmpl() const
+{
+	return ctx().current_tmpl();
+}
+
 cppjinja::evt::context_object& cppjinja::evt::exenv_impl::locals()
 {
 	return ctx().cur_namespace();

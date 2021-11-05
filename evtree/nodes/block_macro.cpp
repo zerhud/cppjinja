@@ -32,6 +32,7 @@ void block_macro::render(evt::exenv& env) const
 absd::data block_macro::evaluate(cppjinja::evt::exenv& env) const
 {
 	env.current_node(this);
+	evt::raii_push_ctx ctx_maker(this, &env.ctx());
 	auto fmt = inner_evaluate(env);
 	auto es = std::allocate_shared<absd::simple_data_holder>(
 	            std::pmr::polymorphic_allocator{env.storage().get()},

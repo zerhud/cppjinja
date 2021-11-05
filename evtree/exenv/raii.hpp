@@ -51,6 +51,11 @@ public:
 class raii_callstack_push final {
 	callstack* calls;
 public:
+	raii_callstack_push(const raii_callstack_push&) =delete ;
+	raii_callstack_push& operator = (const raii_callstack_push&) =delete ;
+	raii_callstack_push(raii_callstack_push&&) noexcept ;
+	raii_callstack_push& operator = (raii_callstack_push&&) noexcept ;
+
 	raii_callstack_push(
 	        callstack* c,
 	        const evtnodes::callable* n,

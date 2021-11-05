@@ -50,6 +50,7 @@ public:
 	context& ctx() override ;
 	const context& ctx() const override ;
 	void current_node(const node* n) override ;
+	const evtnodes::tmpl* current_tmpl() const override ;
 
 	context_object& locals() override ;
 	context_object& globals() override ;

@@ -120,6 +120,7 @@ MOCK_BASE_CLASS( exenv, cppjinja::evt::exenv )
 	MOCK_NON_CONST_METHOD( ctx, 0, context&(), get_ctx )
 
 	MOCK_METHOD( current_node, 1)
+	MOCK_METHOD( current_tmpl, 0)
 	MOCK_METHOD( globals, 0)
 	MOCK_METHOD( locals, 0)
 	MOCK_METHOD( inner_env, 0)

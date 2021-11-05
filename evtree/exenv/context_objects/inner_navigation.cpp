@@ -8,7 +8,6 @@
 
 #include "inner_navigation.hpp"
 #include "exenv.hpp"
-#include "exenv/context.hpp"
 #include "exenv/context_objects/callable_node.hpp"
 #include "evtree.hpp"
 #include "absd/simple_data_holder.hpp"
@@ -87,7 +86,7 @@ std::shared_ptr<context_object> inner_navigation::find(east::var_name n) const
 std::shared_ptr<context_object> inner_navigation::find_in_roots(east::var_name n) const
 {
 	assert(n.size() == 1);
-	return find_in_tmpl(env->ctx().current_tmpl(), n);
+	return find_in_tmpl(env->current_tmpl(), n);
 }
 
 std::shared_ptr<context_object> inner_navigation::find_in_imports(east::var_name n) const
@@ -101,7 +100,7 @@ std::shared_ptr<context_object> inner_navigation::find_in_imports(east::var_name
 const cppjinja::evtnodes::tmpl* inner_navigation::find_tmpl_by_import(east::var_name n) const
 {
 	assert(!n.empty());
-	auto cur_imports = env->ctx().current_tmpl()->imports();
+	auto cur_imports = env->current_tmpl()->imports();
 	std::string first_var(n.front().begin(), n.front().end());
 	for(auto& i:cur_imports) if(i.as == first_var) {
 		auto ret = env->tmpl().search_tmpl(i.tmpl_name.empty() ? i.filename : i.tmpl_name);
@@ -117,8 +116,11 @@ std::shared_ptr<context_object> inner_navigation::find_in_tmpl(
 	assert(t != nullptr);
 
 	auto roots = env->roots(t);
-	for(auto& r:roots) if(r->name() == n[0])
-		return std::make_shared<evt::context_objects::callable_node>(env, r);
+	for(auto& r:roots) if(r->name() == n[0]) {
+		const evtnodes::tmpl* ctc = nullptr;
+		if(env->current_tmpl() != t) ctc = t;
+		return std::make_shared<evt::context_objects::callable_node>(env, r, ctc);
+	}
 	return nullptr;
 }
 
@@ -130,7 +132,7 @@ std::shared_ptr<context_object> inner_navigation::find_in_tmpl(const evtnodes::t
 
 std::shared_ptr<context_object> inner_navigation::find_in_cur_tmpl() const
 {
-	return find_in_tmpl(env->ctx().current_tmpl());
+	return find_in_tmpl(env->current_tmpl());
 }
 
 absd::data inner_navigation::solve() const

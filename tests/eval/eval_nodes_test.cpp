@@ -376,6 +376,12 @@ BOOST_FIXTURE_TEST_CASE(render_with_tabshift, mock_callable_fixture)
 	cnt.render(env);
 	BOOST_TEST(rfmt("\na"_s) == "\n\ta"_s);
 }
+BOOST_FIXTURE_TEST_CASE(render_with_different_template, mock_callable_fixture)
+{
+	ast::block_named ast_bl;
+	evtnodes::block_named cnt(ast_bl);
+	BOOST_FAIL("empty test");
+}
 BOOST_AUTO_TEST_SUITE_END() // block_named
 
 BOOST_AUTO_TEST_SUITE(block_macro)
@@ -396,7 +402,7 @@ BOOST_FIXTURE_TEST_CASE(render_with_tabshift, mock_callable_fixture)
 	ast_bl.left_close.bsign = 2;
 	evtnodes::block_macro cnt(ast_bl);
 	expect_children({&child1});
-	MOCK_EXPECT(env.current_node);
+	expect_transporent_cxt(&cnt);
 	MOCK_EXPECT(env.rinfo);
 	MOCK_EXPECT(child1.rinfo).returns(render_info{false,false});
 	MOCK_EXPECT(child1.render).once().calls([this](cppjinja::evt::exenv&){

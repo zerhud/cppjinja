@@ -164,6 +164,16 @@ BOOST_FIXTURE_TEST_CASE(two_calls, mock_exenv_fixture)
 	auto res = eeval(&env)(txt::parse(ext::expr, "a['b'][c]"));
 	BOOST_TEST(res == "abe");
 }
+BOOST_FIXTURE_TEST_CASE(solve_array_ind, mock_exenv_fixture)
+{
+	auto a = std::make_shared<mocks::context_object>();
+	auto val = std::make_shared<mocks::context_object>();
+	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
+	MOCK_EXPECT(a->find).with(cppjinja::east::var_name{"3"}).returns(val);
+	expect_solve(*val, "ok");
+	auto res = eeval(&env)(txt::parse(ext::expr, "a[1+2]"));
+	BOOST_TEST(res == "ok");
+}
 BOOST_AUTO_TEST_SUITE_END() // point
 
 BOOST_AUTO_TEST_SUITE(fnc_call)

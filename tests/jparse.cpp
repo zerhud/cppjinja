@@ -120,10 +120,7 @@ public:
 				return upper(val.params[0].val.value());
 			throw std::runtime_error("function upper takes 1 argument");
 		}
-		std::cout << "function call " << val.ref[0] << std::endl;
-		std::cout << "\t" << val.ref.size() << std::endl;
-		return "data is here"_sd;
-//		return jinja_json_prov::value(std::move(val));
+		return jinja_json_prov::value(std::move(val));
 	}
 };
 

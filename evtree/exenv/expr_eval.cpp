@@ -104,7 +104,10 @@ cppjinja::evt::context_object_ptr cppjinja::evt::expr_eval::solve_point_arg(
         ast::expr_ops::expr& expr) const
 {
 	eval_type solved = expr_eval(env)(expr);
-	return left.find(east::var_name{solved.str()});
+	east::string_t key;
+	if(solved.is_integer()) key = std::to_string((std::int64_t)solved).c_str();
+	else key = solved.str();
+	return left.find(east::var_name{key});
 }
 
 cppjinja::evt::context_object_ptr cppjinja::evt::expr_eval::solve_point_arg(

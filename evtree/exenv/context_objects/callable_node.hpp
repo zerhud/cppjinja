@@ -17,8 +17,10 @@ namespace cppjinja::evt::context_objects {
 class callable_node : public context_object {
 	evt::exenv* env;
 	const evtnodes::callable* node;
+	const evtnodes::tmpl* cross_tmpl_call=nullptr;
 public:
 	callable_node(evt::exenv* e, const evtnodes::callable* n);
+	callable_node(exenv *e, const evtnodes::callable *n, const evtnodes::tmpl* ctc);
 	~callable_node() noexcept override ;
 
 	bool is_it(const evtnodes::callable* n) const ;
