@@ -23,23 +23,6 @@ namespace ast = cppjinja::ast;
 namespace utd = boost::unit_test::data;
 namespace aps = cppjinja::ast::expr_ops;
 
-template<typename R>
-R& emp_back(R& cnt){ return cnt; }
-template<typename R, typename T>
-R& emp_back(R& cnt, T&& v){ cnt.emplace_back(std::forward<T>(v)); return cnt; }
-template<typename R, typename T, typename... Args>
-R& emp_back(R& cnt, T&& v, Args&&... args){ emp_back(cnt, v); return emp_back(cnt, std::forward<Args>(args)...); }
-
-typedef std::vector<ast::filter_call> filter_calls;
-
-template<typename ... Args>
-filter_calls make_filter_calls(Args&&... args)
-{
-	filter_calls ret;
-	emp_back(ret, std::forward<Args>(args)...);
-	return ret;
-}
-
 ast::op_include make_op_include(ast::string_t fn, std::optional<bool> im, std::optional<bool> wc)
 {
 	ast::op_include ret;

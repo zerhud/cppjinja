@@ -36,7 +36,7 @@ std::pmr::vector<cppjinja::ast::op_import> cppjinja::evtnodes::tmpl::imports() c
 
 std::string cppjinja::evtnodes::tmpl::ast_name() const
 {
-	return itmpl_.name;
+	return itmpl_.name.name;
 }
 
 std::pmr::string cppjinja::evtnodes::tmpl::name() const

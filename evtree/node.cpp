@@ -35,3 +35,8 @@ std::pmr::string cppjinja::evt::node::tps(const std::string& src)
 {
 	return std::pmr::string(src.begin(),src.end());
 }
+
+std::pmr::string cppjinja::evt::node::tps(const ast::expr_ops::single_var_name& src)
+{
+	return tps(src.name);
+}

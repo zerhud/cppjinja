@@ -10,7 +10,6 @@
 
 #include <vector>
 #include "evtree/declarations.hpp"
-#include "parser/ast/common.hpp"
 
 namespace cppjinja::evt {
 

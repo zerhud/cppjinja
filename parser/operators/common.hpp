@@ -11,7 +11,6 @@
 #include <ostream>
 #include <boost/spirit/home/x3/support/ast/variant.hpp>
 
-#include "ast/common.hpp"
 #include "expr.hpp"
 
 #define DEFINE_DEFINED_OPERATORS(sname, ...) \
@@ -84,43 +83,5 @@ bool operator == (const boost::spirit::x3::variant<Args...>& left, const boost::
 	return left.var == right.var;
 }
 
-template<typename Vec, typename Val, typename... Vals>
-void empback(Vec& vec, Val&& val, Vals&&... vals)
-{
-	vec.emplace_back(value_term{std::forward<Val>(val)});
-	if constexpr (sizeof...(Vals)!=0) empback(vec, std::forward<Vals>(vals)...);
-}
-
-template<typename... Args>
-inline array_v make_array(Args&&... args)
-{
-	array_v ret;
-	empback(ret.fields, std::forward<Args>(args)...);
-	return ret;
-}
-
-template<typename... Args>
-inline tuple_v make_tuple(Args&&... args)
-{
-	tuple_v ret;
-	empback(ret.fields, std::forward<Args>(args)...);
-	return ret;
-}
 } // namespace ast
 } // namespace cppjinja
-
-DEFINE_OPERATORS(cppjinja::ast::var_name, left, right)
-DEFINE_OPERATORS(cppjinja::ast::function_call_parameter, left.name, right.name, left.value, right.value)
-DEFINE_OPERATORS(cppjinja::ast::function_call, left.ref, right.ref, left.params, right.params)
-DEFINE_OPERATORS(cppjinja::ast::array_call, left.name, right.name, left.call, right.call)
-DEFINE_DEFINED_OPERATORS(cppjinja::ast::array_calls, left, right)
-DEFINE_OPERATORS(cppjinja::ast::binary_op, left.left, right.left, left.right, right.right)
-DEFINE_OPERATORS(cppjinja::ast::value_term, left.var, right.var)
-DEFINE_OPERATORS(cppjinja::ast::array_v, left.fields, right.fields)
-DEFINE_OPERATORS(cppjinja::ast::tuple_v, left.fields, right.fields)
-namespace std { std::ostream& operator << (std::ostream& out, const cppjinja::ast::comparator& obj); }
-namespace std { std::ostream& operator << (std::ostream& out, const boost::spirit::x3::forward_ast<cppjinja::ast::value_term>& obj); }
-namespace cppjinja::ast {
-bool operator == (const var_name& left, const x3::variant<var_name,array_calls>& right);
-bool operator == (const x3::variant<var_name,array_calls>& left, const var_name& right);
-} // namespace cppjinja::ast

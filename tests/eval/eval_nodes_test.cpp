@@ -40,7 +40,6 @@ using evt_node = cppjinja::evt::node;
 namespace evtnodes = cppjinja::evtnodes;
 namespace ast = cppjinja::ast;
 namespace aps = cppjinja::ast::expr_ops;
-using ast::value_term;
 using mocks::mock_exenv_fixture; // qtcreator cannot parse test with namespace
 
 using evar_name = cppjinja::east::var_name;
@@ -66,7 +65,7 @@ struct mock_callable_fixture : mock_exenv_fixture {
 	template<typename B, typename Ast>
 	void check_getters(const B& bl, const Ast& ast_bl)
 	{
-		BOOST_TEST(bl.name().substr(0, ast_bl.name.size()) == ast_bl.name);
+		BOOST_TEST(bl.name().substr(0, ast_bl.name.name.size()) == ast_bl.name.name);
 		BOOST_TEST(bl.rinfo().trim_left == ast_bl.left_open.trim);
 		BOOST_TEST(bl.rinfo().trim_right == ast_bl.right_close.trim);
 	}
@@ -99,7 +98,7 @@ BOOST_AUTO_TEST_SUITE(tmpl)
 BOOST_AUTO_TEST_CASE(getters)
 {
 	ast::tmpl t;
-	t.name = "test_name";
+	t.name.name = "test_name";
 	t.file_name = "file_name";
 	t.file_imports.emplace_back(ast::op_import{0, 0, "fn", "as", "tn", {}, {}});
 	evtnodes::tmpl tmpl(t);
@@ -416,17 +415,16 @@ typedef std::tuple<
 BOOST_FIXTURE_TEST_CASE_TEMPLATE(getters, T, callable_list, mock_callable_fixture)
 {
 	std::remove_pointer_t<std::tuple_element_t<0, T>> ast_bl;
-	ast_bl.name = "test_name";
+	ast_bl.name.name = "test_name";
 	std::remove_pointer_t<std::tuple_element_t<1, T>> bl(ast_bl);
 	check_getters(bl, ast_bl);
 }
 BOOST_FIXTURE_TEST_CASE_TEMPLATE(sovled_params, T, callable_list, mock_callable_fixture)
 {
 	std::remove_pointer_t<std::tuple_element_t<0, T>> ast_bl;
-	ast_bl.name = "test_name";
+	ast_bl.name.name = "test_name";
 	std::remove_pointer_t<std::tuple_element_t<1, T>> bl(ast_bl);
 
-	using cppjinja::ast::var_name;
 	ast_bl.params.emplace_back(ast::macro_parameter{"a", aps::expr{aps::term{"a"s}}});
 	ast_bl.params.emplace_back(ast::macro_parameter{"b", aps::expr{aps::single_var_name{"a"s}}});
 	std::remove_pointer_t<std::tuple_element_t<1, T>> blp(ast_bl);
@@ -648,7 +646,7 @@ BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
 	ast::block_set ast_bl;
 	ast_bl.left_close.trim = true;
 	ast_bl.right_open.trim = true;
-	ast_bl.name = "tname"s;
+	ast_bl.name.name = "tname"s;
 	cppjinja::evtnodes::block_set block(ast_bl);
 
 	mocks::node child;
@@ -672,7 +670,7 @@ BOOST_AUTO_TEST_SUITE(block_call)
 BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
 {
 	ast::block_call ast_bl;
-	ast_bl.name = "test";
+	ast_bl.name.name = "test";
 	ast_bl.call_params.emplace_back(
 	            cppjinja::ast::macro_parameter{
 	                "cp1n"s,
@@ -701,7 +699,7 @@ BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
 BOOST_FIXTURE_TEST_CASE(evaluate, mock_callable_fixture)
 {
 	ast::block_call ast_bl;
-	ast_bl.name = "test";
+	ast_bl.name.name = "test";
 	ast_bl.left_close.trim = true;
 	ast_bl.right_open.trim = true;
 	cppjinja::evtnodes::block_call block(ast_bl);

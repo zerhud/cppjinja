@@ -59,7 +59,7 @@ inline op_out make_out(std::string v) { op_out ret; ret.value=expr_ops::expr{exp
 inline block_for make_for(std::vector<std::string> vars, expr_ops::expr val, bool recurs=false)
 {
 	block_for ret;
-	ret.vars = std::move(vars);
+	for(auto& v:vars) ret.vars.emplace_back(v);
 	ret.value = std::move(val);
 	ret.recursive = recurs;
 	return ret;
@@ -68,7 +68,7 @@ inline block_for make_for(std::vector<std::string> vars, expr_ops::expr val, boo
 inline block_macro make_macro(std::string n, std::vector<macro_parameter> p)
 {
 	block_macro ret;
-	ret.name = std::move(n);
+	ret.name.name = std::move(n);
 	ret.params = std::move(p);
 	return ret;
 }

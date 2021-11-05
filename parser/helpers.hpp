@@ -29,7 +29,6 @@
 namespace cppjinja {
 
 DEFINE_MEMBER_CHECKER(name, str, std::string)
-DEFINE_MEMBER_CHECKER(ref, astref, ast::var_name)
 DEFINE_MEMBER_CHECKER(content, blockcontent, std::vector<ast::block_content>)
 BOOST_TTI_HAS_MEMBER_DATA(content)
 

@@ -19,7 +19,6 @@
 #include "parser/operators/blocks.hpp"
 #include "parser/grammar/expr.hpp"
 #include "parser/grammar/blocks.hpp"
-#include "parser/grammar/common.hpp"
 
 using namespace std::literals;
 namespace txt = cppjinja::text;
@@ -91,7 +90,6 @@ BOOST_DATA_TEST_CASE(
 
 	std::string text = "<%"s + left + space + "if "s + condition + "%>"s + data + "<%"s + space + "endif" + right + "%>"s;
 	BOOST_TEST_CONTEXT("TEXT=" << text) {
-		BOOST_REQUIRE_NO_THROW( txt::parse(txt::binary_op, condition) );
 		BOOST_REQUIRE_THROW( result = cppjinja::text::parse(txt::block_if, text), std::exception );
 		BOOST_TEST_REQUIRE( !result.else_block.has_value() );
 	}
@@ -227,7 +225,7 @@ BOOST_AUTO_TEST_CASE(block_set)
 {
 	std::string data = "<% set name|e %>content<%endset%>"s;
 	ast::block_set good_result;
-	good_result.name = "name"s;
+	good_result.name.name = "name"s;
 	good_result.filters.emplace_back(
 	            ast::expr_ops::filter_call{
 	                est::lvalue{est::single_var_name{"e"s}}, {}});

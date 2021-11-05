@@ -41,9 +41,11 @@ std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::block_ra
 std::ostream& std::operator << (std::ostream& out, const cppjinja::ast::block_for& obj)
 {
 	using namespace boost::spirit::karma;
+	std::vector<std::string> vars;
+	for(auto& v:obj.vars) vars.emplace_back(v.name);
 	return out
 		<< open_block(obj) << "for" << close_block(obj) << ": "
-		<< format( *char_ % '.', obj.vars)
+		<< format( *char_ % '.', vars)
 		<< " in "
 		<< obj.value.var
 		;

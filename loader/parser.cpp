@@ -83,10 +83,11 @@ cppjinja::parser& cppjinja::parser::parse(std::istream& data)
 	if(!cur_file_name_.empty())
 		cur_file_->name = cur_file_name_;
 
-	for(auto& imp:cur_file_->imports) imp.filename = solve_path(imp.filename);
+	for(auto& imp:cur_file_->imports)
+		imp.filename = solve_path(imp.filename);
 
-	if(cur_file_->tmpls.size() == 1 && cur_file_->tmpls[0].name.empty())
-		cur_file_->tmpls[0].name = cur_file_->name;
+	if(cur_file_->tmpls.size() == 1 && cur_file_->tmpls[0].name.name.empty())
+		cur_file_->tmpls[0].name.name = cur_file_->name;
 	for(auto& tmpl:cur_file_->tmpls) {
 		tmpl.file_name = cur_file_->name;
 		tmpl.file_imports = cur_file_->imports;

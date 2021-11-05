@@ -8,17 +8,10 @@
 
 #pragma once
 
-#include "common.hpp"
 #include "opterm.hpp"
 #include "expr.hpp"
 
 namespace cppjinja::ast {
-
-struct filter_call : x3::variant<var_name, function_call>
-{
-	using base_type::base_type;
-	using base_type::operator=;
-};
 
 struct op_out : x3::position_tagged
 {
@@ -53,8 +46,8 @@ struct op_include : x3::position_tagged
 struct op_import : x3::position_tagged
 {
 	string_t filename;
-	string_t as;
-	string_t tmpl_name;
+	expr_ops::single_var_name as;
+	expr_ops::single_var_name tmpl_name;
 	op_term_start open;
 	op_term_end close;
 };

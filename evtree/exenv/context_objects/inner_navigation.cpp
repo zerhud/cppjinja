@@ -103,7 +103,7 @@ const cppjinja::evtnodes::tmpl* inner_navigation::find_tmpl_by_import(east::var_
 	auto cur_imports = env->current_tmpl()->imports();
 	std::string first_var(n.front().begin(), n.front().end());
 	for(auto& i:cur_imports) if(i.as == first_var) {
-		auto ret = env->tmpl().search_tmpl(i.tmpl_name.empty() ? i.filename : i.tmpl_name);
+		auto ret = env->tmpl().search_tmpl(i.tmpl_name.name.empty() ? i.filename : i.tmpl_name.name);
 		return ret;
 	}
 	return nullptr;

@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(original_file)
 	BOOST_TEST_REQUIRE( result.tmpls.size() == 1);
 
 	ast::tmpl& tmpl = result.tmpls[0];
-	BOOST_TEST( tmpl.name.empty() );
+	BOOST_TEST( tmpl.name.name.empty() );
 	BOOST_TEST_REQUIRE( tmpl.extends.size() == 1 );
 	BOOST_TEST( tmpl.extends[0].file_name == "kuku.tmpl" );
 	BOOST_TEST( !tmpl.extends[0].tmpl_name.has_value() );
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(original_file)
 
 BOOST_AUTO_TEST_CASE(ex_file)
 {
-	std::string data = "<% template tmpl extends kuku from 'kuku.tmpl' %>content<% endtemplate %>";
+	std::string data = "<% template tmpl extends kuku from \"kuku.tmpl\" %>content<% endtemplate %>";
 	ast::file result;
 
 	BOOST_REQUIRE_NO_THROW( result = txt::parse(txt::file, data) );
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(ex_file)
 	BOOST_TEST_REQUIRE( tmpl.extends.size() == 1 );
 	BOOST_TEST( tmpl.extends[0].file_name == "kuku.tmpl" );
 	BOOST_TEST_REQUIRE( tmpl.extends[0].tmpl_name.has_value() );
-	BOOST_TEST( *tmpl.extends[0].tmpl_name == "kuku" );
+	BOOST_TEST( tmpl.extends[0].tmpl_name->name == "kuku" );
 	BOOST_TEST_REQUIRE( tmpl.content.size() == 1 );
 }
 

@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include "common.hpp"
 #include "single.hpp"
 
 namespace cppjinja::ast {
@@ -77,25 +76,23 @@ struct block_if : block
 
 struct block_for : block
 {
-	typedef x3::variant<var_name, function_call> value_t;
-
 	expr_ops::expr value;
 	std::optional<expr_ops::expr_bool> condition;
 	bool recursive=false;
-	std::vector<string_t> vars;
+	std::vector<expr_ops::single_var_name> vars;
 	std::vector<block_content> content;
 	std::optional<else_thread> else_block;
 };
 
 struct macro_parameter
 {
-	string_t name;
+	expr_ops::single_var_name name;
 	std::optional<expr_ops::expr> value;
 };
 
 struct block_with_name : block
 {
-	string_t name;
+	expr_ops::single_var_name name;
 	std::vector<macro_parameter> params;
 	std::vector<block_content> content;
 };
@@ -116,7 +113,7 @@ struct block_call : block_with_name
 
 struct block_set : block
 {
-	string_t name;
+	expr_ops::single_var_name name;
 	std::vector<expr_ops::filter_call> filters;
 	std::vector<block_content> content;
 };

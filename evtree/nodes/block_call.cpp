@@ -32,7 +32,7 @@ void cppjinja::evtnodes::block_call::render(cppjinja::evt::exenv& env) const
 	for(auto& p:ast.call_params) {
 		assert(p.value.has_value());
 		auto& cur = params.emplace_back();
-		cur.name = p.name;
+		cur.name = p.name.name;
 		cur.value = std::make_shared<evt::context_objects::value>(
 		            evt::expr_eval(&env)(*p.value));
 	}
@@ -50,5 +50,5 @@ absd::data cppjinja::evtnodes::block_call::evaluate(
 
 std::pmr::string cppjinja::evtnodes::block_call::name() const
 {
-	return tps(ast.name + "_call"s);
+	return tps(ast.name.name + "_call"s);
 }

@@ -110,9 +110,6 @@ BOOST_AUTO_TEST_CASE(block_raw)
 
 BOOST_AUTO_TEST_CASE(filter)
 {
-	ast::function_call call;
-	call.ref = ast::var_name{"filter"s};
-
 	auto data = std::make_unique<mocks::data_provider>();
 	MOCK_EXPECT(data->value_var_name)
 	        .once()

@@ -16,12 +16,12 @@ namespace cppjinja::ast {
 struct extend_st : x3::position_tagged
 {
 	string_t file_name;
-	std::optional<string_t> tmpl_name;
+	std::optional<expr_ops::single_var_name> tmpl_name;
 };
 
 struct tmpl : x3::position_tagged
 {
-	string_t name;
+	expr_ops::single_var_name name;
 	std::vector<extend_st> extends;
 	std::vector<block_content> content;
 

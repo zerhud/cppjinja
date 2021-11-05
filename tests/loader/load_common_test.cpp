@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(simple)
 	BOOST_TEST( files[0].tmpls.size() == 1 );
 
 	BOOST_TEST_REQUIRE( tmpls.size() == 1 );
-	BOOST_TEST( tmpls[0].name.empty() );
+	BOOST_TEST( tmpls[0].name.name.empty() );
 	BOOST_TEST_REQUIRE( tmpls[0].content.size() == 1 );
 }
 

@@ -36,22 +36,11 @@ namespace east = cppjinja::east;
 namespace ast = cppjinja::ast;
 namespace evtn = cppjinja::evtnodes;
 
-using cppjinja::ast::var_name;
-using cppjinja::ast::comparator;
-using cppjinja::ast::value_term;
 using evar_name = cppjinja::east::var_name;
 using mocks::mock_exenv_fixture; // qtcreator cannot parse test with namespace
 using co_nav_imp = cppjinja::evt::context_objects::navigation_imp;
 using co_nav_tmpl = cppjinja::evt::context_objects::navigation_tmpl;
 using co_nav_stmpl = cppjinja::evt::context_objects::navigation_single_tmpl;
-
-template<typename A>
-A make_container(const std::vector<value_term> vals)
-{
-	std::vector<cppjinja::ast::forward_ast<value_term>> favals;
-	for(auto& v:vals) favals.emplace_back(v);
-	return A{{1,1}, favals};
-}
 
 struct mock_impls_fixture {
 	cppjinja::evt::callstack_impl calls;
@@ -365,7 +354,7 @@ BOOST_FIXTURE_TEST_CASE(find_in_imports, mock_exenv_fixture)
 	cppjinja::evtree tmpl_info;
 
 	ast::tmpl tast;
-	tast.name = "tn";
+	tast.name.name = "tn";
 	tast.file_name = "fn";
 	tast.file_imports.emplace_back(ast::op_import{0,0,"fn", "as", "tn",{},{}});
 
@@ -398,7 +387,7 @@ BOOST_FIXTURE_TEST_CASE(find_in_imports, mock_exenv_fixture)
 BOOST_FIXTURE_TEST_CASE(find_in_roots, mock_exenv_fixture)
 {
 	ast::tmpl tast;
-	tast.name = "name";
+	tast.name.name = "name";
 	tast.file_imports.emplace_back(ast::op_import{0,0,"fn", "as","tn",{},{}});
 
 	co_nav_tmpl in(&env);
@@ -642,7 +631,7 @@ BOOST_FIXTURE_TEST_CASE(current_node, impl_exenv_fixture)
 BOOST_FIXTURE_TEST_CASE(current_tmpl, impl_exenv_fixture)
 {
 	ast::tmpl asttmpl;
-	asttmpl.name = "test";
+	asttmpl.name.name = "test";
 	cppjinja::evtnodes::tmpl tmpl(asttmpl);
 	mocks::node fnode1, fnode2;
 	ctx.push_shadow(&tmpl);

@@ -28,6 +28,7 @@ protected:
 	void render_children(const std::pmr::vector<const node*>& children,
 	    exenv& ctx, render_info default_ri) const ;
 	static std::pmr::string tps(const std::string& src) ;
+	static std::pmr::string tps(const ast::expr_ops::single_var_name& src) ;
 };
 
 class named_node : virtual public node {

@@ -67,7 +67,6 @@ std::ostream& operator << (std::ostream& out, const negate& right);
 std::ostream& operator << (std::ostream& out, const fnc_call& right);
 std::ostream& operator << (std::ostream& out, const filter_call& right);
 std::ostream& operator << (std::ostream& out, const filter& right);
-std::ostream& operator << (std::ostream& out, const single_var_name& right);
 std::ostream& operator << (std::ostream& out, const point& right);
 std::ostream& operator << (std::ostream& out, const point_element& right);
 std::ostream& operator << (std::ostream& out, const op_if& right);

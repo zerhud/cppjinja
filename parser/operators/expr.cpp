@@ -171,7 +171,6 @@ std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const neg
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const fnc_call& right){return out << right.ref << "(...)";}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const filter_call& right){return out << right.ref << "(...)";}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const filter& right){return out << right.base << '|';}
-std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const single_var_name& v){return out << v.name;}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const point& right){return out << right.left << '.' << right.right;}
 std::ostream& cppjinja::ast::expr_ops::operator << (std::ostream& out, const point_element& right){
 	return boost::apply_visitor([&out](const auto& v)->std::ostream&{ return out << v; }, right);

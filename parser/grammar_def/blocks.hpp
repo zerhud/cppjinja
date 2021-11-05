@@ -75,7 +75,7 @@ namespace cppjinja::text {
 
 	const auto block_for_def =
 	       block_term_start
-	    >> lit("for") > (single_var_name % ',')
+	    >> lit("for") > (expr_ops::single_var_name % ',')
 	    >  lit("in") > expr_ops::expr_op_if
 	    >  -(lit("if") >> expr_ops::expr_bool)
 	    >  -(lit("recursive") > x3::attr(true))
@@ -86,26 +86,28 @@ namespace cppjinja::text {
 		;
 
 	const auto block_set_def =
-		   block_term_start
-		>> lit("set") >> single_var_name >> -('|' >> expr_ops::filter_call % '|')
-		>> block_term_end_cnt >> *block_content >> block_term_start
-		>> lit("endset") >> block_term_end
+	       block_term_start
+	    >> lit("set") >> expr_ops::single_var_name
+	    >> -('|' >> expr_ops::filter_call % '|')
+	    >> block_term_end_cnt >> *block_content >> block_term_start
+	    >> lit("endset") >> block_term_end
 		;
 
-	const auto macro_parameter_def = single_var_name >> -('=' >> expr_ops::expr);
+	const auto macro_parameter_def = expr_ops::single_var_name >> -('=' >> expr_ops::expr);
 	const auto macro_parameters_def =
-		single_var_name >> -('(' >> -(macro_parameter % ',') >> ')');
+	        expr_ops::single_var_name
+	    >> -('(' >> -(macro_parameter % ',') >> ')');
 	const auto block_macro_def =
-		   block_term_start >> lit("macro") >> macro_parameters_def
-		>> block_term_end_cnt >> *block_content >> block_term_start
-		>> lexeme[lit("endmacro") >> -omit[+space >> single_var_name]]
-		>> block_term_end
+	       block_term_start >> lit("macro") >> macro_parameters_def
+	    >> block_term_end_cnt >> *block_content >> block_term_start
+	    >> lexeme[lit("endmacro") >> -omit[+space >> expr_ops::single_var_name]]
+	    >> block_term_end
 		;
 	const auto block_named_def =
-		   block_term_start >> lit("block") >> macro_parameters_def
-		>> block_term_end_cnt >> *block_content >> block_term_start
-		>> lit("endblock") >> -omit[+space >> single_var_name]
-		>> block_term_end
+	       block_term_start >> lit("block") >> macro_parameters_def
+	    >> block_term_end_cnt >> *block_content >> block_term_start
+	    >> lit("endblock") >> -omit[+space >> expr_ops::single_var_name]
+	    >> block_term_end
 		;
 	const auto block_filtered_def =
 	       block_term_start >> lit("filter") >> expr_ops::filter_call
@@ -113,12 +115,12 @@ namespace cppjinja::text {
 	    >> lit("endfilter") >> block_term_end
 		;
 
-	const auto call_parameter_def = -(single_var_name >> '=') >> expr_ops::expr;
+	const auto call_parameter_def = -(expr_ops::single_var_name >> '=') >> expr_ops::expr;
 	const auto block_call_def =
 	       block_term_start
 	    >> lit("call")
 	    >> -(omit['('] >> (macro_parameter % ',') >> omit[')'])
-	    >> single_var_name
+	    >> expr_ops::single_var_name
 	    >> -(omit['('] >> (call_parameter % ',') >> omit[')'])
 	    >> block_term_end_cnt >> *block_content >> block_term_start
 	    >> lit("endcall") >> block_term_end

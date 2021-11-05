@@ -52,7 +52,7 @@ cppjinja::evtnodes::block_with_name::solved_params(cppjinja::evt::exenv& env) co
 	evt::expr_eval slv(&env);
 	for(auto& p:cur_ast().params){
 		auto& i = ret.emplace_back();
-		i.name = p.name;
+		i.name = p.name.name;
 		if(p.value) i.val = slv(*p.value);
 	}
 	return ret;

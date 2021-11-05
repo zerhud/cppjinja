@@ -61,6 +61,14 @@ struct dict { std::vector<dict_item> items; };
 struct point;
 struct single_var_name { string_t name; };
 using point_element = x3::variant<single_var_name, forward_ast<point>, forward_ast<expr>> ;
+inline bool operator == (const single_var_name& l, std::string_view r)
+{
+	return l.name == r;
+}
+inline std::ostream& operator << (std::ostream& out, const single_var_name& o)
+{
+	return out << o.name ;
+}
 
 struct point {
 	point_element left;

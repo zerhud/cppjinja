@@ -22,14 +22,14 @@ namespace cppjinja::text {
 		>> x3::attr(std::nullopt)
 		>> filename
 		>> omit[block_term_end] ;
-	auto const extend_st_ex_def =
-		single_var_name >> -(lit("from") >> filename);
+	//NOTE: !!! single_var_name should be here
+	auto const extend_st_ex_def = x3::attr(std::nullopt) >> -(lit("from") >> filename);
 
 	auto const file_def = *op_include >> *op_import >> (+tmpl_ex | +tmpl_original);
 
 	auto const tmpl_def = tmpl_ex | tmpl_original;
 	auto const tmpl_original_def =
-	           x3::attr(std::string(""))
+	           x3::attr(ast::expr_ops::single_var_name{})
 	        >> *extend_st
 	        >> block_content_vec
 	        >> x3::eoi
@@ -37,7 +37,7 @@ namespace cppjinja::text {
 	auto const tmpl_ex_def =
 	           omit[block_term_start]
 	        >> lit("template")
-	        >> single_var_name
+	        >> expr_ops::single_var_name
 	        >> -(lit("extends") >> extend_st_ex % ',')
 	        >> omit[block_term_end]
 	        >  block_content_vec
