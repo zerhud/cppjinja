@@ -572,6 +572,27 @@ BOOST_FIXTURE_TEST_CASE(render_else_tabshift, mock_callable_fixture)
 	cnt.render(env);
 	BOOST_TEST(rfmt("\na"_s) == "\n\ta"_s);
 }
+BOOST_FIXTURE_TEST_CASE(render_elif, mock_callable_fixture)
+{
+	ast::block_if ast_bl;
+	ast_bl.condition = ast::expr_ops::expr_bool{ast::expr_ops::term{false}};
+	evtnodes::block_if if1(ast_bl);
+	ast_bl.condition = ast::expr_ops::expr_bool{ast::expr_ops::term{false}};
+	evtnodes::block_if if2(ast_bl);
+	ast_bl.condition = ast::expr_ops::expr_bool{ast::expr_ops::term{true}};
+	evtnodes::block_if if3(ast_bl);
+	mocks::node if1_cnt, if2_cnt, if3_cnt;
+	expect_children(&if1, {&if1_cnt, &if2});
+	expect_children(&if2, {&if2_cnt, &if3});
+	expect_children(&if3, {&if3_cnt});
+	expect_transporent_cxt(&if1);
+	expect_transporent_cxt(&if2);
+	expect_transporent_cxt(&if3);
+	MOCK_EXPECT(if3_cnt.render).once(); // the enity of test: render the first child of if3
+	MOCK_EXPECT(env.rinfo);
+
+	if1.render(env);
+}
 BOOST_AUTO_TEST_SUITE_END() // block_if
 
 BOOST_AUTO_TEST_SUITE(block_filter)

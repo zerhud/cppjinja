@@ -242,6 +242,13 @@ struct mock_exenv_fixture
 		MOCK_EXPECT(env.children).at_least(1).returns(children);
 	}
 
+	void expect_children(
+	        const cppjinja::evt::node* par,
+	        std::pmr::vector<const cppjinja::evt::node*> children)
+	{
+		MOCK_EXPECT(env.children).at_least(1).with(par).returns(children);
+	}
+
 	template<absd::TrivialData T>
 	static auto create_absd_data(T d)
 	{

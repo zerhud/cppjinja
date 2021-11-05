@@ -22,8 +22,10 @@ void block_if::render_if(cppjinja::evt::exenv& ctx) const
 void block_if::render_else(cppjinja::evt::exenv& ctx) const
 {
 	auto children = ctx.children(this);
-	if(children.size() == 2 && block.else_block) {
-		auto formatter = raii_else_formatter(ctx);
+	if(children.size() == 2) {
+		const bool iselif = block.else_block.has_value();
+		std::optional<evt::raii_result_format> formatter;
+		if(iselif) formatter = raii_else_formatter(ctx);
 		children[1]->render(ctx);
 	}
 }
@@ -64,6 +66,7 @@ cppjinja::evt::render_info block_if::rinfo() const
 
 void block_if::render(evt::exenv& env) const
 {
+	assert(env.children(this).size() == 1 || env.children(this).size() == 2);
 	env.current_node(this);
 	evt::raii_push_ctx ctx_holder(this, &env.ctx());
 	auto ifresult = evt::expr_eval(&env)(block.condition);

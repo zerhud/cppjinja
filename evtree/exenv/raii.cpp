@@ -11,6 +11,8 @@
 #include "callstack.hpp"
 #include "result_formatter.hpp"
 
+using cppjinja::evt::raii_result_format;
+
 cppjinja::evt::raii_push_ctx::raii_push_ctx(
         cppjinja::evt::raii_push_ctx&& other) noexcept
     : ctx(other.ctx)
@@ -33,16 +35,30 @@ cppjinja::evt::raii_push_ctx::~raii_push_ctx()
 	if(ctx) ctx->pop(maker);
 }
 
-cppjinja::evt::raii_result_format::raii_result_format(
+raii_result_format::raii_result_format(raii_result_format&& other) noexcept
+    : fmt(other.fmt), back(other.back)
+{
+	other.fmt = nullptr;
+}
+
+raii_result_format& raii_result_format::operator = (raii_result_format&& other) noexcept
+{
+	fmt = other.fmt;
+	back = other.back;
+	other.fmt = nullptr;
+	return *this;
+}
+
+raii_result_format::raii_result_format(
         cppjinja::evt::result_formatter* f, int s, int b)
     : fmt(f) , back(b)
 {
 	fmt->shift_tab(s);
 }
 
-cppjinja::evt::raii_result_format::~raii_result_format()
+raii_result_format::~raii_result_format()
 {
-	fmt->shift_tab(back);
+	if(fmt) fmt->shift_tab(back);
 }
 
 cppjinja::evt::raii_callstack_push::raii_callstack_push(

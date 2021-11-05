@@ -39,6 +39,11 @@ class raii_result_format final {
 	result_formatter* fmt;
 	int back;
 public:
+	raii_result_format(raii_result_format&& other) noexcept;
+	raii_result_format& operator = (raii_result_format&& other) noexcept;
+	raii_result_format(const raii_result_format& other) =delete ;
+	raii_result_format& operator = (const raii_result_format& other) =delete;
+
 	raii_result_format(result_formatter* f, int s, int b);
 	~raii_result_format();
 };
