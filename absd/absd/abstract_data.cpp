@@ -269,6 +269,7 @@ const absd::data& absd::data::operator [](std::string_view key) const
 
 const absd::data& absd::data::operator [](std::int64_t ind) const
 {
+	assert(source);
 	if(is_cached() && ind_cache.contains(ind))
 		return ind_cache.at(ind);
 	ind_cache.emplace(std::make_pair(ind, absd::data(source->by_ind(ind))));
