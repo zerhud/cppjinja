@@ -33,7 +33,7 @@ std::ostream& cppjinja::throw_cerr_env::elog() const
 
 std::string cppjinja::throw_cerr_env::format_err_msg(const std::string& which_rule) const
 {
-	return "Error! Got error in " + which_rule;
+	return "Got error in " + which_rule;
 }
 
 const cppjinja::parser_env* cppjinja::parser_env::default_env()

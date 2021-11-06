@@ -79,7 +79,8 @@ cppjinja::parser& cppjinja::parser::parse(std::istream& data)
 	boost::spirit::istream_iterator begin(data);
 
 	if(!cur_file_) cur_file_ = &files_.emplace_back();
-	*cur_file_ = cppjinja::text::parse(text::file, begin, end);
+	cppjinja::throw_cerr_env parser_env{cur_file_name_};
+	*cur_file_ = cppjinja::text::parse(text::file, begin, end, &parser_env);
 	if(!cur_file_name_.empty())
 		cur_file_->name = cur_file_name_;
 
