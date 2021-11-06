@@ -23,6 +23,7 @@ simple_dh::simple_data_holder(std::shared_ptr<std::pmr::memory_resource> m)
     , object(mem.get())
     , array(mem.get())
 {
+	assert(reflect().type == data_type::empty);
 }
 
 std::pmr::memory_resource* simple_dh::storage() const
@@ -192,6 +193,7 @@ absd::reflection_info simple_dh::reflect() const
 	reflection_info ret{.type=data_type::empty,.size=array.size()};
 	if(!object.empty() || is_empty_obj) ret.type = data_type::object;
 	else if(!array.empty() || is_empty_arr) ret.type = data_type::array;
+	else if(!pod) ret.type = data_type::empty;
 	else if(std::holds_alternative<std::int64_t>(*pod))
 		ret.type = data_type::integer;
 	else if(std::holds_alternative<double>(*pod))
