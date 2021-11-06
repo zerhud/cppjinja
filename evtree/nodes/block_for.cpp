@@ -140,25 +140,24 @@ void cppjinja::evtnodes::block_for_object::add(
 }
 
 std::shared_ptr<cppjinja::evt::context_object>
-cppjinja::evtnodes::block_for_object::find(cppjinja::east::var_name n) const
+cppjinja::evtnodes::block_for_object::find(cppjinja::east::string_t n) const
 {
-	if(n==east::var_name{"index"})
+	if(n=="index")
 		return std::make_shared<evt::context_objects::value>(create_data(cur_iter+1));
-	if(n==east::var_name{"index0"} || n==east::var_name{"ind"})
+	if(n=="index0" || n=="ind")
 		return std::make_shared<evt::context_objects::value>(create_data(cur_iter));
-	if(n == east::var_name{"length"})
+	if(n == "length")
 		return std::make_shared<evt::context_objects::value>(create_data(length));
-	if(n == east::var_name{"last"})
+	if(n == "last")
 		return std::make_shared<evt::context_objects::value>(create_data(cur_iter+1 == length));
-	if(n == east::var_name{"cycle"})
+	if(n == "cycle")
 		return std::make_shared<evt::context_objects::lambda_function>(
 		[cur_iter=cur_iter](auto params) -> std::shared_ptr<evt::context_object>{
 			auto param_val = params.at(0).value->solve().as_array();
 			auto val = param_val[cur_iter % param_val.size()];
 			return std::make_shared<evt::context_objects::value>(val);
 		});
-	assert(0 < n.size());
-	throw std::runtime_error("cannot find variable "s + n.at(0).c_str());
+	throw std::runtime_error("cannot find variable "s + n.c_str());
 }
 
 absd::data cppjinja::evtnodes::block_for_object::solve() const

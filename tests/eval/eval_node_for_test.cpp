@@ -55,7 +55,7 @@ BOOST_FIXTURE_TEST_CASE(render_one, mock_for_fixture)
 
 	mocks::node child;
 	auto list = std::make_shared<mocks::context_object>();
-	MOCK_EXPECT(all_ctx.find).with(evar_name{"list"}).returns(list);
+	MOCK_EXPECT(all_ctx.find).with("list"_s).returns(list);
 	auto list_val = std::make_shared<absd::simple_data_holder>();
 	list_val->push_back() = 1;
 	list_val->push_back() = 2;
@@ -92,7 +92,7 @@ BOOST_FIXTURE_TEST_CASE(render_two, mock_for_fixture)
 
 	mocks::node child;
 	auto list = std::make_shared<mocks::context_object>();
-	MOCK_EXPECT(all_ctx.find).with(evar_name{"list"}).returns(list);
+	MOCK_EXPECT(all_ctx.find).with("list"_s).returns(list);
 	auto list_val = std::make_shared<absd::simple_data_holder>();
 	list_val->put("one") = 1;
 	list_val->put("two") = 2;
@@ -231,7 +231,7 @@ BOOST_FIXTURE_TEST_CASE(no_value_filter, mock_for_fixture)
 		BOOST_REQUIRE(child);
 		BOOST_CHECK(n=="a" || n=="loop");
 		if(n=="a") {
-			MOCK_EXPECT(all_ctx.find).once().with(evar_name{"a"}).returns(child);
+			MOCK_EXPECT(all_ctx.find).once().with("a"_s).returns(child);
 		}
 	});
 
@@ -249,7 +249,7 @@ BOOST_FIXTURE_TEST_CASE(cannot_add_solve, mock_for_fixture)
 BOOST_FIXTURE_TEST_CASE(find_throws_if_nonexists, mock_for_fixture)
 {
 	evtnodes::block_for_object obj(env.storage(), 1);
-	BOOST_CHECK_THROW(obj.find(east::var_name{"nonexisting"}), std::runtime_error);
+	BOOST_CHECK_THROW(obj.find("nonexisting"_s), std::runtime_error);
 }
 BOOST_FIXTURE_TEST_CASE(index, mock_for_fixture)
 {
@@ -276,18 +276,18 @@ BOOST_FIXTURE_TEST_CASE(index, mock_for_fixture)
 	            [ab_val](east::string_t n, std::shared_ptr<cppjinja::evt::context_object> loop){
 		BOOST_TEST(n=="loop"_s);
 		BOOST_REQUIRE(loop);
-		auto ind = loop->find({"index"_s});
+		auto ind = loop->find("index"_s);
 		BOOST_REQUIRE(ind);
 		BOOST_TEST(ind->solve() == 1);
-		ind = loop->find({"index0"_s});
+		ind = loop->find("index0"_s);
 		BOOST_REQUIRE(ind);
 		BOOST_TEST(ind->solve() == 0);
-		BOOST_TEST(ind->solve() == loop->find({"ind"_s})->solve());
-		BOOST_TEST(loop->find({"length"})->solve() == 2);
+		BOOST_TEST(ind->solve() == loop->find("ind"_s)->solve());
+		BOOST_TEST(loop->find("length"_s)->solve() == 2);
 		auto cycobj = std::make_shared<obj_val_t>(absd::data{ab_val});
-		auto cycle = loop->find({"cycle"})->call({{std::nullopt,cycobj}});
+		auto cycle = loop->find("cycle"_s)->call({{std::nullopt,cycobj}});
 		BOOST_TEST(cycle->solve() == "a"_s);
-		auto last = loop->find({"last"_s});
+		auto last = loop->find("last"_s);
 		BOOST_REQUIRE(last);
 		BOOST_TEST(last->solve() == false);
 	});
@@ -299,16 +299,16 @@ BOOST_FIXTURE_TEST_CASE(index, mock_for_fixture)
 	            [ab_val](east::string_t n, std::shared_ptr<cppjinja::evt::context_object> loop){
 		BOOST_TEST(n=="loop"_s);
 		BOOST_REQUIRE(loop);
-		auto ind = loop->find({"index"_s});
+		auto ind = loop->find("index"_s);
 		BOOST_REQUIRE(ind);
 		BOOST_TEST(ind->solve() == 2);
-		ind = loop->find({"index0"_s});
+		ind = loop->find("index0"_s);
 		BOOST_REQUIRE(ind);
 		BOOST_TEST(ind->solve() == 1);
-		BOOST_TEST(ind->solve() == loop->find({"ind"_s})->solve());
+		BOOST_TEST(ind->solve() == loop->find("ind"_s)->solve());
 		auto cycobj = std::make_shared<obj_val_t>(absd::data{ab_val});
-		BOOST_TEST(loop->find({"cycle"})->call({{std::nullopt,cycobj}})->solve() == "b"_s);
-		auto last = loop->find({"last"_s});
+		BOOST_TEST(loop->find("cycle"_s)->call({{std::nullopt,cycobj}})->solve() == "b"_s);
+		auto last = loop->find("last"_s);
 		BOOST_REQUIRE(last);
 		BOOST_TEST(last->solve() == true);
 	});

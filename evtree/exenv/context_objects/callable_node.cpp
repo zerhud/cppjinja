@@ -44,7 +44,7 @@ void callable_node::add(
 	throw std::runtime_error("cannot add child to a callable node");
 }
 
-std::shared_ptr<context_object> callable_node::find(cppjinja::east::var_name n) const
+std::shared_ptr<context_object> callable_node::find(cppjinja::east::string_t n) const
 {
 	(void)n;
 	throw std::runtime_error("cannot find somthing in callable node");

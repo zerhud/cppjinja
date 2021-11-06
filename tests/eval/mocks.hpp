@@ -184,14 +184,14 @@ struct mock_exenv_fixture
 		        .calls([data](auto, auto p){ BOOST_TEST(p->solve()==data); });
 	}
 
-	void expect_sovle(cppjinja::east::var_name n, absd::data v)
+	void expect_sovle(cppjinja::east::string_t n, absd::data v)
 	{
 		MOCK_EXPECT(all_ctx.find).once().with(n).returns(mock_all_ctx);
 		MOCK_EXPECT(mock_all_ctx->solve).once().returns(v);
 	}
 
 	void expect_call(
-	        cppjinja::east::var_name n,
+	        cppjinja::east::string_t n,
 	        std::vector<cppjinja::evt::context_object::function_parameter> p,
 	        absd::data v)
 	{

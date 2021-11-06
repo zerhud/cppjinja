@@ -83,20 +83,11 @@ BOOST_AUTO_TEST_CASE(find)
 	auto child1 = std::make_shared<tree>();
 	auto child2 = std::make_shared<tree>();
 	obj.add("child1"_s, child1);
-	BOOST_TEST(obj.find(var_name{"no"}) == nullptr);
-	BOOST_TEST(obj.find(var_name{"child1"}) == child1);
+	BOOST_TEST(obj.find("no") == nullptr);
+	BOOST_TEST(obj.find("child1") == child1);
 	obj.add("child2"_s, child2);
-	BOOST_TEST(obj.find(var_name{"no"}) == nullptr);
-	BOOST_TEST(obj.find(var_name{"child2"}) == child2);
-}
-BOOST_AUTO_TEST_CASE(find_multilevel)
-{
-	tree obj;
-	auto child1 = std::make_shared<tree>();
-	auto child2 = std::make_shared<tree>();
-	obj.add("child1"_s, child1);
-	child1->add("child2", child2);
-	BOOST_TEST(obj.find(var_name{"child1", "child2"}) == child2);
+	BOOST_TEST(obj.find("no") == nullptr);
+	BOOST_TEST(obj.find("child2") == child2);
 }
 BOOST_AUTO_TEST_CASE(solve)
 {
@@ -108,8 +99,8 @@ BOOST_AUTO_TEST_CASE(solve)
 	BOOST_TEST(prt(obj.solve()) == "{\"c1\":{}}");
 	obj.add("c2", std::make_shared<tree>());
 	BOOST_TEST(prt(obj.solve()) == "{\"c1\":{},\"c2\":{}}");
-	obj.find(var_name{"c2"})->add("c3", std::make_shared<tree>());
-	obj.find(var_name{"c2"})->add("c4", std::make_shared<covalue>("ok"_ad));
+	obj.find("c2")->add("c3", std::make_shared<tree>());
+	obj.find("c2")->add("c4", std::make_shared<covalue>("ok"_ad));
 	BOOST_TEST(prt(obj.solve()) == "{\"c1\":{},\"c2\":{\"c3\":{},\"c4\":\"ok\"}}");
 }
 BOOST_AUTO_TEST_CASE(cannot_call)
@@ -123,7 +114,7 @@ BOOST_AUTO_TEST_CASE(no_tree_methods_and_no_call)
 {
 	cppjinja::evt::context_objects::value val("ok"_ad);
 	BOOST_CHECK_THROW(val.add("a",std::make_shared<tree>()), std::exception);
-	BOOST_CHECK_THROW(val.find(var_name{"a"}), std::exception);
+	BOOST_CHECK_THROW(val.find("a"), std::exception);
 	BOOST_CHECK_THROW(val.call({}), std::exception);
 }
 BOOST_AUTO_TEST_CASE(solve)
@@ -140,7 +131,7 @@ BOOST_AUTO_TEST_CASE(no_tree_methods_and_no_solve)
 	mocks::callable_node node;
 	cppjinja::evt::context_objects::callable_node val(&env, &node);
 	BOOST_CHECK_THROW(val.add("a",std::make_shared<tree>()), std::exception);
-	BOOST_CHECK_THROW(val.find(var_name{"a"}), std::exception);
+	BOOST_CHECK_THROW(val.find("a"), std::exception);
 	BOOST_CHECK_THROW(val.solve(), std::exception);
 }
 BOOST_AUTO_TEST_CASE(is_it)
@@ -158,7 +149,7 @@ BOOST_FIXTURE_TEST_CASE(call, mock_exenv_fixture)
 	cppjinja::evt::context_object::function_parameter p1{"a"_s, std::make_shared<mocks::context_object>()};
 	MOCK_EXPECT(calls.push).once().in(seq).calls([&node,&p1](auto*n, auto params){
 		BOOST_TEST(n == &node);
-		auto sp1 = params.find(var_name{"a"});
+		auto sp1 = params.find("a");
 		BOOST_TEST(sp1 == p1.value);
 	});
 	MOCK_EXPECT(node.evaluate)
@@ -184,9 +175,9 @@ BOOST_AUTO_TEST_CASE(add)
 	cppjinja::evt::context_objects::callable_params obj({}, {});
 	BOOST_CHECK_THROW(obj.add("a", nullptr), std::exception);
 	auto par = std::make_shared<mocks::context_object>();
-	BOOST_TEST(obj.find(var_name{"a"}) == nullptr);
+	BOOST_TEST(obj.find("a") == nullptr);
 	obj.add("a", par);
-	BOOST_TEST(obj.find(var_name{"a"}) == par);
+	BOOST_TEST(obj.find("a") == par);
 }
 BOOST_AUTO_TEST_CASE(add_placed)
 {
@@ -199,7 +190,7 @@ BOOST_AUTO_TEST_CASE(add_placed)
 	expected.emplace_back(function_parameter{"name", "orig"_ad});
 	cppjinja::evt::context_objects::callable_params obj2(expected, {});
 	obj2.add_placed(0, param);
-	BOOST_TEST(obj2.find(var_name{"name"}) == param);
+	BOOST_TEST(obj2.find("name") == param);
 }
 BOOST_AUTO_TEST_CASE(params_objects)
 {
@@ -217,12 +208,12 @@ BOOST_AUTO_TEST_CASE(params_objects)
 
 	cppjinja::evt::context_objects::callable_params obj({p1, p2, p4, p5}, {c1, c2, c4, c3});
 
-	BOOST_TEST(obj.find(var_name{"p1"}) == c1.value);
-	BOOST_TEST(obj.find(var_name{"p2"}) == c2.value);
-	BOOST_TEST(obj.find(var_name{"p3"}) == c3.value);
-	BOOST_TEST(obj.find(var_name{"p4"}) == c4.value);
-	BOOST_TEST(obj.find(var_name{"p5"})->solve() == 55);
-	BOOST_TEST(obj.find(var_name{"P1"}) == nullptr);
+	BOOST_TEST(obj.find("p1") == c1.value);
+	BOOST_TEST(obj.find("p2") == c2.value);
+	BOOST_TEST(obj.find("p3") == c3.value);
+	BOOST_TEST(obj.find("p4") == c4.value);
+	BOOST_TEST(obj.find("p5")->solve() == 55);
+	BOOST_TEST(obj.find("P1") == nullptr);
 }
 BOOST_AUTO_TEST_SUITE_END() // callable_params
 BOOST_AUTO_TEST_SUITE(queue)
@@ -233,16 +224,16 @@ BOOST_AUTO_TEST_CASE(from_queue)
 	cppjinja::evt::context_objects::queue q2({&obj3});
 	cppjinja::evt::context_objects::queue q({q1, q2});
 
-	MOCK_EXPECT(obj1.find).once().with(var_name{"a"}).returns(nullptr);
-	MOCK_EXPECT(obj2.find).once().with(var_name{"a"}).returns(nullptr);
-	MOCK_EXPECT(obj3.find).once().with(var_name{"a"}).returns(nullptr);
-	BOOST_TEST(q.find(var_name{"a"}) == nullptr);
+	MOCK_EXPECT(obj1.find).once().with("a").returns(nullptr);
+	MOCK_EXPECT(obj2.find).once().with("a").returns(nullptr);
+	MOCK_EXPECT(obj3.find).once().with("a").returns(nullptr);
+	BOOST_TEST(q.find("a") == nullptr);
 
 	auto obj4 = std::make_shared<mocks::context_object>();
-	MOCK_EXPECT(obj1.find).once().with(var_name{"a"}).returns(nullptr);
-	MOCK_EXPECT(obj2.find).once().with(var_name{"a"}).returns(nullptr);
-	MOCK_EXPECT(obj3.find).once().with(var_name{"a"}).returns(obj4);
-	BOOST_TEST(q.find(var_name{"a"}) == obj4);
+	MOCK_EXPECT(obj1.find).once().with("a").returns(nullptr);
+	MOCK_EXPECT(obj2.find).once().with("a").returns(nullptr);
+	MOCK_EXPECT(obj3.find).once().with("a").returns(obj4);
+	BOOST_TEST(q.find("a") == obj4);
 }
 BOOST_AUTO_TEST_CASE(find)
 {
@@ -253,22 +244,22 @@ BOOST_AUTO_TEST_CASE(find)
 	BOOST_CHECK_THROW(q.solve(), std::exception);
 	BOOST_CHECK_THROW(q.call({}), std::exception);
 
-	MOCK_EXPECT(obj1.find).once().with(var_name{"a"}).returns(nullptr);
-	MOCK_EXPECT(obj2.find).once().with(var_name{"a"}).returns(nullptr);
-	BOOST_TEST(q.find(var_name{"a"}) == nullptr);
+	MOCK_EXPECT(obj1.find).once().with("a").returns(nullptr);
+	MOCK_EXPECT(obj2.find).once().with("a").returns(nullptr);
+	BOOST_TEST(q.find("a") == nullptr);
 
 	auto obj4 = std::make_shared<mocks::context_object>();
-	MOCK_EXPECT(obj1.find).once().with(var_name{"a"}).returns(nullptr);
-	MOCK_EXPECT(obj2.find).once().with(var_name{"a"}).returns(obj4);
-	BOOST_TEST(q.find(var_name{"a"}) == obj4);
+	MOCK_EXPECT(obj1.find).once().with("a").returns(nullptr);
+	MOCK_EXPECT(obj2.find).once().with("a").returns(obj4);
+	BOOST_TEST(q.find("a") == obj4);
 
 	using cppjinja::evt::context_object;
 	using cppjinja::evt::context_objects::queue;
-	MOCK_EXPECT(obj1.find).once().with(var_name{"a"}).returns(nullptr);
-	MOCK_EXPECT(obj2.find).once().with(var_name{"a"}).returns(obj4);
+	MOCK_EXPECT(obj1.find).once().with("a").returns(nullptr);
+	MOCK_EXPECT(obj2.find).once().with("a").returns(obj4);
 	queue other1 = queue::clist{&obj1, &obj2};
 	cppjinja::evt::context_objects::queue other = std::move(other1);
-	BOOST_TEST(other.find(var_name{"a"}) == obj4);
+	BOOST_TEST(other.find("a") == obj4);
 }
 BOOST_AUTO_TEST_CASE(add)
 {
@@ -298,12 +289,12 @@ BOOST_AUTO_TEST_CASE(find_is_link)
 {
 	mocks::data_provider prov;
 	cppjinja::evt::context_objects::user_data obj(&prov);
-	auto obj_a = obj.find(var_name{"a"_s});
+	auto obj_a = obj.find("a"_s);
 	BOOST_REQUIRE(obj_a);
 	MOCK_EXPECT(prov.value_var_name).with(var_name{"a"_s}).returns("ok"_ad);
 	BOOST_TEST(obj_a->solve() == "ok"_s);
 
-	auto obj_b = obj.find(var_name{"b"_s});
+	auto obj_b = obj.find("b"_s);
 	MOCK_EXPECT(prov.value_function_call).calls([](auto call){
 		BOOST_TEST(call.ref.size()==1);
 		BOOST_TEST(call.ref.at(0) == "b");
@@ -321,12 +312,12 @@ BOOST_AUTO_TEST_CASE(name_combination)
 {
 	mocks::data_provider prov;
 	cppjinja::evt::context_objects::user_data obj(&prov);
-	auto obj_a = obj.find(var_name{"a"_s});
+	auto obj_a = obj.find("a"_s);
 	BOOST_REQUIRE(obj_a);
 	MOCK_EXPECT(prov.value_var_name).with(var_name{"a"_s}).returns("ok"_ad);
 	BOOST_TEST(obj_a->solve() == "ok"_s);
 
-	auto obj_ab = obj_a->find(var_name{"b"});
+	auto obj_ab = obj_a->find("b");
 	MOCK_EXPECT(prov.value_var_name).with(var_name{"a"_s, "b"_s}).returns("ok2"_ad);
 	BOOST_TEST(obj_ab->solve() == "ok2"_s);
 }
@@ -342,11 +333,6 @@ BOOST_AUTO_TEST_CASE(cannot_add)
 	mocks::exenv env;
 	BOOST_CHECK_THROW(co_nav_imp(&env).add("a", nullptr), std::logic_error );
 	BOOST_CHECK_THROW(co_nav_tmpl(&env).add("a", nullptr), std::logic_error );
-}
-BOOST_FIXTURE_TEST_CASE(find_only_two_or_one_namepoints, mock_exenv_fixture)
-{
-	BOOST_TEST( co_nav_imp(&env).find(east::var_name{}) == nullptr );
-	BOOST_TEST( co_nav_tmpl(&env).find(east::var_name{"a", "b", "c"}) == nullptr );
 }
 BOOST_FIXTURE_TEST_CASE(find_in_imports, mock_exenv_fixture)
 {
@@ -371,16 +357,11 @@ BOOST_FIXTURE_TEST_CASE(find_in_imports, mock_exenv_fixture)
 	MOCK_EXPECT(b_block->name).returns("b");
 	MOCK_EXPECT(b_block->evaluate).returns("test"_ad);
 
-	auto ab = in.find(east::var_name{"as","b"});
-
-	BOOST_REQUIRE( ab!=nullptr );
-	BOOST_TEST( ab->call({})->solve() == "test"_ad );
-
-	expect_call(b_block.get());
-	auto btmpl = in.find(east::var_name{"as"});
+	auto btmpl = in.find("as");
 	BOOST_REQUIRE(btmpl != nullptr);
-	ab = btmpl->find(east::var_name{"b"});
+	auto ab = btmpl->find("b");
 	BOOST_REQUIRE(ab != nullptr);
+	BOOST_TEST( in.find("self") != nullptr );
 
 	BOOST_TEST( ab->call({})->solve() == "test"_ad );
 }
@@ -406,15 +387,8 @@ BOOST_FIXTURE_TEST_CASE(find_in_roots, mock_exenv_fixture)
 	MOCK_EXPECT(env.current_tmpl).returns(tmpl);
 	MOCK_EXPECT(b_block->evaluate).once().returns("test"_ad);
 
-	auto b = in.find(east::var_name{"b"});
+	auto b = in.find("b");
 	BOOST_TEST(b->call({})->solve() == "test"_ad);
-
-	MOCK_EXPECT(env.current_tmpl).returns(tmpl);
-	BOOST_REQUIRE(in.find(east::var_name{"self", "b"}) != nullptr);
-
-	expect_call(b_block.get());
-	MOCK_EXPECT(b_block->evaluate).once().returns("test2"_ad);
-	BOOST_TEST(in.find(east::var_name{"self", "b"})->call({})->solve() == "test2"_ad);
 }
 BOOST_FIXTURE_TEST_CASE(find_in_single_tmpl, mock_exenv_fixture)
 {
@@ -431,7 +405,7 @@ BOOST_FIXTURE_TEST_CASE(find_in_single_tmpl, mock_exenv_fixture)
 	MOCK_EXPECT(b_block->evaluate).once().returns("test"_ad);
 	MOCK_EXPECT(env.current_tmpl).returns(&tmpl);
 
-	auto b = in.find(east::var_name{"b"});
+	auto b = in.find("b");
 	BOOST_TEST(b->call({})->solve() == "test"_ad);
 }
 BOOST_AUTO_TEST_SUITE_END() // inner_navigation
@@ -518,22 +492,22 @@ BOOST_FIXTURE_TEST_CASE(cur_namespace, mock_impls_fixture)
 	ctx.push(&ctx1);
 	ctx.cur_namespace().add("b", obj_ctx1);
 	ctx.cur_namespace().add("c", obj2_ctx1);
-	BOOST_TEST(ctx.cur_namespace().find(evar_name{"c"_s}) == obj2_ctx1);
+	BOOST_TEST(ctx.cur_namespace().find("c"_s) == obj2_ctx1);
 	ctx.push(&ctx2);
 	ctx.cur_namespace().add("c", obj_ctx2);
-	BOOST_TEST(ctx.cur_namespace().find(evar_name{"a"_s}) == obj_maker);
-	BOOST_TEST(ctx.cur_namespace().find(evar_name{"b"_s}) == obj_ctx1);
-	BOOST_TEST(ctx.cur_namespace().find(evar_name{"c"_s}) == obj_ctx2);
+	BOOST_TEST(ctx.cur_namespace().find("a"_s) == obj_maker);
+	BOOST_TEST(ctx.cur_namespace().find("b"_s) == obj_ctx1);
+	BOOST_TEST(ctx.cur_namespace().find("c"_s) == obj_ctx2);
 
 	ctx.pop(&ctx2);
-	BOOST_TEST(ctx.cur_namespace().find(evar_name{"a"_s}) == obj_maker);
-	BOOST_TEST(ctx.cur_namespace().find(evar_name{"b"_s}) == obj_ctx1);
-	BOOST_TEST(ctx.cur_namespace().find(evar_name{"c"_s}) == obj2_ctx1);
+	BOOST_TEST(ctx.cur_namespace().find("a"_s) == obj_maker);
+	BOOST_TEST(ctx.cur_namespace().find("b"_s) == obj_ctx1);
+	BOOST_TEST(ctx.cur_namespace().find("c"_s) == obj2_ctx1);
 
 	ctx.pop(&ctx1);
-	BOOST_TEST(ctx.cur_namespace().find(evar_name{"a"_s}) == obj_maker);
-	BOOST_TEST(ctx.cur_namespace().find(evar_name{"b"_s}) == nullptr);
-	BOOST_TEST(ctx.cur_namespace().find(evar_name{"c"_s}) == nullptr);
+	BOOST_TEST(ctx.cur_namespace().find("a"_s) == obj_maker);
+	BOOST_TEST(ctx.cur_namespace().find("b"_s) == nullptr);
+	BOOST_TEST(ctx.cur_namespace().find("c"_s) == nullptr);
 }
 BOOST_FIXTURE_TEST_CASE(out, mock_impls_fixture)
 {
@@ -566,12 +540,11 @@ BOOST_FIXTURE_TEST_CASE(cannot_call_nullptr, mock_impls_fixture)
 BOOST_FIXTURE_TEST_CASE(push_pop, mock_impls_fixture)
 {
 	using namespace cppjinja::east;
-	using evar_name = cppjinja::east::var_name;
 	mocks::callable_node calling1, calling2;
 
 	BOOST_CHECK_THROW(calls.current_params(&calling1), std::exception);
 	calls.push(&calling1, cppjinja::evt::context_objects::callable_params({}, {}));
-	BOOST_TEST(calls.current_params(&calling1).find(evar_name{"a"}) == nullptr);
+	BOOST_TEST(calls.current_params(&calling1).find("a") == nullptr);
 	BOOST_CHECK_THROW(calls.current_params(&calling2), std::exception);
 	calls.pop();
 	BOOST_CHECK_THROW(calls.current_params(&calling1), std::exception);
@@ -667,7 +640,7 @@ BOOST_FIXTURE_TEST_CASE(bintins, impl_exenv_fixture)
 	calls.push(&node, cppjinja::evt::context_objects::callable_params({},{}));
 
 	BOOST_CHECK(dynamic_cast<cppjinja::evt::context_objects::jinja_namespace*>(
-	                env.all_ctx().find(evar_name{"namespace"}).get()));
+	                env.all_ctx().find("namespace").get()));
 }
 BOOST_FIXTURE_TEST_CASE(globals, impl_exenv_fixture)
 {
@@ -689,12 +662,12 @@ BOOST_FIXTURE_TEST_CASE(params, impl_exenv_fixture)
 	{}, {cppjinja::evt::context_object::function_parameter{"p1"_s, p1_val}});
 	ctx.push_shadow(&calling1);
 	calls.push(&calling1, params);
-	BOOST_TEST(env.params().find(evar_name{"p1"_s}) == p1_val);
+	BOOST_TEST(env.params().find("p1"_s) == p1_val);
 }
 BOOST_FIXTURE_TEST_CASE(user_data, impl_exenv_fixture)
 {
 	MOCK_EXPECT(data.value_var_name).with(evar_name{"a"_s}).returns(42_ad);
-	BOOST_TEST(env.user_data().find(evar_name{"a"})->solve() == 42);
+	BOOST_TEST(env.user_data().find("a")->solve() == 42);
 }
 BOOST_FIXTURE_TEST_CASE(all_ctx, impl_exenv_fixture)
 {
@@ -705,7 +678,7 @@ BOOST_FIXTURE_TEST_CASE(all_ctx, impl_exenv_fixture)
 	ctx.push_shadow(&maker);
 	calls.push(&maker, cppjinja::evt::context_objects::callable_params({},{}));
 	MOCK_EXPECT(data.value_var_name).with(evar_name{"a"_s}).returns(42_ad);
-	BOOST_TEST(env.all_ctx().find(evar_name{"a"})->solve() == 42);
+	BOOST_TEST(env.all_ctx().find("a")->solve() == 42);
 }
 BOOST_AUTO_TEST_SUITE_END() // exenv
 

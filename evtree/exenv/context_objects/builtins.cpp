@@ -85,7 +85,7 @@ void cppjinja::evt::context_objects::builtin_function::add(
 }
 
 std::shared_ptr<cppjinja::evt::context_object>
-cppjinja::evt::context_objects::builtin_function::find(east::var_name n) const
+cppjinja::evt::context_objects::builtin_function::find(east::string_t n) const
 {
 	(void)n;
 	throw std::runtime_error("cannot find something in builtin function");

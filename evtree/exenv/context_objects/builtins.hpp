@@ -21,7 +21,7 @@ protected:
 	std::shared_ptr<context_object> result_empty_str() const ;
 public:
 	void add(east::string_t n, std::shared_ptr<context_object> child) override ;
-	std::shared_ptr<context_object> find(east::var_name n) const override ;
+	std::shared_ptr<context_object> find(east::string_t n) const override ;
 	absd::data solve() const override ;
 };
 

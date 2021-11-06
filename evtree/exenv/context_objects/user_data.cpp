@@ -44,10 +44,10 @@ void cppjinja::evt::context_objects::user_data::add(
 }
 
 std::shared_ptr<cppjinja::evt::context_object>
-cppjinja::evt::context_objects::user_data::find(cppjinja::east::var_name n) const
+cppjinja::evt::context_objects::user_data::find(cppjinja::east::string_t n) const
 {
 	auto nsel = selected_name;
-	nsel.insert(nsel.end(), n.begin(), n.end());
+	nsel.push_back(n);
 	return std::make_shared<user_data>(provider, std::move(nsel));
 }
 

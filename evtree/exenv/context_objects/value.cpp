@@ -29,17 +29,11 @@ void cppjinja::evt::context_objects::value::add(
 }
 
 std::shared_ptr<cppjinja::evt::context_object>
-cppjinja::evt::context_objects::value::find(cppjinja::east::var_name n) const
+cppjinja::evt::context_objects::value::find(cppjinja::east::string_t n) const
 {
-	if(n.size()==1) {
-		if(src.is_object()) return std::make_shared<value>(src[n[0]]);
-		if(src.is_array()) return std::make_shared<value>(src[std::stoi(n[0].c_str())]);
-	}
-
-	std::string vn;
-	for(auto& v:n) vn += v + '.';
-	if(2 <= vn.size()) vn.erase(vn.size()-1, 1);
-	throw std::runtime_error("cannot find a child in a value [" + vn + "]");
+	if(src.is_object()) return std::make_shared<value>(src[n]);
+	if(src.is_array()) return std::make_shared<value>(src[std::stoi(n.c_str())]);
+	throw std::runtime_error("cannot find a child in a value ["s + n.c_str() + ']');
 }
 
 absd::data cppjinja::evt::context_objects::value::solve() const

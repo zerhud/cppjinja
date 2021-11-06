@@ -38,21 +38,25 @@ BOOST_AUTO_TEST_CASE(context)
 	using namespace cppjinja::evt::context_objects;
 	cppjinja::evt::context_objects::builtins stdlib;
 
-	BOOST_CHECK(dynamic_cast<join*>(stdlib.find(var_name{"join"_s}).get()));
-	BOOST_CHECK(dynamic_cast<jinja_namespace*>(stdlib.find(var_name{"namespace"_s}).get()));
-	BOOST_CHECK(dynamic_cast<builtins_tests::callable*>(stdlib.find(var_name{"$tests"_s, "callable"_s}).get()));
-	BOOST_CHECK(dynamic_cast<builtins_tests::defined*>(stdlib.find(var_name{"$tests"_s, "defined"_s}).get()));
-	BOOST_CHECK(dynamic_cast<builtins_tests::undefined*>(stdlib.find(var_name{"$tests"_s, "undefined"_s}).get()));
-	BOOST_CHECK(dynamic_cast<builtins_tests::sameas*>(stdlib.find(var_name{"$tests"_s, "sameas"_s}).get()));
+	BOOST_CHECK(dynamic_cast<join*>(stdlib.find("join"_s).get()));
+	BOOST_CHECK(dynamic_cast<jinja_namespace*>(stdlib.find("namespace"_s).get()));
 
-	BOOST_CHECK(stdlib.find(var_name{"upper"_s}).get());
+	auto tests = stdlib.find("$tests"_s);
+	BOOST_REQUIRE(tests);
+
+	BOOST_CHECK(dynamic_cast<builtins_tests::callable*>(tests->find("callable"_s).get()));
+	BOOST_CHECK(dynamic_cast<builtins_tests::defined*>(tests->find("defined"_s).get()));
+	BOOST_CHECK(dynamic_cast<builtins_tests::undefined*>(tests->find("undefined"_s).get()));
+	BOOST_CHECK(dynamic_cast<builtins_tests::sameas*>(tests->find("sameas"_s).get()));
+
+	BOOST_CHECK(stdlib.find("upper"_s).get());
 }
 BOOST_AUTO_TEST_CASE(upper)
 {
 	using param = cppjinja::evt::context_object::function_parameter;
 
 	cppjinja::evt::context_objects::builtins stdlib;
-	auto fnc = stdlib.find(var_name{"upper"});
+	auto fnc = stdlib.find("upper");
 	BOOST_REQUIRE(fnc!=nullptr);
 	auto result = fnc->call({param{std::nullopt, make_val("text"_sd)}});
 	BOOST_REQUIRE( result!=nullptr );
@@ -64,12 +68,12 @@ BOOST_AUTO_TEST_CASE(jinja_namespace)
 	BOOST_CHECK_THROW(ns.call({}), std::exception);
 	BOOST_CHECK_THROW(ns.solve(), std::exception);
 	BOOST_CHECK_THROW(ns.add("a", nullptr), std::exception);
-	BOOST_CHECK_THROW(ns.find(var_name{"a"}), std::exception);
+	BOOST_CHECK_THROW(ns.find("a"), std::exception);
 
 	auto pval = std::make_shared<mocks::context_object>();
 	auto tree = ns.call({function_parameter{"a", pval}});
 	BOOST_CHECK(tree);
-	BOOST_TEST(tree->find(var_name{"a"}) == pval);
+	BOOST_TEST(tree->find("a") == pval);
 }
 BOOST_AUTO_TEST_CASE(join)
 {

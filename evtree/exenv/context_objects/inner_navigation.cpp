@@ -23,30 +23,20 @@ navigation_imp::navigation_imp(exenv* e) : inner_navigation(e)
 {
 }
 
-std::shared_ptr<context_object> navigation_imp::find(east::var_name n) const
+std::shared_ptr<context_object> navigation_imp::find(east::string_t n) const
 {
-	if(n.size() == 2) return find_in_imports(std::move(n));
-	if(n.size() == 1) {
-		auto found_tmpl = find_tmpl_by_import(n);
-		if(found_tmpl) return find_in_tmpl(found_tmpl);
-	}
-	return nullptr;
+	auto found_tmpl = find_tmpl_by_import(east::var_name{n});
+	if(!found_tmpl && n=="self") return find_in_cur_tmpl();
+	return found_tmpl ? find_in_tmpl(found_tmpl) : nullptr;
 }
 
 navigation_tmpl::navigation_tmpl(exenv* e) : inner_navigation(e)
 {
 }
 
-std::shared_ptr<context_object> navigation_tmpl::find(east::var_name n) const
+std::shared_ptr<context_object> navigation_tmpl::find(east::string_t n) const
 {
-	const bool single_name = n.size() == 1;
-	auto ret = single_name ? find_in_roots(n) : nullptr;
-	if(ret) return ret;
-	const bool link_to_cur_tmpl = !n.empty() && n[0]=="self";
-	n.erase(n.begin());
-	if(link_to_cur_tmpl)
-		return single_name ? find_in_cur_tmpl() : find_in_roots(n);
-	return nullptr;
+	return find_in_roots(east::var_name{n});
 }
 
 navigation_single_tmpl::navigation_single_tmpl(exenv* e, const cppjinja::evtnodes::tmpl* tmpl)
@@ -56,9 +46,9 @@ navigation_single_tmpl::navigation_single_tmpl(exenv* e, const cppjinja::evtnode
 	assert(tmpl);
 }
 
-std::shared_ptr<context_object> navigation_single_tmpl::find(east::var_name n) const
+std::shared_ptr<context_object> navigation_single_tmpl::find(east::string_t n) const
 {
-	return find_in_tmpl(tmpl, n);
+	return find_in_tmpl(tmpl, east::var_name{n});
 }
 
 inner_navigation::inner_navigation(exenv *e)
@@ -74,13 +64,6 @@ void inner_navigation::add(east::string_t n, std::shared_ptr<context_object> chi
 	(void) n;
 	(void) child;
 	throw std::logic_error("cannot add somthing to inner navigation object");
-}
-
-std::shared_ptr<context_object> inner_navigation::find(east::var_name n) const
-{
-	if(n.size() == 1) return find_in_roots(n);
-	if(n.size() == 2) return find_in_imports(n);
-	return nullptr;
 }
 
 std::shared_ptr<context_object> inner_navigation::find_in_roots(east::var_name n) const

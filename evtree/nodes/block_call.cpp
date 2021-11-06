@@ -25,7 +25,7 @@ cppjinja::evtnodes::block_call::block_call(cppjinja::ast::block_call nb)
 
 void cppjinja::evtnodes::block_call::render(cppjinja::evt::exenv& env) const
 {
-	auto obj = env.all_ctx().find(east::var_name{tps(ast.name)});
+	auto obj = env.all_ctx().find(tps(ast.name));
 	auto self = std::make_shared<evt::context_objects::callable_node>(&env, this);
 	std::pmr::vector<evt::context_object::function_parameter> params;
 	params.emplace_back().value = self;

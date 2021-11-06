@@ -256,7 +256,7 @@ BOOST_FIXTURE_TEST_CASE(op_out, mock_exenv_fixture)
 	check_main(tree, "", 1, 0);
 	BOOST_TEST(make_node_seq_str(tree.main_block(), tree.render_tree.all_tree()) == "block_named,op_out..");
 
-	expect_sovle(cppjinja::east::var_name{"a"_s}, create_absd_data(""));
+	expect_sovle("a"_s, create_absd_data(""));
 	MOCK_EXPECT(env.current_node);
 	make_node_seq(tree.main_block(), tree.render_tree.all_tree())[1]->render(env);
 }

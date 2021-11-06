@@ -128,7 +128,7 @@ BOOST_FIXTURE_TEST_CASE(single_var, mock_exenv_fixture)
 {
 	auto a = std::make_shared<mocks::context_object>();
 	expect_solve(*a, "ok");
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
+	MOCK_EXPECT(all_ctx.find).with("a").returns(a);
 	auto res = eeval(&env)(txt::parse(ext::expr, "a"));
 	BOOST_TEST(res == "ok"s);
 }
@@ -140,10 +140,10 @@ BOOST_FIXTURE_TEST_CASE(call_at_end, mock_exenv_fixture)
 	auto b = std::make_shared<mocks::context_object>();
 	auto c = std::make_shared<mocks::context_object>();
 	auto abe = std::make_shared<mocks::context_object>();
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"c"}).returns(c);
-	MOCK_EXPECT(a->find).with(cppjinja::east::var_name{"b"}).returns(b);
-	MOCK_EXPECT(b->find).with(cppjinja::east::var_name{"e"}).returns(abe);
+	MOCK_EXPECT(all_ctx.find).with("a").returns(a);
+	MOCK_EXPECT(all_ctx.find).with("c").returns(c);
+	MOCK_EXPECT(a->find).with("b").returns(b);
+	MOCK_EXPECT(b->find).with("e").returns(abe);
 	expect_solve(*c, "e");
 	expect_solve(*abe, "abe");
 	auto res = eeval(&env)(txt::parse(ext::expr, "a.b[c]"));
@@ -155,12 +155,12 @@ BOOST_FIXTURE_TEST_CASE(two_calls, mock_exenv_fixture)
 	auto b = std::make_shared<mocks::context_object>();
 	auto c = std::make_shared<mocks::context_object>();
 	auto abe = std::make_shared<mocks::context_object>();
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"c"}).returns(c);
+	MOCK_EXPECT(all_ctx.find).with("a").returns(a);
+	MOCK_EXPECT(all_ctx.find).with("c").returns(c);
 	expect_solve(*c, "e");
 	expect_solve(*abe, "abe");
-	MOCK_EXPECT(a->find).with(cppjinja::east::var_name{"b"}).returns(b);
-	MOCK_EXPECT(b->find).with(cppjinja::east::var_name{"e"}).returns(abe);
+	MOCK_EXPECT(a->find).with("b").returns(b);
+	MOCK_EXPECT(b->find).with("e").returns(abe);
 	auto res = eeval(&env)(txt::parse(ext::expr, "a['b'][c]"));
 	BOOST_TEST(res == "abe");
 }
@@ -168,8 +168,8 @@ BOOST_FIXTURE_TEST_CASE(solve_array_ind, mock_exenv_fixture)
 {
 	auto a = std::make_shared<mocks::context_object>();
 	auto val = std::make_shared<mocks::context_object>();
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
-	MOCK_EXPECT(a->find).with(cppjinja::east::var_name{"3"}).returns(val);
+	MOCK_EXPECT(all_ctx.find).with("a").returns(a);
+	MOCK_EXPECT(a->find).with("3").returns(val);
 	expect_solve(*val, "ok");
 	auto res = eeval(&env)(txt::parse(ext::expr, "a[1+2]"));
 	BOOST_TEST(res == "ok");
@@ -183,7 +183,7 @@ BOOST_FIXTURE_TEST_CASE(without_args, mock_exenv_fixture)
 	auto a = std::make_shared<mocks::context_object>();
 	auto call = std::make_shared<mocks::context_object>();
 	expect_solve(*call, "ok");
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
+	MOCK_EXPECT(all_ctx.find).with("a").returns(a);
 	MOCK_EXPECT(a->call).with(params).returns(call);
 	auto res = eeval(&env)(txt::parse(ext::expr, "a()"));
 	BOOST_TEST(res == "ok");
@@ -193,7 +193,7 @@ BOOST_FIXTURE_TEST_CASE(with_args, mock_exenv_fixture)
 	auto a = std::make_shared<mocks::context_object>();
 	auto call = std::make_shared<mocks::context_object>();
 	expect_solve(*call, "test_ok");
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
+	MOCK_EXPECT(all_ctx.find).with("a").returns(a);
 	MOCK_EXPECT(a->call).calls([call](std::pmr::vector<cppjinja::evt::context_object::function_parameter> params){
 		BOOST_TEST(params.size() == 1);
 		BOOST_TEST(params.at(0).name.has_value() == false);
@@ -218,10 +218,10 @@ BOOST_FIXTURE_TEST_CASE(points, mock_exenv_fixture)
 	auto c = std::make_shared<mocks::context_object>();
 	auto d = std::make_shared<mocks::context_object>();
 	auto call = std::make_shared<mocks::context_object>();
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"_s}).returns(a);
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"c"_s}).returns(c);
-	MOCK_EXPECT(a->find).with(cppjinja::east::var_name{"b"}).returns(b);
-	MOCK_EXPECT(c->find).with(cppjinja::east::var_name{"d"}).returns(d);
+	MOCK_EXPECT(all_ctx.find).with("a"_s).returns(a);
+	MOCK_EXPECT(all_ctx.find).with("c"_s).returns(c);
+	MOCK_EXPECT(a->find).with("b").returns(b);
+	MOCK_EXPECT(c->find).with("d").returns(d);
 	MOCK_EXPECT(b->call).with(params).returns(call);
 	expect_solve(*d, "ok");
 	expect_solve(*call, "test_ok");
@@ -237,8 +237,8 @@ BOOST_FIXTURE_TEST_CASE(without_args, mock_exenv_fixture)
 	auto a = std::make_shared<mocks::context_object>();
 	auto b = std::make_shared<mocks::context_object>();
 	auto result = std::make_shared<mocks::context_object>();
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"b"}).returns(b);
+	MOCK_EXPECT(all_ctx.find).with("a").returns(a);
+	MOCK_EXPECT(all_ctx.find).with("b").returns(b);
 	expect_solve(*a, "a");
 	expect_solve(*b, "b");
 	expect_solve(*result, "result");
@@ -261,9 +261,9 @@ BOOST_FIXTURE_TEST_CASE(without_args_few, mock_exenv_fixture)
 	auto c = std::make_shared<mocks::context_object>();
 	auto result_b = std::make_shared<mocks::context_object>();
 	auto result_c = std::make_shared<mocks::context_object>();
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"b"}).returns(b);
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"c"}).returns(c);
+	MOCK_EXPECT(all_ctx.find).with("a").returns(a);
+	MOCK_EXPECT(all_ctx.find).with("b").returns(b);
+	MOCK_EXPECT(all_ctx.find).with("c").returns(c);
 	expect_solve(*a, "a");
 	expect_solve(*b, "b");
 	expect_solve(*c, "c");
@@ -292,9 +292,9 @@ BOOST_FIXTURE_TEST_CASE(with_args, mock_exenv_fixture)
 	auto b = std::make_shared<mocks::context_object>();
 	auto c = std::make_shared<mocks::context_object>();
 	auto result = std::make_shared<mocks::context_object>();
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"a"}).returns(a);
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"b"}).returns(b);
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"c"}).returns(c);
+	MOCK_EXPECT(all_ctx.find).with("a").returns(a);
+	MOCK_EXPECT(all_ctx.find).with("b").returns(b);
+	MOCK_EXPECT(all_ctx.find).with("c").returns(c);
 	expect_solve(*a, "a");
 	expect_solve(*c, "c");
 	expect_solve(*result, "result");
@@ -330,10 +330,10 @@ BOOST_FIXTURE_TEST_CASE(wihout_args, mock_exenv_fixture)
 	auto tests = std::make_shared<mocks::context_object>();
 	auto int_check = std::make_shared<mocks::context_object>();
 	auto check_result = std::make_shared<mocks::context_object>();
-	MOCK_EXPECT(all_ctx.find).with(cppjinja::east::var_name{"$tests"_s}).returns(tests);
+	MOCK_EXPECT(all_ctx.find).with("$tests"_s).returns(tests);
 	MOCK_EXPECT(tests->find)
 	        .exactly(2)
-	        .with(cppjinja::east::var_name{"integer"_s})
+	        .with("integer"_s)
 	        .returns(int_check);
 	MOCK_EXPECT(int_check->call).returns(check_result);
 	MOCK_EXPECT(check_result->solve).once().returns(create_absd_data(true));

@@ -50,7 +50,7 @@ void cppjinja::evt::context_objects::queue::add(
 }
 
 std::shared_ptr<cppjinja::evt::context_object>
-cppjinja::evt::context_objects::queue::find(cppjinja::east::var_name n) const
+cppjinja::evt::context_objects::queue::find(cppjinja::east::string_t n) const
 {
 	for(auto& c:content) if(auto f = c->find(n);f) return f;
 	for(auto& c:const_content) if(auto f = c->find(n);f) return f;

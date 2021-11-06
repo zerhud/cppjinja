@@ -96,7 +96,7 @@ cppjinja::evt::context_object_ptr cppjinja::evt::expr_eval::solve_point_arg(
         cppjinja::ast::expr_ops::single_var_name& epxr) const
 {
 	std::pmr::string ln(epxr.name.begin(),epxr.name.end());
-	return left.find(east::var_name{ln});
+	return left.find(ln);
 }
 
 cppjinja::evt::context_object_ptr cppjinja::evt::expr_eval::solve_point_arg(
@@ -107,7 +107,7 @@ cppjinja::evt::context_object_ptr cppjinja::evt::expr_eval::solve_point_arg(
 	east::string_t key;
 	if(solved.is_integer()) key = std::to_string((std::int64_t)solved).c_str();
 	else key = solved.str();
-	return left.find(east::var_name{key});
+	return left.find(key);
 }
 
 cppjinja::evt::context_object_ptr cppjinja::evt::expr_eval::solve_point_arg(
@@ -208,7 +208,7 @@ cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::single_var_name& t) const
 {
 	std::pmr::string tn(t.name.begin(),t.name.end());
-	return env->all_ctx().find(east::var_name{tn})->solve();
+	return env->all_ctx().find(tn)->solve();
 }
 
 cppjinja::evt::expr_eval::eval_type

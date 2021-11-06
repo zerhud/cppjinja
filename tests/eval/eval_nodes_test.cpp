@@ -42,8 +42,6 @@ namespace ast = cppjinja::ast;
 namespace aps = cppjinja::ast::expr_ops;
 using mocks::mock_exenv_fixture; // qtcreator cannot parse test with namespace
 
-using evar_name = cppjinja::east::var_name;
-
 struct mock_callable_fixture : mock_exenv_fixture {
 	mocks::node child1, child2;
 
@@ -175,7 +173,7 @@ BOOST_FIXTURE_TEST_CASE(name, mock_exenv_fixture)
 	expect_glp(0, 1, 0);
 	expect_solve(*obj, "a");
 	expect_local_object_created("tname", "a");
-	MOCK_EXPECT(all_ctx.find).with(evar_name{"a"_s}).returns(obj);
+	MOCK_EXPECT(all_ctx.find).with("a"_s).returns(obj);
 	MOCK_EXPECT(env.current_node).once().with(&snode);
 	snode.render(env);
 }
@@ -193,7 +191,7 @@ BOOST_FIXTURE_TEST_CASE(call, mock_exenv_fixture)
 	expect_glp(0, 1, 0);
 	expect_solve(*gotten_obj, "test");
 	expect_local_object_created("tname", "test");
-	MOCK_EXPECT(all_ctx.find).with(evar_name{"a"_s}).returns(obj);
+	MOCK_EXPECT(all_ctx.find).with("a"_s).returns(obj);
 	MOCK_EXPECT(obj->call).once().returns(gotten_obj);
 	MOCK_EXPECT(env.current_node).once().with(&snode);
 	snode.render(env);
@@ -429,7 +427,7 @@ BOOST_FIXTURE_TEST_CASE_TEMPLATE(sovled_params, T, callable_list, mock_callable_
 	ast_bl.params.emplace_back(ast::macro_parameter{"b", aps::expr{aps::single_var_name{"a"s}}});
 	std::remove_pointer_t<std::tuple_element_t<1, T>> blp(ast_bl);
 	auto obj = std::make_shared<mocks::context_object>();
-	MOCK_EXPECT(all_ctx.find).with(evar_name{"a"_s}).returns(obj);
+	MOCK_EXPECT(all_ctx.find).with("a"_s).returns(obj);
 	MOCK_EXPECT(obj->solve).returns("b"_ad);
 
 	auto solved = blp.solved_params(env);
@@ -621,7 +619,7 @@ BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
 	expect_transporent_cxt(&block);
 	expect_children({&child});
 	expect_call(
-	              cppjinja::east::var_name{"flt"_s}
+	              "flt"_s
 	            , {fnc_param_t{"$"_s, std::make_shared<val_obj_t>("base"_ad)}}
 	            , "after"_ad);
 	MOCK_EXPECT(env.rinfo).with(cppjinja::evt::render_info{true, true});
@@ -681,7 +679,7 @@ BOOST_FIXTURE_TEST_CASE(render, mock_callable_fixture)
 	// calls other block
 	auto calling_result = std::make_shared<mocks::context_object>();
 	auto calling = std::make_shared<mocks::context_object>();
-	MOCK_EXPECT(all_ctx.find).once().with(evar_name{"test"_s}).returns(calling);
+	MOCK_EXPECT(all_ctx.find).once().with("test"_s).returns(calling);
 	MOCK_EXPECT(calling_result->solve).returns("calling_result"_ad);
 	MOCK_EXPECT(calling->call).once().calls([&block,calling_result](auto params){
 		BOOST_TEST_REQUIRE(params.size()==2);

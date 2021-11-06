@@ -56,13 +56,10 @@ void cppjinja::evt::context_objects::tree::add(
 }
 
 std::shared_ptr<cppjinja::evt::context_object>
-cppjinja::evt::context_objects::tree::find(cppjinja::east::var_name n) const
+cppjinja::evt::context_objects::tree::find(cppjinja::east::string_t n) const
 {
-	auto pos = children.find(n.at(0));
-	if(pos==children.end()) return nullptr;
-	if(n.size()==1) return pos->second;
-	n.erase(n.begin());
-	return pos->second->find(n);
+	auto pos = children.find(n);
+	return pos == children.end() ? nullptr : pos->second;
 }
 
 absd::data cppjinja::evt::context_objects::tree::solve() const

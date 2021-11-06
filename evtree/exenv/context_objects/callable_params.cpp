@@ -82,11 +82,10 @@ void callable_params::add(
 }
 
 std::shared_ptr<cppjinja::evt::context_object>
-callable_params::find(cppjinja::east::var_name n) const
+callable_params::find(cppjinja::east::string_t n) const
 {
-	auto pos = params.find(n.at(0));
-	if(pos==params.end()) return nullptr;
-	return pos->second;
+	auto pos = params.find(n);
+	return pos==params.end() ? nullptr : pos->second;
 }
 
 absd::data callable_params::solve() const
