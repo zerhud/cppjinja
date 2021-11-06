@@ -9,12 +9,17 @@
 #include "builtins.hpp"
 #include "tree.hpp"
 #include "value.hpp"
+#include "builtins/lambda.hpp"
 
 #include <absd/simple_data_holder.hpp>
 
 #include "builtins/tests.hpp"
 
+#include <boost/algorithm/string/case_conv.hpp>
+
 using namespace std::literals;
+using namespace absd::literals;
+using cppjinja::evt::context_objects::make_val;
 
 cppjinja::evt::context_objects::builtins::builtins()
 {
@@ -26,13 +31,27 @@ cppjinja::evt::context_objects::builtins::builtins()
 	tests->add("defined", std::make_shared<builtins_tests::defined>());
 	tests->add("undefined", std::make_shared<builtins_tests::undefined>());
 	tests->add("sameas", std::make_shared<builtins_tests::sameas>());
+
+	add_child("upper", fnc_upper());
 }
 
 cppjinja::evt::context_objects::builtins::~builtins() noexcept
 {
-
 }
 
+std::shared_ptr<cppjinja::evt::context_object>
+cppjinja::evt::context_objects::builtins::fnc_upper() const
+{
+	return std::make_shared<lambda_function>(
+	            [](std::pmr::vector<function_parameter> params)->std::shared_ptr<context_object>{
+		assert(params.at(0).value!=nullptr);
+		auto param = params.at(0).value->solve();
+		if(param.is_empty()) return make_val(""_sd);
+		auto lower = param.str();
+		boost::algorithm::to_upper(lower);
+		return make_val(absd::make_simple(lower));
+	} );
+}
 
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::builtin_function::result_bool(bool res) const

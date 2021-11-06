@@ -36,6 +36,7 @@ public:
 };
 
 class builtins : public tree {
+	std::shared_ptr<context_object> fnc_upper() const ;
 public:
 	builtins();
 	~builtins() noexcept override ;

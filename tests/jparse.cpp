@@ -25,14 +25,6 @@ class extra_functions : public cogen::jinja_json_prov {
 		return false;
 	}
 
-	absd::data upper(absd::data obj) const
-	{
-		if(!obj.is_string()) return obj;
-		auto str = obj.str();
-		boost::algorithm::to_upper(str);
-		return make_simple(str);
-	}
-
 	absd::data extract_name(absd::data obj, absd::data nind=make_simple(-1)) const
 	{
 		auto name = obj["name"];
@@ -115,10 +107,6 @@ public:
 			if(val.params.size()==1)
 				return extract_name(val.params[0].val.value());
 			throw std::runtime_error("function extract_name takes 1 or 2 arguments");
-		} else if(val.ref[0] == "upper") {
-			if(val.params.size()==1)
-				return upper(val.params[0].val.value());
-			throw std::runtime_error("function upper takes 1 argument");
 		}
 		return jinja_json_prov::value(std::move(val));
 	}

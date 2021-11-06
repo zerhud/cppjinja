@@ -26,4 +26,10 @@ public:
 	        std::pmr::vector<function_parameter> params) const override ;
 };
 
+template<typename T>
+std::shared_ptr<value> make_val(T&& v)
+{
+	return std::make_shared<value>(std::forward<T>(v));
+}
+
 } // namespace cppjinja::evt::context_objects

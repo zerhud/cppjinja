@@ -22,10 +22,12 @@
 #include "evtree/exenv/context_objects/tree.hpp"
 
 using namespace std::literals;
+using namespace absd::literals;
 namespace tdata = boost::unit_test::data;
 using var_name = cppjinja::east::var_name;
 using fnc_param = cppjinja::evt::context_object::function_parameter;
 using mocks::mock_exenv_fixture;
+using cppjinja::evt::context_objects::make_val;
 
 BOOST_AUTO_TEST_SUITE(phase_evaluate)
 BOOST_AUTO_TEST_SUITE(context_object)
@@ -42,6 +44,19 @@ BOOST_AUTO_TEST_CASE(context)
 	BOOST_CHECK(dynamic_cast<builtins_tests::defined*>(stdlib.find(var_name{"$tests"_s, "defined"_s}).get()));
 	BOOST_CHECK(dynamic_cast<builtins_tests::undefined*>(stdlib.find(var_name{"$tests"_s, "undefined"_s}).get()));
 	BOOST_CHECK(dynamic_cast<builtins_tests::sameas*>(stdlib.find(var_name{"$tests"_s, "sameas"_s}).get()));
+
+	BOOST_CHECK(stdlib.find(var_name{"upper"_s}).get());
+}
+BOOST_AUTO_TEST_CASE(upper)
+{
+	using param = cppjinja::evt::context_object::function_parameter;
+
+	cppjinja::evt::context_objects::builtins stdlib;
+	auto fnc = stdlib.find(var_name{"upper"});
+	BOOST_REQUIRE(fnc!=nullptr);
+	auto result = fnc->call({param{std::nullopt, make_val("text"_sd)}});
+	BOOST_REQUIRE( result!=nullptr );
+	BOOST_TEST( result->solve() == "TEXT" );
 }
 BOOST_AUTO_TEST_CASE(jinja_namespace)
 {
