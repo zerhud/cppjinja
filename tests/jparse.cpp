@@ -64,7 +64,7 @@ class extra_functions : public cogen::jinja_json_prov {
 		if(naming=="underscore") return make_simple(prefix.str() + "_" + extract_name(obj, nind).str());
 		if(naming=="title_case") return make_simple(prefix.str() + extract_name(obj, nind).str());
 		if(naming=="camel_case") return make_simple(prefix.str() + "_" + extract_name(obj, nind).str());
-		return "phhh"_sd;
+		return absd::make_simple(prefix.str() + extract_name(obj, nind).str());
 	}
 	absd::data apply_sufix(absd::data obj, absd::data prefix, absd::data nind=0_sd) const
 	{
@@ -72,7 +72,7 @@ class extra_functions : public cogen::jinja_json_prov {
 		if(naming=="underscore") return make_simple(prefix.str() + "_" + extract_name(obj, nind).str());
 		if(naming=="title_case") return make_simple(prefix.str() + extract_name(obj, nind).str());
 		if(naming=="camel_case") return make_simple(prefix.str() + "_" + extract_name(obj, nind).str());
-		return "sifuxxx"_sd;
+		return absd::make_simple(extract_name(obj, nind).str() + prefix.str());
 	}
 public:
 	extra_functions(boost::json::value jd) : jinja_json_prov(std::move(jd)) {}
