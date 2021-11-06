@@ -32,6 +32,7 @@ cppjinja::evt::context_objects::builtins_tests::undefined::call(
         std::pmr::vector<cppjinja::evt::context_object::function_parameter> params) const
 {
 	bool res = params.at(0).value == nullptr;
+	res = res || params[0].value->solve().is_empty();
 	return result_bool(res);
 }
 

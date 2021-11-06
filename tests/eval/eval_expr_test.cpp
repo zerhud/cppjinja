@@ -91,10 +91,14 @@ BOOST_FIXTURE_TEST_CASE(logic_check, mock_exenv_fixture)
 	BOOST_TEST(res == true);
 	res = eeval(&env)(txt::parse(ext::expr, "true and false"));
 	BOOST_TEST(res == false);
+	res = eeval(&env)(txt::parse(ext::expr, "false and a"));
+	BOOST_TEST(res == false);
+	res = eeval(&env)(txt::parse(ext::expr, "1 or a"));
+	BOOST_TEST(res == true);
 	res = eeval(&env)(txt::parse(ext::expr, "'a' and 'b'"));
 	BOOST_TEST(res == true);
-//	res = eeval(&env)(txt::parse(ext::expr, "'' and ''"));
-//	BOOST_TEST(res == true);
+	res = eeval(&env)(txt::parse(ext::expr, "'' and ''"));
+	BOOST_TEST(res == false); // empty string evaluates to false
 	res = eeval(&env)(txt::parse(ext::expr, "'b' and ''"));
 	BOOST_TEST(res == false);
 }

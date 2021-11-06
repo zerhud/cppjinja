@@ -120,13 +120,23 @@ BOOST_FIXTURE_TEST_CASE(defined, mock_exenv_fixture)
 {
 	cppjinja::evt::context_objects::builtins_tests::defined obj;
 	auto nca = std::make_shared<mocks::context_object>();
+	MOCK_EXPECT(nca->solve)
+	        .once()
+	        .returns(absd::data{std::make_shared<absd::simple_data_holder>()});
+	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca}})->solve() == false);
+	MOCK_EXPECT(nca->solve).returns(1_sd);
 	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca}})->solve() == true);
 	BOOST_TEST(obj.call({fnc_param{std::nullopt, nullptr}})->solve() == false);
 }
 BOOST_FIXTURE_TEST_CASE(undefined, mock_exenv_fixture)
 {
 	cppjinja::evt::context_objects::builtins_tests::undefined obj;
+	absd::data empty = absd::data{std::make_shared<absd::simple_data_holder>()};
+	BOOST_CHECK(empty.is_empty());
 	auto nca = std::make_shared<mocks::context_object>();
+	MOCK_EXPECT(nca->solve).once().returns(empty);
+	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca}})->solve() == true);
+	MOCK_EXPECT(nca->solve).returns(1_sd);
 	BOOST_TEST(obj.call({fnc_param{std::nullopt, nca}})->solve() == false);
 	BOOST_TEST(obj.call({fnc_param{std::nullopt, nullptr}})->solve() == true);
 }

@@ -306,9 +306,15 @@ cppjinja::evt::expr_eval::operator ()(ast::expr_ops::cmp_check& t) const
 cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::logic_check& t) const
 {
+	absd::data left = visit(t.left);
+	bool bleft = to_bool(left);
+	if(!bleft && t.op == ast::expr_ops::logic_op::op_and)
+		return create_data(false);
+	if(bleft && t.op == ast::expr_ops::logic_op::op_or)
+		return create_data(true);
 	return cvt(boost::apply_visitor(
 	            expr_evals::logic_check(t.op),
-	            to_term(visit(t.left)),
+	            to_term(left),
 	            to_term(visit(t.right))
 	            ));
 }
