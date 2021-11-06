@@ -35,6 +35,9 @@ BOOST_AUTO_TEST_CASE(qutoed_string)
 	BOOST_TEST(txt::parse(ext::quoted_string, "'a\"'"sv) == "a\""s);
 	BOOST_TEST(txt::parse(ext::quoted_string, "\"a'\""sv) == "a'"s);
 	BOOST_TEST(txt::parse(ext::quoted_string, "''"sv) == ""s);
+	BOOST_TEST(txt::parse(ext::quoted_string, "\"\""sv) == ""s);
+	auto result = txt::parse(ext::expr, "\">\""sv);
+	BOOST_TEST(result.var.type().name() == typeid(est::term).name());
 }
 BOOST_AUTO_TEST_CASE(bool_rule)
 {
@@ -218,8 +221,8 @@ BOOST_AUTO_TEST_CASE(op_if)
 {
 	auto result1 = txt::parse(ext::op_if, "a.b if c else 'd'");
 	BOOST_TEST(result1.term == est::expr{txt::parse(ext::point, "a.b")});
-	auto result2 = txt::parse(ext::op_if, "7 if 1 is integer else 3");
-	BOOST_TEST(result2.term == est::expr{est::term{7}});
+	auto result2 = txt::parse(ext::op_if, "'>' if 1 is integer else 3");
+	BOOST_TEST(result2.term == est::expr{est::term{">"s}});
 	est::cmp_check result2_right;
 	result2_right.op = est::cmp_op::test;
 	result2_right.left = est::expr{est::term{1}};

@@ -69,7 +69,9 @@ using boost::spirit::x3::lit;
 static auto const quoted_string_1_def = *(x3::char_ >> !lit('\'') | lit("\\'") >> x3::attr('\'')) >> x3::char_;
 static auto const quoted_string_2_def = *(x3::char_ >> !lit('"') | lit("\\\"") >> x3::attr('"')) >> x3::char_;
 static auto const quoted_string_def =
-        (x3::lexeme[lit("'") >> -quoted_string_1_def >> lit("'")])
+        (x3::lexeme[lit("'") >> lit("'")])
+      | (x3::lexeme[lit("\"") >> lit("\"")])
+      | (x3::lexeme[lit("'") >> -quoted_string_1_def >> lit("'")])
       | (x3::lexeme[lit("\"") >> -quoted_string_2_def >> lit("\"")]);
 
 static auto const bool_rule_def = x3::lexeme[(lit("true") >> x3::attr(true) | lit("false") >> x3::attr(false)) >> !x3::alpha];
@@ -125,7 +127,7 @@ static auto const cmp_test_fnc1_def = lvalue >> expr_math_pow % ' ';
 static auto const cmp_test_fnc2_def = lvalue >> lit('(') >> expr % ',' >> lit(')');
 static auto const cmp_test_fnc_expr_def = cmp_test_fnc2 | cmp_test_fnc1;
 static auto const cmp_test_right_expr_def = cmp_test_fnc_expr | single_var_name ;
-static auto const cmp_check1_def = expr_cmp_check >> cmp_op >> expr_logic_check;
+static auto const cmp_check1_def = expr_cmp_check >> cmp_op > expr_logic_check;
 static auto const cmp_check2_def = expr_cmp_check
         >> lit("is") >> x3::attr(ast::expr_ops::cmp_op::test)
         >> cmp_test_right_expr;

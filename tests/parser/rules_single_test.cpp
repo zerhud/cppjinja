@@ -35,7 +35,16 @@ ast::op_include make_op_include(ast::string_t fn, std::optional<bool> im, std::o
 BOOST_AUTO_TEST_SUITE(phase_parse)
 BOOST_AUTO_TEST_SUITE(singles)
 
-BOOST_DATA_TEST_CASE(op_out, utd::make("'a'"s, "foo()|e|a()|b('v')"s), data)
+BOOST_AUTO_TEST_CASE(op_out_with_if)
+{
+	ast::op_out result;
+	std::string text = "<= '>' if b else '\"' =>";
+	BOOST_CHECK_NO_THROW( result = cppjinja::text::parse(txt::op_out, text) );
+}
+
+BOOST_DATA_TEST_CASE(op_out,
+        utd::make("'a'"s, "foo()|e|a()|b('v')"s, "\"\\\">\""s),
+        data)
 {
 	ast::op_out result;
 
