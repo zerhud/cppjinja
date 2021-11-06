@@ -16,14 +16,20 @@
 #include "common.hpp"
 
 namespace cppjinja::text {
+
+auto set_tmpl_name = [](auto& ctx) { _val(ctx).tmpl_name = _attr(ctx); };
+auto set_file_name = [](auto& ctx) { _val(ctx).file_name = _attr(ctx); };
+
 	auto const extend_st_def =
 		   omit[block_term_start]
 		>> lit("extends")
 		>> x3::attr(std::nullopt)
 		>> filename
 		>> omit[block_term_end] ;
-	//NOTE: !!! single_var_name should be here
-	auto const extend_st_ex_def = x3::attr(std::nullopt) >> -(lit("from") >> filename);
+	auto const extend_st_ex_def =
+	        expr_ops::single_var_name[set_tmpl_name]
+	        >> -(lit("from") >> filename[set_file_name])
+	           ;
 
 	auto const file_def = *op_include >> *op_import >> (+tmpl_ex | +tmpl_original);
 
