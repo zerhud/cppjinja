@@ -31,7 +31,11 @@ void cppjinja::evt::context_objects::value::add(
 std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::value::find(cppjinja::east::string_t n) const
 {
-	if(src.is_object()) return std::make_shared<value>(src[n]);
+	if(src.is_object()) {
+		if(n == "items" && !src.as_map().contains("items"))
+			return const_cast<value*>(this)->shared_from_this();
+		return std::make_shared<value>(src[n]);
+	}
 	if(src.is_array()) return std::make_shared<value>(src[std::stoi(n.c_str())]);
 	throw std::runtime_error("cannot find a child in a value ["s + n.c_str() + ']');
 }
@@ -45,6 +49,7 @@ std::shared_ptr<cppjinja::evt::context_object>
 cppjinja::evt::context_objects::value::call(
         std::pmr::vector<function_parameter> params) const
 {
-	(void)params;
+	if(params.empty() && (src.is_object() || src.is_array()))
+		return const_cast<value*>(this)->shared_from_this();
 	throw std::runtime_error("cannot call a value");
 }

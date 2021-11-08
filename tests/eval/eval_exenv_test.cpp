@@ -110,18 +110,34 @@ BOOST_AUTO_TEST_CASE(cannot_call)
 }
 BOOST_AUTO_TEST_SUITE_END() // tree
 BOOST_AUTO_TEST_SUITE(obj_value)
+using cppjinja::evt::context_objects::value;
 BOOST_AUTO_TEST_CASE(no_tree_methods_and_no_call)
 {
-	cppjinja::evt::context_objects::value val("ok"_ad);
+	value val("ok"_ad);
 	BOOST_CHECK_THROW(val.add("a",std::make_shared<tree>()), std::exception);
 	BOOST_CHECK_THROW(val.find("a"), std::exception);
 	BOOST_CHECK_THROW(val.call({}), std::exception);
 }
 BOOST_AUTO_TEST_CASE(solve)
 {
-	using cppjinja::evt::context_objects::value;
 	BOOST_TEST(value("ok"_ad).solve() == "ok"_s);
 	BOOST_TEST(value(4_ad).solve() == 4);
+}
+BOOST_AUTO_TEST_CASE(items)
+{
+	using namespace absd::literals;
+	auto obj = std::make_shared<absd::simple_data_holder>();
+	obj->put("a", "a_val"_sd);
+	obj->put("b", "b_val"_sd);
+	obj->put("c", "c_val"_sd);
+
+	auto val_simple = std::make_shared<value>(absd::data{obj});
+	BOOST_TEST(val_simple->find("a")->solve() == "a_val"s);
+	BOOST_TEST(val_simple->find("items")->call({})->solve() == absd::data{obj});
+
+	obj->put("items", "surprise"_sd);
+	value val_items(absd::data{obj});
+	BOOST_TEST(val_items.find("items")->solve() == "surprise"s);
 }
 BOOST_AUTO_TEST_SUITE_END() // value
 BOOST_AUTO_TEST_SUITE(callable_node)

@@ -12,7 +12,10 @@
 
 namespace cppjinja::evt::context_objects {
 
-class value : public context_object {
+class value :
+        public context_object
+      , public std::enable_shared_from_this<value>
+{
 	absd::data src;
 
 public:
