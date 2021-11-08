@@ -20,11 +20,23 @@ namespace cppjinja::text {
 	using iterator_type = boost::spirit::istream_iterator;
 	using error_handler_type = x3::error_handler<iterator_type>;
 	using context_type = x3::context<
-	    parser_env_tag,std::reference_wrapper<const parser_env>,
+	    x3::skipper_tag, x3::unused_skipper<decltype(x3::space)>,
 	    x3::context<
-	      x3::error_handler_tag, std::reference_wrapper<error_handler_type>,
-	      x3::phrase_parse_context<decltype(x3::space)>::type
+	         parser_env_tag,std::reference_wrapper<const parser_env>,
+	         x3::context<
+	           x3::error_handler_tag, std::reference_wrapper<error_handler_type>,
+	           x3::phrase_parse_context<decltype(x3::space)>::type
+	         >
 	    >
+	>;
+
+	using context_type_skipper =
+	    x3::context<
+	         parser_env_tag,std::reference_wrapper<const parser_env>,
+	         x3::context<
+	           x3::error_handler_tag, std::reference_wrapper<error_handler_type>,
+	           x3::phrase_parse_context<decltype(x3::space)>::type
+	         >
 	>;
 
 	template<typename EnvTag, typename Parser, typename Env, typename ErrHndl>

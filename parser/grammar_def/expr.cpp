@@ -36,4 +36,31 @@ BOOST_SPIRIT_INSTANTIATE( decltype(in_assign),iterator_type, context_type )
 BOOST_SPIRIT_INSTANTIATE( decltype(expr), iterator_type, context_type )
 BOOST_SPIRIT_INSTANTIATE( decltype(expr_bool), iterator_type, context_type )
 
+// skipper
+BOOST_SPIRIT_INSTANTIATE( decltype(bool_rule), iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(term),      iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(quoted_string), iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(math),      iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(mathop),    iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(single_var_name), iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(point),      iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(concat),     iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(in_check),   iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(cmp_check),  iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(logic_check),iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(negate),     iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(fnc_call),   iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(filter),     iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(op_if),      iterator_type, context_type_skipper )
+
+BOOST_SPIRIT_INSTANTIATE( decltype(list),     iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(tuple),    iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(dict),     iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(eq_assign),iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(in_assign),iterator_type, context_type_skipper )
+
+BOOST_SPIRIT_INSTANTIATE( decltype(expr), iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(expr_bool), iterator_type, context_type_skipper )
+
 } // namespace cppjinja::text::expr_ops
+

@@ -22,11 +22,11 @@ namespace txt = cppjinja::text;
 BOOST_AUTO_TEST_SUITE(phase_parse)
 BOOST_AUTO_TEST_SUITE(errors)
 using cppjinja_mocks::parser_fixture;
-BOOST_FIXTURE_TEST_CASE(tmpl, parser_fixture)
+BOOST_FIXTURE_TEST_CASE(tmpl_must_contains_blocks, parser_fixture)
 {
 	expect_fn("test");
 	MOCK_EXPECT(env->on_error);
-	txt::parse(txt::file, "<% template tmpl %> <%endtemplate%>", env.get());
+	txt::parse(txt::file, "<% template tmpl %><%endtemplate%>", env.get());
 	BOOST_TEST(eout.str().find("In file test") != std::string::npos);
 	BOOST_TEST(eout.str().find("block_content_vec") != std::string::npos);
 }

@@ -19,6 +19,7 @@
 #include "parser/operators/blocks.hpp"
 #include "parser/grammar/expr.hpp"
 #include "parser/grammar/blocks.hpp"
+#include "parser/grammar/tmpls.hpp"
 
 using namespace std::literals;
 namespace txt = cppjinja::text;
@@ -27,6 +28,127 @@ namespace est = cppjinja::ast::expr_ops;
 namespace utd = boost::unit_test::data;
 
 BOOST_AUTO_TEST_SUITE(phase_parse)
+
+BOOST_AUTO_TEST_SUITE(spaces)
+BOOST_AUTO_TEST_SUITE(singles)
+BOOST_AUTO_TEST_CASE(comment)
+{
+	auto text = "<# c #>\n t "s;
+	ast::file result = txt::parse(txt::file, text);
+	BOOST_TEST_REQUIRE(result.tmpls.size() == 1);
+	BOOST_TEST_REQUIRE(result.tmpls[0].content.size() == 2);
+	BOOST_TEST(boost::get<ast::string_t>(result.tmpls[0].content[1]) == "\n t ");
+}
+BOOST_AUTO_TEST_CASE(set)
+{
+	auto text = "<% set a=1 %> s "s;
+	ast::file result = txt::parse(txt::file, text);
+	BOOST_TEST_REQUIRE(result.tmpls.size() == 1);
+	BOOST_TEST_REQUIRE(result.tmpls[0].content.size() == 2);
+	BOOST_TEST(boost::get<ast::string_t>(result.tmpls[0].content[1]) == " s ");
+}
+BOOST_AUTO_TEST_CASE(import)
+{
+	auto text = "<% import 'f' as a %> i "s;
+	ast::file result = txt::parse(txt::file, text);
+	BOOST_TEST_REQUIRE(result.tmpls.size() == 1);
+	BOOST_TEST_REQUIRE(result.tmpls[0].content.size() == 1);
+	BOOST_TEST(boost::get<ast::string_t>(result.tmpls[0].content[0]) == " i ");
+}
+BOOST_AUTO_TEST_CASE(include)
+{
+	auto text = "<% include 'f' %> i "s;
+	ast::file result = txt::parse(txt::file, text);
+	BOOST_TEST_REQUIRE(result.tmpls.size() == 1);
+	BOOST_TEST_REQUIRE(result.tmpls[0].content.size() == 1);
+	BOOST_TEST(boost::get<ast::string_t>(result.tmpls[0].content[0]) == " i ");
+}
+BOOST_AUTO_TEST_SUITE_END() // singles
+BOOST_AUTO_TEST_CASE(raw)
+{
+	auto text = "<% raw %>\n r <% endraw %> t "s;
+	ast::file result = txt::parse(txt::file, text);
+	BOOST_REQUIRE(result.tmpls.size() == 1);
+	BOOST_REQUIRE(result.tmpls[0].content.size() == 2);
+	ast::block_raw& raw = boost::get<ast::forward_ast<ast::block_raw>>(result.tmpls[0].content[0]).get();
+	BOOST_TEST(raw.value == "\n r "s);
+	BOOST_TEST(boost::get<ast::string_t>(result.tmpls[0].content[1]) == " t "s);
+}
+BOOST_AUTO_TEST_CASE(for_and_if)
+{
+	auto text = "<% for a in b %>"
+	"<% if 1==1 %>\nt <% elif 2==2 %> a <% endif %>"
+	"\n text <% else %> e <% endfor %>"s;
+
+	ast::file result = txt::parse(txt::file, text);
+	BOOST_REQUIRE(result.tmpls.size() == 1);
+	BOOST_REQUIRE(result.tmpls[0].content.size() ==1);
+	ast::block_for& bl_for = boost::get<ast::forward_ast<ast::block_for>>(result.tmpls[0].content[0]).get();
+	BOOST_TEST_REQUIRE(bl_for.content.size() == 2);
+	ast::string_t& free_text = boost::get<ast::string_t>(bl_for.content[1]);
+	BOOST_TEST( free_text == "\n text ");
+	ast::block_if& inner_if = boost::get<ast::forward_ast<ast::block_if>>(bl_for.content[0]).get();
+	BOOST_REQUIRE(inner_if.content.size() == 1);
+	ast::string_t& free_text_if = boost::get<ast::string_t>(inner_if.content[0]);
+	BOOST_TEST( free_text_if == "\nt ");
+	BOOST_REQUIRE(inner_if.elifs.size() == 1);
+	ast::string_t& free_text_elif = boost::get<ast::string_t>(inner_if.elifs[0].content.at(0));
+	BOOST_TEST( free_text_elif == " a ");
+	ast::else_thread& for_else = bl_for.else_block.value();
+	BOOST_TEST(boost::get<ast::string_t>(for_else.content.at(0)) == " e ");
+}
+BOOST_AUTO_TEST_CASE(macro)
+{
+	auto text = "<% macro m %>\n i <% endmacro %>\n t "s;
+	ast::file result = txt::parse(txt::file, text);
+	BOOST_REQUIRE(result.tmpls.size() == 1);
+	BOOST_REQUIRE(result.tmpls[0].content.size() == 2);
+	ast::block_macro& bl = boost::get<ast::forward_ast<ast::block_macro>>(result.tmpls[0].content[0]).get();
+	BOOST_TEST(boost::get<ast::string_t>(bl.content.at(0)) == "\n i "s);
+	BOOST_TEST(boost::get<ast::string_t>(result.tmpls[0].content[1]) == "\n t "s);
+}
+BOOST_AUTO_TEST_CASE(named)
+{
+	auto text = "<% block m %>\n i <% endblock %>\n t "s;
+	ast::file result = txt::parse(txt::file, text);
+	BOOST_REQUIRE(result.tmpls.size() == 1);
+	BOOST_REQUIRE(result.tmpls[0].content.size() == 2);
+	ast::block_named& bl = boost::get<ast::forward_ast<ast::block_named>>(result.tmpls[0].content[0]).get();
+	BOOST_TEST(boost::get<ast::string_t>(bl.content.at(0)) == "\n i "s);
+	BOOST_TEST(boost::get<ast::string_t>(result.tmpls[0].content[1]) == "\n t "s);
+}
+BOOST_AUTO_TEST_CASE(filtered)
+{
+	auto text = "<% filter m %>\n i <% endfilter %>\n t "s;
+	ast::file result = txt::parse(txt::file, text);
+	BOOST_REQUIRE(result.tmpls.size() == 1);
+	BOOST_REQUIRE(result.tmpls[0].content.size() == 2);
+	ast::block_filtered& bl = boost::get<ast::forward_ast<ast::block_filtered>>(result.tmpls[0].content[0]).get();
+	BOOST_TEST(boost::get<ast::string_t>(bl.content.at(0)) == "\n i "s);
+	BOOST_TEST(boost::get<ast::string_t>(result.tmpls[0].content[1]) == "\n t "s);
+}
+BOOST_AUTO_TEST_CASE(set)
+{
+	auto text = "<% set m %>\n i <% endset %>\n t "s;
+	ast::file result = txt::parse(txt::file, text);
+	BOOST_REQUIRE(result.tmpls.size() == 1);
+	BOOST_REQUIRE(result.tmpls[0].content.size() == 2);
+	ast::block_set& bl = boost::get<ast::forward_ast<ast::block_set>>(result.tmpls[0].content[0]).get();
+	BOOST_TEST(boost::get<ast::string_t>(bl.content.at(0)) == "\n i "s);
+	BOOST_TEST(boost::get<ast::string_t>(result.tmpls[0].content[1]) == "\n t "s);
+}
+BOOST_AUTO_TEST_CASE(call)
+{
+	auto text = "<% call m %>\n i <% endcall %>\n t "s;
+	ast::file result = txt::parse(txt::file, text);
+	BOOST_REQUIRE(result.tmpls.size() == 1);
+	BOOST_REQUIRE(result.tmpls[0].content.size() == 2);
+	ast::block_call& bl = boost::get<ast::forward_ast<ast::block_call>>(result.tmpls[0].content[0]).get();
+	BOOST_TEST(boost::get<ast::string_t>(bl.content.at(0)) == "\n i "s);
+	BOOST_TEST(boost::get<ast::string_t>(result.tmpls[0].content[1]) == "\n t "s);
+}
+BOOST_AUTO_TEST_SUITE_END() // free_texts
+
 
 BOOST_AUTO_TEST_SUITE(block_raw)
 BOOST_DATA_TEST_CASE(

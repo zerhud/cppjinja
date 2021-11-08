@@ -23,5 +23,15 @@ BOOST_SPIRIT_INSTANTIATE( decltype(tmpl_original), iterator_type, context_type )
 
 BOOST_SPIRIT_INSTANTIATE( decltype(file), iterator_type, context_type )
 
-} // namespace cppjinja::text
+// skipper
 
+BOOST_SPIRIT_INSTANTIATE( decltype(extend_st), iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(extend_st_ex), iterator_type, context_type_skipper )
+
+BOOST_SPIRIT_INSTANTIATE( decltype(tmpl), iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(tmpl_ex), iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(tmpl_original), iterator_type, context_type_skipper )
+
+BOOST_SPIRIT_INSTANTIATE( decltype(file), iterator_type, context_type_skipper )
+
+} // namespace cppjinja::text

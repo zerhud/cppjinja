@@ -18,4 +18,11 @@ BOOST_SPIRIT_INSTANTIATE( decltype(block_term_end),     iterator_type, context_t
 BOOST_SPIRIT_INSTANTIATE( decltype(comment_term_start), iterator_type, context_type )
 BOOST_SPIRIT_INSTANTIATE( decltype(comment_term_end),   iterator_type, context_type )
 
+BOOST_SPIRIT_INSTANTIATE( decltype(op_term_start),      iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(op_term_end),        iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(block_term_start),   iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(block_term_end),     iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(comment_term_start), iterator_type, context_type_skipper )
+BOOST_SPIRIT_INSTANTIATE( decltype(comment_term_end),   iterator_type, context_type_skipper )
+
 } // namespace cppjinja::text
