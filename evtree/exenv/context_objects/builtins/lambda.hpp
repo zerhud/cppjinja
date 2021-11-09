@@ -28,7 +28,8 @@ concept CompatibleParam = absd::AnyData<std::tuple_element_t<I,P>>;
 
 template<typename F>
 concept CompatibleFunction =
-        absd::AnyData<boost::callable_traits::return_type_t<F>>
+        std::is_same_v<boost::callable_traits::return_type_t<F>, absd::data>
+     || absd::AnyData<boost::callable_traits::return_type_t<F>>
       ;
 
 template<CompatibleFunction Fnc>
@@ -41,21 +42,20 @@ public:
 	function_adapter(Fnc&& func) : func(std::forward<Fnc>(func)) {}
 	std::shared_ptr<context_object> operator()(params_type params) const
 	{
-		args_t args;
 		if(std::tuple_size_v<args_t> != params.size())
 			throw std::runtime_error("parameter cound mismatch");
-		set_param<0>(params, args);
+		args_t args = make_args(params, std::make_index_sequence<std::tuple_size_v<args_t>>{});
 		auto ret = std::apply(func, args);
-		return std::make_shared<value>( absd::make_simple(std::move(ret)) );
+		if constexpr (std::is_same_v<decltype(ret), absd::data>)
+		    return std::make_shared<value>( std::move(ret) );
+		else
+		    return std::make_shared<value>( absd::make_simple(std::move(ret)) );
 	}
 private:
-	template<std::size_t I>
-	void set_param(const params_type& params, args_t& call) const
+	template<std::size_t... I>
+	args_t make_args(const params_type& params, std::index_sequence<I...>) const
 	{
-		if constexpr (I < std::tuple_size_v<args_t>) {
-			get<I>(call) = (std::tuple_element_t<I,args_t>)params.at(I).val.value();
-			set_param<I+1>(params, call);
-		}
+		return args_t( ((std::tuple_element_t<I, args_t>)params.at(I).val.value())... );
 	}
 };
 

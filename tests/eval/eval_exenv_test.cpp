@@ -32,6 +32,7 @@
 #include "parser/parse.hpp"
 
 using namespace std::literals;
+using namespace absd::literals;
 namespace tdata = boost::unit_test::data;
 namespace east = cppjinja::east;
 namespace ast = cppjinja::ast;
@@ -432,12 +433,15 @@ BOOST_AUTO_TEST_CASE(ret_type_conv)
 	using cppjinja::evt::context_objects::function_adapter;
 	function_adapter adapt([]()->std::pmr::string{ return "ok"; });
 	BOOST_TEST( adapt({})->solve() == "ok" );
+
+	function_adapter adapt2([]()->absd::data{ return "data"_sd; });
+	BOOST_TEST( adapt2({})->solve() == "data" );
 }
 BOOST_AUTO_TEST_CASE(args_conv)
 {
 	using cppjinja::evt::context_objects::function_adapter;
-	function_adapter adapt([](std::int64_t a, int b)->std::pmr::string{
-		return (std::to_string(a) + std::to_string(b)).c_str();
+	function_adapter adapt([](std::int64_t a, absd::data b)->std::pmr::string{
+		return (std::to_string(a) + std::to_string((std::int64_t)b)).c_str();
 	});
 	std::pmr::vector<east::function_parameter> params;
 	params.emplace_back(east::function_parameter{{}, absd::make_simple(1)});

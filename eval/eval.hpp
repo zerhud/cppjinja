@@ -25,6 +25,7 @@ public:
 class evaluator {
 public:
 	virtual ~evaluator() noexcept =default ;
+//	virtual evaluator& add_tmpl(const parser& all) =0 ;
 	virtual evaluator& add_tmpl(ast::tmpl& t) =0 ;
 	virtual void render(
 	          std::ostream& to
