@@ -34,17 +34,36 @@ concept CompatibleFunction =
 
 template<CompatibleFunction Fnc>
 class function_adapter {
-	Fnc func;
 public:
 	using params_type = std::pmr::vector<east::function_parameter>;
 	using args_t = boost::callable_traits::args_t<Fnc>;
+	using names_t = std::array<std::string, std::tuple_size_v<args_t>>;
+	template<std::size_t I>
+	using param_t = std::tuple_element_t<I, args_t>;
+private:
+	Fnc func;
+	std::optional<names_t> names;
+public:
 
 	function_adapter(Fnc&& func) : func(std::forward<Fnc>(func)) {}
+	function_adapter(Fnc&& func, names_t name_list)
+	    : func(std::forward<Fnc>(func))
+	    , names(name_list)
+	{}
+
+	constexpr std::size_t arity() const
+	{
+		return std::tuple_size_v<args_t>;
+	}
+
 	std::shared_ptr<context_object> operator()(params_type params) const
 	{
 		if(std::tuple_size_v<args_t> != params.size())
 			throw std::runtime_error("parameter cound mismatch");
-		args_t args = make_args(params, std::make_index_sequence<std::tuple_size_v<args_t>>{});
+		std::size_t named_params_count = sort_params(params);
+		args_t args = make_args(
+		            params, named_params_count,
+		            std::make_index_sequence<std::tuple_size_v<args_t>>{});
 		auto ret = std::apply(func, args);
 		if constexpr (std::is_same_v<decltype(ret), absd::data>)
 		    return std::make_shared<value>( std::move(ret) );
@@ -53,9 +72,33 @@ public:
 	}
 private:
 	template<std::size_t... I>
-	args_t make_args(const params_type& params, std::index_sequence<I...>) const
+	args_t make_args(params_type& params, std::size_t npc, std::index_sequence<I...>) const
 	{
-		return args_t( ((std::tuple_element_t<I, args_t>)params.at(I).val.value())... );
+		return args_t( extract_param<I>(params, npc)... );
+	}
+
+	template<std::size_t I>
+	param_t<I> extract_param(params_type& params, std::size_t named_params_count) const
+	{
+		if(names.has_value()) {
+			for(auto pos = params.begin();pos!=params.end();++pos) {
+				if(pos->name && *pos->name == (*names)[I]) {
+					return (param_t<I>)pos->val.value();
+				}
+			}
+		}
+		return (param_t<I>)params.at(I-named_params_count).val.value();
+	}
+
+	std::size_t sort_params(params_type& params) const
+	{
+		std::stable_sort(params.begin(), params.end(),
+		                 [](auto& a, auto& b){
+			return !a.name.has_value() && b.name.has_value();
+		});
+		std::size_t ret = 0;
+		for(auto& p:params) if(p.name.has_value()) ++ret;
+		return ret;
 	}
 };
 
