@@ -25,6 +25,7 @@
 #include "evtree/exenv/context_objects/callable_node.hpp"
 #include "evtree/exenv/context_objects/user_data.hpp"
 #include "evtree/exenv/context_objects/inner_navigation.hpp"
+#include "evtree/exenv/context_objects/builtins/lambda.hpp"
 #include "evtree/nodes/callable.hpp"
 #include "parser/operators/common.hpp"
 #include "parser/grammar/tmpls.hpp"
@@ -425,6 +426,25 @@ BOOST_FIXTURE_TEST_CASE(find_in_single_tmpl, mock_exenv_fixture)
 	BOOST_TEST(b->call({})->solve() == "test"_ad);
 }
 BOOST_AUTO_TEST_SUITE_END() // inner_navigation
+BOOST_AUTO_TEST_SUITE(lambda)
+BOOST_AUTO_TEST_CASE(ret_type_conv)
+{
+	using cppjinja::evt::context_objects::function_adapter;
+	function_adapter adapt([]()->std::pmr::string{ return "ok"; });
+	BOOST_TEST( adapt({})->solve() == "ok" );
+}
+BOOST_AUTO_TEST_CASE(args_conv)
+{
+	using cppjinja::evt::context_objects::function_adapter;
+	function_adapter adapt([](std::int64_t a, int b)->std::pmr::string{
+		return (std::to_string(a) + std::to_string(b)).c_str();
+	});
+	std::pmr::vector<east::function_parameter> params;
+	params.emplace_back(east::function_parameter{{}, absd::make_simple(1)});
+	params.emplace_back(east::function_parameter{{}, absd::make_simple(2)});
+	BOOST_TEST( adapt(params)->solve() == "12" );
+}
+BOOST_AUTO_TEST_SUITE_END() // lambda
 BOOST_AUTO_TEST_SUITE_END() // context_object
 
 BOOST_AUTO_TEST_SUITE(context)
