@@ -451,10 +451,11 @@ BOOST_AUTO_TEST_CASE(args_conv)
 }
 BOOST_AUTO_TEST_CASE(named_args)
 {
+	using cppjinja::evt::context_objects::make_par;
 	using cppjinja::evt::context_objects::function_adapter;
 	function_adapter adapt([](std::int64_t a, absd::data b)->std::pmr::string{
 		return (std::to_string(a) + std::to_string((std::int64_t)b)).c_str();
-	}, {"a", "b"});
+	}, {make_par("a"), make_par("b", 0)});
 
 	BOOST_TEST(adapt.arity() == 2);
 
@@ -465,6 +466,12 @@ BOOST_AUTO_TEST_CASE(named_args)
 
 	params[1].name = "a";
 	BOOST_TEST( adapt(params)->solve() == "21" );
+
+	params.pop_back();
+	BOOST_TEST( adapt(params)->solve() == "10" );
+
+	params.pop_back();
+	BOOST_CHECK_THROW(adapt(params), std::runtime_error);
 }
 BOOST_AUTO_TEST_SUITE_END() // lambda
 BOOST_AUTO_TEST_SUITE_END() // context_object
