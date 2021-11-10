@@ -432,10 +432,10 @@ BOOST_AUTO_TEST_CASE(ret_type_conv)
 {
 	using cppjinja::evt::context_objects::function_adapter;
 	function_adapter adapt([]()->std::pmr::string{ return "ok"; });
-	BOOST_TEST( adapt({})->solve() == "ok" );
+	BOOST_TEST( adapt({}) == "ok" );
 
 	function_adapter adapt2([]()->absd::data{ return "data"_sd; });
-	BOOST_TEST( adapt2({})->solve() == "data" );
+	BOOST_TEST( adapt2({}) == "data" );
 	BOOST_TEST( adapt2.arity() == 0);
 }
 BOOST_AUTO_TEST_CASE(args_conv)
@@ -447,7 +447,7 @@ BOOST_AUTO_TEST_CASE(args_conv)
 	std::pmr::vector<east::function_parameter> params;
 	params.emplace_back(east::function_parameter{{}, absd::make_simple(1)});
 	params.emplace_back(east::function_parameter{{}, absd::make_simple(2)});
-	BOOST_TEST( adapt(params)->solve() == "12" );
+	BOOST_TEST( adapt(params) == "12" );
 }
 BOOST_AUTO_TEST_CASE(named_args)
 {
@@ -462,16 +462,28 @@ BOOST_AUTO_TEST_CASE(named_args)
 	std::pmr::vector<east::function_parameter> params;
 	params.emplace_back(east::function_parameter{{}, absd::make_simple(1)});
 	params.emplace_back(east::function_parameter{{}, absd::make_simple(2)});
-	BOOST_TEST( adapt(params)->solve() == "12" );
+	BOOST_TEST( adapt(params) == "12" );
 
 	params[1].name = "a";
-	BOOST_TEST( adapt(params)->solve() == "21" );
+	BOOST_TEST( adapt(params) == "21" );
+	params[1].name = "b";
+	BOOST_TEST( adapt(params) == "12" );
 
 	params.pop_back();
-	BOOST_TEST( adapt(params)->solve() == "10" );
+	BOOST_TEST( adapt(params) == "10" );
 
 	params.pop_back();
 	BOOST_CHECK_THROW(adapt(params), std::runtime_error);
+
+	params.emplace_back(east::function_parameter{{}, absd::make_simple(1)});
+	params.emplace_back(east::function_parameter{{}, absd::make_simple(2)});
+	params.emplace_back(east::function_parameter{{}, absd::make_simple(3)});
+	function_adapter adapt2([](std::int64_t a, absd::data b, std::int64_t c)->std::pmr::string{
+		return (std::to_string(a) + std::to_string((std::int64_t)b) + std::to_string(c)).c_str();
+	}, {make_par("a"), make_par("b"), make_par("c")});
+	BOOST_TEST( adapt2(params) == "123" );
+	params[2].name = "a";
+	BOOST_TEST( adapt2(params) == "312" );
 }
 BOOST_AUTO_TEST_SUITE_END() // lambda
 BOOST_AUTO_TEST_SUITE_END() // context_object

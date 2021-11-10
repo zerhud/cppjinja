@@ -14,21 +14,28 @@
 #include <absd/simple_data_holder.hpp>
 #include <evtree/evtree.hpp>
 #include "jparse/json_prov.hpp"
+#include "evtree/exenv/context_objects/builtins/lambda.hpp"
 
 using absd::make_simple;
 using namespace absd::literals;
 
 class extra_functions : public cogen::jinja_json_prov {
+	struct extra_fnc_info {
+		std::pmr::string name;
+		std::function<absd::data(std::pmr::vector<cppjinja::east::function_parameter>)> fnc;
+	};
+
+	std::list<extra_fnc_info> extra_funcs;
+
 	static bool contains(const std::vector<absd::data>& con, absd::data val)
 	{
 		for(auto& v:con) if(v==val) return true;
 		return false;
 	}
 
-	absd::data extract_name(absd::data obj, absd::data nind=make_simple(-1)) const
+	static absd::data extract_name(absd::data obj, std::int64_t ind)
 	{
 		auto name = obj["name"];
-		std::int64_t ind = (std::int64_t)nind;
 		if(name.is_array()) return name[0 <= ind ? ind : 0];
 		return name;
 	}
@@ -75,10 +82,23 @@ class extra_functions : public cogen::jinja_json_prov {
 		return absd::make_simple(extract_name(obj, nind).str() + prefix.str());
 	}
 public:
-	extra_functions(boost::json::value jd) : jinja_json_prov(std::move(jd)) {}
+	extra_functions(boost::json::value jd) : jinja_json_prov(std::move(jd))
+	{
+		using cppjinja::evt::context_objects::make_par;
+		using cppjinja::evt::context_objects::function_adapter;
+		extra_funcs.emplace_back(extra_fnc_info{"name", function_adapter(
+		            &extra_functions::extract_name,
+		            {make_par("obj"), make_par("ind", -1)}
+		            )});
+	}
+
 	absd::data value(const cppjinja::east::function_call& val) const override
 	{
 		if(val.ref.size()!=1) return jinja_json_prov::value(std::move(val));
+		auto pos = std::find_if(extra_funcs.begin(), extra_funcs.end(),
+		                        [&val](auto& i){return i.name == val.ref[0];});
+		if(pos != extra_funcs.end()) return pos->fnc(val.params);
+
 		if(val.ref[0] == "select_keys") {
 			if(val.params.size() != 2)
 				throw std::runtime_error("function select_keys takes two arguments");
@@ -101,12 +121,6 @@ public:
 			if(val.params.size()==3)
 				return apply_sufix(val.params[0].val.value(), val.params[1].val.value(), val.params[2].val.value());
 			throw std::runtime_error("function apply_sufix takes 2 or 3 arguments");
-		} else if(val.ref[0] == "name") {
-			if(val.params.size()==2)
-				return extract_name(val.params[0].val.value(), val.params[1].val.value());
-			if(val.params.size()==1)
-				return extract_name(val.params[0].val.value());
-			throw std::runtime_error("function extract_name takes 1 or 2 arguments");
 		}
 		return jinja_json_prov::value(std::move(val));
 	}

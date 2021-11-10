@@ -14,7 +14,6 @@
 #include <boost/callable_traits.hpp>
 #include <absd/simple_data_holder.hpp>
 
-#include "../value.hpp"
 #include "../builtins.hpp"
 
 namespace cppjinja::evt::context_objects
@@ -26,17 +25,17 @@ concept CompatibleParam = absd::AnyData<std::tuple_element_t<I,P>>;
 //template<typename P, std::size_t Ind, std::size_t... Inds>
 //concept CompatibleParams = CompatibleParam<P, Inds> && ...;
 
-inline std::pair<std::string, std::optional<absd::data>> make_par(std::string n)
+inline std::pair<std::pmr::string, std::optional<absd::data>> make_par(std::pmr::string n)
 {
-	std::pair<std::string, std::optional<absd::data>> ret;
+	std::pair<std::pmr::string, std::optional<absd::data>> ret;
 	ret.first = std::move(n);
 	return ret;
 }
 
 template<typename T>
-std::pair<std::string, std::optional<absd::data>> make_par(std::string n, T&& v)
+std::pair<std::pmr::string, std::optional<absd::data>> make_par(std::pmr::string n, T&& v)
 {
-	std::pair<std::string, std::optional<absd::data>> ret;
+	std::pair<std::pmr::string, std::optional<absd::data>> ret;
 	ret.first = std::move(n);
 	if constexpr (std::is_same_v<T, absd::data>)
 	        ret.second = std::move(v);
@@ -55,13 +54,18 @@ class function_adapter {
 public:
 	using params_type = std::pmr::vector<east::function_parameter>;
 	using args_t = boost::callable_traits::args_t<Fnc>;
-	using values_t = std::array<std::pair<std::string,std::optional<absd::data>>, std::tuple_size_v<args_t>>;
+	using values_t = std::array<std::pair<std::pmr::string,std::optional<absd::data>>, std::tuple_size_v<args_t>>;
 	template<std::size_t I>
 	using param_t = std::tuple_element_t<I, args_t>;
 private:
 	Fnc func;
 	std::optional<values_t> names;
 public:
+	function_adapter(const function_adapter&) =default ;
+	function_adapter& operator = (const function_adapter&) =default ;
+
+	function_adapter(function_adapter&&) noexcept =default ;
+	function_adapter& operator = (function_adapter&&) noexcept =default ;
 
 	function_adapter(Fnc&& func) : func(std::forward<Fnc>(func)) {}
 	function_adapter(Fnc&& func, values_t name_list)
@@ -69,71 +73,71 @@ public:
 	    , names(name_list)
 	{}
 
-	constexpr std::size_t arity() const
+	static constexpr std::size_t arity()
 	{
 		return std::tuple_size_v<args_t>;
 	}
 
-	std::shared_ptr<context_object> operator()(params_type params) const
+	absd::data operator()(params_type params) const
 	{
-		std::size_t named_params_count = sort_params(params);
-		args_t args = make_args(
-		            params, named_params_count,
-		            std::make_index_sequence<std::tuple_size_v<args_t>>{});
+		sort_params(params);
+		args_t args = make_args(params, std::make_index_sequence<arity()>{});
 		auto ret = std::apply(func, args);
 		if constexpr (std::is_same_v<decltype(ret), absd::data>)
-		    return std::make_shared<value>( std::move(ret) );
+		    return ret;
 		else
-		    return std::make_shared<value>( absd::make_simple(std::move(ret)) );
+		    return absd::make_simple(std::move(ret));
 	}
 private:
 	std::size_t sort_params(params_type& params) const
 	{
-		std::stable_sort(params.begin(), params.end(),
-		                 [](auto& a, auto& b){
-			return !a.name.has_value() && b.name.has_value();
-		});
-		std::size_t ret = 0;
-		for(auto& p:params) if(p.name.has_value()) ++ret;
-		return ret;
+		if(!names) return 0;
+		params_type sorted;
+		std::size_t del_count = 0;
+		for(std::size_t i=0;i<names->size();++i) {
+			std::size_t ind = i - del_count;
+			auto named = try_extract_named_param(i, params);
+			if(named) {
+				sorted.emplace_back().val = std::move(*named);
+				++del_count;
+			}
+			else if(params.size() <= ind) {
+				if((*names)[i].second)
+					sorted.emplace_back().val = (*names)[i].second;
+				else throw std::runtime_error("parameter count mismatch");
+			}
+			else sorted.emplace_back().val = std::move(params[ind].val.value());
+		}
+		params = std::move(sorted);
+		return 0;
 	}
 
 	template<std::size_t... I>
-	args_t make_args(params_type& params, std::size_t npc, std::index_sequence<I...>) const
+	args_t make_args(params_type& params, std::index_sequence<I...>) const
 	{
-		return args_t( extract_param<I>(params, npc)... );
+		assert(sizeof...(I) == params.size());
+		return args_t( extract_param<I>(params)... );
 	}
 
 	template<std::size_t I>
-	param_t<I> extract_param(params_type& params, std::size_t named_params_count) const
+	param_t<I> extract_param(params_type& params) const
 	{
-		auto named = try_extract_named_param<I>(params);
-		if(named) return *named;
-		auto def = try_extract_def_param<I>(params);
-		if(def) return *def;
-		return (param_t<I>)params.at(I - named_params_count).val.value();
+		assert( I < params.size() );
+		return (param_t<I>)params[I].val.value();
 	}
 
-	template<std::size_t I>
-	std::optional<param_t<I>> try_extract_named_param(params_type& params) const
+	std::optional<absd::data> try_extract_named_param(
+	        std::size_t i, params_type& params) const
 	{
+		assert(names.has_value());
 		if(names.has_value()) {
 			for(auto pos = params.begin();pos!=params.end();++pos) {
-				if(pos->name && *pos->name == (*names)[I].first) {
-					return (param_t<I>)pos->val.value();
+				if(pos->name && *pos->name == (*names)[i].first) {
+					auto ret = pos->val.value();
+					params.erase(pos);
+					return ret;
 				}
 			}
-		}
-		return std::nullopt;
-	}
-	template<std::size_t I>
-	std::optional<param_t<I>> try_extract_def_param(params_type& params) const
-	{
-		if(params.size() <= I) {
-			if(names && (*names)[I].second) {
-				return (param_t<I>)(*names)[I].second.value();
-			}
-			throw std::runtime_error("parameter count mismatch");
 		}
 		return std::nullopt;
 	}
