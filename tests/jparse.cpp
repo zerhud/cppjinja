@@ -14,7 +14,7 @@
 #include <absd/simple_data_holder.hpp>
 #include <evtree/evtree.hpp>
 #include "jparse/json_prov.hpp"
-#include "evtree/exenv/context_objects/builtins/lambda.hpp"
+#include "evtree/exenv/context_objects/builtins/function_adapter.hpp"
 
 using absd::make_simple;
 using namespace absd::literals;

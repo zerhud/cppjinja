@@ -26,6 +26,7 @@
 #include "evtree/exenv/context_objects/user_data.hpp"
 #include "evtree/exenv/context_objects/inner_navigation.hpp"
 #include "evtree/exenv/context_objects/builtins/lambda.hpp"
+#include "evtree/exenv/context_objects/builtins/function_adapter.hpp"
 #include "evtree/nodes/callable.hpp"
 #include "parser/operators/common.hpp"
 #include "parser/grammar/tmpls.hpp"
