@@ -119,9 +119,9 @@ public:
 	bool is_array() const ;
 	bool is_empty() const ;
 
-	explicit operator std::int64_t () const ;
-	explicit operator double () const ;
-	explicit operator std::pmr::string () const ;
+	operator std::int64_t () const ;
+	operator double () const ;
+	operator std::pmr::string () const ;
 	explicit operator bool () const ;
 
 	inline std::pmr::string str() const
@@ -140,6 +140,16 @@ public:
 
 	const data& operator [] (std::string_view key) const ;
 	const data& operator [] (std::int64_t ind) const ;
+	template<StringData T>
+	const data& operator [] (const T& key) const
+	{
+		return (*this)[std::string_view(key)];
+	}
+	template<Integer T>
+	const data& operator [] (T key) const
+	{
+		return (*this)[(std::int64_t)key];
+	}
 };
 
 class to_json_printer final {
