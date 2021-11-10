@@ -69,6 +69,24 @@ simple_dh& simple_dh::operator = (bool v)
 	return *this;
 }
 
+simple_dh& simple_dh::operator = (std::pmr::vector<data> arr)
+{
+	make_empty_array();
+	array = std::move(arr);
+	return *this;
+}
+
+simple_dh& simple_dh::operator = (std::pmr::map<std::pmr::string,data> obj)
+{
+	make_empty_object();
+	object.clear();
+	for(auto& [k,v]:obj) {
+		auto obj = std::make_pair(std::pmr::string(k, storage()), std::move(v));
+		object.emplace(std::move(obj));
+	}
+	return *this;
+}
+
 void simple_dh::require_change()
 {
 	is_empty_obj = false;

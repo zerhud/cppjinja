@@ -90,6 +90,14 @@ public:
 		            &extra_functions::extract_name,
 		            {make_par("obj"), make_par("ind", -1)}
 		            )});
+		extra_funcs.emplace_back(extra_fnc_info{"select_keys", function_adapter(
+		            &extra_functions::select_keys,
+		            {make_par("obj"), make_par("vals")}
+		            )});
+		extra_funcs.emplace_back(extra_fnc_info{"unique", function_adapter(
+		            &extra_functions::select_keys,
+		            {make_par("vals")}
+		            )});
 	}
 
 	absd::data value(const cppjinja::east::function_call& val) const override
@@ -99,17 +107,7 @@ public:
 		                        [&val](auto& i){return i.name == val.ref[0];});
 		if(pos != extra_funcs.end()) return pos->fnc(val.params);
 
-		if(val.ref[0] == "select_keys") {
-			if(val.params.size() != 2)
-				throw std::runtime_error("function select_keys takes two arguments");
-			return select_keys(
-			            std::move(val.params[0].val.value()),
-			            std::move(val.params[1].val.value()));
-		} else if(val.ref[0] == "unique") {
-			if(val.params.size() != 1)
-				throw std::runtime_error("function unique takes one argument");
-			return unique( std::move(val.params[0].val.value()) );
-		} else if(val.ref[0] == "apply_prefix") {
+		if(val.ref[0] == "apply_prefix") {
 			if(val.params.size()==2)
 				return apply_prefix(val.params[0].val.value(), val.params[1].val.value());
 			if(val.params.size()==3)

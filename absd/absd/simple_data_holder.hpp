@@ -34,9 +34,9 @@ public:
 	simple_data_holder();
 	simple_data_holder(std::shared_ptr<std::pmr::memory_resource> m);
 
-	template<TrivialData T>
+	template<typename T> requires TrivialData<T> || Array<T> || Object<T>
 	simple_data_holder(T v) : simple_data_holder() { (*this)=v; }
-	template<TrivialData T>
+	template<typename T> requires TrivialData<T> || Array<T> || Object<T>
 	simple_data_holder(std::shared_ptr<std::pmr::memory_resource> m, T v)
 	    : simple_data_holder(std::move(m)) { (*this)=v; }
 
@@ -65,6 +65,8 @@ public:
 
 	simple_data_holder& operator = (double v);
 	simple_data_holder& operator = (bool v);
+	simple_data_holder& operator = (std::pmr::vector<data> arr);
+	simple_data_holder& operator = (std::pmr::map<std::pmr::string,data> obj);
 
 	std::pmr::string& str();
 	const std::pmr::string& str() const ;

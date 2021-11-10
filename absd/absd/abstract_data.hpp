@@ -34,7 +34,11 @@ concept TrivialData = IntegerFloating<T> || Integer<T> || Boolean<T>;
 template<typename T>
 concept StringData = std::is_constructible_v<std::pmr::string,T>;
 template<typename T>
-concept AnyData = TrivialData<T> || StringData<T>;
+concept Array = std::is_same_v<std::decay_t<T>, std::pmr::vector<data>>;
+template<typename T>
+concept Object = std::is_same_v<std::decay_t<T>, std::pmr::map<std::pmr::string,data>>;
+template<typename T>
+concept AnyData = TrivialData<T> || StringData<T> || Array<T> || Object<T>;
 
 using data_variant = std::variant<std::int64_t, double, std::pmr::string, bool>;
 enum class data_type {
@@ -123,6 +127,14 @@ public:
 	operator double () const ;
 	operator std::pmr::string () const ;
 	explicit operator bool () const ;
+	operator std::pmr::vector<data>() const
+	{
+		return as_array();
+	}
+	operator std::pmr::map<std::pmr::string,data>() const
+	{
+		return as_map();
+	}
 
 	inline std::pmr::string str() const
 	{

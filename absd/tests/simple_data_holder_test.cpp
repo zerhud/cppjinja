@@ -18,6 +18,8 @@
 #include "absd/simple_data_holder.hpp"
 
 BOOST_AUTO_TEST_SUITE(absd)
+using namespace absd::literals;
+
 using absd_mocks::fixture;
 using abs_data = absd::data;
 using simple_dh = absd::simple_data_holder;
@@ -65,6 +67,13 @@ BOOST_AUTO_TEST_CASE(simple_string)
 	hld2 = "test";
 	BOOST_TEST(hld2.to_string() == "test");
 }
+BOOST_AUTO_TEST_CASE(object_at_ctor)
+{
+	std::pmr::map<std::pmr::string,absd::data> obj;
+	obj.emplace(std::make_pair("key", 1_sd));
+	simple_dh hld = obj;
+	BOOST_TEST(hld.by_key("key") == 1);
+}
 BOOST_AUTO_TEST_CASE(object)
 {
 	simple_dh hld;
@@ -93,6 +102,15 @@ BOOST_AUTO_TEST_CASE(object_with_data)
 	auto val_dh = std::make_shared<simple_dh>();
 	hld.put("t1", absd::data{val_dh});
 	BOOST_TEST(hld.by_key("t1") == val_dh);
+}
+BOOST_AUTO_TEST_CASE(array_at_ctor)
+{
+	std::pmr::vector<absd::data> ar;
+	ar.emplace_back(1_sd);
+	ar.emplace_back(2_sd);
+	simple_dh hld = ar;
+	BOOST_TEST(hld.by_ind(0)->to_int() == 1);
+	BOOST_TEST(hld.by_ind(1)->to_int() == 2);
 }
 BOOST_AUTO_TEST_CASE(array)
 {

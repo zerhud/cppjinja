@@ -75,6 +75,12 @@ BOOST_FIXTURE_TEST_CASE(as_object_fnc, fixture)
 		BOOST_TEST(k=="key");
 		BOOST_TEST(v == absd::data{val});
 	}
+
+	std::pmr::map<std::pmr::string,data> map2 = dp();
+	auto pos = map2.find("key");
+	BOOST_REQUIRE(pos!=map2.end());
+	BOOST_TEST(pos->second == 42);
+	BOOST_TEST(map2.size() == 1);
 }
 BOOST_FIXTURE_TEST_CASE(as_array, fixture)
 {
@@ -100,6 +106,10 @@ BOOST_FIXTURE_TEST_CASE(as_array_fnc, fixture)
 	auto ar = dp().as_array();
 	BOOST_TEST(ar.size() == 1);
 	for(auto& v:ar) BOOST_TEST(v == absd::data{val});
+
+	std::pmr::vector<data> ar2 = dp();
+	BOOST_TEST(ar2.size() == 1);
+	for(auto& v:ar2) BOOST_TEST(v == absd::data{val});
 }
 BOOST_AUTO_TEST_SUITE(reflect)
 BOOST_FIXTURE_TEST_CASE(empty, fixture)
