@@ -40,7 +40,7 @@ class extra_functions : public cogen::jinja_json_prov {
 		return name;
 	}
 
-	absd::data select_keys(absd::data obj, absd::data vals) const
+	static absd::data select_keys(absd::data obj, absd::data vals)
 	{
 		auto ret = std::make_shared<absd::simple_data_holder>();
 		auto vals_arr = vals.as_array();
@@ -55,7 +55,7 @@ class extra_functions : public cogen::jinja_json_prov {
 		}
 		return absd::data{ret};
 	}
-	absd::data unique(absd::data vals) const
+	static absd::data unique(absd::data vals)
 	{
 		if(!vals.is_array()) return vals;
 		std::vector<absd::data> result;
@@ -92,12 +92,10 @@ public:
 		            )});
 		extra_funcs.emplace_back(extra_fnc_info{"select_keys", function_adapter(
 		            &extra_functions::select_keys,
-		            {make_par("obj"), make_par("vals")}
+		            {make_par("$"), make_par("vals")}
 		            )});
 		extra_funcs.emplace_back(extra_fnc_info{"unique", function_adapter(
-		            &extra_functions::select_keys,
-		            {make_par("vals")}
-		            )});
+		            &extra_functions::unique )});
 	}
 
 	absd::data value(const cppjinja::east::function_call& val) const override

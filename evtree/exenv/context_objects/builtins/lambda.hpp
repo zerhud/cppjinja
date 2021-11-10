@@ -71,7 +71,8 @@ public:
 	function_adapter(Fnc&& func, values_t name_list)
 	    : func(std::forward<Fnc>(func))
 	    , names(name_list)
-	{}
+	{
+	}
 
 	static constexpr std::size_t arity()
 	{
@@ -89,9 +90,14 @@ public:
 		    return absd::make_simple(std::move(ret));
 	}
 private:
-	std::size_t sort_params(params_type& params) const
+	void sort_params(params_type& params) const
 	{
-		if(!names) return 0;
+		if(!names) {
+			if(arity() != params.size())
+				throw std::runtime_error("parameter count mismatch");
+			return;
+		}
+
 		params_type sorted;
 		std::size_t del_count = 0;
 		for(std::size_t i=0;i<names->size();++i) {
@@ -109,7 +115,6 @@ private:
 			else sorted.emplace_back().val = std::move(params[ind].val.value());
 		}
 		params = std::move(sorted);
-		return 0;
 	}
 
 	template<std::size_t... I>
