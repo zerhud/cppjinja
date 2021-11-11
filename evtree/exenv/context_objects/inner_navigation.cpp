@@ -37,7 +37,15 @@ navigation_single_tmpl::navigation_single_tmpl(exenv* e, const cppjinja::evtnode
 
 std::shared_ptr<context_object> navigation_single_tmpl::find(east::string_t n) const
 {
-	return find_in_tmpl(tmpl ? tmpl : cur_tmpl(), n);
+	auto self = tmpl ? tmpl : cur_tmpl();
+	auto found = find_in_tmpl(self, n);
+	if(!found) {
+		for(auto& par:self->parents()) {
+			found = find_in_tmpl(find_tmpl(par), n);
+			if(found) break;
+		}
+	}
+	return found;
 }
 
 inner_navigation::inner_navigation(exenv *e)
@@ -59,6 +67,12 @@ const cppjinja::evtnodes::tmpl* inner_navigation::cur_tmpl() const
 {
 	assert(env);
 	return env->current_tmpl();
+}
+
+const cppjinja::evtnodes::tmpl* inner_navigation::find_tmpl(const east::string_t& n) const
+{
+	ast::string_t ast_name(n.begin(),n.end());
+	return env->tmpl().search_tmpl(ast_name);
 }
 
 const cppjinja::evtnodes::tmpl* inner_navigation::find_tmpl_by_import(east::string_t n) const

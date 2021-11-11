@@ -16,6 +16,7 @@ class inner_navigation : public context_object {
 	exenv* env;
 protected:
 	const evtnodes::tmpl* cur_tmpl() const ;
+	const evtnodes::tmpl* find_tmpl(const east::string_t& n) const ;
 	const evtnodes::tmpl* find_tmpl_by_import(east::string_t n) const ;
 	std::shared_ptr<context_object> find_in_tmpl(const evtnodes::tmpl* t) const;
 	std::shared_ptr<context_object> find_in_tmpl(const evtnodes::tmpl* t, east::string_t n) const;

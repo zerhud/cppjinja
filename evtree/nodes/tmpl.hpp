@@ -21,6 +21,8 @@ public:
 
 	evt::render_info rinfo() const override ;
 
+	std::pmr::vector<std::pmr::string> parents() const ;
+
 	std::pmr::string file_name() const ;
 	std::pmr::vector<ast::op_import> imports() const ;
 

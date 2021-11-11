@@ -426,6 +426,46 @@ BOOST_FIXTURE_TEST_CASE(find_in_single_tmpl, mock_exenv_fixture)
 	auto b = in.find("b");
 	BOOST_TEST(b->call({})->solve() == "test"_ad);
 }
+BOOST_FIXTURE_TEST_CASE(find_in_parent, mock_exenv_fixture)
+{
+	cppjinja::evtree tree;
+
+	ast::tmpl ast_tmpl{};
+	ast_tmpl.name.name = "b";
+	tree.add_tmpl(ast_tmpl);
+	const evtn::tmpl* tmpl_b = tree.search_tmpl("b");
+
+	ast_tmpl.name.name = "a";
+	ast_tmpl.extends.emplace_back(ast::extend_st{0,0,"",ast::expr_ops::single_var_name{"b"}});
+	tree.add_tmpl(ast_tmpl);
+	const evtn::tmpl* tmpl_a = tree.search_tmpl("a");
+
+
+	BOOST_TEST_REQUIRE(tmpl_a->parents().size() == 1);
+	BOOST_TEST(tmpl_a->parents()[0] == "b");
+
+	auto a_block = std::make_shared<mocks::callable_node>();
+	auto b_block = std::make_shared<mocks::callable_node>();
+	MOCK_EXPECT(a_block->name).returns("a");
+	MOCK_EXPECT(b_block->name).returns("b");
+	MOCK_EXPECT(a_block->evaluate).returns("a_block"_sd);
+	MOCK_EXPECT(b_block->evaluate).returns("b_block"_sd);
+	MOCK_EXPECT(env.tmpl).returns(std::ref(tree));
+	expect_roots(tmpl_a, {a_block.get()});
+	expect_roots(tmpl_b, {b_block.get()});
+	expect_solved_params(*a_block, {});
+	expect_solved_params(*b_block, {});
+	MOCK_EXPECT(env.current_tmpl).returns(tmpl_a);
+	MOCK_EXPECT(ctx.push);
+	MOCK_EXPECT(ctx.pop);
+	MOCK_EXPECT(calls.push);
+	MOCK_EXPECT(calls.pop);
+
+	co_nav_stmpl nav_a(&env, tmpl_a);
+	BOOST_TEST(nav_a.find("a")->call({})->solve() == "a_block");
+	BOOST_REQUIRE(nav_a.find("b"));
+	BOOST_TEST(nav_a.find("b")->call({})->solve() == "b_block");
+}
 BOOST_AUTO_TEST_SUITE_END() // inner_navigation
 BOOST_AUTO_TEST_SUITE(lambda)
 BOOST_AUTO_TEST_CASE(ret_type_conv)
