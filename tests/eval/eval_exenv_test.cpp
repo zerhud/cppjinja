@@ -42,7 +42,6 @@ namespace evtn = cppjinja::evtnodes;
 using evar_name = cppjinja::east::var_name;
 using mocks::mock_exenv_fixture; // qtcreator cannot parse test with namespace
 using co_nav_imp = cppjinja::evt::context_objects::navigation_imp;
-using co_nav_tmpl = cppjinja::evt::context_objects::navigation_tmpl;
 using co_nav_stmpl = cppjinja::evt::context_objects::navigation_single_tmpl;
 
 struct mock_impls_fixture {
@@ -345,13 +344,13 @@ BOOST_AUTO_TEST_SUITE(inner_navigation)
 BOOST_AUTO_TEST_CASE(cannot_create_without_env)
 {
 	BOOST_CHECK_THROW(co_nav_imp{nullptr}, std::runtime_error);
-	BOOST_CHECK_THROW(co_nav_tmpl{nullptr}, std::runtime_error);
+	BOOST_CHECK_THROW(co_nav_stmpl(nullptr, nullptr), std::runtime_error);
 }
 BOOST_AUTO_TEST_CASE(cannot_add)
 {
 	mocks::exenv env;
 	BOOST_CHECK_THROW(co_nav_imp(&env).add("a", nullptr), std::logic_error );
-	BOOST_CHECK_THROW(co_nav_tmpl(&env).add("a", nullptr), std::logic_error );
+	BOOST_CHECK_THROW(co_nav_stmpl(&env, nullptr).add("a", nullptr), std::logic_error );
 }
 BOOST_FIXTURE_TEST_CASE(find_in_imports, mock_exenv_fixture)
 {
@@ -390,7 +389,7 @@ BOOST_FIXTURE_TEST_CASE(find_in_roots, mock_exenv_fixture)
 	tast.name.name = "name";
 	tast.file_imports.emplace_back(ast::op_import{0,0,"fn", "as","tn",{},{}});
 
-	co_nav_tmpl in(&env);
+	co_nav_stmpl in(&env, nullptr);
 	cppjinja::evtree tmpl_info;
 	tmpl_info.add_tmpl(tast);
 	const evtn::tmpl* tmpl = tmpl_info.search_tmpl("name");

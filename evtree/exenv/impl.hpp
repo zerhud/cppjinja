@@ -29,7 +29,7 @@ class exenv_impl final : public exenv {
 	context_objects::tree global_namespace;
 	context_objects::builtins builtins;
 	context_objects::navigation_imp nav_env;
-	context_objects::navigation_tmpl nav_tmpl;
+	context_objects::navigation_single_tmpl nav_tmpl;
 	result_formatter rfmt;
 	std::shared_ptr<std::pmr::memory_resource> mem =
 	        std::make_shared<std::pmr::unsynchronized_pool_resource>();

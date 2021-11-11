@@ -32,7 +32,7 @@ cppjinja::evt::exenv_impl::exenv_impl(
     : compiled_template(tree)
     , given_data(prov)
     , nav_env(this)
-    , nav_tmpl(this)
+    , nav_tmpl(this, nullptr)
 {
 }
 
