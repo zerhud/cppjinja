@@ -480,7 +480,27 @@ BOOST_AUTO_TEST_CASE(ret_type_conv)
 }
 BOOST_AUTO_TEST_CASE(args_conv)
 {
+	using cppjinja::evt::context_objects::CompatibleParam ;
+	using cppjinja::evt::context_objects::CompatibleParams ;
 	using cppjinja::evt::context_objects::function_adapter;
+
+	struct foo_t{};
+	static_assert( !absd::AnyData<foo_t>, "only special data is valid");
+	static_assert( CompatibleParam<std::tuple<std::int64_t,absd::data>, 0>, "std::int64_t is valid");
+	static_assert( CompatibleParam<std::tuple<std::int64_t,absd::data>, 1>, "absd::data is valid");
+	static_assert( CompatibleParams<std::tuple<std::int64_t>>(
+	        std::make_index_sequence<1>()),
+	        "std::int64_t is valid");
+	static_assert( CompatibleParams<std::tuple<std::int64_t, std::int64_t>>(
+	        std::make_index_sequence<2>()),
+	        "std::int64_t is valid");
+	static_assert( CompatibleParams<std::tuple<std::int64_t, absd::data>>(std::make_index_sequence<2>()),
+	        "std::int64_t and data is valid");
+
+	function_adapter adapt0([](std::int64_t a)->std::pmr::string{
+		return std::to_string(a).c_str() ;
+	});
+
 	function_adapter adapt([](std::int64_t a, absd::data b)->std::pmr::string{
 		return (std::to_string(a) + std::to_string((std::int64_t)b)).c_str();
 	});

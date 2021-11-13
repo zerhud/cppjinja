@@ -20,10 +20,17 @@ namespace cppjinja::evt::context_objects
 {
 
 template<typename P, int I>
-concept CompatibleParam = absd::AnyData<std::tuple_element_t<I,P>>;
+constexpr bool CompatibleParam =
+        absd::AnyData<std::tuple_element_t<I,P>>
+     || std::is_same_v<std::tuple_element_t<I,P>, absd::data>;
 
-//template<typename P, std::size_t Ind, std::size_t... Inds>
-//concept CompatibleParams = CompatibleParam<P, Inds> && ...;
+template<typename P, std::size_t... Inds>
+constexpr bool CompatibleParams(std::index_sequence<Inds...>) {return false;}
+template<typename P, std::size_t... Inds> requires requires(std::index_sequence<Inds...>){
+	requires (CompatibleParam<P, Inds> && ...);
+}
+constexpr bool CompatibleParams(std::index_sequence<Inds...>) {return true;}
+
 
 inline std::pair<std::pmr::string, std::optional<absd::data>> make_par(std::pmr::string n)
 {
@@ -45,8 +52,14 @@ std::pair<std::pmr::string, std::optional<absd::data>> make_par(std::pmr::string
 
 template<typename F>
 concept CompatibleFunction =
-        std::is_same_v<boost::callable_traits::return_type_t<F>, absd::data>
-     || absd::AnyData<boost::callable_traits::return_type_t<F>>
+        (
+            std::is_same_v<boost::callable_traits::return_type_t<F>, absd::data>
+         || absd::AnyData<boost::callable_traits::return_type_t<F>>
+        )
+     && (
+            std::tuple_size_v<boost::callable_traits::args_t<F>> == 0
+         || CompatibleParams<boost::callable_traits::args_t<F>>(std::make_index_sequence<std::tuple_size_v<boost::callable_traits::args_t<F>>>())
+        )
       ;
 
 template<CompatibleFunction Fnc>

@@ -28,7 +28,10 @@ concept IntegerFloating =
 template<typename T>
 concept Boolean = std::is_same_v<std::decay_t<T>, bool>;
 template<typename T>
-concept Integer = std::integral<std::decay_t<T>> && !Boolean<T> && !IntegerFloating<T>;
+concept Integer =
+        std::integral<std::decay_t<T>>
+    && !Boolean<T> && !std::is_same_v<std::decay_t<T>, char>
+    && !IntegerFloating<T>;
 template<typename T>
 concept TrivialData = IntegerFloating<T> || Integer<T> || Boolean<T>;
 template<typename T>

@@ -80,7 +80,7 @@ bool cppjinja::evtnodes::block_for::eval_for_str(
 	auto loop = std::make_shared<block_for_object>(env.storage(), val.size());
 	for(auto& lvar:val) {
 		evt::raii_push_ctx ctx(this, &env.ctx());
-		env.locals().add(tps(abl.vars[0]), make_val(env, lvar));
+		env.locals().add(tps(abl.vars[0]), make_val(env, std::pmr::string(1,lvar)));
 		env.locals().add("loop", loop);
 		if(eval_condition(env))
 			rc_children.at(0)->render(env);

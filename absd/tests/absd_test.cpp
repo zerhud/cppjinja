@@ -19,6 +19,24 @@
 BOOST_AUTO_TEST_SUITE(absd)
 using absd_mocks::fixture;
 using abs_data = absd::data;
+BOOST_AUTO_TEST_CASE(concept_tests)
+{
+	static_assert(absd::Integer<int>, "int is acceptible");
+	static_assert(absd::Integer<std::int64_t>, "int is acceptible");
+	static_assert(!absd::Integer<char>, "char is not acceptible");
+	static_assert(!absd::Integer<bool>, "bool is not acceptible");
+
+	static_assert(absd::IntegerFloating<float>, "float is acceptible");
+	static_assert(absd::IntegerFloating<double>, "double is acceptible");
+
+	static_assert(absd::Boolean<bool>, "char is not acceptible");
+	static_assert(!absd::Boolean<char>, "char is not a bool");
+	static_assert(!absd::Boolean<int>, "int is not a bool");
+
+	static_assert(absd::StringData<std::string>, "std::string is a string");
+	static_assert(absd::StringData<std::pmr::string>, "std::pmr::string is a string");
+	static_assert(!absd::StringData<std::pmr::wstring>, "std::pmr::wstring is not a string");
+}
 BOOST_FIXTURE_TEST_CASE(to_int, fixture)
 {
 	MOCK_EXPECT(prov->to_int).once().returns(42);
