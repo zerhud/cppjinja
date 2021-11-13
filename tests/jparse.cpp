@@ -141,7 +141,7 @@ int main(int argc, char** argv)
 	}
 
 	cppjinja::evtree ev;
-	cppjinja::parser jparser({});
+	cppjinja::parser jparser;
 	std::filesystem::path rtmpl = opt_vals["tmpl"].as<std::string>();
 	rtmpl = absolute(rtmpl);
 	jparser.parse(rtmpl);

@@ -17,13 +17,12 @@
 std::filesystem::path cppjinja::parser::solve_path(const std::filesystem::path& to) const
 {
 	using namespace std::filesystem;
+	assert(solver_);
 
 	if(to.is_absolute()) return to;
 
 	for(auto& d:cur_dir_stack_) if(exists(d/to)) return d / to;
-	for(auto& d:incs_)          if(exists(d/to)) return d / to;
-
-	return absolute(to);
+	return absolute( solver_(to) );
 }
 
 void cppjinja::parser::parse(const ast::op_include& inc)
@@ -49,9 +48,15 @@ void cppjinja::parser::parse(ast::op_import& imp)
 	parse(fn);
 }
 
-cppjinja::parser::parser(std::vector<std::filesystem::path> inc_dirs)
-    : incs_(std::move(inc_dirs))
+cppjinja::parser::parser()
+    : parser(path_solver{})
 {
+}
+
+cppjinja::parser::parser(path_solver ps)
+    : solver_(std::move(ps))
+{
+	if(!solver_) solver_ = [](auto&& p){return p;};
 }
 
 cppjinja::parser& cppjinja::parser::parse(std::filesystem::path file)

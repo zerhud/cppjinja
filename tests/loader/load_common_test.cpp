@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_SUITE(loader)
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-	cppjinja::parser psr({});
+	cppjinja::parser psr;
 	std::stringstream data("some tmpl"s);
 	BOOST_CHECK_NO_THROW( psr.parse(data) );
 	auto tmpls = psr.tmpls();

@@ -31,7 +31,6 @@ class evtree : public evaluator {
 
 	const evt::compiled_tmpl& tmpl_by_node(const evt::node* n) const ;
 public:
-	/// debug function
 	const evtnodes::tmpl* search_tmpl(const ast::string_t& name) const ;
 	std::pmr::vector<const evt::node*> children(const evt::node* selected) const ;
 	std::pmr::vector<const evtnodes::callable*> roots(const evtnodes::tmpl* tmpl) const ;

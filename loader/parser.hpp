@@ -17,8 +17,11 @@
 namespace cppjinja {
 
 class parser final {
+public:
+	using path_solver = std::function<std::filesystem::path(std::filesystem::path)>;
+private:
+	path_solver solver_;
 	std::vector<std::filesystem::path> cur_dir_stack_;
-	std::vector<std::filesystem::path> incs_;
 	std::list<ast::file> files_;
 	ast::file* cur_file_ = nullptr;
 	ast::string_t cur_file_name_;
@@ -30,10 +33,14 @@ public:
 	parser(const parser&) =delete ;
 	parser& operator = (const parser&) =delete ;
 
-	/// @param inc_dirs include directories for search
-	/// includes, extends and so on... the pricority of
+	/// create parser with default solver
+	/// (cannot actualy solve anything)
+	parser();
+
+	/// @param ps functor for solve path, must returns
+	/// absolute path, receive relative. the pricority of
 	/// include is second, first is the same directory.
-	parser(std::vector<std::filesystem::path> inc_dirs);
+	parser(path_solver ps);
 
 	parser& parse(std::filesystem::path file);
 	parser& parse(std::istream& data);
