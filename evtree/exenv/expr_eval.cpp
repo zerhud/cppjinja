@@ -14,7 +14,6 @@
 #include "context_objects/value.hpp"
 
 #include "expr/math.hpp"
-#include "expr/cmp_check.hpp"
 #include "expr/logic_check.hpp"
 
 #include "absd/simple_data_holder.hpp"
