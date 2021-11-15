@@ -32,7 +32,7 @@ void cppjinja::parser::parse(const ast::op_include& inc)
 	assert(fn.is_absolute());
 
 	if(inc.ignore_missing && *inc.ignore_missing) {
-		if(!std::filesystem::exists(fn)) return;
+		if(!exists(fn)) return;
 	}
 
 	//TODO: with or without context ignored for now
@@ -61,7 +61,7 @@ cppjinja::parser::parser(path_solver ps)
 
 cppjinja::parser& cppjinja::parser::parse(std::filesystem::path file)
 {
-	if(!std::filesystem::exists(file))
+	if(!exists(file))
 		throw std::runtime_error("file " + file.string() + " doesn't exists");
 
 	cur_file_ = &files_.emplace_back();
