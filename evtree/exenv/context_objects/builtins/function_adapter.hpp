@@ -20,9 +20,13 @@ namespace cppjinja::evt::context_objects
 {
 
 template<typename P, int I>
-constexpr bool CompatibleParam =
-        absd::AnyData<std::tuple_element_t<I,P>>
-     || std::is_same_v<std::tuple_element_t<I,P>, absd::data>;
+constexpr bool CompatibleParam = // must copy value
+    (   !std::is_reference_v<std::tuple_element_t<I,P>>
+     && !std::is_pointer_v<std::tuple_element_t<I,P>>
+    ) && // absd::data or convertible to absd::data
+    (   absd::AnyData<std::tuple_element_t<I,P>>
+     || std::is_same_v<std::tuple_element_t<I,P>, absd::data>
+    );
 
 template<typename P, std::size_t... Inds>
 constexpr bool CompatibleParams(std::index_sequence<Inds...>) {return false;}
@@ -30,25 +34,6 @@ template<typename P, std::size_t... Inds> requires requires(std::index_sequence<
 	requires (CompatibleParam<P, Inds> && ...);
 }
 constexpr bool CompatibleParams(std::index_sequence<Inds...>) {return true;}
-
-
-inline std::pair<std::pmr::string, std::optional<absd::data>> make_par(std::pmr::string n)
-{
-	std::pair<std::pmr::string, std::optional<absd::data>> ret;
-	ret.first = std::move(n);
-	return ret;
-}
-
-template<typename T>
-std::pair<std::pmr::string, std::optional<absd::data>> make_par(std::pmr::string n, T&& v)
-{
-	std::pair<std::pmr::string, std::optional<absd::data>> ret;
-	ret.first = std::move(n);
-	if constexpr (std::is_same_v<T, absd::data>)
-	        ret.second = std::move(v);
-	else ret.second = absd::make_simple(std::forward<T>(v));
-	return ret;
-}
 
 template<typename F>
 concept CompatibleFunction =
@@ -61,6 +46,24 @@ concept CompatibleFunction =
          || CompatibleParams<boost::callable_traits::args_t<F>>(std::make_index_sequence<std::tuple_size_v<boost::callable_traits::args_t<F>>>())
         )
       ;
+
+inline std::pair<std::pmr::string, std::optional<absd::data>> make_par(std::pmr::string n)
+{
+	std::pair<std::pmr::string, std::optional<absd::data>> ret;
+	ret.first = std::move(n);
+	return ret;
+}
+
+template<typename T> requires (CompatibleParam<std::tuple<T>, 0>)
+std::pair<std::pmr::string, std::optional<absd::data>> make_par(std::pmr::string n, T&& v)
+{
+	std::pair<std::pmr::string, std::optional<absd::data>> ret;
+	ret.first = std::move(n);
+	if constexpr (std::is_same_v<T, absd::data>)
+		ret.second = std::move(v);
+	else ret.second = absd::make_simple(std::forward<T>(v));
+	return ret;
+}
 
 template<CompatibleFunction Fnc>
 class function_adapter {
@@ -84,6 +87,12 @@ public:
 	function_adapter(Fnc&& func, values_t name_list)
 	    : func(std::forward<Fnc>(func))
 	    , names(name_list)
+	{
+	}
+
+	template<typename... Params>
+	function_adapter(Fnc&& fnc, Params&&... p)
+	    : function_adapter(std::forward<Fnc>(fnc), {std::forward<Params>(p)...})
 	{
 	}
 
