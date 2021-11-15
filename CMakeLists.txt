@@ -101,6 +101,9 @@ target_include_directories(evaluator
                 "${CMAKE_CURRENT_SOURCE_DIR}"
                 "${CMAKE_CURRENT_SOURCE_DIR}/evtree"
 		"${CMAKE_CURRENT_SOURCE_DIR}/parser"
+	PUBLIC
+		"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>"
+		"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
         )
 target_link_libraries(evaluator PUBLIC absd stdc++fs PRIVATE loader)
 install(DIRECTORY eval DESTINATION "${inst_incdir}" FILES_MATCHING PATTERN "*.hpp")
