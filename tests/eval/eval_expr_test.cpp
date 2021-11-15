@@ -75,6 +75,10 @@ BOOST_FIXTURE_TEST_CASE(cmp_check, mock_exenv_fixture)
 	BOOST_TEST(res == true);
 	res = eeval(&env)(txt::parse(ext::expr, "'cc' < 'aa'"));
 	BOOST_TEST(res == false);
+	BOOST_TEST(eeval(&env)(txt::parse(ext::expr, "1 > 2")) == false);
+	BOOST_TEST(eeval(&env)(txt::parse(ext::expr, "1 >= 2")) == false);
+	BOOST_TEST(eeval(&env)(txt::parse(ext::expr, "1 <= 2")) == true);
+	BOOST_TEST(eeval(&env)(txt::parse(ext::expr, "1 != 2")) == true);
 }
 BOOST_FIXTURE_TEST_CASE(in_check, mock_exenv_fixture)
 {

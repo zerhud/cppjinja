@@ -43,6 +43,9 @@ BOOST_AUTO_TEST_CASE(bool_rule)
 {
 	BOOST_TEST(txt::parse(ext::bool_rule, "true"sv) == true);
 	BOOST_TEST(txt::parse(ext::bool_rule, "false"sv) == false);
+
+	BOOST_TEST(txt::parse(ext::bool_rule, "True"sv) == true);
+	BOOST_TEST(txt::parse(ext::bool_rule, "False"sv) == false);
 }
 BOOST_AUTO_TEST_CASE(term)
 {

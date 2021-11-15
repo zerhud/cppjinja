@@ -296,11 +296,19 @@ cppjinja::evt::expr_eval::eval_type
 cppjinja::evt::expr_eval::operator ()(ast::expr_ops::cmp_check& t) const
 {
 	if(t.op == ast::expr_ops::cmp_op::test) return perform_test(t);
-	return cvt(boost::apply_visitor(
-	            expr_evals::cmp_check(t.op),
-	            to_term(visit(t.left)),
-	            to_term(visit(t.right))
-	            ));
+	auto cmp = [&t](const eval_type& left, const eval_type& right) -> bool
+	{
+	    using ast::expr_ops::cmp_op;
+	    if(t.op == cmp_op::eq) return left == right;
+	    if(t.op == cmp_op::neq) return left != right;
+	    if(t.op == cmp_op::less) return left < right;
+	    if(t.op == cmp_op::more) return left > right;
+	    if(t.op == cmp_op::less_eq) return left <= right;
+	    if(t.op == cmp_op::more_eq) return left >= right;
+	    assert(false);
+	    return false;
+	};
+	return cvt(cmp( visit(t.left), visit(t.right) ));
 }
 
 cppjinja::evt::expr_eval::eval_type

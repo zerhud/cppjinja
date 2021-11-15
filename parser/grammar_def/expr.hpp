@@ -74,7 +74,12 @@ static auto const quoted_string_def =
       | (x3::lexeme[lit("'") >> -quoted_string_1_def >> lit("'")])
       | (x3::lexeme[lit("\"") >> -quoted_string_2_def >> lit("\"")]);
 
-static auto const bool_rule_def = x3::lexeme[(lit("true") >> x3::attr(true) | lit("false") >> x3::attr(false)) >> !x3::alpha];
+static auto const bool_rule_def =
+        x3::lexeme[
+          ( (lit("true")|lit("True")) >> x3::attr(true)
+           |(lit("false")|lit("False")) >> x3::attr(false)
+          ) >> !x3::alpha
+       ] ;
 static auto const term_def = bool_rule | double_ | x3::int64 | quoted_string;
 static auto const keywords_def = bool_rule|x3::lexeme[(lit("if")|lit("else")|lit("in")|lit("and")|lit("or")|lit("is")|lit("not")|lit("recursive")) >> !x3::alpha];
 static auto const single_var_name_helper_def = x3::lexeme[ !keywords_def >> x3::char_("A-Za-z_") >> *x3::char_("0-9A-Za-z_") ];
@@ -135,8 +140,8 @@ static auto const cmp_check_def = cmp_check2 | cmp_check1;
 static auto const cmp_op_def =
         lit("==") >> x3::attr(ast::expr_ops::cmp_op::eq)
       | lit("!=") >> x3::attr(ast::expr_ops::cmp_op::neq)
-      | lit("<") >> x3::attr(ast::expr_ops::cmp_op::less)
-      | lit(">") >> x3::attr(ast::expr_ops::cmp_op::more)
+      | x3::lexeme[lit("<") >> !lit("=")] >> x3::attr(ast::expr_ops::cmp_op::less)
+      | x3::lexeme[lit(">") >> !lit("=")] >> x3::attr(ast::expr_ops::cmp_op::more)
       | lit("<=") >> x3::attr(ast::expr_ops::cmp_op::less_eq)
       | lit(">=") >> x3::attr(ast::expr_ops::cmp_op::more_eq) ;
 
