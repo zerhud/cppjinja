@@ -20,6 +20,7 @@ protected:
 	const evtnodes::tmpl* find_tmpl_by_import(east::string_t n) const ;
 	std::shared_ptr<context_object> find_in_tmpl(const evtnodes::tmpl* t) const;
 	std::shared_ptr<context_object> find_in_tmpl(const evtnodes::tmpl* t, east::string_t n) const;
+	std::shared_ptr<context_object> find_in_pars(const evtnodes::tmpl* t, const east::string_t& n) const;
 public:
 	inner_navigation(exenv* e);
 

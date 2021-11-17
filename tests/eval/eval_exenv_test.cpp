@@ -466,6 +466,47 @@ BOOST_FIXTURE_TEST_CASE(find_in_parent, mock_exenv_fixture)
 	BOOST_REQUIRE(nav_a.find("b"));
 	BOOST_TEST(nav_a.find("b")->call({})->solve() == "b_block");
 }
+BOOST_FIXTURE_TEST_CASE(few_parents, mock_exenv_fixture)
+{
+	cppjinja::evtree tree;
+
+	ast::tmpl ast_tmpl;
+	ast_tmpl.name.name = "top";
+	ast_tmpl.file_name = "top";
+	ast_tmpl.extends.emplace_back(ast::extend_st{0,0, {}, ast::expr_ops::single_var_name{.name="par_a"}});
+	tree.add_tmpl(ast_tmpl);
+	const evtn::tmpl* tmpl_top = tree.search_tmpl("top");
+
+	ast_tmpl.name.name = "par_a";
+	ast_tmpl.file_name = "par_a";
+	ast_tmpl.extends = {ast::extend_st{0,0, {}, ast::expr_ops::single_var_name{.name="par_b"}}};
+	tree.add_tmpl(ast_tmpl);
+	const evtn::tmpl* par_a = tree.search_tmpl("par_a");
+
+	ast_tmpl.name.name = "par_b";
+	ast_tmpl.file_name = "par_b";
+	ast_tmpl.extends.clear();
+	tree.add_tmpl(ast_tmpl);
+	const evtn::tmpl* par_b = tree.search_tmpl("par_b");
+
+	auto a_block = std::make_shared<mocks::callable_node>();
+	MOCK_EXPECT(a_block->name).returns("a");
+	MOCK_EXPECT(a_block->evaluate).returns("a_block"_sd);
+	MOCK_EXPECT(env.tmpl).returns(std::ref(tree));
+	expect_roots(tmpl_top, {});
+	expect_roots(par_a, {});
+	expect_roots(par_b, {a_block.get()});
+	expect_solved_params(*a_block, {});
+	MOCK_EXPECT(env.current_tmpl).returns(tmpl_top);
+	MOCK_EXPECT(ctx.push);
+	MOCK_EXPECT(ctx.pop);
+	MOCK_EXPECT(calls.push);
+	MOCK_EXPECT(calls.pop);
+
+	co_nav_stmpl nav_a(&env, tmpl_top);
+	BOOST_TEST(nav_a.find("a")->call({})->solve() == "a_block");
+
+}
 BOOST_AUTO_TEST_SUITE_END() // inner_navigation
 BOOST_AUTO_TEST_SUITE(lambda)
 BOOST_AUTO_TEST_CASE(ret_type_conv)
